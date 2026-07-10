@@ -1,0 +1,30 @@
+# LogViz Configuration Example
+# Copy to ~/.logviz/config.yaml and customize
+
+# Default output format for exports
+default_export_format: json
+
+# Color scheme for terminal output
+colors:
+  DEBUG: cyan
+  INFO: green
+  WARN: yellow
+  ERROR: red
+  FATAL: magenta_bold
+
+# Date/time format for display
+# Use Python strftime format codes
+date_format: "%Y-%m-%d %H:%M:%S"
+
+# Timezone for display (default: UTC)
+timezone: UTC
+
+# Maximum lines to buffer for real-time tailing
+tail_buffer_size: 1000
+
+# Performance tuning
+streaming:
+  # Process logs in chunks for large files
+  chunk_size: 8192
+  # Enable memory-efficient mode for files >100MB
+  auto_stream_threshold_mb: 100

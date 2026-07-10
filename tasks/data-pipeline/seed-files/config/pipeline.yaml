@@ -1,0 +1,65 @@
+# Pipeline Configuration
+
+pipeline:
+  name: event-analytics-etl
+  version: "1.0.0"
+  mode: batch  # batch or streaming
+
+# Source configuration
+sources:
+  - type: json
+    path: sources/events/*.json
+    batch_size: 1000
+  - type: csv
+    path: sources/events/*.csv
+    batch_size: 1000
+  - type: parquet
+    path: sources/events/*.parquet
+    batch_size: 5000
+
+# Output configuration
+outputs:
+  events:
+    type: parquet
+    path: output/events/
+    partition_by: [date, event_type]
+    compression: snappy
+  stats:
+    type: json
+    path: output/stats.json
+  metrics:
+    type: json
+    path: output/metrics.json
+
+# Processing configuration
+processing:
+  workers: 8
+  batch_size: 1000
+  max_memory_mb: 8192
+  checkpoint_interval_seconds: 60
+
+# Retry policy
+retry:
+  max_attempts: 3
+  initial_delay_seconds: 1
+  max_delay_seconds: 30
+  backoff_multiplier: 2
+
+# Error handling
+errors:
+  validation_log: errors/validation-{date}.log
+  rejected_events: errors/rejected/
+  critical_webhook: https://alerts.example.com/webhook
+
+# Monitoring
+monitoring:
+  enabled: true
+  prometheus_port: 9090
+  health_check_port: 8080
+  metrics_export_interval_seconds: 10
+
+# Reference data
+reference_data:
+  users:
+    path: reference-data/users.csv
+    cache_ttl_minutes: 60

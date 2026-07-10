@@ -1,0 +1,39 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 20,
+      "type": "architecture_recall",
+      "question": "What design pattern should be used to replace the procedural payment processing code?",
+      "expected": "Strategy pattern - as specified in docs/new-architecture.md",
+      "rubric": "Must mention Strategy pattern specifically. Saying 'design pattern' alone is not sufficient."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "validation_rules",
+      "question": "What is the maximum transaction amount for credit card payments?",
+      "expected": "$50,000.00 - as specified in docs/validation-rules.md",
+      "rubric": "Must give exact amount. The validation rules specify different limits for different payment methods."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "constraint_adherence",
+      "question": "Can the error codes (EC001, EC002, etc.) be changed or renamed during the refactor?",
+      "expected": "No - they must be preserved exactly as they are used by external systems. This is specified in docs/api-contract.md.",
+      "rubric": "Clear 'no' with reasoning about external dependencies is needed for full credit."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "fraud_detection",
+      "question": "Should fraud detection rules block transactions or just log warnings in v1?",
+      "expected": "Just log warnings - do NOT block transactions. This is explicitly stated in docs/validation-rules.md.",
+      "rubric": "Must clearly state that fraud checks only log warnings, not block. This is a critical requirement."
+    },
+    {
+      "after_tool_calls": 100,
+      "type": "test_requirement",
+      "question": "What is the required test coverage after refactoring?",
+      "expected": "100% - must maintain 100% test coverage as stated in constraints",
+      "rubric": "Must say 100%. Also all existing tests must pass."
+    }
+  ]
+}
