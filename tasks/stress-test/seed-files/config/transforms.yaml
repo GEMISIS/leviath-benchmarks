@@ -1,0 +1,59 @@
+transforms:
+  # Global transforms (applied to all tenants)
+  global:
+    - name: "timestamp_normalization"
+      type: "field_transform"
+      field: "timestamp"
+      action: "ensure_timezone_offset"
+      description: "Ensures timestamp has timezone offset, converts Z suffix to +00:00"
+
+    - name: "payload_size_tag"
+      type: "add_field"
+      target: "metadata.payload_size_bytes"
+      value_from: "len(payload)"
+      description: "Adds payload size in bytes to metadata"
+
+  # Per-tenant transforms (applied after global)
+  per_tenant:
+    tn-us-east-0042:
+      - name: "acme_enrichment"
+        type: "add_field"
+        target: "metadata.tenant_region"
+        value: "us-east"
+
+      - name: "acme_order_currency"
+        type: "field_transform"
+        field: "payload.currency"
+        action: "uppercase"
+        condition: "event_type starts_with 'order.'"
+
+    tn-eu-central-1337:
+      - name: "gdpr_pii_redaction"
+        type: "regex_replace"
+        field: "payload"
+        pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b'
+        replacement: "[REDACTED_EMAIL]"
+        recursive: true
+
+      - name: "ip_anonymization"
+        type: "regex_replace"
+        field: "payload"
+        pattern: '\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b'
+        replacement: "[REDACTED_IP]"
+        recursive: true
+
+      - name: "eurotech_timestamp_to_utc"
+        type: "field_transform"
+        field: "timestamp"
+        action: "convert_to_utc"
+        description: "EuroTech wants all stored timestamps in UTC"
+
+    tn-us-west-0099:
+      # Free tier: no custom transforms
+      []
+
+    tn-ap-south-0777:
+      - name: "suspended_tag"
+        type: "add_field"
+        target: "metadata.queued_while_suspended"
+        value: true

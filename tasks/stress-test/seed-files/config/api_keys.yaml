@@ -1,0 +1,35 @@
+api_keys:
+  - key_id: "key_admin_001"
+    key_hash: "$2b$12$LJ3m4IY1sNOb/RDDEOvqve7h.TqGBMFPOxXiVe2KxlGJjG3HFN5fS"  # plaintext: "admin-secret-key-2024"
+    tenant_id: "*"  # admin key, can access all tenants
+    permissions:
+      - "events:read"
+      - "events:write"
+      - "dlq:read"
+      - "dlq:write"
+      - "tenants:read"
+      - "metrics:read"
+    rate_limit_override: null  # use 10x tenant limit
+
+  - key_id: "key_acme_001"
+    key_hash: "$2b$12$YKwXp5r5gVn.D6IQ.pN3/eBB3/qI7YCMHjVfIBjw6FW1.dYN2Wa6i"  # plaintext: "acme-api-key-prod"
+    tenant_id: "tn-us-east-0042"
+    permissions:
+      - "events:read"
+      - "events:write"
+    rate_limit_override: null
+
+  - key_id: "key_eurotech_001"
+    key_hash: "$2b$12$R7VXe3PqQVr.yG2JQ.kN4/aBB4/rI8ZDNIjXgJCkw7GX2.eZO3Xb7j"  # plaintext: "eurotech-api-key-prod"
+    tenant_id: "tn-eu-central-1337"
+    permissions:
+      - "events:read"
+      - "events:write"
+    rate_limit_override: null
+
+  - key_id: "key_startup_001"
+    key_hash: "$2b$12$M5QTd4OmPUq.xF1HP.mM3/dAA3/pG7XCMGiWeFBiv5ET0.cXM2Vb5h"  # plaintext: "startup-api-key-prod"
+    tenant_id: "tn-us-west-0099"
+    permissions:
+      - "events:write"
+    rate_limit_override: null
