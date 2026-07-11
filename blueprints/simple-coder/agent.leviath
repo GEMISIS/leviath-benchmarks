@@ -1,11 +1,11 @@
-# Simple coding agent blueprint for benchmarking
-# This is a minimal single-stage agent for fair comparison with flat baseline
+# Coding agent blueprint for benchmarking
+# Two-stage: implement then test-and-fix loop
 
 [agent]
 name = "simple-coder"
-version = "1.2.0"
-description = "Single-stage coding agent for benchmarking"
-entry_stage = "code"
+version = "2.0.0"
+description = "Two-stage coding agent: implement → test/fix loop"
+entry_stage = "implement"
 
 [tool_permissions]
 read_file  = "allow"
@@ -14,27 +14,29 @@ write_file = "allow"
 edit_file  = "allow"
 bash       = "allow"
 
-[stages.code]
+# Stage 1: Read specs and implement all components
+[stages.implement]
 mode = "autonomous"
-description = "Write code to complete the task"
+description = "Read all specs, then implement every component"
 available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
-max_iterations = 250
+max_iterations = 150
 allow_complete = true
+next_stage = "test_fix"
 
-[stages.code.model]
+[stages.implement.model]
 models = [
   { provider = "anthropic", model = "claude-sonnet-5" },
   { provider = "anthropic", model = "claude-opus-4-8" }
 ]
 
 system_prompt = """
-You are an autonomous coding agent. Your job is to build complete working software using only tools. You MUST use tools for ALL work — never just describe what you would do.
+You are an autonomous coding agent in the IMPLEMENTATION phase. Your job is to build complete working software using only tools.
 
 CRITICAL RULES:
 - ALWAYS use tools. Never respond with just text.
 - After reading specs, IMMEDIATELY start writing code with write_file.
 - Do NOT summarize or plan in text. Just build.
-- You are done ONLY when all deliverable files have been written AND tests pass.
+- Write ALL deliverable files before finishing this stage.
 - If you need to think, do it briefly then use a tool.
 
 Available tools:
@@ -48,24 +50,70 @@ Work order:
 1. Read ALL spec and config files first
 2. Write each source file with write_file (do not skip any)
 3. Write requirements.txt and README.md
-4. Run tests with bash to verify
-5. Fix any issues
-6. Only stop when everything works
+4. When ALL files are written, respond with a summary of what you built
+
+Do NOT run tests yet — that happens in the next stage. Focus on writing correct, complete code.
 """
 
-# Structured context layout — the key differentiator vs flat baseline
-# Specs read via read_file go to tool_results (compacting), not conversation
-# This means specs get summarized instead of evicted when context fills up
+# Stage 2: Run tests and fix until all pass
+[stages.test_fix]
+mode = "autonomous"
+description = "Run tests, fix failures, repeat until all pass"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+max_iterations = 100
+allow_complete = true
+
+[stages.test_fix.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+system_prompt = """
+You are an autonomous coding agent in the TEST AND FIX phase. All source files have been written. Your job is to make every test pass.
+
+CRITICAL RULES:
+- ALWAYS use tools. Never respond with just text.
+- Start by installing requirements and running the test suite.
+- For each failure: read the failing test, read the relevant source, fix the bug.
+- Re-run tests after each fix to verify.
+- Do NOT stop until ALL tests pass (or you've exhausted attempts).
+
+Available tools:
+- read_file: Read file contents
+- write_file: Create or overwrite files
+- edit_file: Make exact string replacements
+- list_dir: List directory contents
+- bash: Execute shell commands
+
+Work order:
+1. bash: pip3 install -r requirements.txt
+2. bash: python3 -m pytest tests/ -v --tb=short
+3. If failures: read the test, read the source, fix with edit_file
+4. Re-run tests
+5. Repeat until all pass
+6. Only respond with a summary when all tests pass
+"""
+
+# Structured context layout
 [context.regions]
 task = { kind = "pinned", max_tokens = 4000 }
 conversation = { kind = "sliding_window", max_items = 100, max_tokens = 60000 }
 tool_results = { kind = "compacting", threshold_tokens = 40000, max_tokens = 80000 }
 scratch = { kind = "clearable", max_tokens = 20000 }
 
-[stages.code.tool_result_routing]
+[stages.implement.tool_result_routing]
 default_region = "tool_results"
 persist = true
 
-[stages.code.tool_result_routing.tool_overrides]
+[stages.implement.tool_result_routing.tool_overrides]
+bash = "scratch"
+list_dir = "scratch"
+
+[stages.test_fix.tool_result_routing]
+default_region = "tool_results"
+persist = true
+
+[stages.test_fix.tool_result_routing.tool_overrides]
 bash = "scratch"
 list_dir = "scratch"

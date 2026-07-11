@@ -117,6 +117,8 @@ struct RunMetrics {
     probe_responses: Vec<ProbeResponse>,
     tool_call_count: usize,
     truncation_events: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    quality: Option<QualityEval>,
 }
 
 struct Agent {
@@ -1056,6 +1058,7 @@ Work order:
             probe_responses: self.probe_responses.clone(),
             tool_call_count: self.tool_call_count,
             truncation_events: self.truncation_events,
+            quality: None,
         }
     }
 }
@@ -1063,6 +1066,126 @@ Work order:
 struct ToolResult {
     content: String,
     is_error: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct QualityEval {
+    tests_total: usize,
+    tests_passed: usize,
+    tests_failed: usize,
+    tests_errors: usize,
+    test_pass_rate: f64,
+    files_produced: usize,
+    total_source_bytes: usize,
+    test_output: String,
+}
+
+fn evaluate_output_quality(workdir: &std::path::Path) -> QualityEval {
+    // Count source files produced
+    let src_dir = workdir.join("src");
+    let (files_produced, total_source_bytes) = if src_dir.exists() {
+        let mut count = 0usize;
+        let mut bytes = 0usize;
+        if let Ok(entries) = std::fs::read_dir(&src_dir) {
+            for entry in entries.flatten() {
+                if entry.path().extension().map_or(false, |e| e == "py") {
+                    count += 1;
+                    bytes += entry.metadata().map(|m| m.len() as usize).unwrap_or(0);
+                }
+            }
+        }
+        (count, bytes)
+    } else {
+        (0, 0)
+    };
+
+    // Install requirements if they exist
+    let req_file = workdir.join("requirements.txt");
+    if req_file.exists() {
+        let _ = std::process::Command::new("pip3")
+            .args(["install", "-q", "-r", "requirements.txt"])
+            .current_dir(workdir)
+            .output();
+    }
+
+    // Run pytest
+    let test_output = std::process::Command::new("python3")
+        .args(["-m", "pytest", "tests/", "-v", "--tb=short"])
+        .current_dir(workdir)
+        .output();
+
+    match test_output {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let full_output = format!("{}\n{}", stdout, stderr);
+
+            // Parse pytest summary line: "X passed, Y failed, Z errors"
+            let (passed, failed, errors, total) = parse_pytest_summary(&full_output);
+
+            QualityEval {
+                tests_total: total,
+                tests_passed: passed,
+                tests_failed: failed,
+                tests_errors: errors,
+                test_pass_rate: if total > 0 { passed as f64 / total as f64 } else { 0.0 },
+                files_produced,
+                total_source_bytes,
+                test_output: full_output.chars().take(5000).collect(),
+            }
+        }
+        Err(e) => QualityEval {
+            tests_total: 0,
+            tests_passed: 0,
+            tests_failed: 0,
+            tests_errors: 0,
+            test_pass_rate: 0.0,
+            files_produced,
+            total_source_bytes,
+            test_output: format!("Failed to run pytest: {}", e),
+        },
+    }
+}
+
+fn parse_pytest_summary(output: &str) -> (usize, usize, usize, usize) {
+    // Look for the summary line like "89 passed" or "34 passed, 1 failed"
+    let mut passed = 0usize;
+    let mut failed = 0usize;
+    let mut errors = 0usize;
+
+    for line in output.lines().rev() {
+        if line.contains("passed") || line.contains("failed") || line.contains("error") {
+            // Parse "N passed"
+            if let Some(cap) = line.split("passed").next() {
+                if let Some(num_str) = cap.split_whitespace().last() {
+                    passed = num_str.parse().unwrap_or(0);
+                }
+            }
+            // Parse "N failed"
+            if line.contains("failed") {
+                if let Some(cap) = line.split("failed").next() {
+                    if let Some(num_str) = cap.split_whitespace().last() {
+                        // Handle "N passed, M failed" — last word before "failed"
+                        failed = num_str.trim_end_matches(',').parse().unwrap_or(0);
+                    }
+                }
+            }
+            // Parse "N error"
+            if line.contains("error") {
+                if let Some(cap) = line.split("error").next() {
+                    if let Some(num_str) = cap.split_whitespace().last() {
+                        errors = num_str.trim_end_matches(',').parse().unwrap_or(0);
+                    }
+                }
+            }
+            if passed > 0 || failed > 0 || errors > 0 {
+                break;
+            }
+        }
+    }
+
+    let total = passed + failed + errors;
+    (passed, failed, errors, total)
 }
 
 #[tokio::main]
@@ -1114,7 +1237,14 @@ async fn main() -> Result<()> {
         warn!("Agent run ended with error: {}", e);
     }
 
-    let metrics = agent.generate_metrics();
+    let mut metrics = agent.generate_metrics();
+
+    // Run quality evaluation — execute pytest on the workdir
+    info!("Running quality evaluation (pytest)...");
+    let quality = evaluate_output_quality(&agent.workdir);
+    info!("Quality: {} passed, {} failed, {} errors out of {} total tests",
+        quality.tests_passed, quality.tests_failed, quality.tests_errors, quality.tests_total);
+    metrics.quality = Some(quality);
 
     info!("Flat baseline completed:");
     info!("  Total iterations: {}", metrics.total_iterations);
@@ -1125,6 +1255,11 @@ async fn main() -> Result<()> {
     info!("  Cache hit rate: {:.2}%", metrics.cache_hit_rate * 100.0);
     info!("  Truncation events: {}", metrics.truncation_events);
     info!("  Probe responses: {}", metrics.probe_responses.len());
+    if let Some(ref q) = metrics.quality {
+        info!("  Tests: {}/{} passed ({:.0}%)", q.tests_passed, q.tests_total,
+            if q.tests_total > 0 { q.tests_passed as f64 / q.tests_total as f64 * 100.0 } else { 0.0 });
+        info!("  Files produced: {}", q.files_produced);
+    }
 
     if let Some(output_path) = args.output {
         let json = serde_json::to_string_pretty(&metrics)?;
