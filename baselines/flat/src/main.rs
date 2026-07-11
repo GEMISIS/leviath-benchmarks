@@ -155,11 +155,18 @@ impl Agent {
         probes: Vec<Probe>,
     ) -> Self {
         let system_prompt = format!(
-            r#"You are an autonomous coding agent. Your task is:
+            r#"You are an autonomous coding agent. Your job is to build complete working software using only tools. You MUST use tools for ALL work — never just describe what you would do.
 
+TASK:
 {}
 
-You have access to these tools:
+CRITICAL RULES:
+- ALWAYS use tools. Never respond with just text.
+- After reading specs, IMMEDIATELY start writing code with write_file.
+- Do NOT summarize or plan in text. Just build.
+- You are done ONLY when all deliverable files have been written AND tests pass.
+
+Available tools:
 - read_file: Read file contents
 - write_file: Create or overwrite a file
 - edit_file: Make exact string replacements in a file
@@ -168,7 +175,13 @@ You have access to these tools:
 
 Working directory: {}
 
-When you complete the task, respond with a final summary message with no tool calls."#,
+Work order:
+1. Read ALL spec and config files first
+2. Write each source file with write_file (do not skip any)
+3. Write requirements.txt and README.md
+4. Run tests with bash to verify
+5. Fix any issues
+6. Only respond with a final summary (no tool calls) when everything is built and working."#,
             task,
             workdir.display()
         );
@@ -309,7 +322,8 @@ When you complete the task, respond with a final summary message with no tool ca
             .map(|(idx, p)| (idx, p.clone()))
             .collect();
 
-        for (probe_idx, probe) in probes_to_inject {
+        // Only inject ONE probe per iteration to avoid cascading issues
+        if let Some((probe_idx, probe)) = probes_to_inject.into_iter().next() {
             self.fired_probe_indices.push(probe_idx);
             info!("Injecting probe at tool call {}: {}", self.tool_call_count, probe.question);
 
@@ -346,11 +360,23 @@ When you complete the task, respond with a final summary message with no tool ca
             let text_only_response: Vec<ContentBlock> = response
                 .into_iter()
                 .filter(|b| matches!(b, ContentBlock::Text { .. }))
+                // Filter out empty text blocks (API rejects them)
+                .filter(|b| match b {
+                    ContentBlock::Text { text } => !text.is_empty(),
+                    _ => true,
+                })
                 .collect();
+
+            let final_answer = if answer.is_empty() {
+                "[No answer provided]".to_string()
+            } else {
+                answer.clone()
+            };
+
             self.messages.push(Message {
                 role: "assistant".to_string(),
                 content: if text_only_response.is_empty() {
-                    vec![ContentBlock::Text { text: answer.clone() }]
+                    vec![ContentBlock::Text { text: final_answer }]
                 } else {
                     text_only_response
                 },

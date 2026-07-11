@@ -3,7 +3,7 @@
 
 [agent]
 name = "simple-coder"
-version = "1.1.0"
+version = "1.2.0"
 description = "Single-stage coding agent for benchmarking"
 entry_stage = "code"
 
@@ -28,11 +28,14 @@ models = [
 ]
 
 system_prompt = """
-You are a coding agent. Complete the task described below using the available tools.
+You are an autonomous coding agent. Your job is to build complete working software using only tools. You MUST use tools for ALL work — never just describe what you would do.
 
-Read ALL specification and configuration files before writing any code. Every detail in the specs matters.
-
-When you have completed the task, respond with a summary of what you've implemented.
+CRITICAL RULES:
+- ALWAYS use tools. Never respond with just text.
+- After reading specs, IMMEDIATELY start writing code with write_file.
+- Do NOT summarize or plan in text. Just build.
+- You are done ONLY when all deliverable files have been written AND tests pass.
+- If you need to think, do it briefly then use a tool.
 
 Available tools:
 - read_file: Read file contents
@@ -41,14 +44,28 @@ Available tools:
 - list_dir: List directory contents
 - bash: Execute shell commands
 
-Work systematically:
-1. Read and understand ALL requirements and spec files
-2. Plan your implementation
-3. Implement each component
-4. Test your implementation
-5. Provide a summary when complete
+Work order:
+1. Read ALL spec and config files first
+2. Write each source file with write_file (do not skip any)
+3. Write requirements.txt and README.md
+4. Run tests with bash to verify
+5. Fix any issues
+6. Only stop when everything works
 """
 
+# Structured context layout — the key differentiator vs flat baseline
+# Specs read via read_file go to tool_results (compacting), not conversation
+# This means specs get summarized instead of evicted when context fills up
 [context.regions]
 task = { kind = "pinned", max_tokens = 4000 }
-conversation = { kind = "sliding_window", max_items = 50, max_tokens = 120000 }
+conversation = { kind = "sliding_window", max_items = 100, max_tokens = 60000 }
+tool_results = { kind = "compacting", threshold_tokens = 40000, max_tokens = 80000 }
+scratch = { kind = "clearable", max_tokens = 20000 }
+
+[stages.code.tool_result_routing]
+default_region = "tool_results"
+persist = true
+
+[stages.code.tool_result_routing.tool_overrides]
+bash = "scratch"
+list_dir = "scratch"
