@@ -102,6 +102,20 @@ leviath-benchmarks/
 └── reports/                     # Generated markdown reports
 ```
 
+## Context Window Configuration
+
+Modern models (Claude Sonnet 5, Opus 4.8) support **1M+ input tokens**, making it nearly impossible for typical coding tasks to fill the context window. However, real-world agent workloads — large codebases, long debugging sessions, multi-file refactors — routinely exceed practical context limits.
+
+To produce meaningful retention benchmarks, we **artificially constrain the context window** (default: 32K-80K tokens). This:
+
+1. **Simulates real-world pressure**: A 100-file codebase easily generates 200K+ tokens of context
+2. **Forces context management decisions**: Without constraints, both flat and structured approaches perform identically (no truncation = no information loss)
+3. **Produces measurable differences**: The benchmark measures how well each approach handles context overflow, which is the core value proposition
+
+The `--context-window` flag on the flat baseline and the `max_tokens` field in Leviath blueprints control this. Results should always report the configured window size alongside token metrics.
+
+> **Note**: With unconstrained windows, both approaches achieve identical retention scores. The structured context advantage emerges specifically when the window fills up and decisions must be made about what to keep vs. evict.
+
 ## Getting Started
 
 ### Prerequisites

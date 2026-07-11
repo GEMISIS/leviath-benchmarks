@@ -236,13 +236,8 @@ When you complete the task, respond with a final summary message with no tool ca
                 // Add a nudge to continue and don't count this as "finished".
                 if self.just_answered_probe {
                     self.just_answered_probe = false;
-                    info!("Post-probe text response, nudging agent to continue task...");
-                    self.messages.push(Message {
-                        role: "user".to_string(),
-                        content: vec![ContentBlock::Text {
-                            text: "Thank you. Now please continue working on the original task.".to_string(),
-                        }],
-                    });
+                    info!("Post-probe text response, continuing task...");
+                    // User nudge already added in probe handler, just continue
                     continue;
                 }
                 // Allow up to 2 consecutive text-only responses before considering done
@@ -268,7 +263,16 @@ When you complete the task, respond with a final summary message with no tool ca
                 info!("Executing tool: {}", name);
                 self.tool_call_count += 1;
 
-                let result = self.execute_tool(&name, input).await?;
+                let result = match self.execute_tool(&name, input).await {
+                    Ok(r) => r,
+                    Err(e) => {
+                        warn!("Tool execution error for {}: {}", name, e);
+                        ToolResult {
+                            content: format!("Error executing tool: {}", e),
+                            is_error: true,
+                        }
+                    }
+                };
                 tool_results.push(ContentBlock::ToolResult {
                     tool_use_id: id,
                     content: result.content,
@@ -353,6 +357,14 @@ When you complete the task, respond with a final summary message with no tool ca
             });
 
             self.just_answered_probe = true;
+
+            // Add a user message to continue (some models require conversation to end with user message)
+            self.messages.push(Message {
+                role: "user".to_string(),
+                content: vec![ContentBlock::Text {
+                    text: "Thank you. Please continue working on the original task.".to_string(),
+                }],
+            });
         }
 
         Ok(())
@@ -388,7 +400,8 @@ When you complete the task, respond with a final summary message with no tool ca
         struct AnthropicRequest {
             model: String,
             max_tokens: usize,
-            temperature: f32,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            temperature: Option<f32>,
             system: Vec<SystemBlock>,
             messages: Vec<AnthropicMessage>,
             tools: Vec<serde_json::Value>,
@@ -433,10 +446,17 @@ When you complete the task, respond with a final summary message with no tool ca
 
         let tools = self.get_tool_definitions();
 
+        // Sonnet 5+ doesn't support temperature parameter
+        let temp = if self.model.contains("sonnet-5") || self.model.contains("opus-5") {
+            None
+        } else {
+            Some(self.temperature)
+        };
+
         let request = AnthropicRequest {
             model: self.model.clone(),
-            max_tokens: 4096,
-            temperature: self.temperature,
+            max_tokens: 16384,
+            temperature: temp,
             system: vec![SystemBlock {
                 block_type: "text".to_string(),
                 text: self.system_prompt.clone(),
@@ -790,7 +810,8 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     fn tool_read_file(&self, input: serde_json::Value) -> Result<ToolResult> {
-        let path: String = serde_json::from_value(input["path"].clone())?;
+        let path: String = serde_json::from_value(input["path"].clone())
+            .unwrap_or_else(|_| "unknown".to_string());
         let full_path = self.resolve_path(&path)?;
 
         match fs::read_to_string(&full_path) {
@@ -879,7 +900,8 @@ When you complete the task, respond with a final summary message with no tool ca
         let path = if input["path"].is_null() {
             self.workdir.clone()
         } else {
-            let path_str: String = serde_json::from_value(input["path"].clone())?;
+            let path_str: String = serde_json::from_value(input["path"].clone())
+                .unwrap_or_else(|_| ".".to_string());
             self.resolve_path(&path_str)?
         };
 
@@ -913,7 +935,8 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     fn tool_bash(&self, input: serde_json::Value) -> Result<ToolResult> {
-        let command: String = serde_json::from_value(input["command"].clone())?;
+        let command: String = serde_json::from_value(input["command"].clone())
+            .unwrap_or_else(|_| "echo 'no command provided'".to_string());
 
         let output = Command::new("sh")
             .arg("-c")
@@ -1060,7 +1083,10 @@ async fn main() -> Result<()> {
         probes,
     );
 
-    agent.run(args.max_iterations).await?;
+    let run_result = agent.run(args.max_iterations).await;
+    if let Err(ref e) = run_result {
+        warn!("Agent run ended with error: {}", e);
+    }
 
     let metrics = agent.generate_metrics();
 
