@@ -134,6 +134,9 @@ struct Agent {
     tool_call_count: usize,
     probes: Vec<Probe>,
     probe_responses: Vec<ProbeResponse>,
+    fired_probe_indices: Vec<usize>,  // track which probes already fired
+    just_answered_probe: bool,
+    consecutive_no_tools: usize,
 
     metrics: Vec<InferenceMetrics>,
     iteration: usize,
@@ -183,6 +186,9 @@ When you complete the task, respond with a final summary message with no tool ca
             tool_call_count: 0,
             probes,
             probe_responses: Vec::new(),
+            fired_probe_indices: Vec::new(),
+            just_answered_probe: false,
+            consecutive_no_tools: 0,
             metrics: Vec::new(),
             iteration: 0,
             truncation_events: 0,
@@ -226,9 +232,35 @@ When you complete the task, respond with a final summary message with no tool ca
             });
 
             if tool_uses.is_empty() {
-                info!("No tool calls - agent finished");
+                // After a probe response, the agent might stop with a text-only reply.
+                // Add a nudge to continue and don't count this as "finished".
+                if self.just_answered_probe {
+                    self.just_answered_probe = false;
+                    info!("Post-probe text response, nudging agent to continue task...");
+                    self.messages.push(Message {
+                        role: "user".to_string(),
+                        content: vec![ContentBlock::Text {
+                            text: "Thank you. Now please continue working on the original task.".to_string(),
+                        }],
+                    });
+                    continue;
+                }
+                // Allow up to 2 consecutive text-only responses before considering done
+                // (agent might be thinking/planning before next tool call)
+                if self.consecutive_no_tools < 2 {
+                    self.consecutive_no_tools += 1;
+                    self.messages.push(Message {
+                        role: "user".to_string(),
+                        content: vec![ContentBlock::Text {
+                            text: "Continue with the task.".to_string(),
+                        }],
+                    });
+                    continue;
+                }
+                info!("No tool calls for {} consecutive turns - agent finished", self.consecutive_no_tools + 1);
                 break;
             }
+            self.consecutive_no_tools = 0;
 
             // Execute tools
             let mut tool_results = Vec::new();
@@ -259,15 +291,22 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     async fn check_and_inject_probe(&mut self) -> Result<()> {
-        // Find probes that should fire now
-        let probes_to_inject: Vec<_> = self
+        // Skip probe check if we just answered one (avoid double-firing)
+        if self.just_answered_probe {
+            return Ok(());
+        }
+
+        // Find probes that should fire now (skip already-fired ones)
+        let probes_to_inject: Vec<(usize, Probe)> = self
             .probes
             .iter()
-            .filter(|p| p.after_tool_calls == self.tool_call_count)
-            .cloned()
+            .enumerate()
+            .filter(|(idx, p)| p.after_tool_calls <= self.tool_call_count && !self.fired_probe_indices.contains(idx))
+            .map(|(idx, p)| (idx, p.clone()))
             .collect();
 
-        for probe in probes_to_inject {
+        for (probe_idx, probe) in probes_to_inject {
+            self.fired_probe_indices.push(probe_idx);
             info!("Injecting probe at tool call {}: {}", self.tool_call_count, probe.question);
 
             // Add probe question as user message
@@ -295,15 +334,25 @@ When you complete the task, respond with a final summary message with no tool ca
 
             self.probe_responses.push(ProbeResponse {
                 probe: probe.clone(),
-                answer,
+                answer: answer.clone(),
                 tool_call_count: self.tool_call_count,
             });
 
-            // Add assistant response
+            // Add assistant response (text-only — strip any tool_use blocks to keep message pairing valid)
+            let text_only_response: Vec<ContentBlock> = response
+                .into_iter()
+                .filter(|b| matches!(b, ContentBlock::Text { .. }))
+                .collect();
             self.messages.push(Message {
                 role: "assistant".to_string(),
-                content: response,
+                content: if text_only_response.is_empty() {
+                    vec![ContentBlock::Text { text: answer.clone() }]
+                } else {
+                    text_only_response
+                },
             });
+
+            self.just_answered_probe = true;
         }
 
         Ok(())
@@ -757,8 +806,10 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     fn tool_write_file(&self, input: serde_json::Value) -> Result<ToolResult> {
-        let path: String = serde_json::from_value(input["path"].clone())?;
-        let content: String = serde_json::from_value(input["content"].clone())?;
+        let path: String = serde_json::from_value(input["path"].clone())
+            .unwrap_or_else(|_| "output.txt".to_string());
+        let content: String = serde_json::from_value(input["content"].clone())
+            .unwrap_or_else(|_| String::new());
         let full_path = self.resolve_path(&path)?;
 
         if let Some(parent) = full_path.parent() {
@@ -778,9 +829,12 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     fn tool_edit_file(&self, input: serde_json::Value) -> Result<ToolResult> {
-        let path: String = serde_json::from_value(input["path"].clone())?;
-        let old_str: String = serde_json::from_value(input["old_str"].clone())?;
-        let new_str: String = serde_json::from_value(input["new_str"].clone())?;
+        let path: String = serde_json::from_value(input["path"].clone())
+            .unwrap_or_else(|_| "output.txt".to_string());
+        let old_str: String = serde_json::from_value(input["old_str"].clone())
+            .unwrap_or_else(|_| String::new());
+        let new_str: String = serde_json::from_value(input["new_str"].clone())
+            .unwrap_or_else(|_| String::new());
         let full_path = self.resolve_path(&path)?;
 
         match fs::read_to_string(&full_path) {

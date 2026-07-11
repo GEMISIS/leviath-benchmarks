@@ -45,7 +45,7 @@ enum Command {
         reps: usize,
 
         /// Models to benchmark (comma-separated)
-        #[arg(long, default_value = "claude-sonnet-4-5")]
+        #[arg(long, default_value = "claude-sonnet-5")]
         models: String,
 
         /// Use mock provider for resource benchmarks (free)

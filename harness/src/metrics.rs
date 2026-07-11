@@ -73,6 +73,7 @@ impl BenchmarkResult {
     /// Calculate cost in USD (Anthropic pricing as of 2026)
     pub fn calculate_cost(&self) -> f64 {
         let (input_price, output_price, cache_write_price, cache_read_price) = match self.model.as_str() {
+            "claude-sonnet-5" => (3.0, 15.0, 3.75, 0.30),
             "claude-sonnet-4-5" | "claude-sonnet-4-6" => (3.0, 15.0, 3.75, 0.30),
             "claude-opus-4-8" => (15.0, 75.0, 18.75, 1.50),
             _ => (3.0, 15.0, 3.75, 0.30), // Default to Sonnet pricing

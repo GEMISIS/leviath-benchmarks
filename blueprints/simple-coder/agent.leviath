@@ -3,7 +3,7 @@
 
 [agent]
 name = "simple-coder"
-version = "1.0.0"
+version = "1.1.0"
 description = "Single-stage coding agent for benchmarking"
 entry_stage = "code"
 
@@ -18,17 +18,19 @@ bash       = "allow"
 mode = "autonomous"
 description = "Write code to complete the task"
 available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
-max_iterations = 150
+max_iterations = 250
 allow_complete = true
 
 [stages.code.model]
 models = [
-  { provider = "anthropic", model = "claude-sonnet-4-6" },
+  { provider = "anthropic", model = "claude-sonnet-5" },
   { provider = "anthropic", model = "claude-opus-4-8" }
 ]
 
 system_prompt = """
 You are a coding agent. Complete the task described below using the available tools.
+
+Read ALL specification and configuration files before writing any code. Every detail in the specs matters.
 
 When you have completed the task, respond with a summary of what you've implemented.
 
@@ -40,12 +42,13 @@ Available tools:
 - bash: Execute shell commands
 
 Work systematically:
-1. Read and understand the requirements
-2. Implement the solution
-3. Test your implementation
-4. Provide a summary when complete
+1. Read and understand ALL requirements and spec files
+2. Plan your implementation
+3. Implement each component
+4. Test your implementation
+5. Provide a summary when complete
 """
 
 [context.regions]
 task = { kind = "pinned", max_tokens = 4000 }
-conversation = { kind = "sliding_window", max_items = 30, max_tokens = 80000 }
+conversation = { kind = "sliding_window", max_items = 50, max_tokens = 120000 }
