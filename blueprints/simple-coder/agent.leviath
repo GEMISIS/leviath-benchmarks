@@ -3,7 +3,7 @@
 
 [agent]
 name = "simple-coder"
-version = "2.0.0"
+version = "2.1.0"
 description = "Two-stage coding agent: implement → test/fix loop"
 entry_stage = "implement"
 
@@ -39,28 +39,31 @@ CRITICAL RULES:
 - Write ALL deliverable files before finishing this stage.
 - If you need to think, do it briefly then use a tool.
 
-Available tools:
-- read_file: Read file contents
-- write_file: Create or overwrite files
-- edit_file: Make exact string replacements
-- list_dir: List directory contents
-- bash: Execute shell commands
-
 Work order:
-1. Read ALL spec and config files first
+1. list_dir to see the workspace, then read ALL spec and config files
 2. Write each source file with write_file (do not skip any)
 3. Write requirements.txt and README.md
-4. When ALL files are written, respond with a summary of what you built
+4. When ALL files are written, respond with a brief summary
 
 Do NOT run tests yet — that happens in the next stage. Focus on writing correct, complete code.
 """
+
+# In implement stage, bash/list_dir output is transient (scratch)
+# File contents persist (tool_results) for reference during implementation
+[stages.implement.tool_result_routing]
+default_region = "tool_results"
+persist = true
+
+[stages.implement.tool_result_routing.tool_overrides]
+bash = "scratch"
+list_dir = "scratch"
 
 # Stage 2: Run tests and fix until all pass
 [stages.test_fix]
 mode = "autonomous"
 description = "Run tests, fix failures, repeat until all pass"
 available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
-max_iterations = 100
+max_iterations = 80
 allow_complete = true
 
 [stages.test_fix.model]
@@ -74,46 +77,37 @@ You are an autonomous coding agent in the TEST AND FIX phase. All source files h
 
 CRITICAL RULES:
 - ALWAYS use tools. Never respond with just text.
-- Start by installing requirements and running the test suite.
-- For each failure: read the failing test, read the relevant source, fix the bug.
-- Re-run tests after each fix to verify.
+- Start by installing requirements and running the full test suite.
+- For each failure: read the failing test, read the relevant source, fix with edit_file.
+- Re-run tests after EACH fix to verify progress.
 - Do NOT stop until ALL tests pass (or you've exhausted attempts).
-
-Available tools:
-- read_file: Read file contents
-- write_file: Create or overwrite files
-- edit_file: Make exact string replacements
-- list_dir: List directory contents
-- bash: Execute shell commands
+- When all tests pass, respond with a brief summary of fixes made.
 
 Work order:
-1. bash: pip3 install -r requirements.txt
-2. bash: python3 -m pytest tests/ -v --tb=short
-3. If failures: read the test, read the source, fix with edit_file
-4. Re-run tests
-5. Repeat until all pass
-6. Only respond with a summary when all tests pass
+1. bash: pip3 install -r requirements.txt 2>&1
+2. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+3. For each failure: read test → read source → edit_file to fix
+4. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+5. Repeat 3-4 until all tests pass
 """
 
-# Structured context layout
-[context.regions]
-task = { kind = "pinned", max_tokens = 4000 }
-conversation = { kind = "sliding_window", max_items = 100, max_tokens = 60000 }
-tool_results = { kind = "compacting", threshold_tokens = 40000, max_tokens = 80000 }
-scratch = { kind = "clearable", max_tokens = 20000 }
-
-[stages.implement.tool_result_routing]
-default_region = "tool_results"
-persist = true
-
-[stages.implement.tool_result_routing.tool_overrides]
-bash = "scratch"
-list_dir = "scratch"
-
+# In test_fix stage, bash output (test results) goes to tool_results so
+# test failures persist across iterations and get compacted rather than cleared.
+# This prevents the agent from "forgetting" which tests failed.
 [stages.test_fix.tool_result_routing]
 default_region = "tool_results"
 persist = true
 
 [stages.test_fix.tool_result_routing.tool_overrides]
-bash = "scratch"
 list_dir = "scratch"
+
+# Structured context layout
+# - task: pinned specs that never evict
+# - conversation: sliding window of recent assistant/user messages
+# - tool_results: file contents + test output, compacted when large
+# - scratch: transient output (list_dir), cleared aggressively
+[context.regions]
+task = { kind = "pinned", max_tokens = 4000 }
+conversation = { kind = "sliding_window", max_items = 100, max_tokens = 60000 }
+tool_results = { kind = "compacting", threshold_tokens = 40000, max_tokens = 80000 }
+scratch = { kind = "clearable", max_tokens = 20000 }
