@@ -48,11 +48,17 @@ enum ServerEvent {
         status: String,
         stage: Option<String>,
         iteration: usize,
+        #[serde(default)]
+        tool_calls: usize,
     },
     Tokens {
         run_id: String,
         prompt_tokens: usize,
         completion_tokens: usize,
+        #[serde(default)]
+        cached_tokens: usize,
+        #[serde(default)]
+        cache_write_tokens: usize,
     },
     ContextUpdate {
         run_id: String,
@@ -291,6 +297,8 @@ async fn run_leviath_task(
     let mut tool_call_count = 0;
     let mut probe_responses = Vec::new();
     let mut completed = false;
+    let mut pending_probe: Option<(Probe, usize)> = None;
+    let mut probe_log_buffer = Vec::new();
 
     // Monitor WebSocket events
     while let Some(msg_result) = ws_read.next().await {
@@ -303,19 +311,43 @@ async fn run_leviath_task(
                 ServerEvent::Tokens {
                     prompt_tokens,
                     completion_tokens,
+                    cached_tokens,
+                    cache_write_tokens,
                     ..
                 } => {
                     inference_metrics.push(InferenceMetrics {
                         iteration: inference_metrics.len() + 1,
                         prompt_tokens,
                         completion_tokens,
-                        cached_tokens: 0, // Will be filled from meta
-                        cache_write_tokens: 0,
+                        cached_tokens,
+                        cache_write_tokens,
                         timestamp: chrono::Utc::now().to_rfc3339(),
                     });
+
+                    // If we have a pending probe, finalize it with collected logs
+                    if let Some((probe, probe_tool_count)) = pending_probe.take() {
+                        let answer = probe_log_buffer.join("\n");
+                        probe_log_buffer.clear();
+
+                        info!("Probe answer collected: {}", answer);
+
+                        probe_responses.push(ProbeResponse {
+                            probe,
+                            answer,
+                            tool_call_count: probe_tool_count,
+                        });
+                    }
                 }
 
                 ServerEvent::Log { ref line, .. } => {
+                    // If we're waiting for a probe response, collect log lines
+                    if pending_probe.is_some() {
+                        // Skip log lines that are just metadata/status
+                        if !line.starts_with('[') && !line.is_empty() {
+                            probe_log_buffer.push(line.clone());
+                        }
+                    }
+
                     if line.contains("Calling tool:") {
                         tool_call_count += 1;
 
@@ -335,15 +367,9 @@ async fn run_leviath_task(
                                     .send()
                                     .await?;
 
-                                // Wait for response (simplified - would need to parse from logs)
-                                sleep(Duration::from_secs(2)).await;
-
-                                // For now, record that we injected the probe
-                                probe_responses.push(ProbeResponse {
-                                    probe: probe.clone(),
-                                    answer: "[answer would be extracted from logs]".to_string(),
-                                    tool_call_count,
-                                });
+                                // Mark that we're waiting for a probe response
+                                pending_probe = Some((probe.clone(), tool_call_count));
+                                probe_log_buffer.clear();
                             }
                         }
                     }

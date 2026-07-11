@@ -41,6 +41,12 @@ struct MessagesResponse {
 enum ContentBlock {
     #[serde(rename = "text")]
     Text { text: String },
+    #[serde(rename = "tool_use")]
+    ToolUse {
+        id: String,
+        name: String,
+        input: serde_json::Value,
+    },
 }
 
 #[derive(Debug, Serialize)]
@@ -77,51 +83,64 @@ async fn handle_messages(
     // Simulate processing delay
     sleep(Duration::from_millis(state.delay_ms)).await;
 
-    // Generate canned response
+    // Determine which iteration this is based on message count
+    // Count assistant messages to know which response to send
+    let iteration = req.messages.iter()
+        .filter(|m| m.get("role").and_then(|r| r.as_str()) == Some("assistant"))
+        .count();
+
+    let input_tokens = estimate_tokens(&req.messages);
+
+    // State machine: first response uses list_dir, next 3-5 use read_file, then final text
+    let (content, stop_reason) = if iteration == 0 {
+        // First response: list_dir tool call
+        (vec![ContentBlock::ToolUse {
+            id: format!("toolu_{}", uuid::Uuid::new_v4()),
+            name: "list_dir".to_string(),
+            input: serde_json::json!({"path": "."}),
+        }], "tool_use".to_string())
+    } else if iteration < 5 {
+        // Next 3-4 responses: read_file tool calls
+        (vec![ContentBlock::ToolUse {
+            id: format!("toolu_{}", uuid::Uuid::new_v4()),
+            name: "read_file".to_string(),
+            input: serde_json::json!({"path": format!("file{}.txt", iteration)}),
+        }], "tool_use".to_string())
+    } else {
+        // Final response: text only to signal completion
+        (vec![ContentBlock::Text {
+            text: "I have completed the analysis of the project structure.".to_string(),
+        }], "end_turn".to_string())
+    };
+
+    // Simulate realistic cache behavior
+    let (cache_creation, cache_read) = if iteration == 0 {
+        // First request: cache is being created
+        (Some(input_tokens), Some(0))
+    } else {
+        // Subsequent requests: simulate 60-80% cache hit
+        let cache_hit_portion = (input_tokens as f64 * 0.7) as usize;
+        let new_tokens = input_tokens - cache_hit_portion;
+        (Some(new_tokens), Some(cache_hit_portion))
+    };
+
     let response = MessagesResponse {
         id: format!("msg_{}", uuid::Uuid::new_v4()),
         response_type: "message".to_string(),
         role: "assistant".to_string(),
-        content: vec![ContentBlock::Text {
-            text: generate_canned_response(&req),
-        }],
+        content,
         model: req.model.clone(),
-        stop_reason: "end_turn".to_string(),
+        stop_reason,
         usage: Usage {
-            input_tokens: estimate_tokens(&req.messages),
+            input_tokens,
             output_tokens: 150,
-            cache_creation_input_tokens: Some(0),
-            cache_read_input_tokens: Some(0),
+            cache_creation_input_tokens: cache_creation,
+            cache_read_input_tokens: cache_read,
         },
     };
 
     (StatusCode::OK, Json(response))
 }
-
-fn generate_canned_response(req: &MessagesRequest) -> String {
-    // Detect what kind of request this is based on messages
-    let last_message = req.messages.last();
-
-    if let Some(msg) = last_message {
-        let content = msg.get("content").and_then(|c| c.as_str()).unwrap_or("");
-
-        if content.contains("read_file") || content.contains("list_dir") {
-            return "I've examined the codebase structure.".to_string();
-        }
-
-        if content.contains("write_file") || content.contains("edit_file") {
-            return "I've made the necessary changes to the code.".to_string();
-        }
-
-        if content.contains("bash") || content.contains("test") {
-            return "The tests are passing successfully.".to_string();
-        }
-    }
-
-    // Default response
-    "I understand the task and will proceed with the implementation.".to_string()
-}
-
 fn estimate_tokens(messages: &[serde_json::Value]) -> usize {
     // Rough estimate: 4 chars per token
     messages

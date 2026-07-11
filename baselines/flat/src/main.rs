@@ -423,8 +423,208 @@ When you complete the task, respond with a final summary message with no tool ca
     }
 
     async fn call_openai(&self) -> Result<(Vec<ContentBlock>, TokenUsage)> {
-        // OpenAI implementation - simplified for now
-        anyhow::bail!("OpenAI provider not yet implemented")
+        #[derive(Serialize)]
+        struct OpenAIRequest {
+            model: String,
+            messages: Vec<OpenAIMessage>,
+            tools: Vec<serde_json::Value>,
+            temperature: f32,
+            max_tokens: usize,
+        }
+
+        #[derive(Serialize)]
+        struct OpenAIMessage {
+            role: String,
+            content: Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            tool_calls: Option<Vec<serde_json::Value>>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            tool_call_id: Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            name: Option<String>,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIResponse {
+            choices: Vec<OpenAIChoice>,
+            usage: OpenAIUsage,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIChoice {
+            message: OpenAIResponseMessage,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIResponseMessage {
+            content: Option<String>,
+            #[serde(default)]
+            tool_calls: Vec<OpenAIToolCall>,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIToolCall {
+            id: String,
+            #[serde(rename = "type")]
+            call_type: String,
+            function: OpenAIFunction,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIFunction {
+            name: String,
+            arguments: String,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIUsage {
+            prompt_tokens: usize,
+            completion_tokens: usize,
+            #[serde(default)]
+            prompt_tokens_details: Option<OpenAIPromptTokensDetails>,
+        }
+
+        #[derive(Deserialize)]
+        struct OpenAIPromptTokensDetails {
+            #[serde(default)]
+            cached_tokens: usize,
+        }
+
+        // Convert messages to OpenAI format
+        let mut openai_messages = vec![
+            OpenAIMessage {
+                role: "system".to_string(),
+                content: Some(self.system_prompt.clone()),
+                tool_calls: None,
+                tool_call_id: None,
+                name: None,
+            }
+        ];
+
+        for msg in &self.messages {
+            // Handle different content block types
+            if msg.role == "assistant" {
+                // Check if this message has tool calls
+                let tool_calls: Vec<_> = msg.content.iter()
+                    .filter_map(|block| match block {
+                        ContentBlock::ToolUse { id, name, input } => Some(serde_json::json!({
+                            "id": id,
+                            "type": "function",
+                            "function": {
+                                "name": name,
+                                "arguments": input.to_string(),
+                            }
+                        })),
+                        _ => None,
+                    })
+                    .collect();
+
+                let text_content = msg.content.iter()
+                    .filter_map(|block| match block {
+                        ContentBlock::Text { text } => Some(text.clone()),
+                        _ => None,
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                openai_messages.push(OpenAIMessage {
+                    role: "assistant".to_string(),
+                    content: if text_content.is_empty() { None } else { Some(text_content) },
+                    tool_calls: if tool_calls.is_empty() { None } else { Some(tool_calls) },
+                    tool_call_id: None,
+                    name: None,
+                });
+            } else {
+                // User message - check for tool results
+                for block in &msg.content {
+                    match block {
+                        ContentBlock::ToolResult { tool_use_id, content, .. } => {
+                            openai_messages.push(OpenAIMessage {
+                                role: "tool".to_string(),
+                                content: Some(content.clone()),
+                                tool_calls: None,
+                                tool_call_id: Some(tool_use_id.clone()),
+                                name: None,
+                            });
+                        }
+                        ContentBlock::Text { text } => {
+                            openai_messages.push(OpenAIMessage {
+                                role: "user".to_string(),
+                                content: Some(text.clone()),
+                                tool_calls: None,
+                                tool_call_id: None,
+                                name: None,
+                            });
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        // Convert tools to OpenAI format
+        let tools: Vec<_> = self.get_tool_definitions()
+            .iter()
+            .map(|tool| serde_json::json!({
+                "type": "function",
+                "function": {
+                    "name": tool["name"],
+                    "description": tool["description"],
+                    "parameters": tool["input_schema"],
+                }
+            }))
+            .collect();
+
+        let request = OpenAIRequest {
+            model: self.model.clone(),
+            messages: openai_messages,
+            tools,
+            temperature: self.temperature,
+            max_tokens: 4096,
+        };
+
+        let response = self
+            .client
+            .post("https://api.openai.com/v1/chat/completions")
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(&request)
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<OpenAIResponse>()
+            .await?;
+
+        let message = &response.choices[0].message;
+
+        // Convert response to ContentBlock format
+        let mut content = Vec::new();
+
+        if let Some(text) = &message.content {
+            if !text.is_empty() {
+                content.push(ContentBlock::Text { text: text.clone() });
+            }
+        }
+
+        for tool_call in &message.tool_calls {
+            let input: serde_json::Value = serde_json::from_str(&tool_call.function.arguments)?;
+            content.push(ContentBlock::ToolUse {
+                id: tool_call.id.clone(),
+                name: tool_call.function.name.clone(),
+                input,
+            });
+        }
+
+        let usage = TokenUsage {
+            prompt_tokens: response.usage.prompt_tokens,
+            completion_tokens: response.usage.completion_tokens,
+            cached_tokens: response.usage.prompt_tokens_details
+                .as_ref()
+                .map(|d| d.cached_tokens)
+                .unwrap_or(0),
+            cache_write_tokens: 0, // OpenAI doesn't provide this separately
+        };
+
+        Ok((content, usage))
     }
 
     fn get_tool_definitions(&self) -> Vec<serde_json::Value> {
