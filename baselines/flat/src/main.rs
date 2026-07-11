@@ -192,6 +192,14 @@ When you complete the task, respond with a final summary message with no tool ca
     async fn run(&mut self, max_iterations: usize) -> Result<()> {
         info!("Starting flat baseline agent - {} iterations max", max_iterations);
 
+        // Add the task as the first user message (required by Anthropic API)
+        self.messages.push(Message {
+            role: "user".to_string(),
+            content: vec![ContentBlock::Text {
+                text: "Begin the task.".to_string(),
+            }],
+        });
+
         for i in 0..max_iterations {
             self.iteration = i + 1;
             info!("Iteration {}/{}", self.iteration, max_iterations);
@@ -394,17 +402,22 @@ When you complete the task, respond with a final summary message with no tool ca
             tools,
         };
 
-        let response = self
+        let http_response = self
             .client
             .post("https://api.anthropic.com/v1/messages")
             .header("x-api-key", &self.api_key)
             .header("anthropic-version", "2023-06-01")
             .json(&request)
             .send()
-            .await?
-            .error_for_status()?
-            .json::<AnthropicResponse>()
             .await?;
+
+        if !http_response.status().is_success() {
+            let status = http_response.status();
+            let body = http_response.text().await.unwrap_or_default();
+            anyhow::bail!("Anthropic API error {}: {}", status, body);
+        }
+
+        let response = http_response.json::<AnthropicResponse>().await?;
 
         let content: Vec<ContentBlock> = response
             .content
