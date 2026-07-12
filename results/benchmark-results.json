@@ -1,0 +1,68 @@
+{
+  "benchmark": "stress-test-v3",
+  "date": "2026-07-11",
+  "task": "Multi-Tenant Event Processing Platform",
+  "approaches": {
+    "leviath": {
+      "version": "v3",
+      "blueprint": "simple-coder",
+      "model": "claude-sonnet-5",
+      "duration_seconds": 0,
+      "tool_calls": 0,
+      "api_requests": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "estimated_cost_usd": 0,
+      "test_results": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "by_category": {
+          "happy_path": {"total": 0, "passed": 0},
+          "schema_validation": {"total": 0, "passed": 0},
+          "idempotency": {"total": 0, "passed": 0},
+          "rate_limiting": {"total": 0, "passed": 0},
+          "dlq": {"total": 0, "passed": 0},
+          "backoff": {"total": 0, "passed": 0},
+          "router": {"total": 0, "passed": 0},
+          "transformer": {"total": 0, "passed": 0},
+          "metrics": {"total": 0, "passed": 0},
+          "api_auth": {"total": 0, "passed": 0},
+          "audit": {"total": 0, "passed": 0},
+          "circuit_breaker": {"total": 0, "passed": 0}
+        }
+      }
+    },
+    "flat_baseline": {
+      "version": "v3",
+      "model": "claude-sonnet-5",
+      "duration_seconds": 0,
+      "tool_calls": 0,
+      "api_requests": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "estimated_cost_usd": 0,
+      "test_results": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "by_category": {
+          "happy_path": {"total": 0, "passed": 0},
+          "schema_validation": {"total": 0, "passed": 0},
+          "idempotency": {"total": 0, "passed": 0},
+          "rate_limiting": {"total": 0, "passed": 0},
+          "dlq": {"total": 0, "passed": 0},
+          "backoff": {"total": 0, "passed": 0},
+          "router": {"total": 0, "passed": 0},
+          "transformer": {"total": 0, "passed": 0},
+          "metrics": {"total": 0, "passed": 0},
+          "api_auth": {"total": 0, "passed": 0},
+          "audit": {"total": 0, "passed": 0},
+          "circuit_breaker": {"total": 0, "passed": 0}
+        }
+      }
+    }
+  }
+}

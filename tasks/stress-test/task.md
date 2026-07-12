@@ -19,7 +19,6 @@ The platform processes events from multiple tenants, applies transformation rule
 9. **Audit Logger** (`src/audit.py`) — Audit trail per compliance spec
 10. **Pipeline Orchestrator** (`src/pipeline.py`) — Ties everything together per the pipeline spec
 11. **API Server** (`src/api.py`) — REST API exposing the platform per the API spec
-12. **Integration Tests** (`tests/test_integration.py`) — End-to-end tests covering all components
 
 ## Critical Rules
 
@@ -32,6 +31,8 @@ The platform processes events from multiple tenants, applies transformation rule
 
 ## Deliverables
 
-- All 12 files listed above
+- All 11 files listed above
 - `requirements.txt` with dependencies
 - `README.md` with architecture overview
+
+**Note:** A separate validation test suite will be used to evaluate your implementation.
