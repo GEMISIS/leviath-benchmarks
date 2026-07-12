@@ -1,14 +1,22 @@
 {
   "run": 2,
   "approach": "leviath",
-  "duration_seconds": 862,
-  "tool_calls": 218,
-  "prompt_tokens": 2569111,
-  "completion_tokens": 85083,
-  "estimated_cost_usd": 8.98,
-  "passed": 0,
-  "failed": 0,
-  "total": 0,
-  "pass_rate": 0,
-  "failures": []
+  "duration_seconds": 792,
+  "iterations": 45,
+  "tool_calls": 64,
+  "prompt_tokens": 3208533,
+  "completion_tokens": 95709,
+  "estimated_cost_usd": 11.06,
+  "passed": 63,
+  "failed": 6,
+  "total": 69,
+  "pass_rate": 91.3,
+  "failures": [
+    "test_batch_over_100_rejected",
+    "test_prometheus_metrics_endpoint",
+    "test_unknown_tenant_returns_404",
+    "test_duplicate_event_returns_409",
+    "test_decorrelated_jitter_formula",
+    "test_cross_tenant_access_returns_403"
+  ]
 }

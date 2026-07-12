@@ -390,21 +390,20 @@ def resource_footprint(out):
             markersize=9, zorder=10, label='Leviath (ECS)')
     ax.fill_between(lev_x, lev_y, alpha=0.06, color=LEVIATH, zorder=5)
 
-    # Leviath data label — single label since all values are nearly identical
+    # Leviath end-of-line label (matches competitor style)
+    last_lev_val = lev_y[-1]
     if lev_y[0] == lev_y[-1]:
-        # All the same — one label at midpoint
-        mid_idx = len(lev_x) // 2
-        ax.annotate(f'{lev_y[0]} MB (flat across all counts)',
-                    (lev_x[mid_idx], lev_y[mid_idx]),
-                    textcoords='offset points', xytext=(0, 18),
-                    ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+        ax.annotate(f'Leviath  {last_lev_val} MB (constant)',
+                    (lev_x[-1], last_lev_val),
+                    textcoords='offset points', xytext=(8, 0),
+                    ha='left', va='center', fontsize=10, fontweight='bold',
+                    color=LEVIATH)
     else:
-        ax.annotate(f'{lev_y[0]} MB', (lev_x[0], lev_y[0]),
-                    textcoords='offset points', xytext=(-30, 14),
-                    ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
-        ax.annotate(f'{lev_y[-1]} MB', (lev_x[-1], lev_y[-1]),
-                    textcoords='offset points', xytext=(12, 14),
-                    ha='left', fontsize=10, fontweight='bold', color=LEVIATH)
+        ax.annotate(f'Leviath  {last_lev_val} MB',
+                    (lev_x[-1], last_lev_val),
+                    textcoords='offset points', xytext=(8, 0),
+                    ha='left', va='center', fontsize=10, fontweight='bold',
+                    color=LEVIATH)
 
     # Plot each competing tool — thinner lines, sorted by peak RSS descending
     tool_order = sorted(
@@ -423,8 +422,13 @@ def resource_footprint(out):
         ax.plot(mx, my, color=color, linewidth=2, marker='s',
                 markersize=5, zorder=8, label=label, alpha=0.85)
 
-        # No inline labels at measured points — let the legend + projections
-        # carry identification. This avoids the x=5 label pileup.
+        # Label at rightmost measured point: tool name + value
+        last_val = my[-1]
+        gb_str = f'{last_val/1000:.1f} GB' if last_val >= 1000 else f'{last_val:,} MB'
+        ax.annotate(f'{label}  {gb_str}', (mx[-1], my[-1]),
+                    textcoords='offset points', xytext=(8, 0),
+                    ha='left', va='center', fontsize=9, color=color,
+                    fontweight='bold')
 
     # If tools already have 10-agent data points, no projection needed
     # Only project if max measured is < 10
@@ -483,13 +487,7 @@ def resource_footprint(out):
                     ha='left', fontsize=9, color=LEVIATH, alpha=0.7,
                     fontstyle='italic', fontweight='bold')
     else:
-        # Label the 10-agent measured point
-        lev_at_10 = next((m['peak_rss_mb'] for m in lev if m['agents'] == 10), None)
-        if lev_at_10:
-            ax.annotate(f'{lev_at_10} MB', (10, lev_at_10),
-                        textcoords='offset points', xytext=(8, 10),
-                        ha='left', fontsize=10, color=LEVIATH,
-                        fontweight='bold')
+        pass  # End-of-line label already added above
 
     # Callout box — use highest concurrency with real data
     if 'claude_code' in res['tools']:
@@ -520,18 +518,29 @@ def resource_footprint(out):
     ax.set_xlabel('Concurrent Agents', fontsize=12, color=TEXT, labelpad=8)
     ax.set_ylabel('Peak Device RAM (MB)', fontsize=12, color=TEXT, labelpad=8)
 
-    ax.legend(loc='upper left', frameon=True, fancybox=True,
-              edgecolor=GRID, fontsize=9, ncol=1)
+    # No legend box — end-of-line labels identify each series
+    # ax.legend(loc='upper left', frameon=True, fancybox=True,
+    #           edgecolor=GRID, fontsize=9, ncol=1)
     ax.yaxis.grid(True, color=GRID, linewidth=0.5, alpha=0.5, zorder=0)
 
-    # Use proportional x-axis spacing
-    ax.set_xlim(0, 11.5)
-    ax.set_xticks([1, 3, 5, 10])
+    # X-axis: proportional spacing, extend past 10 for labels
+    all_x = lev_x[:]
+    for tk in tool_order:
+        all_x.extend(m['agents'] for m in res['tools'][tk]['measurements'])
+    max_x = max(all_x)
+    ax.set_xlim(0, max_x + max_x * 0.25)  # 25% padding for labels
+    ax.set_xticks(sorted(set(all_x)))
 
-    # Footnotes
-    ax.text(0.98, 0.02, 'Dashed = linear projection from measured data',
-            transform=ax.transAxes, ha='right', fontsize=8,
-            color=MUTED, fontstyle='italic')
+    # Footnote: all measurements are real
+    has_projections = len(proj_labels) > 0
+    if has_projections:
+        ax.text(0.98, 0.02, 'Dashed = linear projection',
+                transform=ax.transAxes, ha='right', fontsize=8,
+                color=MUTED, fontstyle='italic')
+    else:
+        ax.text(0.98, 0.02, 'All data points measured (no projections)',
+                transform=ax.transAxes, ha='right', fontsize=8,
+                color=MUTED, fontstyle='italic')
 
     plt.tight_layout(rect=[0, 0, 1, 0.92])
     save(fig, 'resource-footprint', out)
