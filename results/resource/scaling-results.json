@@ -1,0 +1,60 @@
+{
+  "benchmark": "resource-footprint-scaling",
+  "date": "2026-07-12",
+  "system": {
+    "ram_gb": 16,
+    "cpu": "Apple M-series",
+    "os": "macOS 15.5"
+  },
+  "leviath": {
+    "type": "ecs_engine",
+    "language": "Rust",
+    "base_rss_mb": 18,
+    "per_agent_overhead_mb": 1,
+    "measurements": [
+      {"agents": 1, "peak_rss_mb": 18},
+      {"agents": 3, "peak_rss_mb": 20},
+      {"agents": 5, "peak_rss_mb": 22},
+      {"agents": 10, "peak_rss_mb": 28},
+      {"agents": 20, "peak_rss_mb": 38}
+    ]
+  },
+  "tools": {
+    "claude_code": {
+      "version": "2.1.86",
+      "language": "Node.js",
+      "measurements": [
+        {"agents": 1, "peak_rss_mb": 300},
+        {"agents": 3, "peak_rss_mb": 906},
+        {"agents": 5, "peak_rss_mb": 1574}
+      ]
+    },
+    "codex_cli": {
+      "version": "0.144.1",
+      "language": "Node.js",
+      "measurements": [
+        {"agents": 1, "peak_rss_mb": 131},
+        {"agents": 3, "peak_rss_mb": 394},
+        {"agents": 5, "peak_rss_mb": 657}
+      ]
+    },
+    "pi": {
+      "version": "latest",
+      "language": "Node.js",
+      "measurements": [
+        {"agents": 1, "peak_rss_mb": 195},
+        {"agents": 3, "peak_rss_mb": 603},
+        {"agents": 5, "peak_rss_mb": 1010}
+      ]
+    },
+    "opencode": {
+      "version": "0.0.55",
+      "language": "Go",
+      "measurements": [
+        {"agents": 1, "peak_rss_mb": 131},
+        {"agents": 3, "peak_rss_mb": 328},
+        {"agents": 5, "peak_rss_mb": 581}
+      ]
+    }
+  }
+}

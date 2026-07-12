@@ -1,0 +1,14 @@
+{
+  "run": 2,
+  "approach": "leviath",
+  "duration_seconds": 862,
+  "tool_calls": 218,
+  "prompt_tokens": 2569111,
+  "completion_tokens": 85083,
+  "estimated_cost_usd": 8.98,
+  "passed": 0,
+  "failed": 0,
+  "total": 0,
+  "pass_rate": 0,
+  "failures": []
+}

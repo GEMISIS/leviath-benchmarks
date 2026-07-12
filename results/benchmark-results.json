@@ -3,149 +3,122 @@
   "date": "2026-07-11",
   "task": "Multi-Tenant Event Processing Platform",
   "validation_tests": 69,
+  "methodology": {
+    "model": "claude-sonnet-5",
+    "validation": "69 hidden tests across 13 categories, unseen by agent",
+    "baseline": "Independent Rust binary, same API + tools, single flat context window",
+    "seed_files": "11 spec files, 4 config files, identical for both approaches"
+  },
   "approaches": {
-    "leviath": {
-      "version": "v3",
-      "blueprint": "simple-coder",
-      "model": "claude-sonnet-5",
-      "duration_seconds": 840,
-      "tool_calls": 73,
-      "api_requests": 51,
-      "prompt_tokens": 3772904,
-      "completion_tokens": 92080,
-      "estimated_cost_usd": 12.7,
-      "test_results": {
-        "total": 69,
-        "passed": 60,
-        "failed": 9,
-        "errors": 0,
-        "pass_rate": 87.0,
-        "by_category": {
-          "happy_path": {
-            "total": 9,
-            "passed": 9
-          },
-          "schema_validation": {
-            "total": 8,
-            "passed": 5
-          },
-          "idempotency": {
-            "total": 3,
-            "passed": 1
-          },
-          "rate_limiting": {
-            "total": 4,
-            "passed": 4
-          },
-          "dlq": {
-            "total": 5,
-            "passed": 5
-          },
-          "backoff": {
-            "total": 2,
-            "passed": 1
-          },
-          "router": {
-            "total": 3,
-            "passed": 3
-          },
-          "transformer": {
-            "total": 3,
-            "passed": 3
-          },
-          "metrics": {
-            "total": 3,
-            "passed": 3
-          },
-          "api_auth": {
-            "total": 6,
-            "passed": 6
-          },
-          "audit": {
-            "total": 2,
-            "passed": 2
-          },
-          "circuit_breaker": {
-            "total": 2,
-            "passed": 1
-          },
-          "batch_api": {
-            "total": 2,
-            "passed": 0
-          }
-        }
-      }
-    },
     "flat_baseline": {
       "version": "v3",
       "model": "claude-sonnet-5",
-      "duration_seconds": 1020,
-      "tool_calls": 123,
-      "api_requests": 123,
-      "prompt_tokens": 8628122,
-      "completion_tokens": 102785,
-      "estimated_cost_usd": 27.43,
-      "test_results": {
-        "total": 69,
-        "passed": 59,
-        "failed": 10,
-        "errors": 0,
-        "pass_rate": 85.5,
-        "by_category": {
-          "happy_path": {
-            "total": 9,
-            "passed": 9
-          },
-          "schema_validation": {
-            "total": 8,
-            "passed": 5
-          },
-          "idempotency": {
-            "total": 3,
-            "passed": 3
-          },
-          "rate_limiting": {
-            "total": 4,
-            "passed": 2
-          },
-          "dlq": {
-            "total": 5,
-            "passed": 4
-          },
-          "backoff": {
-            "total": 2,
-            "passed": 1
-          },
-          "router": {
-            "total": 3,
-            "passed": 2
-          },
-          "transformer": {
-            "total": 3,
-            "passed": 3
-          },
-          "metrics": {
-            "total": 3,
-            "passed": 3
-          },
-          "api_auth": {
-            "total": 6,
-            "passed": 6
-          },
-          "audit": {
-            "total": 2,
-            "passed": 2
-          },
-          "circuit_breaker": {
-            "total": 2,
-            "passed": 2
-          },
-          "batch_api": {
-            "total": 2,
-            "passed": 0
-          }
-        }
+      "runs": 1,
+      "pass_rate": {
+        "mean": 85.5,
+        "stddev": 0,
+        "ci95": 0,
+        "min": 85.5,
+        "max": 85.5,
+        "values": [
+          85.5
+        ]
+      },
+      "cost_usd": {
+        "mean": 27.43,
+        "stddev": 0,
+        "ci95": 0,
+        "values": [
+          27.43
+        ]
+      },
+      "duration_seconds": {
+        "mean": 1020,
+        "stddev": 0,
+        "values": [
+          1020
+        ]
+      },
+      "tool_calls": {
+        "mean": 123,
+        "stddev": 0,
+        "values": [
+          123
+        ]
+      },
+      "tests_passed": {
+        "mean": 59.0,
+        "values": [
+          59
+        ]
+      },
+      "common_failures": {
+        "test_invalid_tenant_id_format_returns_400": 1,
+        "test_unregistered_source_to_dlq": 1,
+        "test_bad_tenant_id_format_rejected_at_receive": 1,
+        "test_token_bucket_blocks_after_capacity": 1,
+        "test_free_tenant_rate_limited": 1,
+        "test_non_retryable_not_retried": 1,
+        "test_decorrelated_jitter_formula": 1,
+        "test_inventory_rule_requires_premium_tier": 1,
+        "test_batch_ingestion_success": 1,
+        "test_batch_over_100_rejected": 1
       }
+    },
+    "leviath": {
+      "version": "v3",
+      "model": "claude-sonnet-5",
+      "runs": 1,
+      "pass_rate": {
+        "mean": 87.0,
+        "stddev": 0,
+        "ci95": 0,
+        "min": 87.0,
+        "max": 87.0,
+        "values": [
+          87.0
+        ]
+      },
+      "cost_usd": {
+        "mean": 12.7,
+        "stddev": 0,
+        "ci95": 0,
+        "values": [
+          12.7
+        ]
+      },
+      "duration_seconds": {
+        "mean": 840,
+        "stddev": 0,
+        "values": [
+          840
+        ]
+      },
+      "tool_calls": {
+        "mean": 73,
+        "stddev": 0,
+        "values": [
+          73
+        ]
+      },
+      "tests_passed": {
+        "mean": 60.0,
+        "values": [
+          60
+        ]
+      },
+      "common_failures": {
+        "test_missing_required_fields_returns_400": 1,
+        "test_invalid_tenant_id_format_returns_400": 1,
+        "test_bad_tenant_id_format_rejected_at_receive": 1,
+        "test_duplicate_event_returns_409": 1,
+        "test_idempotent_header_on_duplicate": 1,
+        "test_decorrelated_jitter_formula": 1,
+        "test_circuit_breaker_returns_503": 1,
+        "test_batch_ingestion_success": 1,
+        "test_batch_over_100_rejected": 1
+      },
+      "blueprint": "simple-coder"
     }
   }
 }

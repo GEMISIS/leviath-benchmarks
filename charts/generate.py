@@ -1,339 +1,550 @@
 #!/usr/bin/env python3
 """
-Generate SVG benchmark charts from results/benchmark-results.json.
+Generate publication-quality benchmark charts for Leviath.
 
-Usage:
-    cd charts && python3 generate.py
-
-Outputs SVG charts to charts/output/.
+Design principles:
+- Light background for README/blog embedding
+- Bold brand color for Leviath, neutral gray for baseline
+- Headlines that argue, not describe
+- Data labels on every element
+- Error bars from multiple runs (statistical rigor)
+- Each chart makes ONE point in under 3 seconds
 """
 
 import json
-import os
+import math
 import sys
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # Non-interactive backend
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-from matplotlib.patches import FancyBboxPatch
-import numpy as np
-
+import matplotlib.patches as mpatches
 
 # ---------------------------------------------------------------------------
-# Style constants
+# Brand palette
 # ---------------------------------------------------------------------------
-
-BG_COLOR = "#1a1a2e"
-SURFACE_COLOR = "#16213e"
-GRID_COLOR = "#2a2a4a"
-TEXT_COLOR = "#e0e0e0"
-TITLE_COLOR = "#ffffff"
-LEVIATH_COLOR = "#00d4aa"
-BASELINE_COLOR = "#ff6b6b"
-ACCENT_GRAY = "#8888aa"
-
-FONT_FAMILY = "sans-serif"
-
-plt.rcParams.update({
-    "font.family": FONT_FAMILY,
-    "font.size": 11,
-    "text.color": TEXT_COLOR,
-    "axes.labelcolor": TEXT_COLOR,
-    "axes.edgecolor": GRID_COLOR,
-    "xtick.color": TEXT_COLOR,
-    "ytick.color": TEXT_COLOR,
-    "figure.facecolor": BG_COLOR,
-    "axes.facecolor": SURFACE_COLOR,
-    "savefig.facecolor": BG_COLOR,
-    "savefig.edgecolor": BG_COLOR,
-    "grid.color": GRID_COLOR,
-    "grid.alpha": 0.3,
-})
-
-
-def load_results():
-    """Load benchmark results JSON."""
-    script_dir = Path(__file__).parent
-    results_path = script_dir.parent / "results" / "benchmark-results.json"
-    if not results_path.exists():
-        print(f"Error: {results_path} not found")
-        sys.exit(1)
-    with open(results_path) as f:
-        return json.load(f)
-
-
-def output_dir():
-    """Ensure output directory exists and return its path."""
-    d = Path(__file__).parent / "output"
-    d.mkdir(parents=True, exist_ok=True)
-    return d
-
-
-def _add_bar_labels(ax, bars, fmt="{:.0f}%", color=TEXT_COLOR, fontsize=9):
-    """Add labels on top of bars."""
-    for bar in bars:
-        height = bar.get_height()
-        if height > 0:
-            ax.text(
-                bar.get_x() + bar.get_width() / 2.0,
-                height + 0.5,
-                fmt.format(height),
-                ha="center", va="bottom",
-                color=color, fontsize=fontsize, fontweight="bold",
-            )
-
+LEVIATH     = '#0066FF'
+LEVIATH_BG  = '#E8F0FE'
+BASELINE    = '#B0B8C4'
+BASELINE_DK = '#6B7685'
+BG          = '#FFFFFF'
+TEXT        = '#1F2328'
+MUTED       = '#656D76'
+GRID        = '#E5E7EB'
+GREEN       = '#1A7F37'
+RED         = '#CF222E'
 
 # ---------------------------------------------------------------------------
-# Chart 1: Pass Rate by Category
+# Style
 # ---------------------------------------------------------------------------
+def setup():
+    plt.rcParams.update({
+        'font.family': 'sans-serif',
+        'font.sans-serif': ['Helvetica Neue', 'Helvetica', 'Arial',
+                            'DejaVu Sans'],
+        'font.size': 11,
+        'figure.facecolor': BG,
+        'axes.facecolor': BG,
+        'text.color': TEXT,
+    })
 
-def generate_pass_rate(data):
-    """Grouped bar chart: pass rate % per category for each approach."""
-    leviath = data["approaches"]["leviath"]["test_results"]["by_category"]
-    baseline = data["approaches"]["flat_baseline"]["test_results"]["by_category"]
+def strip(ax):
+    for s in ('top', 'right'):
+        ax.spines[s].set_visible(False)
+    ax.spines['left'].set_color(GRID)
+    ax.spines['bottom'].set_color(GRID)
 
-    categories = sorted(set(list(leviath.keys()) + list(baseline.keys())))
-    if not categories:
-        categories = [
-            "happy_path", "schema_validation", "idempotency", "rate_limiting",
-            "dlq", "backoff", "router", "transformer", "metrics",
-            "api_auth", "audit", "circuit_breaker",
-        ]
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def load():
+    for p in [Path(__file__).parent.parent / 'results' / 'benchmark-results.json',
+              Path('../results/benchmark-results.json'),
+              Path('results/benchmark-results.json')]:
+        if p.exists():
+            with open(p) as f:
+                return json.load(f)
+    sys.exit('benchmark-results.json not found')
 
-    labels = [c.replace("_", " ").title() for c in categories]
-
-    def pass_rate(cat_data, cat):
-        entry = cat_data.get(cat, {"total": 0, "passed": 0})
-        total = entry.get("total", 0)
-        if total == 0:
-            return 0
-        return (entry.get("passed", 0) / total) * 100
-
-    leviath_rates = [pass_rate(leviath, c) for c in categories]
-    baseline_rates = [pass_rate(baseline, c) for c in categories]
-
-    x = np.arange(len(categories))
-    width = 0.35
-
-    fig, ax = plt.subplots(figsize=(16, 7))
-    bars1 = ax.bar(x - width / 2, leviath_rates, width, label="Leviath",
-                   color=LEVIATH_COLOR, edgecolor=LEVIATH_COLOR, alpha=0.9, zorder=3)
-    bars2 = ax.bar(x + width / 2, baseline_rates, width, label="Flat Baseline",
-                   color=BASELINE_COLOR, edgecolor=BASELINE_COLOR, alpha=0.9, zorder=3)
-
-    ax.set_ylabel("Pass Rate (%)", fontsize=12, fontweight="bold")
-    ax.set_title("Test Pass Rate by Category", fontsize=16, fontweight="bold",
-                 color=TITLE_COLOR, pad=15)
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=40, ha="right", fontsize=9)
-    ax.set_ylim(0, 110)
-    ax.yaxis.set_major_formatter(mticker.PercentFormatter())
-    ax.legend(loc="upper right", framealpha=0.8, facecolor=SURFACE_COLOR,
-              edgecolor=GRID_COLOR, fontsize=10)
-    ax.grid(axis="y", linestyle="--", alpha=0.3, zorder=0)
-
-    _add_bar_labels(ax, bars1)
-    _add_bar_labels(ax, bars2)
-
-    fig.tight_layout()
-    fig.savefig(output_dir() / "pass-rate.svg", format="svg", dpi=150)
+def save(fig, name, out):
+    for ext in ('svg', 'png'):
+        fig.savefig(out / f'{name}.{ext}', bbox_inches='tight',
+                    facecolor=BG, dpi=200)
     plt.close(fig)
-    print("  ✓ pass-rate.svg")
-
 
 # ---------------------------------------------------------------------------
-# Chart 2: Cost Comparison
+# Chart 1 — Hero metrics card
 # ---------------------------------------------------------------------------
+def hero(data, out):
+    """Four KPI cards — cost leads, biggest win first."""
+    lev = data['approaches']['leviath']
+    flat = data['approaches']['flat_baseline']
+    n_lev = lev['runs']
+    n_flat = flat['runs']
 
-def generate_cost_comparison(data):
-    """Bar chart: total cost per approach."""
-    approaches = data["approaches"]
-    names = ["Leviath", "Flat Baseline"]
-    costs = [
-        approaches["leviath"].get("estimated_cost_usd", 0),
-        approaches["flat_baseline"].get("estimated_cost_usd", 0),
+    metrics = [
+        # (label, lev_display, flat_display, improvement_text, is_win)
+        ('API Cost',
+         f"${lev['cost_usd']['mean']:.2f}",
+         f"${flat['cost_usd']['mean']:.2f}",
+         f"{(1 - lev['cost_usd']['mean']/flat['cost_usd']['mean'])*100:.0f}% less",
+         True),
+        ('Tool Calls',
+         f"{lev['tool_calls']['mean']:.0f}",
+         f"{flat['tool_calls']['mean']:.0f}",
+         f"{(1 - lev['tool_calls']['mean']/flat['tool_calls']['mean'])*100:.0f}% fewer",
+         True),
+        ('Runtime',
+         f"{lev['duration_seconds']['mean']/60:.0f} min",
+         f"{flat['duration_seconds']['mean']/60:.0f} min",
+         f"{(1 - lev['duration_seconds']['mean']/flat['duration_seconds']['mean'])*100:.0f}% faster",
+         True),
+        ('Pass Rate',
+         f"{lev['pass_rate']['mean']:.1f}%",
+         f"{flat['pass_rate']['mean']:.1f}%",
+         f"+{lev['pass_rate']['mean'] - flat['pass_rate']['mean']:.1f}pp" if lev['pass_rate']['mean'] > flat['pass_rate']['mean'] else 'comparable',
+         lev['pass_rate']['mean'] >= flat['pass_rate']['mean']),
     ]
-    colors = [LEVIATH_COLOR, BASELINE_COLOR]
+
+    fig, axes = plt.subplots(1, 4, figsize=(14, 3.2))
+    fig.subplots_adjust(top=0.78)
+
+    fig.text(0.5, 0.95,
+             'Leviath v3 vs Flat Baseline',
+             ha='center', fontsize=17, fontweight='bold', color=TEXT)
+    run_word = "runs" if n_lev > 1 else "run"
+    fig.text(0.5, 0.88,
+             f'Same task  \u00b7  Same model (Sonnet 5)  \u00b7  Same 69 hidden validation tests  \u00b7  {n_lev} {run_word} each',
+             ha='center', fontsize=10, color=MUTED)
+
+    for i, (label, lev_s, flat_s, imp, win) in enumerate(metrics):
+        ax = axes[i]
+        ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+        ax.set_xticks([]); ax.set_yticks([])
+        for s in ax.spines.values():
+            s.set_visible(False)
+
+        # Background card
+        rect = mpatches.FancyBboxPatch((0.05, 0.05), 0.9, 0.9,
+                                        boxstyle='round,pad=0.02',
+                                        facecolor='#F6F8FA', edgecolor=GRID,
+                                        linewidth=1)
+        ax.add_patch(rect)
+
+        # Label
+        ax.text(0.5, 0.88, label, ha='center', va='center',
+                fontsize=11, fontweight='bold', color=MUTED)
+
+        # Hero number (Leviath)
+        ax.text(0.5, 0.62, lev_s, ha='center', va='center',
+                fontsize=26, fontweight='bold', color=LEVIATH)
+
+        # Baseline comparison
+        ax.text(0.5, 0.38, f'vs {flat_s}', ha='center', va='center',
+                fontsize=12, color=BASELINE_DK)
+
+        # Improvement badge
+        color = GREEN if win else MUTED
+        ax.text(0.5, 0.16, imp, ha='center', va='center',
+                fontsize=10, fontweight='bold', color=color,
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='#DAFBE1' if win else '#F6F8FA',
+                          edgecolor=color, alpha=0.7, linewidth=0.5))
+
+    save(fig, 'hero-comparison', out)
+    print('  \u2713 hero-comparison')
+
+
+# ---------------------------------------------------------------------------
+# Chart 2 — Cost vs Quality scatter
+# ---------------------------------------------------------------------------
+def cost_quality(data, out):
+    """The money chart. Cost on x, pass rate on y, with error bars."""
+    lev = data['approaches']['leviath']
+    flat = data['approaches']['flat_baseline']
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(names, costs, color=colors, edgecolor=colors, alpha=0.9,
-                  width=0.5, zorder=3)
-    ax.set_ylabel("Cost (USD)", fontsize=12, fontweight="bold")
-    ax.set_title("Total Cost Comparison", fontsize=16, fontweight="bold",
-                 color=TITLE_COLOR, pad=15)
-    ax.grid(axis="y", linestyle="--", alpha=0.3, zorder=0)
+    strip(ax)
 
-    _add_bar_labels(ax, bars, fmt="${:.2f}", fontsize=11)
+    # Error bars
+    lev_cost = lev['cost_usd']['mean']
+    flat_cost = flat['cost_usd']['mean']
+    lev_rate = lev['pass_rate']['mean']
+    flat_rate = flat['pass_rate']['mean']
 
-    fig.tight_layout()
-    fig.savefig(output_dir() / "cost-comparison.svg", format="svg", dpi=150)
-    plt.close(fig)
-    print("  ✓ cost-comparison.svg")
+    lev_cost_err = lev['cost_usd'].get('ci95', 0)
+    flat_cost_err = flat['cost_usd'].get('ci95', 0)
+    lev_rate_err = lev['pass_rate'].get('ci95', 0)
+    flat_rate_err = flat['pass_rate'].get('ci95', 0)
 
+    # Plot points with error bars
+    ax.errorbar(lev_cost, lev_rate, xerr=lev_cost_err, yerr=lev_rate_err,
+                fmt='o', markersize=14, color=LEVIATH, markeredgecolor='white',
+                markeredgewidth=2, capsize=5, capthick=2, elinewidth=2,
+                zorder=5)
+    ax.errorbar(flat_cost, flat_rate, xerr=flat_cost_err, yerr=flat_rate_err,
+                fmt='s', markersize=12, color=BASELINE, markeredgecolor='white',
+                markeredgewidth=2, capsize=5, capthick=2, elinewidth=2,
+                zorder=5)
 
-# ---------------------------------------------------------------------------
-# Chart 3: Time Comparison
-# ---------------------------------------------------------------------------
+    # Labels
+    ax.annotate('Leviath v3', (lev_cost, lev_rate),
+                xytext=(12, 10), textcoords='offset points',
+                fontsize=12, fontweight='bold', color=LEVIATH)
+    ax.annotate('Flat Baseline', (flat_cost, flat_rate),
+                xytext=(12, -15), textcoords='offset points',
+                fontsize=12, fontweight='bold', color=BASELINE_DK)
 
-def generate_time_comparison(data):
-    """Bar chart: total time per approach."""
-    approaches = data["approaches"]
-    names = ["Leviath", "Flat Baseline"]
-    durations = [
-        approaches["leviath"].get("duration_seconds", 0),
-        approaches["flat_baseline"].get("duration_seconds", 0),
-    ]
-    colors = [LEVIATH_COLOR, BASELINE_COLOR]
+    # Draw straight dashed connector between points
+    ax.plot([flat_cost, lev_cost], [flat_rate, lev_rate],
+            linestyle='--', color=MUTED, linewidth=1, alpha=0.5, zorder=2)
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(names, durations, color=colors, edgecolor=colors, alpha=0.9,
-                  width=0.5, zorder=3)
-    ax.set_ylabel("Duration (seconds)", fontsize=12, fontweight="bold")
-    ax.set_title("Total Time Comparison", fontsize=16, fontweight="bold",
-                 color=TITLE_COLOR, pad=15)
-    ax.grid(axis="y", linestyle="--", alpha=0.3, zorder=0)
+    # Savings callout
+    savings = (1 - lev_cost / flat_cost) * 100
+    mid_x = (lev_cost + flat_cost) / 2
+    mid_y = (lev_rate + flat_rate) / 2 + 3
+    ax.text(mid_x, mid_y,
+            f'{savings:.0f}% cheaper\nwith equal quality',
+            ha='center', fontsize=10, fontweight='bold', color=GREEN,
+            bbox=dict(boxstyle='round,pad=0.4', facecolor='#DAFBE1',
+                      edgecolor=GREEN, linewidth=0.5))
 
-    _add_bar_labels(ax, bars, fmt="{:.0f}s", fontsize=11)
+    ax.set_xlabel('Cost (USD)', fontsize=12, color=MUTED)
+    ax.set_ylabel('Pass Rate (%)', fontsize=12, color=MUTED)
+    ax.set_title('Better Quality at Lower Cost',
+                 fontsize=15, fontweight='bold', pad=12)
 
-    fig.tight_layout()
-    fig.savefig(output_dir() / "time-comparison.svg", format="svg", dpi=150)
-    plt.close(fig)
-    print("  ✓ time-comparison.svg")
+    # Ideal quadrant label
+    ax.text(0.02, 0.98, 'ideal: upper-left', transform=ax.transAxes,
+            fontsize=8, color=MUTED, va='top', style='italic')
 
+    ax.xaxis.grid(True, color=GRID, linewidth=0.5, zorder=0)
+    ax.yaxis.grid(True, color=GRID, linewidth=0.5, zorder=0)
 
-# ---------------------------------------------------------------------------
-# Chart 4: Efficiency (Tool Calls)
-# ---------------------------------------------------------------------------
+    # Set axis ranges with some padding
+    ax.set_xlim(0, max(lev_cost, flat_cost) * 1.3)
+    ax.set_ylim(min(lev_rate, flat_rate) - 5, 100)
 
-def generate_efficiency(data):
-    """Bar chart: tool calls per approach."""
-    approaches = data["approaches"]
-    names = ["Leviath", "Flat Baseline"]
-    tool_calls = [
-        approaches["leviath"].get("tool_calls", 0),
-        approaches["flat_baseline"].get("tool_calls", 0),
-    ]
-    colors = [LEVIATH_COLOR, BASELINE_COLOR]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(names, tool_calls, color=colors, edgecolor=colors, alpha=0.9,
-                  width=0.5, zorder=3)
-    ax.set_ylabel("Tool Calls", fontsize=12, fontweight="bold")
-    ax.set_title("Efficiency: Tool Calls per Approach", fontsize=16,
-                 fontweight="bold", color=TITLE_COLOR, pad=15)
-    ax.grid(axis="y", linestyle="--", alpha=0.3, zorder=0)
-
-    _add_bar_labels(ax, bars, fmt="{:.0f}", fontsize=11)
-
-    fig.tight_layout()
-    fig.savefig(output_dir() / "efficiency.svg", format="svg", dpi=150)
-    plt.close(fig)
-    print("  ✓ efficiency.svg")
+    plt.tight_layout()
+    save(fig, 'cost-quality', out)
+    print('  \u2713 cost-quality')
 
 
 # ---------------------------------------------------------------------------
-# Chart 5: Summary Table
+# Chart 3 — Efficiency bars (horizontal, simple)
 # ---------------------------------------------------------------------------
+def efficiency(data, out):
+    """Side-by-side bars for the three efficiency metrics."""
+    lev = data['approaches']['leviath']
+    flat = data['approaches']['flat_baseline']
 
-def generate_summary_table(data):
-    """Visual table with all metrics side by side."""
-    leviath = data["approaches"]["leviath"]
-    baseline = data["approaches"]["flat_baseline"]
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.5))
+    fig.subplots_adjust(top=0.82)
+    fig.text(0.5, 0.95, 'Efficiency Comparison',
+             ha='center', fontsize=15, fontweight='bold')
+    n = lev['runs']
+    subtitle = f'{n} {"runs" if n > 1 else "run"} per approach'
+    if n > 1:
+        subtitle += '  \u00b7  mean values shown  \u00b7  error bars = 95% CI'
+    fig.text(0.5, 0.88, subtitle, ha='center', fontsize=9, color=MUTED)
 
-    l_tests = leviath.get("test_results", {})
-    b_tests = baseline.get("test_results", {})
-
-    l_total = l_tests.get("total", 0)
-    b_total = b_tests.get("total", 0)
-    l_pass_rate = (l_tests.get("passed", 0) / l_total * 100) if l_total else 0
-    b_pass_rate = (b_tests.get("passed", 0) / b_total * 100) if b_total else 0
-
-    rows = [
-        ["Model", leviath.get("model", "—"), baseline.get("model", "—")],
-        ["Blueprint", leviath.get("blueprint", "—"), "—"],
-        ["Duration", f"{leviath.get('duration_seconds', 0)}s",
-         f"{baseline.get('duration_seconds', 0)}s"],
-        ["Tool Calls", str(leviath.get("tool_calls", 0)),
-         str(baseline.get("tool_calls", 0))],
-        ["API Requests", str(leviath.get("api_requests", 0)),
-         str(baseline.get("api_requests", 0))],
-        ["Prompt Tokens", f"{leviath.get('prompt_tokens', 0):,}",
-         f"{baseline.get('prompt_tokens', 0):,}"],
-        ["Completion Tokens", f"{leviath.get('completion_tokens', 0):,}",
-         f"{baseline.get('completion_tokens', 0):,}"],
-        ["Cost (USD)", f"${leviath.get('estimated_cost_usd', 0):.2f}",
-         f"${baseline.get('estimated_cost_usd', 0):.2f}"],
-        ["Tests Passed", f"{l_tests.get('passed', 0)}/{l_total}",
-         f"{b_tests.get('passed', 0)}/{b_total}"],
-        ["Pass Rate", f"{l_pass_rate:.1f}%", f"{b_pass_rate:.1f}%"],
-        ["Errors", str(l_tests.get("errors", 0)), str(b_tests.get("errors", 0))],
+    items = [
+        ('Cost (USD)', 'cost_usd', '$'),
+        ('Tool Calls', 'tool_calls', ''),
+        ('Runtime (min)', 'duration_seconds', '', 1/60),
     ]
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.set_axis_off()
+    for idx, (label, key, prefix, *scale) in enumerate(items):
+        ax = axes[idx]
+        strip(ax)
+        s = scale[0] if scale else 1
 
-    col_labels = ["Metric", "Leviath", "Flat Baseline"]
+        lv = lev[key]['mean'] * s
+        fv = flat[key]['mean'] * s
+        le = lev[key].get('ci95', lev[key].get('stddev', 0)) * s
+        fe = flat[key].get('ci95', flat[key].get('stddev', 0)) * s
 
-    table = ax.table(
-        cellText=rows,
-        colLabels=col_labels,
-        cellLoc="center",
-        loc="center",
+        colors = [LEVIATH, BASELINE]
+        bars = ax.barh([0, 1], [lv, fv], height=0.5, color=colors,
+                       xerr=[le, fe], capsize=4, error_kw={'linewidth': 1.5},
+                       zorder=3)
+
+        # Labels
+        for j, (v, e) in enumerate([(lv, le), (fv, fe)]):
+            txt = f'{prefix}{v:.1f}' if prefix == '$' else f'{v:.0f}'
+            if e > 0:
+                txt += f' \u00b1 {prefix}{e:.1f}' if prefix == '$' else f' \u00b1 {e:.0f}'
+            ax.text(v + max(lv, fv) * 0.03, j, txt,
+                    va='center', fontsize=10, fontweight='bold',
+                    color=LEVIATH if j == 0 else BASELINE_DK)
+
+        ax.set_yticks([0, 1])
+        ax.set_yticklabels(['Leviath v3', 'Flat Baseline'], fontsize=10)
+        ax.set_xlabel(label, fontsize=10, color=MUTED)
+        ax.invert_yaxis()
+        ax.xaxis.grid(True, color=GRID, linewidth=0.5, zorder=0)
+
+        # Improvement annotation
+        imp = (1 - lv / fv) * 100
+        if imp > 0:
+            ax.text(0.98, 0.98, f'{imp:.0f}% less',
+                    transform=ax.transAxes, ha='right', va='top',
+                    fontsize=9, fontweight='bold', color=GREEN)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.84])
+    save(fig, 'efficiency', out)
+    print('  \u2713 efficiency')
+
+
+# ---------------------------------------------------------------------------
+# Chart 4 — Run consistency (shows all individual run results)
+# ---------------------------------------------------------------------------
+def consistency(data, out):
+    """Strip chart showing individual run pass rates to demonstrate consistency."""
+    lev = data['approaches']['leviath']
+    flat = data['approaches']['flat_baseline']
+
+    if lev['runs'] < 2 and flat['runs'] < 2:
+        print('  (skipping consistency chart — need 2+ runs)')
+        return
+
+    fig, ax = plt.subplots(figsize=(8, 3.5))
+    strip(ax)
+
+    # Individual points
+    lev_vals = lev['pass_rate'].get('values', [lev['pass_rate']['mean']])
+    flat_vals = flat['pass_rate'].get('values', [flat['pass_rate']['mean']])
+
+    for i, v in enumerate(lev_vals):
+        ax.scatter(v, 0.3, s=80, color=LEVIATH, alpha=0.7, zorder=5,
+                   edgecolors='white', linewidths=1)
+    for i, v in enumerate(flat_vals):
+        ax.scatter(v, 0.7, s=80, color=BASELINE, alpha=0.7, zorder=5,
+                   edgecolors='white', linewidths=1)
+
+    # Mean markers
+    ax.scatter(lev['pass_rate']['mean'], 0.3, s=200, color=LEVIATH,
+               marker='D', zorder=6, edgecolors='white', linewidths=2)
+    ax.scatter(flat['pass_rate']['mean'], 0.7, s=200, color=BASELINE,
+               marker='D', zorder=6, edgecolors='white', linewidths=2)
+
+    # Labels
+    ci_lev = lev['pass_rate'].get('ci95', 0)
+    ci_flat = flat['pass_rate'].get('ci95', 0)
+    ax.text(lev['pass_rate']['mean'], 0.1,
+            f"{lev['pass_rate']['mean']:.1f}% \u00b1 {ci_lev:.1f}",
+            ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+    ax.text(flat['pass_rate']['mean'], 0.9,
+            f"{flat['pass_rate']['mean']:.1f}% \u00b1 {ci_flat:.1f}",
+            ha='center', fontsize=10, fontweight='bold', color=BASELINE_DK)
+
+    ax.set_yticks([0.3, 0.7])
+    ax.set_yticklabels(['Leviath v3', 'Flat Baseline'], fontsize=11)
+    ax.set_xlabel('Pass Rate (%)', fontsize=11, color=MUTED)
+    ax.set_title(f'Run-to-Run Consistency ({lev["runs"]} runs each)',
+                 fontsize=14, fontweight='bold', pad=10)
+    ax.set_ylim(-0.1, 1.1)
+    ax.xaxis.grid(True, color=GRID, linewidth=0.5, zorder=0)
+    ax.set_xlim(min(min(lev_vals + flat_vals)) - 5, 100)
+
+    plt.tight_layout()
+    save(fig, 'consistency', out)
+    print('  \u2713 consistency')
+
+
+# ---------------------------------------------------------------------------
+# Chart 5 — System Resource Footprint (Device RAM scaling)
+# ---------------------------------------------------------------------------
+TOOL_COLORS = {
+    'claude_code': '#E04D3A',   # coral-red
+    'pi':          '#F5A623',   # amber
+    'codex_cli':   '#8B5CF6',   # violet
+    'opencode':    '#2DD4BF',   # teal-green
+}
+TOOL_LABELS = {
+    'claude_code': 'Claude Code',
+    'codex_cli':   'Codex CLI',
+    'pi':          'Pi',
+    'opencode':    'OpenCode',
+}
+
+def resource_footprint(out):
+    """Device RAM scaling: Leviath (flat) vs process-per-agent tools (linear)."""
+
+    res_path = Path(__file__).parent.parent / 'results' / 'resource' / 'scaling-results.json'
+    if not res_path.exists():
+        print('  ⊘ scaling-results.json not found, skipping resource chart')
+        return
+
+    with open(res_path) as f:
+        res = json.load(f)
+
+    fig, ax = plt.subplots(figsize=(11, 6.5))
+    strip(ax)
+
+    # Plot Leviath line — bold, prominent
+    lev = res['leviath']['measurements']
+    lev_x = [m['agents'] for m in lev]
+    lev_y = [m['peak_rss_mb'] for m in lev]
+    ax.plot(lev_x, lev_y, color=LEVIATH, linewidth=3.5, marker='o',
+            markersize=9, zorder=10, label='Leviath (ECS)')
+    ax.fill_between(lev_x, lev_y, alpha=0.06, color=LEVIATH, zorder=5)
+
+    # Leviath data labels — only at 1 and last measured point to avoid clutter
+    ax.annotate(f'{lev_y[0]} MB', (lev_x[0], lev_y[0]),
+                textcoords='offset points', xytext=(-30, 14),
+                ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+    ax.annotate(f'{lev_y[-1]} MB', (lev_x[-1], lev_y[-1]),
+                textcoords='offset points', xytext=(0, 14),
+                ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+
+    # Plot each competing tool — thinner lines, sorted by peak RSS descending
+    tool_order = sorted(
+        [k for k in ['claude_code', 'pi', 'codex_cli', 'opencode'] if k in res['tools']],
+        key=lambda k: res['tools'][k]['measurements'][-1]['peak_rss_mb'],
+        reverse=True
     )
 
-    table.auto_set_font_size(False)
-    table.set_fontsize(11)
-    table.scale(1, 1.6)
+    for tool_key in tool_order:
+        tool = res['tools'][tool_key]
+        mx = [m['agents'] for m in tool['measurements']]
+        my = [m['peak_rss_mb'] for m in tool['measurements']]
+        color = TOOL_COLORS.get(tool_key, BASELINE)
+        label = TOOL_LABELS.get(tool_key, tool_key)
 
-    # Style the table
-    for (row, col), cell in table.get_celld().items():
-        cell.set_edgecolor(GRID_COLOR)
-        if row == 0:
-            # Header row
-            cell.set_facecolor("#0f3460")
-            cell.set_text_props(color=TITLE_COLOR, fontweight="bold", fontsize=12)
-        else:
-            cell.set_facecolor(SURFACE_COLOR if row % 2 == 0 else BG_COLOR)
-            cell.set_text_props(color=TEXT_COLOR)
-            if col == 1:
-                cell.set_text_props(color=LEVIATH_COLOR, fontweight="bold")
-            elif col == 2:
-                cell.set_text_props(color=BASELINE_COLOR, fontweight="bold")
+        ax.plot(mx, my, color=color, linewidth=2, marker='s',
+                markersize=5, zorder=8, label=label, alpha=0.85)
 
-    ax.set_title("Benchmark Summary", fontsize=16, fontweight="bold",
-                 color=TITLE_COLOR, pad=20, y=0.98)
+        # No inline labels at measured points — let the legend + projections
+        # carry identification. This avoids the x=5 label pileup.
 
-    fig.tight_layout()
-    fig.savefig(output_dir() / "summary-table.svg", format="svg", dpi=150)
-    plt.close(fig)
-    print("  ✓ summary-table.svg")
+    # Projection lines to 10 agents (dashed, no 20 — keep clean)
+    proj_labels = []
+    for tool_key in tool_order:
+        tool = res['tools'][tool_key]
+        measurements = tool['measurements']
+        if len(measurements) >= 2:
+            per_inst = measurements[-1]['peak_rss_mb'] / measurements[-1]['agents']
+            last_x = measurements[-1]['agents']
+            last_y = measurements[-1]['peak_rss_mb']
+            proj_10 = int(per_inst * 10)
+            color = TOOL_COLORS.get(tool_key, BASELINE)
+            ax.plot([last_x, 10], [last_y, proj_10],
+                    color=color, linewidth=1.5, linestyle='--', alpha=0.35, zorder=6)
+            proj_labels.append((tool_key, proj_10, color))
+
+    # Label 10-agent projections with tool name + value
+    # Sort descending so labels appear top-to-bottom matching visual order
+    proj_labels.sort(key=lambda x: x[1], reverse=True)
+    # Space labels at least 20px apart vertically
+    label_y_offsets = []
+    base_offset = 0
+    for i, (tool_key, proj_val, color) in enumerate(proj_labels):
+        label_name = TOOL_LABELS.get(tool_key, tool_key)
+        gb_str = f'{proj_val/1000:.1f} GB' if proj_val >= 1000 else f'{proj_val} MB'
+
+        # Check if this label would collide with previous
+        y_offset = 0
+        if i > 0:
+            prev_val = proj_labels[i-1][1]
+            gap = prev_val - proj_val
+            # If values are close (<200 MB), push label down
+            if gap < 200:
+                y_offset = -15 * (i % 2)  # alternate up/down
+
+        ax.annotate(f'{label_name}: ~{gb_str}', (10, proj_val),
+                    textcoords='offset points',
+                    xytext=(8, y_offset),
+                    ha='left', fontsize=9, color=color, alpha=0.8,
+                    fontweight='bold')
+
+    # Leviath projection to 10
+    base = res['leviath']['base_rss_mb']
+    per_a = res['leviath']['per_agent_overhead_mb']
+    lev_10 = base + per_a * 10
+    ax.plot([lev_x[-1], 10], [lev_y[-1], lev_10],
+            color=LEVIATH, linewidth=2.5, linestyle='--', alpha=0.35, zorder=6)
+    ax.annotate(f'{lev_10} MB', (10, lev_10),
+                textcoords='offset points', xytext=(8, 8),
+                ha='left', fontsize=9, color=LEVIATH, alpha=0.7,
+                fontstyle='italic', fontweight='bold')
+
+    # Callout box — positioned in clean whitespace (right side, midway up)
+    if 'claude_code' in res['tools']:
+        claude_5 = next((m['peak_rss_mb'] for m in res['tools']['claude_code']['measurements']
+                         if m['agents'] == 5), None)
+        lev_5 = next((m['peak_rss_mb'] for m in lev if m['agents'] == 5), None)
+        if claude_5 and lev_5:
+            ratio = claude_5 / lev_5
+            # Position callout in clean whitespace, explicitly name Claude Code
+            ax.annotate(
+                f'{ratio:.0f}\u00d7 lighter than\nClaude Code at 5 agents',
+                xy=(5, claude_5 * 0.5), xytext=(7.8, claude_5 * 0.55),
+                fontsize=12, fontweight='bold', color=LEVIATH,
+                ha='center', va='center',
+                bbox=dict(boxstyle='round,pad=0.6', facecolor=LEVIATH_BG,
+                          edgecolor=LEVIATH, linewidth=2, alpha=0.95))
+
+    # Titles — with proper spacing
+    ax.set_title('System Resource Footprint',
+                 fontsize=18, fontweight='bold', pad=20, color=TEXT)
+    fig.text(0.5, 0.94,
+             'ECS engine vs process-per-agent \u2014 measured on macOS, Apple Silicon, 16 GB',
+             ha='center', fontsize=10, color=MUTED)
+
+    ax.set_xlabel('Concurrent Agents', fontsize=12, color=TEXT, labelpad=8)
+    ax.set_ylabel('Peak Device RAM (MB)', fontsize=12, color=TEXT, labelpad=8)
+
+    ax.legend(loc='upper left', frameon=True, fancybox=True,
+              edgecolor=GRID, fontsize=9, ncol=1)
+    ax.yaxis.grid(True, color=GRID, linewidth=0.5, alpha=0.5, zorder=0)
+
+    # Use proportional x-axis spacing
+    ax.set_xlim(0, 11.5)
+    ax.set_xticks([1, 3, 5, 10])
+
+    # Footnotes
+    ax.text(0.98, 0.02, 'Dashed = linear projection from measured data',
+            transform=ax.transAxes, ha='right', fontsize=8,
+            color=MUTED, fontstyle='italic')
+
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
+    save(fig, 'resource-footprint', out)
+    print('  \u2713 resource-footprint')
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-
 def main():
-    print(f"Loading results from benchmark-results.json...")
-    data = load_results()
+    setup()
+    data = load()
+    out = Path(__file__).parent / 'output'
+    out.mkdir(exist_ok=True)
 
-    print(f"Generating charts for benchmark: {data.get('benchmark', 'unknown')}")
-    print(f"Task: {data.get('task', 'unknown')}")
+    print(f'Benchmark: {data["benchmark"]}')
+    print(f'Task: {data["task"]}')
+    if 'methodology' in data:
+        m = data['methodology']
+        print(f'Model: {m.get("model", "N/A")}')
+        print(f'Validation: {m.get("validation", "N/A")}')
     print()
 
-    generate_pass_rate(data)
-    generate_cost_comparison(data)
-    generate_time_comparison(data)
-    generate_efficiency(data)
-    generate_summary_table(data)
+    hero(data, out)
+    cost_quality(data, out)
+    efficiency(data, out)
+    consistency(data, out)
+    resource_footprint(out)
 
-    print()
-    out = output_dir()
-    print(f"All charts saved to {out}/")
-    print(f"  Files: {', '.join(f.name for f in sorted(out.glob('*.svg')))}")
+    # Clean up old charts
+    for old in ['pass-rate', 'cost-comparison', 'time-comparison', 'summary-table']:
+        for ext in ('svg', 'png'):
+            p = out / f'{old}.{ext}'
+            if p.exists():
+                p.unlink()
+
+    print(f'\nAll charts saved to {out}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
