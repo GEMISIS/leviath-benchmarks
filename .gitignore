@@ -3,8 +3,8 @@
 **/*.rs.bk
 Cargo.lock
 
-# Results (except baseline reference data)
-/results/*.json
+# Results (large run artifacts, not the template)
+!/results/benchmark-results.json
 !/results/.gitkeep
 
 # Build artifacts
