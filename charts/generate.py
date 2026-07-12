@@ -390,13 +390,21 @@ def resource_footprint(out):
             markersize=9, zorder=10, label='Leviath (ECS)')
     ax.fill_between(lev_x, lev_y, alpha=0.06, color=LEVIATH, zorder=5)
 
-    # Leviath data labels — only at 1 and last measured point to avoid clutter
-    ax.annotate(f'{lev_y[0]} MB', (lev_x[0], lev_y[0]),
-                textcoords='offset points', xytext=(-30, 14),
-                ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
-    ax.annotate(f'{lev_y[-1]} MB', (lev_x[-1], lev_y[-1]),
-                textcoords='offset points', xytext=(0, 14),
-                ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+    # Leviath data label — single label since all values are nearly identical
+    if lev_y[0] == lev_y[-1]:
+        # All the same — one label at midpoint
+        mid_idx = len(lev_x) // 2
+        ax.annotate(f'{lev_y[0]} MB (flat across all counts)',
+                    (lev_x[mid_idx], lev_y[mid_idx]),
+                    textcoords='offset points', xytext=(0, 18),
+                    ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+    else:
+        ax.annotate(f'{lev_y[0]} MB', (lev_x[0], lev_y[0]),
+                    textcoords='offset points', xytext=(-30, 14),
+                    ha='center', fontsize=10, fontweight='bold', color=LEVIATH)
+        ax.annotate(f'{lev_y[-1]} MB', (lev_x[-1], lev_y[-1]),
+                    textcoords='offset points', xytext=(12, 14),
+                    ha='left', fontsize=10, fontweight='bold', color=LEVIATH)
 
     # Plot each competing tool — thinner lines, sorted by peak RSS descending
     tool_order = sorted(
@@ -418,11 +426,15 @@ def resource_footprint(out):
         # No inline labels at measured points — let the legend + projections
         # carry identification. This avoids the x=5 label pileup.
 
-    # Projection lines to 10 agents (dashed, no 20 — keep clean)
+    # If tools already have 10-agent data points, no projection needed
+    # Only project if max measured is < 10
     proj_labels = []
     for tool_key in tool_order:
         tool = res['tools'][tool_key]
         measurements = tool['measurements']
+        max_measured = max(m['agents'] for m in measurements)
+        if max_measured >= 10:
+            continue  # Already have real data, no projection needed
         if len(measurements) >= 2:
             per_inst = measurements[-1]['peak_rss_mb'] / measurements[-1]['agents']
             last_x = measurements[-1]['agents']
@@ -458,28 +470,41 @@ def resource_footprint(out):
                     ha='left', fontsize=9, color=color, alpha=0.8,
                     fontweight='bold')
 
-    # Leviath projection to 10
-    base = res['leviath']['base_rss_mb']
-    per_a = res['leviath']['per_agent_overhead_mb']
-    lev_10 = base + per_a * 10
-    ax.plot([lev_x[-1], 10], [lev_y[-1], lev_10],
-            color=LEVIATH, linewidth=2.5, linestyle='--', alpha=0.35, zorder=6)
-    ax.annotate(f'{lev_10} MB', (10, lev_10),
-                textcoords='offset points', xytext=(8, 8),
-                ha='left', fontsize=9, color=LEVIATH, alpha=0.7,
-                fontstyle='italic', fontweight='bold')
+    # Leviath line extends to 10 — it already has real measurements
+    # If we have a measured 10-agent point, no projection needed
+    if max(lev_x) < 10:
+        base = res['leviath']['base_rss_mb']
+        per_a = res['leviath'].get('per_agent_overhead_mb', 1)
+        lev_10 = base + per_a * 10
+        ax.plot([lev_x[-1], 10], [lev_y[-1], lev_10],
+                color=LEVIATH, linewidth=2.5, linestyle='--', alpha=0.35, zorder=6)
+        ax.annotate(f'{lev_10} MB', (10, lev_10),
+                    textcoords='offset points', xytext=(8, 8),
+                    ha='left', fontsize=9, color=LEVIATH, alpha=0.7,
+                    fontstyle='italic', fontweight='bold')
+    else:
+        # Label the 10-agent measured point
+        lev_at_10 = next((m['peak_rss_mb'] for m in lev if m['agents'] == 10), None)
+        if lev_at_10:
+            ax.annotate(f'{lev_at_10} MB', (10, lev_at_10),
+                        textcoords='offset points', xytext=(8, 10),
+                        ha='left', fontsize=10, color=LEVIATH,
+                        fontweight='bold')
 
-    # Callout box — positioned in clean whitespace (right side, midway up)
+    # Callout box — use highest concurrency with real data
     if 'claude_code' in res['tools']:
-        claude_5 = next((m['peak_rss_mb'] for m in res['tools']['claude_code']['measurements']
-                         if m['agents'] == 5), None)
-        lev_5 = next((m['peak_rss_mb'] for m in lev if m['agents'] == 5), None)
-        if claude_5 and lev_5:
-            ratio = claude_5 / lev_5
-            # Position callout in clean whitespace, explicitly name Claude Code
+        claude_map = {m['agents']: m['peak_rss_mb']
+                      for m in res['tools']['claude_code']['measurements']}
+        lev_map = {m['agents']: m['peak_rss_mb'] for m in lev}
+        shared = sorted(set(claude_map) & set(lev_map), reverse=True)
+        if shared:
+            n = shared[0]
+            c_val, l_val = claude_map[n], lev_map[n]
+            ratio = c_val / l_val
+            y_pos = c_val * 0.42
             ax.annotate(
-                f'{ratio:.0f}\u00d7 lighter than\nClaude Code at 5 agents',
-                xy=(5, claude_5 * 0.5), xytext=(7.8, claude_5 * 0.55),
+                f'{ratio:.0f}\u00d7 lighter than\nClaude Code at {n} agents',
+                xy=(n * 0.6, y_pos), xytext=(n * 0.6, y_pos),
                 fontsize=12, fontweight='bold', color=LEVIATH,
                 ha='center', va='center',
                 bbox=dict(boxstyle='round,pad=0.6', facecolor=LEVIATH_BG,
