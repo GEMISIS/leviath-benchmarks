@@ -187,7 +187,26 @@ class _PipelineAdapter:
 
     # Canonical entry point
     def process(self, event):
-        return self._process_fn(event)
+        result = self._process_fn(event)
+        # Normalize result to dict if it's a custom object
+        if result is not None and not isinstance(result, dict):
+            d = {}
+            for attr in ["status_code", "http_status", "body", "headers",
+                         "event", "processed_event", "handler_results",
+                         "event_id", "tenant_id", "status", "message",
+                         "error", "degraded"]:
+                val = getattr(result, attr, None)
+                if val is not None:
+                    d[attr] = val
+            # Also try converting via vars() or __dict__
+            if not d:
+                try:
+                    d = vars(result)
+                except TypeError:
+                    pass
+            if d:
+                return d
+        return result
 
     # Transparent proxy for everything else (storage, dlq, metrics, etc.)
     def __getattr__(self, name):
