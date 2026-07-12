@@ -1,0 +1,954 @@
+{
+  "model": "claude-sonnet-5",
+  "provider": "anthropic",
+  "task": "flat-baseline",
+  "total_iterations": 105,
+  "total_prompt_tokens": 9545103,
+  "total_completion_tokens": 126956,
+  "total_cached_tokens": 220180,
+  "total_cache_write_tokens": 0,
+  "cache_hit_rate": 0.023067325727129398,
+  "per_call_metrics": [
+    {
+      "iteration": 1,
+      "prompt_tokens": 80,
+      "completion_tokens": 62,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:21.684469+00:00"
+    },
+    {
+      "iteration": 2,
+      "prompt_tokens": 148,
+      "completion_tokens": 187,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:23.831760+00:00"
+    },
+    {
+      "iteration": 3,
+      "prompt_tokens": 595,
+      "completion_tokens": 829,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:30.702314+00:00"
+    },
+    {
+      "iteration": 4,
+      "prompt_tokens": 18209,
+      "completion_tokens": 32,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:32.243765+00:00"
+    },
+    {
+      "iteration": 4,
+      "prompt_tokens": 18258,
+      "completion_tokens": 1992,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:54.687282+00:00"
+    },
+    {
+      "iteration": 5,
+      "prompt_tokens": 18434,
+      "completion_tokens": 238,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:51:58.539042+00:00"
+    },
+    {
+      "iteration": 6,
+      "prompt_tokens": 18525,
+      "completion_tokens": 95,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:00.114673+00:00"
+    },
+    {
+      "iteration": 7,
+      "prompt_tokens": 19149,
+      "completion_tokens": 154,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:03.011154+00:00"
+    },
+    {
+      "iteration": 8,
+      "prompt_tokens": 19388,
+      "completion_tokens": 154,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:09.315296+00:00"
+    },
+    {
+      "iteration": 9,
+      "prompt_tokens": 19561,
+      "completion_tokens": 1891,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:24.398296+00:00"
+    },
+    {
+      "iteration": 10,
+      "prompt_tokens": 21076,
+      "completion_tokens": 494,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:29.131208+00:00"
+    },
+    {
+      "iteration": 11,
+      "prompt_tokens": 21577,
+      "completion_tokens": 1695,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:52:41.589350+00:00"
+    },
+    {
+      "iteration": 12,
+      "prompt_tokens": 23283,
+      "completion_tokens": 4047,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:53:11.835702+00:00"
+    },
+    {
+      "iteration": 13,
+      "prompt_tokens": 27330,
+      "completion_tokens": 1802,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:53:24.412089+00:00"
+    },
+    {
+      "iteration": 14,
+      "prompt_tokens": 29141,
+      "completion_tokens": 1534,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:53:38.962654+00:00"
+    },
+    {
+      "iteration": 15,
+      "prompt_tokens": 30338,
+      "completion_tokens": 3896,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:54:08.850430+00:00"
+    },
+    {
+      "iteration": 16,
+      "prompt_tokens": 33792,
+      "completion_tokens": 3294,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:54:31.810483+00:00"
+    },
+    {
+      "iteration": 17,
+      "prompt_tokens": 37095,
+      "completion_tokens": 2768,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:54:51.608834+00:00"
+    },
+    {
+      "iteration": 18,
+      "prompt_tokens": 39848,
+      "completion_tokens": 4177,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:55:20.714576+00:00"
+    },
+    {
+      "iteration": 19,
+      "prompt_tokens": 44045,
+      "completion_tokens": 2373,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:55:38.231401+00:00"
+    },
+    {
+      "iteration": 20,
+      "prompt_tokens": 46441,
+      "completion_tokens": 2687,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:55:56.499036+00:00"
+    },
+    {
+      "iteration": 21,
+      "prompt_tokens": 49147,
+      "completion_tokens": 9160,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:56:55.983410+00:00"
+    },
+    {
+      "iteration": 22,
+      "prompt_tokens": 58259,
+      "completion_tokens": 119,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:56:57.956692+00:00"
+    },
+    {
+      "iteration": 23,
+      "prompt_tokens": 58365,
+      "completion_tokens": 4310,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:27.363820+00:00"
+    },
+    {
+      "iteration": 24,
+      "prompt_tokens": 62562,
+      "completion_tokens": 219,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:30.078823+00:00"
+    },
+    {
+      "iteration": 25,
+      "prompt_tokens": 62776,
+      "completion_tokens": 207,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:33.034010+00:00"
+    },
+    {
+      "iteration": 26,
+      "prompt_tokens": 62994,
+      "completion_tokens": 424,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:37.728426+00:00"
+    },
+    {
+      "iteration": 27,
+      "prompt_tokens": 64057,
+      "completion_tokens": 135,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:42.995998+00:00"
+    },
+    {
+      "iteration": 28,
+      "prompt_tokens": 64215,
+      "completion_tokens": 451,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:48.315525+00:00"
+    },
+    {
+      "iteration": 29,
+      "prompt_tokens": 64537,
+      "completion_tokens": 171,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:57:50.710769+00:00"
+    },
+    {
+      "iteration": 30,
+      "prompt_tokens": 64741,
+      "completion_tokens": 9953,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:58:57.516043+00:00"
+    },
+    {
+      "iteration": 31,
+      "prompt_tokens": 74716,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:58:59.675864+00:00"
+    },
+    {
+      "iteration": 32,
+      "prompt_tokens": 75164,
+      "completion_tokens": 1573,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:18.104709+00:00"
+    },
+    {
+      "iteration": 33,
+      "prompt_tokens": 75538,
+      "completion_tokens": 1360,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:33.152901+00:00"
+    },
+    {
+      "iteration": 34,
+      "prompt_tokens": 75946,
+      "completion_tokens": 207,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:36.122975+00:00"
+    },
+    {
+      "iteration": 35,
+      "prompt_tokens": 76784,
+      "completion_tokens": 771,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:52.564129+00:00"
+    },
+    {
+      "iteration": 36,
+      "prompt_tokens": 77321,
+      "completion_tokens": 415,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:57.207362+00:00"
+    },
+    {
+      "iteration": 37,
+      "prompt_tokens": 77694,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T06:59:59.797070+00:00"
+    },
+    {
+      "iteration": 38,
+      "prompt_tokens": 78228,
+      "completion_tokens": 288,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:00:14.323682+00:00"
+    },
+    {
+      "iteration": 39,
+      "prompt_tokens": 78420,
+      "completion_tokens": 532,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:00:21.980061+00:00"
+    },
+    {
+      "iteration": 40,
+      "prompt_tokens": 78981,
+      "completion_tokens": 565,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:00:28.824777+00:00"
+    },
+    {
+      "iteration": 41,
+      "prompt_tokens": 79514,
+      "completion_tokens": 849,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:00:36.681485+00:00"
+    },
+    {
+      "iteration": 42,
+      "prompt_tokens": 80276,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:00:38.996773+00:00"
+    },
+    {
+      "iteration": 43,
+      "prompt_tokens": 80415,
+      "completion_tokens": 139,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:01:00.088095+00:00"
+    },
+    {
+      "iteration": 44,
+      "prompt_tokens": 80582,
+      "completion_tokens": 148,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:01:21.337329+00:00"
+    },
+    {
+      "iteration": 45,
+      "prompt_tokens": 81591,
+      "completion_tokens": 2732,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:01:48.472820+00:00"
+    },
+    {
+      "iteration": 46,
+      "prompt_tokens": 84339,
+      "completion_tokens": 143,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:01:51.202342+00:00"
+    },
+    {
+      "iteration": 47,
+      "prompt_tokens": 84670,
+      "completion_tokens": 853,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:02:16.075093+00:00"
+    },
+    {
+      "iteration": 48,
+      "prompt_tokens": 85574,
+      "completion_tokens": 177,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:02:26.534684+00:00"
+    },
+    {
+      "iteration": 48,
+      "prompt_tokens": 85768,
+      "completion_tokens": 284,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:02:31.058874+00:00"
+    },
+    {
+      "iteration": 49,
+      "prompt_tokens": 85929,
+      "completion_tokens": 252,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:02:34.518851+00:00"
+    },
+    {
+      "iteration": 50,
+      "prompt_tokens": 89392,
+      "completion_tokens": 1453,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:02:50.499115+00:00"
+    },
+    {
+      "iteration": 51,
+      "prompt_tokens": 90160,
+      "completion_tokens": 2316,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:13.933393+00:00"
+    },
+    {
+      "iteration": 52,
+      "prompt_tokens": 92508,
+      "completion_tokens": 145,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:17.021607+00:00"
+    },
+    {
+      "iteration": 53,
+      "prompt_tokens": 92696,
+      "completion_tokens": 205,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:19.911774+00:00"
+    },
+    {
+      "iteration": 54,
+      "prompt_tokens": 92935,
+      "completion_tokens": 106,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:21.535477+00:00"
+    },
+    {
+      "iteration": 55,
+      "prompt_tokens": 93403,
+      "completion_tokens": 115,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:23.548971+00:00"
+    },
+    {
+      "iteration": 56,
+      "prompt_tokens": 93785,
+      "completion_tokens": 261,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:27.331064+00:00"
+    },
+    {
+      "iteration": 57,
+      "prompt_tokens": 94080,
+      "completion_tokens": 1523,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:40.382436+00:00"
+    },
+    {
+      "iteration": 58,
+      "prompt_tokens": 95637,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:03:42.653517+00:00"
+    },
+    {
+      "iteration": 59,
+      "prompt_tokens": 95775,
+      "completion_tokens": 530,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:04:05.343157+00:00"
+    },
+    {
+      "iteration": 60,
+      "prompt_tokens": 96333,
+      "completion_tokens": 109,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:04:07.689429+00:00"
+    },
+    {
+      "iteration": 61,
+      "prompt_tokens": 96469,
+      "completion_tokens": 504,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:04:32.697953+00:00"
+    },
+    {
+      "iteration": 62,
+      "prompt_tokens": 97027,
+      "completion_tokens": 200,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:04:35.554647+00:00"
+    },
+    {
+      "iteration": 62,
+      "prompt_tokens": 97053,
+      "completion_tokens": 264,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:04:40.668800+00:00"
+    },
+    {
+      "iteration": 63,
+      "prompt_tokens": 97248,
+      "completion_tokens": 3600,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:05:18.553082+00:00"
+    },
+    {
+      "iteration": 64,
+      "prompt_tokens": 106412,
+      "completion_tokens": 7097,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:06:38.611211+00:00"
+    },
+    {
+      "iteration": 65,
+      "prompt_tokens": 107607,
+      "completion_tokens": 6517,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:07:46.292852+00:00"
+    },
+    {
+      "iteration": 66,
+      "prompt_tokens": 108851,
+      "completion_tokens": 5798,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:08:46.674091+00:00"
+    },
+    {
+      "iteration": 67,
+      "prompt_tokens": 110145,
+      "completion_tokens": 543,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:08:53.707809+00:00"
+    },
+    {
+      "iteration": 68,
+      "prompt_tokens": 110283,
+      "completion_tokens": 154,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:09:14.619854+00:00"
+    },
+    {
+      "iteration": 69,
+      "prompt_tokens": 110472,
+      "completion_tokens": 287,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:09:18.467579+00:00"
+    },
+    {
+      "iteration": 70,
+      "prompt_tokens": 111207,
+      "completion_tokens": 1116,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:09:28.411750+00:00"
+    },
+    {
+      "iteration": 71,
+      "prompt_tokens": 112270,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:09:30.488901+00:00"
+    },
+    {
+      "iteration": 72,
+      "prompt_tokens": 112408,
+      "completion_tokens": 180,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:09:54.231538+00:00"
+    },
+    {
+      "iteration": 73,
+      "prompt_tokens": 112726,
+      "completion_tokens": 615,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:05.491211+00:00"
+    },
+    {
+      "iteration": 74,
+      "prompt_tokens": 113369,
+      "completion_tokens": 109,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:07.992478+00:00"
+    },
+    {
+      "iteration": 75,
+      "prompt_tokens": 113505,
+      "completion_tokens": 757,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:34.864785+00:00"
+    },
+    {
+      "iteration": 76,
+      "prompt_tokens": 114305,
+      "completion_tokens": 227,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:38.148419+00:00"
+    },
+    {
+      "iteration": 76,
+      "prompt_tokens": 114549,
+      "completion_tokens": 494,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:44.935237+00:00"
+    },
+    {
+      "iteration": 77,
+      "prompt_tokens": 114741,
+      "completion_tokens": 176,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:10:47.447162+00:00"
+    },
+    {
+      "iteration": 78,
+      "prompt_tokens": 115227,
+      "completion_tokens": 1958,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:09.444259+00:00"
+    },
+    {
+      "iteration": 79,
+      "prompt_tokens": 117218,
+      "completion_tokens": 2644,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:31.327343+00:00"
+    },
+    {
+      "iteration": 80,
+      "prompt_tokens": 119225,
+      "completion_tokens": 358,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:35.789744+00:00"
+    },
+    {
+      "iteration": 81,
+      "prompt_tokens": 119420,
+      "completion_tokens": 325,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:40.174549+00:00"
+    },
+    {
+      "iteration": 82,
+      "prompt_tokens": 119597,
+      "completion_tokens": 183,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:43.179874+00:00"
+    },
+    {
+      "iteration": 83,
+      "prompt_tokens": 120033,
+      "completion_tokens": 82,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:11:45.415391+00:00"
+    },
+    {
+      "iteration": 84,
+      "prompt_tokens": 129800,
+      "completion_tokens": 3876,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:12:18.202218+00:00"
+    },
+    {
+      "iteration": 85,
+      "prompt_tokens": 131675,
+      "completion_tokens": 1365,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:12:28.546618+00:00"
+    },
+    {
+      "iteration": 86,
+      "prompt_tokens": 133073,
+      "completion_tokens": 1752,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:12:41.925617+00:00"
+    },
+    {
+      "iteration": 87,
+      "prompt_tokens": 134858,
+      "completion_tokens": 155,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:12:44.753289+00:00"
+    },
+    {
+      "iteration": 88,
+      "prompt_tokens": 135040,
+      "completion_tokens": 119,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:08.283625+00:00"
+    },
+    {
+      "iteration": 89,
+      "prompt_tokens": 135180,
+      "completion_tokens": 149,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:10.424668+00:00"
+    },
+    {
+      "iteration": 90,
+      "prompt_tokens": 135363,
+      "completion_tokens": 158,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:14.267959+00:00"
+    },
+    {
+      "iteration": 91,
+      "prompt_tokens": 135552,
+      "completion_tokens": 81,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:16.505021+00:00"
+    },
+    {
+      "iteration": 92,
+      "prompt_tokens": 135869,
+      "completion_tokens": 1605,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:29.540831+00:00"
+    },
+    {
+      "iteration": 93,
+      "prompt_tokens": 137508,
+      "completion_tokens": 111,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:13:31.557267+00:00"
+    },
+    {
+      "iteration": 94,
+      "prompt_tokens": 137646,
+      "completion_tokens": 494,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:03.497114+00:00"
+    },
+    {
+      "iteration": 95,
+      "prompt_tokens": 137812,
+      "completion_tokens": 735,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:37.577602+00:00"
+    },
+    {
+      "iteration": 96,
+      "prompt_tokens": 138575,
+      "completion_tokens": 117,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:40.822791+00:00"
+    },
+    {
+      "iteration": 97,
+      "prompt_tokens": 138691,
+      "completion_tokens": 74,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:43.253577+00:00"
+    },
+    {
+      "iteration": 98,
+      "prompt_tokens": 141864,
+      "completion_tokens": 674,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:49.805359+00:00"
+    },
+    {
+      "iteration": 99,
+      "prompt_tokens": 142566,
+      "completion_tokens": 466,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:55.088658+00:00"
+    },
+    {
+      "iteration": 100,
+      "prompt_tokens": 143060,
+      "completion_tokens": 109,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:14:57.509562+00:00"
+    },
+    {
+      "iteration": 101,
+      "prompt_tokens": 143196,
+      "completion_tokens": 875,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:15:31.408065+00:00"
+    },
+    {
+      "iteration": 102,
+      "prompt_tokens": 144129,
+      "completion_tokens": 344,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:15:35.446472+00:00"
+    },
+    {
+      "iteration": 102,
+      "prompt_tokens": 144439,
+      "completion_tokens": 226,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:15:39.750168+00:00"
+    },
+    {
+      "iteration": 103,
+      "prompt_tokens": 147216,
+      "completion_tokens": 894,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:15:48.488601+00:00"
+    },
+    {
+      "iteration": 104,
+      "prompt_tokens": 148504,
+      "completion_tokens": 233,
+      "cached_tokens": 2020,
+      "cache_write_tokens": 0,
+      "timestamp": "2026-07-11T07:15:54.059704+00:00"
+    }
+  ],
+  "probe_responses": [
+    {
+      "probe": {
+        "after_tool_calls": 20,
+        "type": "factual_recall",
+        "question": "What is the exact regex pattern for validating tenant IDs?",
+        "expected": "^tn-(us-east|us-west|eu-central|ap-south)-\\d{4}$",
+        "rubric": "Must include the exact regex with all four valid regions. Partial credit if they get the format right but miss a region or use a generic pattern."
+      },
+      "answer": "^tn-(us-east|us-west|eu-central|ap-south)-\\d{4}$",
+      "tool_call_count": 20
+    },
+    {
+      "probe": {
+        "after_tool_calls": 35,
+        "type": "factual_recall",
+        "question": "What algorithm does the webhook retry policy use, and how exactly does it calculate sleep time?",
+        "expected": "Decorrelated jitter: sleep = min(backoff_max_ms, random_between(backoff_base_ms, previous_sleep * 3)). Previous_sleep starts at backoff_base_ms.",
+        "rubric": "Must mention 'decorrelated jitter' specifically (not exponential, not full jitter). Must include the formula with the *3 multiplier. Partial credit for naming the algorithm without the formula."
+      },
+      "answer": "The webhook retry policy uses **decorrelated jitter** (AWS-style, not standard exponential backoff or full/equal jitter).\n\nFormula:\n```\nsleep = min(backoff_max_ms, random_between(backoff_base_ms, previous_sleep * 3))\n```\n\nwhere `previous_sleep` starts at `backoff_base_ms` for the first retry, and each subsequent retry's sleep is a random value between `backoff_base_ms` and `3×` the previous sleep, capped at `backoff_max_ms`.",
+      "tool_call_count": 63
+    },
+    {
+      "probe": {
+        "after_tool_calls": 50,
+        "type": "constraint_adherence",
+        "question": "What happens when an event arrives for a tenant with status 'migrating'? Be specific about all behaviors.",
+        "expected": "Accept event, process with BOTH old and new pipeline config, compare results, log discrepancies, but use OLD pipeline result. Return 200.",
+        "rubric": "Must mention: (1) process with both configs, (2) compare results, (3) log discrepancies, (4) use OLD result. Missing any of these is partial credit."
+      },
+      "answer": "",
+      "tool_call_count": 76
+    },
+    {
+      "probe": {
+        "after_tool_calls": 65,
+        "type": "factual_recall",
+        "question": "What is the exact storage key format for events, and what part of the event_type is used?",
+        "expected": "{tenant_storage_prefix}/{event_category}/{YYYY}/{MM}/{DD}/{HH}/{event_id} — uses event_category (part BEFORE the dot), NOT the full event_type",
+        "rubric": "Must specify that it uses the CATEGORY (before the dot), not the full event_type. Must include the date path segments. Missing the category distinction is a fail."
+      },
+      "answer": "The exact storage key format is:\n\n```\n{tenant_storage_prefix}/{event_category}/{YYYY}/{MM}/{DD}/{HH}/{event_id}\n```\n\nExample: `acme/user/2024/03/15/14/evt_us_01HQ3ABC123`\n\nThe **event_category** is the part of `event_type` **before the dot** (e.g., for `event_type: \"user.created\"`, the category is `\"user\"`) — NOT the full event_type string.\n\nThis is implemented in `src/storage.py::build_storage_key()`, which splits on `.` and takes `event_type.split(\".\")[0]`, and is verified by `test_storage_key_format` in the integration test suite.",
+      "tool_call_count": 89
+    },
+    {
+      "probe": {
+        "after_tool_calls": 80,
+        "type": "factual_recall",
+        "question": "What algorithm is specified for streaming percentile estimation in the metrics system? What is the relative accuracy parameter?",
+        "expected": "DDSketch with relative accuracy 1% (alpha = 0.01). NOT t-digest, NOT reservoir sampling, NOT simple sorting.",
+        "rubric": "Must name DDSketch specifically. Must mention 1% or 0.01 accuracy. If they say t-digest or any other algorithm, score as wrong."
+      },
+      "answer": "**DDSketch** algorithm is specified for streaming percentile estimation, with a relative accuracy parameter of **1% (alpha = 0.01)**.\n\nPer `monitoring-spec.md`: \"Use the DDSketch algorithm for streaming percentile estimation. Relative accuracy: 1% (alpha = 0.01). This is NOT t-digest, NOT simple sorting, NOT reservoir sampling — DDSketch chosen because it's mergeable across time windows.\"\n\nThis is implemented in `src/metrics.py::DDSketch` with `alpha=0.01` as the default constructor parameter, used by the `Histogram` class for all four histogram metrics (`processing.duration_ms`, `payload.size_bytes`, `transform.duration_ms`, `storage.batch_size`), and verified by `test_ddsketch_accuracy` in the test suite.",
+      "tool_call_count": 114
+    }
+  ],
+  "tool_call_count": 117,
+  "truncation_events": 0,
+  "quality": {
+    "tests_total": 63,
+    "tests_passed": 63,
+    "tests_failed": 0,
+    "tests_errors": 0,
+    "test_pass_rate": 1.0,
+    "files_produced": 15,
+    "total_source_bytes": 123030,
+    "test_output": "============================= test session starts ==============================\nplatform darwin -- Python 3.14.3, pytest-8.0.0, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.14/bin/python3.14\ncachedir: .pytest_cache\nrootdir: /private/tmp/flat-bench-v3\nplugins: anyio-4.13.0\ncollecting ... collected 63 items\n\ntests/test_integration.py::test_tenant_id_regex_valid PASSED             [  1%]\ntests/test_integration.py::test_tenant_registry_loads_all_tenants PASSED [  3%]\ntests/test_integration.py::test_validate_envelope_missing_fields PASSED  [  4%]\ntests/test_integration.py::test_validate_full_rejects_bad_event_type PASSED [  6%]\ntests/test_integration.py::test_validate_full_unregistered_source PASSED [  7%]\ntests/test_integration.py::test_validate_full_idempotency_duplicate PASSED [  9%]\ntests/test_integration.py::test_payload_size_limit_free_tier PASSED      [ 11%]\ntests/test_integration.py::test_sdk_version_too_old PASSED               [ 12%]\ntests/test_integration.py::test_clock_skew_rejected PASSED               [ 14%]\ntests/test_integration.py::test_global_transform_timestamp_z_suffix PASSED [ 15%]\ntests/test_integration.py::test_global_transform_adds_payload_size PASSED [ 17%]\ntests/test_integration.py::test_acme_order_currency_uppercase PASSED     [ 19%]\ntests/test_integration.py::test_eurotech_gdpr_redaction PASSED           [ 20%]\ntests/test_integration.py::test_router_default_handlers_no_match PASSED  [ 22%]\ntests/test_integration.py::test_router_notification_priority PASSED      [ 23%]\ntests/test_integration.py::test_router_inventory_condition_tier PASSED   [ 25%]\ntests/test_integration.py::test_router_payment_failed_merged_handlers PASSED [ 26%]\ntests/test_integration.py::test_token_bucket_refill PASSED               [ 28%]\ntests/test_integration.py::test_sliding_window_log_basic PASSED          [ 30%]\ntests/test_integration.py::test_sliding_window_approximate_mode_switch PASSED [ 31%]\ntests/test_integration.py::test_rate_limiter_free_tier_limit PASSED      [ 33%]\ntests/test_integration.py::test_rate_limiter_admin_gets_10x PASSED       [ 34%]\ntests/test_integration.py::test_decorrelated_jitter_bounds PASSED        [ 36%]\ntests/test_integration.py::test_decorrelated_jitter_respects_max_cap PASSED [ 38%]\ntests/test_integration.py::test_decorrelated_jitter_not_pure_exponential PASSED [ 39%]\ntests/test_integration.py::test_webhook_handler_retries_using_tenant_policy PASSED [ 41%]\ntests/test_integration.py::test_dlq_enqueue_and_retry_policy PASSED      [ 42%]\ntests/test_integration.py::test_dlq_backoff_progression PASSED           [ 44%]\ntests/test_integration.py::test_dlq_depth_limit PASSED                   [ 46%]\ntests/test_integration.py::test_metrics_counters_and_tags PASSED         [ 47%]\ntests/test_integration.py::test_metrics_histogram_percentiles PASSED     [ 49%]\ntests/test_integration.py::test_ddsketch_accuracy PASSED                 [ 50%]\ntests/test_integration.py::test_metrics_summary_shape PASSED             [ 52%]\ntests/test_integration.py::test_audit_log_chain_integrity PASSED         [ 53%]\ntests/test_integration.py::test_storage_key_format PASSED                [ 55%]\ntests/test_integration.py::test_storage_write_and_read PASSED            [ 57%]\ntests/test_integration.py::test_storage_tenant_isolation PASSED          [ 58%]\ntests/test_integration.py::test_pipeline_full_success PASSED             [ 60%]\ntests/test_integration.py::test_pipeline_invalid_envelope_rejected PASSED [ 61%]\ntests/test_integration.py::test_pipeline_decommissioned_tenant PASSED    [ 63%]\ntests/test_integration.py::test_pipeline_suspended_tenant_queues PASSED  [ 65%]\ntests/test_integration.py::test_pipeline_migrating_tenant_uses_old_config_and_warns PASSED [ 66%]\ntests/test_integration.py::test_pipeline_unregistered_source_dlq PASSED  [ 68%]\ntests/test_integration.py::test_pipeline_duplicate_event_returns_409 PASSED [ 69%]\ntests/test_integration.py::test_pipeline_inventory_reorder_triggers_notification PASSED [ 71%]\ntests/test_integration.py::test_pipeline_circuit_breaker_opens_after_failures PASSED [ 73%]\ntests/test_integration.py::test_pipeline_rate_limit_enforced PASSED      [ 74%]\ntests/test_integration.py::test_seconds_until_next_02_00_utc PASSED      [ 76%]\ntests/test_integration.py::test_storage_retention_cleanup_deletes_expired_events PASSED [ 77%]\ntests/test_integration.py::test_audit_retention_cleanup_runs PASSED      [ 79%]\ntests/test_integration.py::test_tenant_config_reload_emits_audit_action PASSED [ 80%]\ntests/test_integration.py::test_start_and_stop_background_workers PASSED [ 82%]\ntests/test_integration.py::test_api_health_no_auth PASSED                [ 84%]\ntests/test_integration.py::test_api_requires_auth PASSED                 [ 85%]\ntests/test_integration.py::test_api_ingest_event_with_valid_key PASSED   [ 87%]\ntests/test_integration.py::test_api_ingest_event_wrong_tenant_key PASSED [ 88%]\ntests/test_integration.py::test_api_invalid_key PASSED                   [ 90%]\ntests/test_integration.py:"
+  }
+}

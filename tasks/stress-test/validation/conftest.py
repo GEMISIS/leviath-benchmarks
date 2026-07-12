@@ -160,6 +160,40 @@ def _find_pipeline_class(mod):
     pytest.skip("No Pipeline class found in pipeline module")
 
 
+class _PipelineAdapter:
+    """Wraps a pipeline instance to normalize method names across implementations.
+
+    Different implementations may use ``process()``, ``process_event()``,
+    ``handle()``, or ``ingest()`` — this adapter exposes a canonical
+    ``.process(event)`` regardless of what the underlying class calls it.
+    Similarly, storage/DLQ/metrics accessors are normalised.
+    """
+
+    _PROCESS_NAMES = ["process", "process_event", "handle", "handle_event", "ingest", "ingest_event"]
+
+    def __init__(self, inner):
+        self._inner = inner
+        self._process_fn = None
+        for name in self._PROCESS_NAMES:
+            fn = getattr(inner, name, None)
+            if callable(fn):
+                self._process_fn = fn
+                break
+        if self._process_fn is None:
+            raise AttributeError(
+                f"Pipeline class {type(inner).__name__} has no process method "
+                f"(tried: {self._PROCESS_NAMES})"
+            )
+
+    # Canonical entry point
+    def process(self, event):
+        return self._process_fn(event)
+
+    # Transparent proxy for everything else (storage, dlq, metrics, etc.)
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+
 @pytest.fixture
 def pipeline(pipeline_module, project_root):
     """Create a fresh Pipeline instance for each test."""
@@ -173,7 +207,7 @@ def pipeline(pipeline_module, project_root):
             instance = cls(config_dir=str(project_root / "config"))
         except TypeError:
             instance = cls(str(project_root / "config"))
-    return instance
+    return _PipelineAdapter(instance)
 
 
 # ---------------------------------------------------------------------------
