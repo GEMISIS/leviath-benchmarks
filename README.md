@@ -1,6 +1,6 @@
 # Leviath Benchmarks
 
-Reproducible benchmark suite measuring the performance and efficiency of the [Leviath agent framework](https://github.com/leviath-ai/leviath) against traditional flat-context baselines.
+Reproducible benchmark suite measuring the performance and efficiency of the [Leviath agent framework](https://github.com/Sun-Forge-AI/leviath) against traditional flat-context baselines.
 
 ## What This Measures
 
@@ -121,7 +121,7 @@ The `--context-window` flag on the flat baseline and the `max_tokens` field in L
 ### Prerequisites
 
 1. **Rust toolchain** (1.70+): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-2. **Leviath installed**: Follow [Leviath installation guide](https://github.com/leviath-ai/leviath#installation)
+2. **Leviath installed**: Follow [Leviath installation guide](https://github.com/Sun-Forge-AI/leviath#installation)
 3. **API keys**: Set environment variables:
    ```bash
    export ANTHROPIC_API_KEY=your_anthropic_key
