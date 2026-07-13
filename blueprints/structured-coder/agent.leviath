@@ -1,27 +1,42 @@
-# Benchmark Coder v3 — Rich structured context
+# Benchmark Coder v4 — HashMap file tracking + context tools
 # Three-stage: analyze → implement → test-and-fix
-# Designed to demonstrate structured context advantages over flat
+# Uses HashMap regions for file tracking and context tools for analysis artifacts
 
 [agent]
 name = "benchmark-coder"
-version = "3.0.0"
-description = "Three-stage coding agent with rich context structure for benchmarking"
+version = "4.0.0"
+description = "Three-stage coding agent with HashMap file tracking and context tools"
 entry_stage = "analyze"
 
 [tool_permissions]
-read_file  = "allow"
-list_dir   = "allow"
-write_file = "allow"
-edit_file  = "allow"
-bash       = "allow"
+read_file      = "allow"
+list_dir       = "allow"
+write_file     = "allow"
+edit_file      = "allow"
+bash           = "allow"
+context_write  = "allow"
+context_append = "allow"
+context_read   = "allow"
+context_delete = "allow"
+context_list   = "allow"
+
+# ─── File Tracking ────────────────────────────────────────────────────────────
+# Auto-sync read_file/write_file/edit_file to the "files" HashMap region.
+# Tool results reference the system prompt instead of duplicating file content.
+[context.file_tracking]
+region = "files"
+track_reads = true
+track_writes = true
+max_file_tokens = 5000
 
 # ─── Stage 1: Analyze ─────────────────────────────────────────────────────────
 # Read all specs, build architecture diagram, create implementation plan.
-# This populates the pinned regions that persist through all later stages.
+# Uses context_write to populate pinned regions that persist through all stages.
+# NO filesystem write tools — analysis artifacts live in context, not on disk.
 [stages.analyze]
 mode = "autonomous"
 description = "Read specs, build architecture understanding, create plan"
-available_tools = ["read_file", "list_dir"]
+available_tools = ["read_file", "list_dir", "context_write", "context_read", "context_list"]
 max_iterations = 20
 allow_complete = true
 next_stage = "implement"
@@ -33,31 +48,39 @@ models = [
 ]
 
 system_prompt = """
-You are analyzing a coding task. Read ALL specification and configuration files, 
-then produce TWO outputs using tools:
+You are analyzing a coding task. Read ALL specification and configuration files,
+then use context_write to store your analysis directly in context regions.
 
-1. ARCHITECTURE (write_file → architecture.md):
-   - Component diagram showing how parts interact (use Mermaid syntax)
+WORKFLOW:
+1. Read every spec/config file (they'll be auto-tracked in the 'files' region)
+2. Use context_write to store your architecture in the 'architecture' region:
+   - Component diagram (Mermaid syntax)
    - Data flow between components
    - Key interfaces and contracts
    - Critical implementation decisions
-
-2. PLAN (write_file → plan.md):
+3. Use context_write to store your plan in the 'plan' region:
    - Ordered list of files to create
    - For each file: purpose, key classes/functions, dependencies
    - Integration points between components
    - Testing strategy
+4. Use context_list to verify your regions are populated
 
-Read EVERY spec file before writing anything. The architecture and plan will 
-persist in your context throughout implementation — they are your map.
+The architecture and plan will persist in your context throughout implementation.
+They are your map — make them detailed and actionable.
+
+TOOLS:
+- read_file: Read spec files (auto-tracked in 'files' region)
+- list_dir: Explore directory structure
+- context_write: Write to named regions (architecture, plan)
+- context_read: Read back what you've written
+- context_list: See all regions and their contents
 """
 
-# Route spec file contents to the files region (persistent reference)
+# Route spec file contents to files region (auto-tracked via file_tracking)
 [stages.analyze.tool_result_routing]
 default_region = "scratch"
 persist = true
 [stages.analyze.tool_result_routing.tool_overrides]
-read_file = "files"
 list_dir = "scratch"
 
 # Direct transition: carry everything forward including populated regions
@@ -72,10 +95,11 @@ compact_prompt = "Summarize the analysis phase: key findings, architecture decis
 
 # ─── Stage 2: Implement ───────────────────────────────────────────────────────
 # Build all components following the plan. Architecture + plan stay pinned.
+# File tracking auto-syncs write_file/edit_file results to the files HashMap.
 [stages.implement]
 mode = "autonomous"
 description = "Implement all components following the plan"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash", "context_read", "context_list"]
 max_iterations = 120
 allow_complete = true
 next_stage = "test_fix"
@@ -87,30 +111,31 @@ models = [
 ]
 
 system_prompt = """
-You are implementing a coding task. Your architecture diagram and plan are in 
-your context — follow them.
+You are implementing a coding task. Your architecture diagram and plan are in
+your context (pinned regions) — follow them.
 
 RULES:
 - ALWAYS use tools. Never respond with just text.
 - Follow your plan's file order — build dependencies first.
-- After writing each file, verify it matches the architecture.
+- File contents are auto-tracked: every read/write/edit updates your files region.
+  Tool results will say "tracked in files region" — the actual content is in your
+  system context, not duplicated in messages.
+- Use context_read to check what files you've already written.
 - Use bash to test imports and basic functionality as you go.
-- Track what you've built: check your files region for current state.
 
 WORKFLOW:
-1. Review architecture and plan (they're in your context)
+1. Use context_read to review architecture and plan
 2. Write requirements.txt first
 3. Build each component per the plan
 4. After each component: bash to verify imports work
-5. When all files written: brief summary of what was built
+5. When all files written: complete the stage
 """
 
-# File contents go to files region; bash/list_dir to scratch
+# File reads/writes auto-tracked via file_tracking config
 [stages.implement.tool_result_routing]
 default_region = "conversation"
 persist = true
 [stages.implement.tool_result_routing.tool_overrides]
-read_file = "files"
 list_dir = "scratch"
 bash = "scratch"
 
@@ -121,14 +146,14 @@ transform = "custom"
 [stages.implement.transitions.test_fix.transform_config]
 carry = ["architecture", "plan", "files"]
 compact = ["conversation"]
-clear = ["scratch"]
+clear = ["scratch", "test_results"]
 compact_prompt = "Summarize what was implemented: files created, key decisions, any known issues."
 
 # ─── Stage 3: Test and Fix ────────────────────────────────────────────────────
 [stages.test_fix]
 mode = "autonomous"
 description = "Run tests, fix failures, repeat until all pass"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash", "context_read", "context_list"]
 max_iterations = 80
 allow_complete = true
 
@@ -140,14 +165,15 @@ models = [
 
 system_prompt = """
 You are in the TEST AND FIX phase. All source files have been written.
-Your architecture diagram shows how components connect — use it to understand 
-failure context. Your files region shows what exists.
+Your architecture diagram shows how components connect. Your files region has
+the current content of every file you've touched — use context_read to check.
 
 RULES:
 - Start by installing requirements and running the full test suite.
-- For each failure: read the failing test, check architecture for component 
+- For each failure: read the failing test, check architecture for component
   relationships, read the relevant source, fix with edit_file.
 - Re-run tests after EACH fix to verify progress.
+- File edits are auto-tracked — your files region always has the latest version.
 - Do NOT stop until ALL tests pass.
 
 WORKFLOW:
@@ -157,13 +183,11 @@ WORKFLOW:
 4. Repeat until all tests pass
 """
 
-# Test output goes to test_results (compacting — persists failures across iterations)
-# File reads go to files region
+# Test output and file reads auto-tracked
 [stages.test_fix.tool_result_routing]
 default_region = "conversation"
 persist = true
 [stages.test_fix.tool_result_routing.tool_overrides]
-read_file = "files"
 list_dir = "scratch"
 bash = "test_results"
 
@@ -172,34 +196,43 @@ bash = "test_results"
 provider = "anthropic"
 model = "claude-sonnet-5"
 
+# ─── Repetition Detection ────────────────────────────────────────────────────
+[context.repetition_detection]
+max_repeat_calls = 3
+max_readonly_streak = 10
+
 # ─── Context Layout ──────────────────────────────────────────────────────────
 #
-# System-level (pinned, stable, cacheable as a block > 1024 tokens):
-#   architecture — component diagram, data flow, interfaces (mermaid)
-#   plan — ordered implementation plan with file list and strategy
+# System-level (pinned, stable, cacheable):
+#   architecture — component diagram, data flow, interfaces (written by analyze stage)
+#   plan — ordered implementation plan (written by analyze stage)
 #   task — the original task description
 #
-# Knowledge (non-volatile, persists across message eviction):
-#   files — file manifest + contents, compacted when large
-#   files_history — summarized older file state
+# HashMap (keyed by file path, auto-synced via file tracking):
+#   files — latest version of every file the agent reads/writes
+#           upsert semantics: edits replace, no duplicates
+#           referenced by tool results ("see files region")
+#
+# Knowledge (compacting):
 #   test_results — test output, compacted when large
 #   test_history — summarized older test results
 #
 # Conversation (messages, with bulk eviction for caching):
 #   conversation — sliding window with bulk eviction strategy
 #
-# Working memory (volatile, cleared aggressively):
+# Working memory (volatile):
 #   scratch — transient output (list_dir, bash stdout)
 
 [context.regions]
-# Pinned: ~12K tokens of stable system context (above 1024 caching minimum)
+# Pinned: stable system context (above 1024 caching minimum combined)
 architecture   = { kind = "pinned",          max_tokens = 6000 }
 plan           = { kind = "pinned",          max_tokens = 4000 }
 task           = { kind = "pinned",          max_tokens = 4000 }
 
-# Knowledge: file contents and test results survive message eviction
-files          = { kind = "compacting",      threshold_tokens = 25000, max_tokens = 40000 }
-files_history  = { kind = "compact_history", source_region = "files", max_tokens = 8000 }
+# HashMap: file contents, keyed by path, auto-synced
+files          = { kind = "hashmap",         max_tokens = 40000, max_entries = 50 }
+
+# Knowledge: test results survive message eviction
 test_results   = { kind = "compacting",      threshold_tokens = 15000, max_tokens = 25000 }
 test_history   = { kind = "compact_history", source_region = "test_results", max_tokens = 5000 }
 

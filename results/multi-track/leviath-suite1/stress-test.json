@@ -1,0 +1,15 @@
+{
+  "task": "stress-test",
+  "approach": "leviath",
+  "run_id": "suite1",
+  "duration_seconds": 0,
+  "tool_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "estimated_cost_usd": 0.0,
+  "passed": 0,
+  "failed": 0,
+  "total": 0,
+  "pass_rate": 0.0,
+  "failures": []
+}

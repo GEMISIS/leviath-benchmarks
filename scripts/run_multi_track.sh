@@ -44,8 +44,10 @@ for TASK in "${TASKS[@]}"; do
     echo -e "${BOLD}--- Task: $TASK ---${NC}"
     echo "  Workdir: $WORKDIR"
 
-    # ── 1. Copy seed files ──────────────────────────────────────────────
+    # ── 1. Copy seed files (preserve seed-files/ dir for validation imports) ──
     if [ -d "$TASK_DIR/seed-files" ]; then
+        cp -r "$TASK_DIR/seed-files" "$WORKDIR/seed-files"
+        # Also copy contents to workdir root (agent sees them at top level)
         cp -r "$TASK_DIR/seed-files/"* "$WORKDIR/" 2>/dev/null || true
     fi
 
@@ -53,23 +55,46 @@ for TASK in "${TASKS[@]}"; do
     AGENT_META="$WORKDIR/.agent-meta.json"
     START_TS=$(date +%s)
 
-    if command -v leviath &>/dev/null && [ "$APPROACH" = "leviath" ]; then
+    LEV_BIN="${LEV_BIN:-$(command -v lev 2>/dev/null || echo "$HOME/dev/leviath/target/release/lev")}"
+    FLAT_BIN="${FLAT_BIN:-$BENCH_ROOT/target/release/flat-baseline}"
+    API_KEY="${ANTHROPIC_API_KEY:-$(grep 'anthropic_api_key' ~/.leviath/config.toml 2>/dev/null | sed 's/.*= *"//' | sed 's/"//')}"
+    ABS_TASK="$(realpath "$TASK_DIR/task.md")"
+
+    # Resolve blueprint to absolute path
+    ABS_BLUEPRINT="$(cd "$BENCH_ROOT" && realpath "$BLUEPRINT")"
+
+    # Snapshot existing runs before this task (for meta capture)
+    RUNS_BEFORE=$(ls -d "$HOME/.leviath/runs/"*/ 2>/dev/null | wc -l | tr -d ' ')
+
+    if [ "$APPROACH" = "leviath" ] && [ -x "$LEV_BIN" ]; then
         echo "  Running leviath agent..."
-        leviath run --blueprint "$BLUEPRINT" \
-            --task "$TASK_DIR/task.md" \
+        echo "  Blueprint: $ABS_BLUEPRINT"
+        echo "  Task: $ABS_TASK"
+        (cd "$WORKDIR" && "$LEV_BIN" run "$ABS_BLUEPRINT" \
+            --task "$ABS_TASK" \
+            --foreground \
+            --yolo) > "$WORKDIR/.agent.log" 2>&1 || true
+        # Find the NEW run directory (created after RUNS_BEFORE)
+        NEW_RUN=$(ls -td "$HOME/.leviath/runs/"*/ 2>/dev/null | head -1)
+        RUNS_AFTER=$(ls -d "$HOME/.leviath/runs/"*/ 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$RUNS_AFTER" -gt "$RUNS_BEFORE" ] && [ -n "$NEW_RUN" ]; then
+            cp "$NEW_RUN/meta.json" "$AGENT_META" 2>/dev/null || true
+            echo "  Meta captured from: $NEW_RUN"
+        else
+            echo "  ⚠ No new run directory found for meta capture"
+        fi
+    elif [ "$APPROACH" = "flat" ] && [ -x "$FLAT_BIN" ]; then
+        echo "  Running flat baseline agent..."
+        "$FLAT_BIN" \
+            --task "$(cat "$ABS_TASK")" \
+            --model "claude-sonnet-5" \
             --workdir "$WORKDIR" \
-            --meta "$AGENT_META" 2>&1 | tail -3 || true
-    elif [ -x "$BENCH_ROOT/target/release/harness" ]; then
-        echo "  Running harness ($APPROACH)..."
-        "$BENCH_ROOT/target/release/harness" \
-            --approach "$APPROACH" \
-            --blueprint "$BLUEPRINT" \
-            --task "$TASK_DIR/task.md" \
-            --workdir "$WORKDIR" \
-            --meta "$AGENT_META" 2>&1 | tail -3 || true
+            --max-iterations 200 \
+            --api-key "$API_KEY" \
+            --output "$AGENT_META" > "$WORKDIR/.agent.log" 2>&1 || true
     else
-        echo -e "  ${YELLOW}⚠  No agent runner found — skipping agent execution.${NC}"
-        echo -e "  ${YELLOW}   (Validation will run against whatever is in workdir.)${NC}"
+        echo -e "  ${YELLOW}⚠  No agent runner found for approach '$APPROACH'.${NC}"
+        echo -e "  ${YELLOW}   LEV_BIN=$LEV_BIN  FLAT_BIN=$FLAT_BIN${NC}"
     fi
 
     END_TS=$(date +%s)
@@ -145,7 +170,9 @@ else:
         "tool_calls": meta.get("tool_calls", 0),
         "prompt_tokens": meta.get("prompt_tokens", 0),
         "completion_tokens": meta.get("completion_tokens", 0),
-        "estimated_cost_usd": round(meta.get("prompt_tokens", 0) * 3 / 1_000_000 + meta.get("completion_tokens", 0) * 15 / 1_000_000, 2),
+        "estimated_cost_usd": round(
+            meta.get("prompt_tokens", meta.get("total_prompt_tokens", 0)) * 3 / 1_000_000 +
+            meta.get("completion_tokens", meta.get("total_completion_tokens", 0)) * 15 / 1_000_000, 2),
         "passed": passed,
         "failed": failed,
         "total": total,

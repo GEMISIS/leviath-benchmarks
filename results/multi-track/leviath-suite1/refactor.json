@@ -1,0 +1,32 @@
+{
+  "task": "refactor",
+  "approach": "leviath",
+  "run_id": "suite1",
+  "duration_seconds": 0,
+  "tool_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "estimated_cost_usd": 0.0,
+  "passed": 0,
+  "failed": 16,
+  "total": 16,
+  "pass_rate": 0.0,
+  "failures": [
+    "test_process_payment_function_exists",
+    "test_migrate_script_exists",
+    "test_migrate_script_importable",
+    "test_backward_compatibility",
+    "test_payment_methods_supported",
+    "test_payment_strategy_abc_exists",
+    "test_credit_card_strategy_exists",
+    "test_paypal_strategy_exists",
+    "test_bank_transfer_strategy_exists",
+    "test_crypto_strategy_exists",
+    "test_strategy_has_validate_method",
+    "test_strategy_has_process_method",
+    "test_amount_validator_exists",
+    "test_payment_method_validator_exists",
+    "test_fraud_validator_exists",
+    "test_balance_validator_exists"
+  ]
+}

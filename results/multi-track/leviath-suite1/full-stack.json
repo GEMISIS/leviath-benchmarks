@@ -1,0 +1,30 @@
+{
+  "task": "full-stack",
+  "approach": "leviath",
+  "run_id": "suite1",
+  "duration_seconds": 0,
+  "tool_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "estimated_cost_usd": 0.0,
+  "passed": 10,
+  "failed": 14,
+  "total": 24,
+  "pass_rate": 41.67,
+  "failures": [
+    "test_backend_directory_exists",
+    "test_backend_app_importable",
+    "test_frontend_directory_exists",
+    "test_frontend_has_package_json",
+    "test_frontend_has_notification_component",
+    "test_frontend_has_preferences_component",
+    "test_frontend_references_shared_types",
+    "test_comment_priority_is_medium",
+    "test_mention_priority_is_high",
+    "test_security_priority_is_urgent",
+    "test_security_bypasses_quiet_hours",
+    "test_notification_types_supported",
+    "test_duplicate_suppression",
+    "test_backend_uses_shared_type_values"
+  ]
+}
