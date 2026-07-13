@@ -1,0 +1,210 @@
+# Benchmark Coder v3 — Rich structured context
+# Three-stage: analyze → implement → test-and-fix
+# Designed to demonstrate structured context advantages over flat
+
+[agent]
+name = "benchmark-coder"
+version = "3.0.0"
+description = "Three-stage coding agent with rich context structure for benchmarking"
+entry_stage = "analyze"
+
+[tool_permissions]
+read_file  = "allow"
+list_dir   = "allow"
+write_file = "allow"
+edit_file  = "allow"
+bash       = "allow"
+
+# ─── Stage 1: Analyze ─────────────────────────────────────────────────────────
+# Read all specs, build architecture diagram, create implementation plan.
+# This populates the pinned regions that persist through all later stages.
+[stages.analyze]
+mode = "autonomous"
+description = "Read specs, build architecture understanding, create plan"
+available_tools = ["read_file", "list_dir"]
+max_iterations = 20
+allow_complete = true
+next_stage = "implement"
+
+[stages.analyze.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+system_prompt = """
+You are analyzing a coding task. Read ALL specification and configuration files, 
+then produce TWO outputs using tools:
+
+1. ARCHITECTURE (write_file → architecture.md):
+   - Component diagram showing how parts interact (use Mermaid syntax)
+   - Data flow between components
+   - Key interfaces and contracts
+   - Critical implementation decisions
+
+2. PLAN (write_file → plan.md):
+   - Ordered list of files to create
+   - For each file: purpose, key classes/functions, dependencies
+   - Integration points between components
+   - Testing strategy
+
+Read EVERY spec file before writing anything. The architecture and plan will 
+persist in your context throughout implementation — they are your map.
+"""
+
+# Route spec file contents to the files region (persistent reference)
+[stages.analyze.tool_result_routing]
+default_region = "scratch"
+persist = true
+[stages.analyze.tool_result_routing.tool_overrides]
+read_file = "files"
+list_dir = "scratch"
+
+# Direct transition: carry everything forward including populated regions
+[stages.analyze.transitions.implement]
+hint = "Analysis complete — begin implementation"
+transform = "custom"
+[stages.analyze.transitions.implement.transform_config]
+carry = ["architecture", "plan", "files"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize the analysis phase: key findings, architecture decisions, and implementation plan."
+
+# ─── Stage 2: Implement ───────────────────────────────────────────────────────
+# Build all components following the plan. Architecture + plan stay pinned.
+[stages.implement]
+mode = "autonomous"
+description = "Implement all components following the plan"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+max_iterations = 120
+allow_complete = true
+next_stage = "test_fix"
+
+[stages.implement.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+system_prompt = """
+You are implementing a coding task. Your architecture diagram and plan are in 
+your context — follow them.
+
+RULES:
+- ALWAYS use tools. Never respond with just text.
+- Follow your plan's file order — build dependencies first.
+- After writing each file, verify it matches the architecture.
+- Use bash to test imports and basic functionality as you go.
+- Track what you've built: check your files region for current state.
+
+WORKFLOW:
+1. Review architecture and plan (they're in your context)
+2. Write requirements.txt first
+3. Build each component per the plan
+4. After each component: bash to verify imports work
+5. When all files written: brief summary of what was built
+"""
+
+# File contents go to files region; bash/list_dir to scratch
+[stages.implement.tool_result_routing]
+default_region = "conversation"
+persist = true
+[stages.implement.tool_result_routing.tool_overrides]
+read_file = "files"
+list_dir = "scratch"
+bash = "scratch"
+
+# Compact implementation conversation, carry knowledge forward
+[stages.implement.transitions.test_fix]
+hint = "Implementation complete — begin testing"
+transform = "custom"
+[stages.implement.transitions.test_fix.transform_config]
+carry = ["architecture", "plan", "files"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what was implemented: files created, key decisions, any known issues."
+
+# ─── Stage 3: Test and Fix ────────────────────────────────────────────────────
+[stages.test_fix]
+mode = "autonomous"
+description = "Run tests, fix failures, repeat until all pass"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+max_iterations = 80
+allow_complete = true
+
+[stages.test_fix.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+system_prompt = """
+You are in the TEST AND FIX phase. All source files have been written.
+Your architecture diagram shows how components connect — use it to understand 
+failure context. Your files region shows what exists.
+
+RULES:
+- Start by installing requirements and running the full test suite.
+- For each failure: read the failing test, check architecture for component 
+  relationships, read the relevant source, fix with edit_file.
+- Re-run tests after EACH fix to verify progress.
+- Do NOT stop until ALL tests pass.
+
+WORKFLOW:
+1. bash: pip3 install -r requirements.txt 2>&1
+2. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+3. For each failure: understand → fix → re-test
+4. Repeat until all tests pass
+"""
+
+# Test output goes to test_results (compacting — persists failures across iterations)
+# File reads go to files region
+[stages.test_fix.tool_result_routing]
+default_region = "conversation"
+persist = true
+[stages.test_fix.tool_result_routing.tool_overrides]
+read_file = "files"
+list_dir = "scratch"
+bash = "test_results"
+
+# ─── Compaction ───────────────────────────────────────────────────────────────
+[compaction]
+provider = "anthropic"
+model = "claude-sonnet-5"
+
+# ─── Context Layout ──────────────────────────────────────────────────────────
+#
+# System-level (pinned, stable, cacheable as a block > 1024 tokens):
+#   architecture — component diagram, data flow, interfaces (mermaid)
+#   plan — ordered implementation plan with file list and strategy
+#   task — the original task description
+#
+# Knowledge (non-volatile, persists across message eviction):
+#   files — file manifest + contents, compacted when large
+#   files_history — summarized older file state
+#   test_results — test output, compacted when large
+#   test_history — summarized older test results
+#
+# Conversation (messages, with bulk eviction for caching):
+#   conversation — sliding window with bulk eviction strategy
+#
+# Working memory (volatile, cleared aggressively):
+#   scratch — transient output (list_dir, bash stdout)
+
+[context.regions]
+# Pinned: ~12K tokens of stable system context (above 1024 caching minimum)
+architecture   = { kind = "pinned",          max_tokens = 6000 }
+plan           = { kind = "pinned",          max_tokens = 4000 }
+task           = { kind = "pinned",          max_tokens = 4000 }
+
+# Knowledge: file contents and test results survive message eviction
+files          = { kind = "compacting",      threshold_tokens = 25000, max_tokens = 40000 }
+files_history  = { kind = "compact_history", source_region = "files", max_tokens = 8000 }
+test_results   = { kind = "compacting",      threshold_tokens = 15000, max_tokens = 25000 }
+test_history   = { kind = "compact_history", source_region = "test_results", max_tokens = 5000 }
+
+# Conversation: bulk eviction keeps prefix stable for caching
+conversation   = { kind = "sliding_window",  max_items = 80, max_tokens = 50000, strategy = "bulk", overflow = 20 }
+
+# Scratch: transient, cleared aggressively
+scratch        = { kind = "clearable",       max_tokens = 10000 }
