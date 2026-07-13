@@ -48,32 +48,30 @@ models = [
 ]
 
 system_prompt = """
-You are analyzing a coding task. Read ALL specification and configuration files,
-then use context_write to store your analysis directly in context regions.
+You are analyzing a coding task. Your goal is to read specs and produce two artifacts
+using the context_write tool: an architecture document and an implementation plan.
 
-WORKFLOW:
-1. Read every spec/config file (they'll be auto-tracked in the 'files' region)
-2. Use context_write to store your architecture in the 'architecture' region:
-   - Component diagram (Mermaid syntax)
-   - Data flow between components
+IMPORTANT: You have context_write, context_read, and context_list tools that write
+directly to your context memory. These are NOT filesystem tools — they store information
+in named regions that persist across stages. Use them instead of write_file.
+
+STEP-BY-STEP:
+1. list_dir to see what spec files exist
+2. read_file each spec file (contents auto-tracked in 'files' region)
+3. After reading ALL specs, call context_write with region="architecture" to store:
+   - Mermaid component diagram
+   - Data flow description
    - Key interfaces and contracts
-   - Critical implementation decisions
-3. Use context_write to store your plan in the 'plan' region:
-   - Ordered list of files to create
-   - For each file: purpose, key classes/functions, dependencies
-   - Integration points between components
+   - Critical design decisions
+4. Call context_write with region="plan" to store:
+   - Ordered list of files to create with dependencies
+   - For each file: purpose, key classes/functions
+   - Integration points
    - Testing strategy
-4. Use context_list to verify your regions are populated
+5. Call context_list to verify both regions are populated, then complete
 
-The architecture and plan will persist in your context throughout implementation.
-They are your map — make them detailed and actionable.
-
-TOOLS:
-- read_file: Read spec files (auto-tracked in 'files' region)
-- list_dir: Explore directory structure
-- context_write: Write to named regions (architecture, plan)
-- context_read: Read back what you've written
-- context_list: See all regions and their contents
+DO NOT read the same file twice. Read each spec once, then synthesize.
+After reading specs, your NEXT action must be context_write — not more reading.
 """
 
 # Route spec file contents to files region (auto-tracked via file_tracking)
@@ -111,22 +109,22 @@ models = [
 ]
 
 system_prompt = """
-You are implementing a coding task. Your architecture diagram and plan are in
-your context (pinned regions) — follow them.
+You are implementing a coding task. Your architecture and plan are available via
+context_read — use context_read with region="architecture" and region="plan" to
+review them before starting.
 
 RULES:
 - ALWAYS use tools. Never respond with just text.
 - Follow your plan's file order — build dependencies first.
-- File contents are auto-tracked: every read/write/edit updates your files region.
-  Tool results will say "tracked in files region" — the actual content is in your
-  system context, not duplicated in messages.
-- Use context_read to check what files you've already written.
+- File contents are auto-tracked: every write_file/edit_file updates your 'files'
+  context region automatically. When you read_file, the result says "tracked in
+  files region" — the full content is in your system context, not in the message.
 - Use bash to test imports and basic functionality as you go.
 
 WORKFLOW:
-1. Use context_read to review architecture and plan
+1. context_read region="plan" — review your implementation plan
 2. Write requirements.txt first
-3. Build each component per the plan
+3. Build each component per the plan using write_file
 4. After each component: bash to verify imports work
 5. When all files written: complete the stage
 """
@@ -198,8 +196,8 @@ model = "claude-sonnet-5"
 
 # ─── Repetition Detection ────────────────────────────────────────────────────
 [context.repetition_detection]
-max_repeat_calls = 3
-max_readonly_streak = 10
+max_repeat_calls = 4
+max_readonly_streak = 15
 
 # ─── Context Layout ──────────────────────────────────────────────────────────
 #
