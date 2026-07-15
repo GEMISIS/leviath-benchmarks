@@ -1,0 +1,296 @@
+# TDD Coder v1.0 — Test-plan-driven development
+# Three-stage: analyze (with test plan) → implement (with inline verification) → fix (corrective only)
+# Key insight: testing is planned during analysis and executed inline during implementation.
+# test_fix is purely corrective — no new files, no new tests, just fix what's broken.
+
+[agent]
+name = "tdd-mixed"
+version = "1.0.0"
+description = "TDD mixed: Opus analyze (test plan) → Haiku implement (inline verify) → Haiku fix (corrective)"
+entry_stage = "analyze"
+
+[tool_permissions]
+read_file      = "allow"
+read_files     = "allow"
+list_dir       = "allow"
+write_file     = "allow"
+edit_file      = "allow"
+shell          = "allow"
+context_write  = "allow"
+context_append = "allow"
+context_read   = "allow"
+context_delete = "allow"
+context_list   = "allow"
+
+# ─── File Tracking ────────────────────────────────────────────────────────────
+[context.file_tracking]
+region = "files"
+track_reads = true
+track_writes = true
+max_file_tokens = 5000
+
+# ─── Stage 1: Analyze ─────────────────────────────────────────────────────────
+# Read all specs, build architecture, trace flows, create plan AND test plan.
+[stages.analyze]
+mode = "autonomous"
+description = "Read specs, build architecture, trace flows, create implementation plan and verification plan"
+available_tools = ["read_file", "read_files", "list_dir", "context_write"]
+max_iterations = 25
+allow_complete = true
+next_stage = "implement"
+
+system_prompt = """
+You are analyzing a coding task. Your goal is to read all specs and produce FOUR
+artifacts using the context_write tool. You MUST make four separate context_write
+calls — one for each region.
+
+IMPORTANT: When you read_file, the content is automatically stored in your system
+prompt under the 'files' section. You can reference files you've already read
+without calling read_file again.
+
+STEP-BY-STEP:
+
+1. list_dir to see what spec files exist
+2. read_file each spec file
+
+3. context_write region="architecture" — STATIC STRUCTURE:
+   - Mermaid component diagram showing modules and their relationships
+   - Key interfaces and contracts between components
+   - Data models and their fields
+   - External dependencies (databases, APIs, config files)
+
+4. context_write region="program_flows" — RUNTIME BEHAVIOR:
+   - Trace the primary happy-path flow end-to-end (e.g., "request arrives →
+     validate → process → store → respond") with actual function call chain
+   - Trace the primary error/failure flow with call chain
+   - Trace the test flow: "test runner imports module → instantiates →
+     calls method → asserts result" — what does this look like for your design?
+   - Identify lifecycle concerns: what starts/stops, what state is shared,
+     what cleanup is needed
+
+5. context_write region="plan" — IMPLEMENTATION PLAN:
+   - Assess overall complexity: is this a straightforward data pipeline, a
+     concurrent system, a stateful service? Match your approach to the actual
+     requirements — don't add complexity the spec doesn't demand.
+   - Ordered list of files to create, with dependencies
+   - For each file: its public interface (function/class signatures)
+   - Integration points between files
+   - Constraints: list any simplifying decisions you're making and why
+
+6. context_write region="test_plan" — VERIFICATION PLAN:
+   Write concrete shell commands that verify each component works. These run
+   DURING implementation, not after. Use inline `python3 -c` scripts.
+
+   For EACH component in your implementation plan, write:
+   a) An IMPORT check: verify the module imports without error
+   b) A CONTRACT check: call key functions with known inputs, assert outputs
+   c) For the final component (API/entry point): an INTEGRATION check that
+      creates an instance, sends a request, verifies the response
+
+   FORMAT — use this exact structure so the implement stage can follow it:
+
+   ## Component: schema_validator.py
+   ```shell
+   python3 -c "from src.schema_validator import SchemaValidator; print('import OK')"
+   ```
+   ```shell
+   python3 -c "
+   from src.schema_validator import SchemaValidator
+   sv = SchemaValidator('config/')
+   # test with valid event
+   result = sv.validate({'tenant_id': 'tn-us-east-0042', 'event_type': 'user.created', ...})
+   assert result.valid, f'Expected valid, got: {result}'
+   print('contract OK')
+   "
+   ```
+
+   ## Component: storage.py
+   ```shell
+   python3 -c "
+   from src.storage import format_storage_key
+   key = format_storage_key('acme', 'user.created', '2024-03-15T14:30:00+00:00', 'evt_123')
+   assert key == 'acme/user/2024/03/15/14/evt_123', f'Got: {key}'
+   print('contract OK')
+   "
+   ```
+
+   ## Integration: Full pipeline
+   ```shell
+   python3 -c "
+   from src.api import create_app
+   app = create_app()
+   client = app.test_client()
+   r = client.get('/api/v1/health')
+   assert r.status_code == 200, f'Health check failed: {r.status_code}'
+   print('integration OK')
+   "
+   ```
+
+   IMPORTANT:
+   - Use REAL values from the spec/config files you read (tenant IDs, API keys, etc.)
+   - Each check must be a standalone shell command (no test framework needed)
+   - Include the bcrypt plaintext API keys from config/api_keys.yaml in auth checks
+   - Write checks that match YOUR architecture decisions (your class names, your function signatures)
+
+7. Complete the stage
+
+DO NOT read the same file twice. After reading all specs, your NEXT actions must
+be the four context_write calls.
+"""
+
+[stages.analyze.model]
+models = [
+  { provider = "anthropic", model = "claude-opus-4-6" },
+  { provider = "anthropic", model = "claude-sonnet-5" }
+]
+
+[stages.analyze.tool_result_routing]
+default_region = "scratch"
+persist = true
+[stages.analyze.tool_result_routing.tool_overrides]
+list_dir = "scratch"
+
+[stages.analyze.transitions.implement]
+hint = "Analysis complete — begin implementation"
+transform = "custom"
+[stages.analyze.transitions.implement.transform_config]
+carry = ["architecture", "program_flows", "plan", "test_plan", "files"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize the analysis phase: key findings, architecture decisions, and test plan overview."
+
+# ─── Stage 2: Implement with Inline Verification ─────────────────────────────
+[stages.implement]
+mode = "autonomous"
+description = "Implement components with inline verification from the test plan"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
+max_iterations = 120
+allow_complete = false
+next_stage = "test_fix"
+
+system_prompt = """
+You are implementing a coding task. Your architecture, program flows, plan, and
+TEST PLAN are in your context. The test plan contains specific verification
+commands to run after each component.
+
+RULES:
+- Follow your plan's build order and public interfaces exactly.
+- Match the complexity level you set in your plan.
+- File contents are auto-tracked: every write_file/edit_file updates your 'files'
+  context region automatically.
+- Every module must be importable and testable in isolation:
+  * No side effects on import
+  * Dependencies must be injectable
+  * Lifecycle via explicit methods, not import side effects
+- VERIFY AFTER EVERY COMPONENT using the commands from your test plan.
+- Do NOT move to the next component until verification passes.
+- If a verification fails, fix the code with edit_file and re-run verification.
+
+WORKFLOW:
+1. Review your plan, program flows, AND test plan
+2. shell: pip3 install -r requirements.txt (write requirements.txt first)
+3. For each component in your plan:
+   a. write_file to create the component
+   b. shell: run the IMPORT check from your test plan for this component
+   c. shell: run the CONTRACT check from your test plan for this component
+   d. If either fails → edit_file to fix → re-run checks
+   e. Do NOT proceed to the next component until both checks pass
+4. After ALL components are written:
+   a. shell: run the INTEGRATION checks from your test plan
+   b. If integration fails → edit_file to fix → re-run
+5. When all verifications pass: complete the stage
+"""
+
+[stages.implement.model]
+models = [
+  { provider = "anthropic", model = "claude-haiku-4-5" },
+  { provider = "anthropic", model = "claude-sonnet-5" }
+]
+
+[stages.implement.tool_result_routing]
+default_region = "conversation"
+persist = true
+[stages.implement.tool_result_routing.tool_overrides]
+list_dir = "scratch"
+shell = "scratch"
+
+[stages.implement.transitions.test_fix]
+hint = "Implementation and verification complete — final corrective pass"
+transform = "custom"
+[stages.implement.transitions.test_fix.transform_config]
+carry = ["architecture", "program_flows", "plan", "test_plan", "files"]
+compact = ["conversation"]
+clear = ["scratch", "test_results"]
+compact_prompt = "Summarize: files created, verification results, any known issues."
+
+# ─── Stage 3: Corrective Fix (no new files) ───────────────────────────────────
+[stages.test_fix]
+mode = "autonomous"
+description = "Corrective-only: run verifications, fix failures, no new files"
+available_tools = ["read_file", "edit_file", "list_dir", "shell"]
+max_iterations = 60
+allow_complete = true
+
+system_prompt = """
+You are in the CORRECTIVE FIX phase. All source files have been written and
+verified during implementation. Your job is to do a final validation pass.
+
+CONSTRAINTS:
+- You can ONLY edit existing files (edit_file). You CANNOT create new files.
+- You can ONLY run shell commands and read files.
+- Do NOT write test files. Do NOT create new modules.
+- Do NOT change the fundamental architecture (e.g., Flask→FastAPI, sync→async).
+- Fix ONLY what is broken. If something works, leave it alone.
+
+WORKFLOW:
+1. shell: pip3 install -r requirements.txt 2>&1
+2. Run each verification from your test_plan context:
+   - Import checks for all components
+   - Contract checks for all components
+   - Integration checks
+3. For any failure:
+   a. Read the failing source file
+   b. Identify the minimal fix
+   c. edit_file to apply the fix
+   d. Re-run ONLY the failed verification
+4. When all verifications pass: complete the stage
+
+IMPORTANT: Be surgical. Each edit should fix ONE issue. Re-verify after each edit.
+Do not batch edits — they compound errors.
+"""
+
+[stages.test_fix.model]
+models = [
+  { provider = "anthropic", model = "claude-haiku-4-5" },
+  { provider = "anthropic", model = "claude-sonnet-5" }
+]
+
+[stages.test_fix.tool_result_routing]
+default_region = "conversation"
+persist = true
+[stages.test_fix.tool_result_routing.tool_overrides]
+list_dir = "scratch"
+shell = "test_results"
+
+# ─── Compaction ───────────────────────────────────────────────────────────────
+[compaction]
+provider = "anthropic"
+model = "claude-sonnet-5"
+
+# ─── Repetition Detection ────────────────────────────────────────────────────
+[context.repetition_detection]
+max_repeat_calls = 4
+max_readonly_streak = 15
+
+# ─── Context Layout ──────────────────────────────────────────────────────────
+[context.regions]
+architecture   = { kind = "pinned",          max_tokens = 6000,  required = true, required_message = "Write the architecture analysis via context_write with region='architecture'." }
+program_flows  = { kind = "pinned",          max_tokens = 5000,  required = true, required_message = "Write the program flows via context_write with region='program_flows'. Trace the happy path, error path, and test path." }
+plan           = { kind = "pinned",          max_tokens = 4000,  required = true, required_message = "Write the implementation plan via context_write with region='plan'. Include complexity assessment and file interfaces." }
+test_plan      = { kind = "pinned",          max_tokens = 5000,  required = true, required_message = "Write the verification plan via context_write with region='test_plan'. Include import checks, contract checks, and integration checks for each component." }
+task           = { kind = "pinned",          max_tokens = 4000 }
+files          = { kind = "hashmap",         max_tokens = 40000, max_entries = 50 }
+test_results   = { kind = "compacting",      threshold_tokens = 15000, max_tokens = 25000 }
+test_history   = { kind = "compact_history", source_region = "test_results", max_tokens = 5000 }
+conversation   = { kind = "sliding_window",  max_items = 80, max_tokens = 50000, strategy = "bulk", overflow = 20 }
+scratch        = { kind = "clearable",       max_tokens = 10000 }
