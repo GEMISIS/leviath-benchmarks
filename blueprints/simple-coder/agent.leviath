@@ -1,10 +1,12 @@
 # Coding agent blueprint for benchmarking
 # Two-stage: implement then test-and-fix loop
+# Simulates Claude Code-style context: stable system prompt + append-only conversation
+# No structured regions, no file tracking, no carry — just a big conversation.
 
 [agent]
 name = "simple-coder"
-version = "2.1.0"
-description = "Two-stage coding agent: implement → test/fix loop"
+version = "3.0.0"
+description = "Two-stage coding agent simulating Claude Code-style context management"
 entry_stage = "implement"
 
 [tool_permissions]
@@ -22,12 +24,6 @@ available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
 max_iterations = 150
 allow_complete = true
 next_stage = "test_fix"
-
-[stages.implement.model]
-models = [
-  { provider = "anthropic", model = "claude-sonnet-5" },
-  { provider = "anthropic", model = "claude-opus-4-8" }
-]
 
 system_prompt = """
 You are an autonomous coding agent in the IMPLEMENTATION phase. Your job is to build complete working software using only tools.
@@ -48,15 +44,19 @@ Work order:
 Do NOT run tests yet — that happens in the next stage. Focus on writing correct, complete code.
 """
 
-# In implement stage, bash/list_dir output is transient (scratch)
-# File contents persist (tool_results) for reference during implementation
-[stages.implement.tool_result_routing]
-default_region = "tool_results"
-persist = true
+[stages.implement.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
 
-[stages.implement.tool_result_routing.tool_overrides]
-bash = "scratch"
-list_dir = "scratch"
+# Everything goes into conversation — simulates Claude Code style where
+# tool results are inline messages, not routed to separate regions.
+# The conversation grows append-only; old messages drop off the front
+# via sliding window, preserving the stable system prompt prefix.
+[stages.implement.tool_result_routing]
+default_region = "conversation"
+persist = true
 
 # Stage 2: Run tests and fix until all pass
 [stages.test_fix]
@@ -65,12 +65,6 @@ description = "Run tests, fix failures, repeat until all pass"
 available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
 max_iterations = 80
 allow_complete = true
-
-[stages.test_fix.model]
-models = [
-  { provider = "anthropic", model = "claude-sonnet-5" },
-  { provider = "anthropic", model = "claude-opus-4-8" }
-]
 
 system_prompt = """
 You are an autonomous coding agent in the TEST AND FIX phase. All source files have been written. Your job is to make every test pass.
@@ -91,23 +85,27 @@ Work order:
 5. Repeat 3-4 until all tests pass
 """
 
-# In test_fix stage, bash output (test results) goes to tool_results so
-# test failures persist across iterations and get compacted rather than cleared.
-# This prevents the agent from "forgetting" which tests failed.
+[stages.test_fix.model]
+models = [
+  { provider = "anthropic", model = "claude-sonnet-5" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
 [stages.test_fix.tool_result_routing]
-default_region = "tool_results"
+default_region = "conversation"
 persist = true
 
-[stages.test_fix.tool_result_routing.tool_overrides]
-list_dir = "scratch"
-
-# Structured context layout
-# - task: pinned specs that never evict
-# - conversation: sliding window of recent assistant/user messages
-# - tool_results: file contents + test output, compacted when large
-# - scratch: transient output (list_dir), cleared aggressively
+# Context layout: Claude Code-style
+# - task: pinned system prompt (stable prefix, always cached)
+# - conversation: everything else — tool results, messages, all inline
+#   Uses bulk eviction to keep the prefix stable for caching:
+#   old messages drop off in chunks from the front, but the system prompt
+#   + recent conversation stay stable across calls.
+#
+# This gives the same caching behavior as Claude Code:
+# [stable system prompt] + [growing conversation with tool results]
+# The system prompt caches. Older conversation caches until evicted.
+# New messages append at the end, not breaking the prefix.
 [context.regions]
-task = { kind = "pinned", max_tokens = 4000 }
-conversation = { kind = "sliding_window", max_items = 100, max_tokens = 60000 }
-tool_results = { kind = "compacting", threshold_tokens = 40000, max_tokens = 80000 }
-scratch = { kind = "clearable", max_tokens = 20000 }
+task         = { kind = "pinned",         max_tokens = 4000 }
+conversation = { kind = "sliding_window", max_items = 100, max_tokens = 120000, strategy = "bulk", overflow = 20 }
