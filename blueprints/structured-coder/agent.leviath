@@ -16,7 +16,7 @@ read_files     = "allow"
 list_dir       = "allow"
 write_file     = "allow"
 edit_file      = "allow"
-bash           = "allow"
+shell           = "allow"
 context_write  = "allow"
 context_append = "allow"
 context_read   = "allow"
@@ -113,7 +113,7 @@ compact_prompt = "Summarize the analysis phase: key findings, architecture decis
 [stages.implement]
 mode = "autonomous"
 description = "Implement all components following the plan"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
 max_iterations = 120
 allow_complete = true
 next_stage = "test_fix"
@@ -135,14 +135,14 @@ RULES:
     that prevent instantiation in a test)
   * If a module needs setup/teardown (background tasks, connections), that must
     happen through explicit lifecycle methods, not on import
-- Use bash to verify imports work after writing each component.
+- Use shell to verify imports work after writing each component.
 
 WORKFLOW:
 1. Review your plan and program flows
 2. Write requirements.txt first
 3. Build each component per the plan using write_file
-4. After each component: bash to verify it imports cleanly
-5. After all components: bash to verify the test flow from program_flows works
+4. After each component: shell to verify it imports cleanly
+5. After all components: shell to verify the test flow from program_flows works
    (import the entry point, instantiate, call with test data)
 6. When all files written and imports verified: complete the stage
 """
@@ -158,7 +158,7 @@ default_region = "conversation"
 persist = true
 [stages.implement.tool_result_routing.tool_overrides]
 list_dir = "scratch"
-bash = "scratch"
+shell = "scratch"
 
 [stages.implement.transitions.test_fix]
 hint = "Implementation complete — begin testing"
@@ -173,7 +173,7 @@ compact_prompt = "Summarize what was implemented: files created, key decisions, 
 [stages.test_fix]
 mode = "autonomous"
 description = "Run tests, fix failures, repeat until all pass"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
 max_iterations = 80
 allow_complete = true
 
@@ -198,8 +198,8 @@ RULES:
 - Do NOT stop until ALL tests pass.
 
 WORKFLOW:
-1. bash: pip3 install -r requirements.txt 2>&1
-2. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+1. shell: pip3 install -r requirements.txt 2>&1
+2. shell: python3 -m pytest tests/ -v --tb=short 2>&1
 3. For each failure: understand → fix → re-test
 4. Repeat until all tests pass
 """
@@ -215,7 +215,7 @@ default_region = "conversation"
 persist = true
 [stages.test_fix.tool_result_routing.tool_overrides]
 list_dir = "scratch"
-bash = "test_results"
+shell = "test_results"
 
 # ─── Compaction ───────────────────────────────────────────────────────────────
 [compaction]

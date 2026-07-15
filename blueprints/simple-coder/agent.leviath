@@ -14,13 +14,13 @@ read_file  = "allow"
 list_dir   = "allow"
 write_file = "allow"
 edit_file  = "allow"
-bash       = "allow"
+shell       = "allow"
 
 # Stage 1: Read specs and implement all components
 [stages.implement]
 mode = "autonomous"
 description = "Read all specs, then implement every component"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
 max_iterations = 150
 allow_complete = true
 next_stage = "test_fix"
@@ -62,7 +62,7 @@ persist = true
 [stages.test_fix]
 mode = "autonomous"
 description = "Run tests, fix failures, repeat until all pass"
-available_tools = ["read_file", "write_file", "edit_file", "list_dir", "bash"]
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
 max_iterations = 80
 allow_complete = true
 
@@ -78,10 +78,10 @@ CRITICAL RULES:
 - When all tests pass, respond with a brief summary of fixes made.
 
 Work order:
-1. bash: pip3 install -r requirements.txt 2>&1
-2. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+1. shell: pip3 install -r requirements.txt 2>&1
+2. shell: python3 -m pytest tests/ -v --tb=short 2>&1
 3. For each failure: read test → read source → edit_file to fix
-4. bash: python3 -m pytest tests/ -v --tb=short 2>&1
+4. shell: python3 -m pytest tests/ -v --tb=short 2>&1
 5. Repeat 3-4 until all tests pass
 """
 
