@@ -115,7 +115,7 @@ mode = "autonomous"
 description = "Implement all components following the plan"
 available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
 max_iterations = 120
-allow_complete = true
+allow_complete = false
 next_stage = "test_fix"
 
 system_prompt = """
