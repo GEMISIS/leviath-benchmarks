@@ -60,7 +60,8 @@ class TestBatchIngestion:
     """Tests for POST /api/v1/events/batch endpoint."""
 
     def test_batch_ingestion_success(self, app_client, auth_header_factory):
-        """Spec: POST /api/v1/events/batch accepts up to 100 events."""
+        """Spec: POST /api/v1/events/batch accepts up to 100 events.
+        Spec: Request body is {"events": [...]}, always returns 200 at HTTP level."""
         events = [
             make_event(
                 tenant_id="tn-us-east-0042",
@@ -71,9 +72,12 @@ class TestBatchIngestion:
         ]
         headers = auth_header_factory("acme-api-key-prod")
         headers["Content-Type"] = "application/json"
-        resp = app_client.post("/api/v1/events/batch", json=events, headers=headers)
-        assert resp.status_code in (200, 207), \
-            f"Batch ingestion should succeed, got {resp.status_code}"
+        resp = app_client.post("/api/v1/events/batch", json={"events": events}, headers=headers)
+        assert resp.status_code == 200, \
+            f"Batch ingestion should return 200, got {resp.status_code}"
+        data = resp.get_json()
+        assert data is not None, "Batch response should be JSON"
+        assert "results" in data, "Batch response should contain 'results' array"
 
     def test_batch_over_100_rejected(self, app_client, auth_header_factory):
         """Spec: Batch endpoint accepts max 100 events."""
@@ -87,7 +91,7 @@ class TestBatchIngestion:
         ]
         headers = auth_header_factory("acme-api-key-prod")
         headers["Content-Type"] = "application/json"
-        resp = app_client.post("/api/v1/events/batch", json=events, headers=headers)
+        resp = app_client.post("/api/v1/events/batch", json={"events": events}, headers=headers)
         assert resp.status_code == 400, \
             f"Batch >100 should return 400, got {resp.status_code}"
 

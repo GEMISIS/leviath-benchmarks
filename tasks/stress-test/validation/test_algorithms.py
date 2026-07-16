@@ -457,11 +457,23 @@ class TestDDSketchUsage:
 
     def test_percentile_function_exists(self, metrics_module):
         """Spec: Metrics module exposes percentile query functionality."""
-        # Look for percentile-related functions or methods
-        has_percentile_fn = any(
+        import inspect
+
+        # Check module-level names for percentile
+        has_percentile = any(
             "percentile" in name.lower()
             for name in dir(metrics_module)
         )
-        
-        assert has_percentile_fn, \
-            "Metrics module should have percentile-related functions"
+
+        # Also check methods on classes defined in the module
+        if not has_percentile:
+            for name in dir(metrics_module):
+                obj = getattr(metrics_module, name, None)
+                if inspect.isclass(obj):
+                    class_attrs = [a for a in dir(obj) if "percentile" in a.lower()]
+                    if class_attrs:
+                        has_percentile = True
+                        break
+
+        assert has_percentile, \
+            "Metrics module should have percentile-related functions or methods"
