@@ -35,8 +35,8 @@ max_file_tokens = 5000
 mode = "autonomous"
 description = "Read all spec files and extract every constraint the spec imposes"
 available_tools = ["read_file", "read_files", "list_dir", "context_write"]
-max_iterations = 20
-allow_complete = true
+max_iterations = 25
+allow_complete = false
 next_stage = "test_design"
 
 system_prompt = """
@@ -116,7 +116,7 @@ mode = "autonomous"
 description = "Write pytest test files based purely on spec constraints — before any architecture exists"
 available_tools = ["read_file", "write_file", "list_dir", "shell", "context_write"]
 max_iterations = 40
-allow_complete = true
+allow_complete = false
 next_stage = "design"
 
 system_prompt = """
@@ -197,7 +197,7 @@ description = "Design architecture to satisfy constraints and pass tests"
 available_tools = ["read_file", "list_dir", "context_write"]
 max_iterations = 20
 max_revisits = 2
-allow_complete = true
+allow_complete = false
 next_stage = "scaffold"
 
 system_prompt = """
@@ -275,7 +275,7 @@ description = "Write all source files as stubs/interfaces matching the architect
 available_tools = ["read_file", "write_file", "list_dir", "shell"]
 max_iterations = 40
 max_revisits = 2
-allow_complete = true
+allow_complete = false
 next_stage = "implement"
 
 system_prompt = """
@@ -334,7 +334,7 @@ description = "Fill in skeleton stubs with real implementation logic"
 available_tools = ["read_file", "edit_file", "list_dir", "shell"]
 max_iterations = 120
 max_revisits = 2
-allow_complete = true
+allow_complete = false
 next_stage = "validate"
 
 system_prompt = """
@@ -432,7 +432,6 @@ persist = true
 
 [stages.validate.transitions.troubleshoot]
 hint = "Tests failed — diagnose the issues"
-condition = "error"
 transform = "custom"
 [stages.validate.transitions.troubleshoot.transform_config]
 carry = ["constraints", "test_summary", "architecture", "test_results", "files"]
