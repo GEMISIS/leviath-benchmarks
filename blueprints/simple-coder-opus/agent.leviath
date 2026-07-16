@@ -1,0 +1,111 @@
+# Coding agent blueprint for benchmarking
+# Two-stage: implement then test-and-fix loop
+# Simulates Claude Code-style context: stable system prompt + append-only conversation
+# No structured regions, no file tracking, no carry — just a big conversation.
+
+[agent]
+name = "simple-coder-opus"
+version = "3.0.0"
+description = "Opus Claude Code-style: two-stage implement + test-fix"
+entry_stage = "implement"
+
+[tool_permissions]
+read_file  = "allow"
+list_dir   = "allow"
+write_file = "allow"
+edit_file  = "allow"
+shell       = "allow"
+
+# Stage 1: Read specs and implement all components
+[stages.implement]
+mode = "autonomous"
+description = "Read all specs, then implement every component"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
+max_iterations = 150
+allow_complete = true
+next_stage = "test_fix"
+
+system_prompt = """
+You are an autonomous coding agent in the IMPLEMENTATION phase. Your job is to build complete working software using only tools.
+
+CRITICAL RULES:
+- ALWAYS use tools. Never respond with just text.
+- After reading specs, IMMEDIATELY start writing code with write_file.
+- Do NOT summarize or plan in text. Just build.
+- Write ALL deliverable files before finishing this stage.
+- If you need to think, do it briefly then use a tool.
+
+Work order:
+1. list_dir to see the workspace, then read ALL spec and config files
+2. Write each source file with write_file (do not skip any)
+3. Write requirements.txt and README.md
+4. When ALL files are written, respond with a brief summary
+
+Do NOT run tests yet — that happens in the next stage. Focus on writing correct, complete code.
+"""
+
+[stages.implement.model]
+models = [
+  { provider = "anthropic", model = "claude-opus-4-6" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+# Everything goes into conversation — simulates Claude Code style where
+# tool results are inline messages, not routed to separate regions.
+# The conversation grows append-only; old messages drop off the front
+# via sliding window, preserving the stable system prompt prefix.
+[stages.implement.tool_result_routing]
+default_region = "conversation"
+persist = true
+
+# Stage 2: Run tests and fix until all pass
+[stages.test_fix]
+mode = "autonomous"
+description = "Run tests, fix failures, repeat until all pass"
+available_tools = ["read_file", "write_file", "edit_file", "list_dir", "shell"]
+max_iterations = 80
+allow_complete = true
+
+system_prompt = """
+You are an autonomous coding agent in the TEST AND FIX phase. All source files have been written. Your job is to make every test pass.
+
+CRITICAL RULES:
+- ALWAYS use tools. Never respond with just text.
+- Start by installing requirements and running the full test suite.
+- For each failure: read the failing test, read the relevant source, fix with edit_file.
+- Re-run tests after EACH fix to verify progress.
+- Do NOT stop until ALL tests pass (or you've exhausted attempts).
+- When all tests pass, respond with a brief summary of fixes made.
+
+Work order:
+1. shell: pip3 install -r requirements.txt 2>&1
+2. shell: python3 -m pytest tests/ -v --tb=short 2>&1
+3. For each failure: read test → read source → edit_file to fix
+4. shell: python3 -m pytest tests/ -v --tb=short 2>&1
+5. Repeat 3-4 until all tests pass
+"""
+
+[stages.test_fix.model]
+models = [
+  { provider = "anthropic", model = "claude-opus-4-6" },
+  { provider = "anthropic", model = "claude-opus-4-8" }
+]
+
+[stages.test_fix.tool_result_routing]
+default_region = "conversation"
+persist = true
+
+# Context layout: Claude Code-style
+# - task: pinned system prompt (stable prefix, always cached)
+# - conversation: everything else — tool results, messages, all inline
+#   Uses bulk eviction to keep the prefix stable for caching:
+#   old messages drop off in chunks from the front, but the system prompt
+#   + recent conversation stay stable across calls.
+#
+# This gives the same caching behavior as Claude Code:
+# [stable system prompt] + [growing conversation with tool results]
+# The system prompt caches. Older conversation caches until evicted.
+# New messages append at the end, not breaking the prefix.
+[context.regions]
+task         = { kind = "pinned",         max_tokens = 4000 }
+conversation = { kind = "sliding_window", max_items = 100, max_tokens = 120000, strategy = "bulk", overflow = 20 }
