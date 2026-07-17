@@ -1,188 +1,83 @@
-#!/usr/bin/env bash
-# run-benchmark.sh — Run a stress-test benchmark for a given approach.
+#!/bin/bash
+# Run N parallel Leviath benchmark runs with a given blueprint
+# Usage: ./run-benchmark.sh <blueprint-path> [num-runs] [task-path]
 #
-# Usage:
-#   ./run-benchmark.sh <approach>
-#
-# Where <approach> is one of: leviath, flat
-#
-set -euo pipefail
+# Examples:
+#   ./run-benchmark.sh blueprints/engineer-v2/agent.leviath
+#   ./run-benchmark.sh blueprints/engineer-v3/agent.leviath 3
+#   ./run-benchmark.sh blueprints/engineer-v2/agent.leviath 5 tasks/stress-test/task.md
 
-APPROACH="${1:-}"
+set -e
+
+BLUEPRINT="${1:?Usage: $0 <blueprint-path> [num-runs] [task-path]}"
+NUM_RUNS="${2:-3}"
+TASK="${3:-tasks/stress-test/task.md}"
+SEED_DIR="tasks/stress-test/seed-files"
+VALIDATION_DIR="tasks/stress-test/validation"
+
+# Resolve paths relative to script location
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TASK_DIR="$SCRIPT_DIR/tasks/stress-test"
-VALIDATION_DIR="$TASK_DIR/validation"
-RESULTS_DIR="$SCRIPT_DIR/results"
-TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+BLUEPRINT="$SCRIPT_DIR/$BLUEPRINT"
+TASK="$SCRIPT_DIR/$TASK"
+SEED_DIR="$SCRIPT_DIR/$SEED_DIR"
+VALIDATION_DIR="$SCRIPT_DIR/$VALIDATION_DIR"
 
-# ---------------------------------------------------------------------------
-# Validation
-# ---------------------------------------------------------------------------
+# Validate inputs
+[ -f "$BLUEPRINT" ] || { echo "Blueprint not found: $BLUEPRINT"; exit 1; }
+[ -f "$TASK" ] || { echo "Task not found: $TASK"; exit 1; }
+[ -d "$SEED_DIR" ] || { echo "Seed dir not found: $SEED_DIR"; exit 1; }
 
-if [[ -z "$APPROACH" ]]; then
-  echo "Usage: $0 <approach>"
-  echo "  approach: leviath | flat"
-  exit 1
-fi
-
-if [[ "$APPROACH" != "leviath" && "$APPROACH" != "flat" ]]; then
-  echo "Error: approach must be 'leviath' or 'flat'"
-  exit 1
-fi
-
-# ---------------------------------------------------------------------------
-# Setup
-# ---------------------------------------------------------------------------
-
-WORKDIR="$(mktemp -d)"
-echo "=== Stress Test Benchmark ==="
-echo "Approach:  $APPROACH"
-echo "Workdir:   $WORKDIR"
-echo "Timestamp: $TIMESTAMP"
+echo "=== Leviath Benchmark Runner ==="
+echo "Blueprint: $BLUEPRINT"
+echo "Task: $TASK"
+echo "Runs: $NUM_RUNS"
 echo ""
 
-# Copy seed files into workdir
-cp -r "$TASK_DIR/seed-files/"* "$WORKDIR/"
-echo "Copied seed files to workdir."
+# Create workdirs and launch runs
+WORKDIRS=()
+RUN_IDS=()
 
-# ---------------------------------------------------------------------------
-# Run the approach
-# ---------------------------------------------------------------------------
-
-START_TIME=$(date +%s)
-
-echo ""
-echo "--- Running $APPROACH approach ---"
-echo ""
-
-if [[ "$APPROACH" == "leviath" ]]; then
-  echo "Running Leviath agent..."
-  # Invoke Leviath with the task file pointed at the workdir
-  # Adjust the command below to match your Leviath CLI invocation
-  if command -v leviath &>/dev/null; then
-    cd "$WORKDIR"
-    leviath run \
-      --blueprint "$SCRIPT_DIR/blueprints/simple-coder.leviath" \
-      --task "$TASK_DIR/task.md" \
-      --workdir "$WORKDIR" \
-      2>&1 | tee "$WORKDIR/agent.log" || true
-  else
-    echo "WARNING: 'leviath' command not found. Skipping agent run."
-    echo "         Place your implementation in: $WORKDIR/src/"
-  fi
-elif [[ "$APPROACH" == "flat" ]]; then
-  echo "Running flat baseline..."
-  if [[ -f "$SCRIPT_DIR/target/release/flat-baseline" ]]; then
-    cd "$WORKDIR"
-    "$SCRIPT_DIR/target/release/flat-baseline" \
-      --task "$TASK_DIR/task.md" \
-      --workdir "$WORKDIR" \
-      2>&1 | tee "$WORKDIR/agent.log" || true
-  else
-    echo "WARNING: flat-baseline binary not found. Skipping agent run."
-    echo "         Place your implementation in: $WORKDIR/src/"
-  fi
-fi
-
-END_TIME=$(date +%s)
-DURATION=$((END_TIME - START_TIME))
+for i in $(seq 1 "$NUM_RUNS"); do
+  WORKDIR=$(mktemp -d)
+  cp -r "$SEED_DIR"/* "$WORKDIR/"
+  WORKDIRS+=("$WORKDIR")
+  
+  cd "$WORKDIR"
+  OUTPUT=$(lev run "$BLUEPRINT" -t "$TASK" --yolo 2>&1)
+  RUN_ID=$(echo "$OUTPUT" | grep "Started run:" | awk '{print $3}')
+  RUN_IDS+=("$RUN_ID")
+  
+  echo "Run $i: $RUN_ID → $WORKDIR"
+  sleep 2
+done
 
 echo ""
-echo "Agent completed in ${DURATION}s."
-
-# ---------------------------------------------------------------------------
-# Run validation tests
-# ---------------------------------------------------------------------------
-
+echo "=== All $NUM_RUNS runs launched ==="
 echo ""
-echo "--- Running validation tests ---"
+echo "Monitor with: lev dash"
+echo ""
+echo "When complete, score with:"
 echo ""
 
-# Copy validation tests into the workdir
-cp -r "$VALIDATION_DIR" "$WORKDIR/validation"
+for i in $(seq 0 $((NUM_RUNS - 1))); do
+  echo "  # Run $((i + 1)): ${RUN_IDS[$i]}"
+  echo "  cd ${WORKDIRS[$i]}"
+  echo "  cp $VALIDATION_DIR/*.py ."
+  echo "  python -m pytest test_algorithms.py test_behavioral.py -v --tb=short"
+  echo ""
+done
 
-# Install validation requirements
-cd "$WORKDIR"
-pip3 install -q -r validation/requirements.txt 2>/dev/null || \
-  pip3 install --user -q -r validation/requirements.txt 2>/dev/null || \
-  pip3 install --break-system-packages -q -r validation/requirements.txt 2>/dev/null || true
+# Save run info for later scoring
+RESULTS_FILE="/tmp/benchmark-runs-$(date +%s).json"
+echo "{" > "$RESULTS_FILE"
+echo "  \"blueprint\": \"$BLUEPRINT\"," >> "$RESULTS_FILE"
+echo "  \"runs\": [" >> "$RESULTS_FILE"
+for i in $(seq 0 $((NUM_RUNS - 1))); do
+  COMMA=""
+  [ $i -lt $((NUM_RUNS - 1)) ] && COMMA=","
+  echo "    {\"id\": \"${RUN_IDS[$i]}\", \"workdir\": \"${WORKDIRS[$i]}\"}$COMMA" >> "$RESULTS_FILE"
+done
+echo "  ]" >> "$RESULTS_FILE"
+echo "}" >> "$RESULTS_FILE"
 
-# Install the implementation's requirements if present
-if [[ -f "$WORKDIR/requirements.txt" ]]; then
-  pip3 install -q -r "$WORKDIR/requirements.txt" 2>/dev/null || \
-    pip3 install --user -q -r "$WORKDIR/requirements.txt" 2>/dev/null || \
-    pip3 install --break-system-packages -q -r "$WORKDIR/requirements.txt" 2>/dev/null || true
-fi
-
-# Run pytest with JSON report
-REPORT_FILE="$WORKDIR/test-report.json"
-cd "$WORKDIR"
-python3 -m pytest validation/ \
-  -v \
-  --json-report \
-  --json-report-file="$REPORT_FILE" \
-  --tb=short \
-  -x || true
-
-# ---------------------------------------------------------------------------
-# Parse results
-# ---------------------------------------------------------------------------
-
-echo ""
-echo "--- Results ---"
-echo ""
-
-if [[ -f "$REPORT_FILE" ]]; then
-  python3 -c "
-import json, sys
-
-with open('$REPORT_FILE') as f:
-    report = json.load(f)
-
-summary = report.get('summary', {})
-total = summary.get('total', 0)
-passed = summary.get('passed', 0)
-failed = summary.get('failed', 0)
-errors = summary.get('error', 0)
-
-print(f'Total:   {total}')
-print(f'Passed:  {passed}')
-print(f'Failed:  {failed}')
-print(f'Errors:  {errors}')
-print(f'Pass %%:  {passed/total*100:.1f}%%' if total else 'Pass %: N/A')
-
-# Count by category (test class name → category)
-categories = {}
-for test in report.get('tests', []):
-    nodeid = test.get('nodeid', '')
-    outcome = test.get('outcome', '')
-    # Extract class name: validation/test_pipeline.py::TestHappyPath::test_...
-    parts = nodeid.split('::')
-    cls = parts[1] if len(parts) > 1 else 'unknown'
-    # Convert TestHappyPath → happy_path
-    cat = cls.replace('Test', '').strip()
-    # CamelCase to snake_case
-    import re
-    cat = re.sub(r'(?<!^)(?=[A-Z])', '_', cat).lower()
-    if cat not in categories:
-        categories[cat] = {'total': 0, 'passed': 0}
-    categories[cat]['total'] += 1
-    if outcome == 'passed':
-        categories[cat]['passed'] += 1
-
-print()
-print('By category:')
-for cat, data in sorted(categories.items()):
-    pct = data['passed']/data['total']*100 if data['total'] else 0
-    print(f'  {cat:25s} {data[\"passed\"]}/{data[\"total\"]} ({pct:.0f}%)')
-"
-else
-  echo "No test report generated."
-fi
-
-echo ""
-echo "Duration:  ${DURATION}s"
-echo "Workdir:   $WORKDIR"
-echo "Report:    $REPORT_FILE"
-echo ""
-echo "Done."
+echo "Run info saved to: $RESULTS_FILE"
