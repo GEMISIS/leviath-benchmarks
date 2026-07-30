@@ -1,136 +1,169 @@
 #!/usr/bin/env python3
-"""
-Aggregate multiple benchmark runs into a summary with statistics.
-Reads results/runs/*.json, outputs results/benchmark-results.json
+"""Aggregate the runs of one benchmark round into a summary.
+
+Usage:
+    scripts/aggregate-results.py results/rounds/<freeze-tag>/
+
+Reads every  <round-dir>/runs/*.json  and writes  <round-dir>/benchmark-results.json.
+
+Integrity rules (see METHODOLOGY.md):
+  - Every run file MUST carry a "freeze_tag" matching the round directory name;
+    anything else is refused. This is what prevents mixing runs scored under
+    different task/suite versions (the failure mode of the July 2026 round).
+  - No metadata is hardcoded here: model, task, blueprint, and suite hash are
+    read from the run files and must agree across runs of the same arm.
+  - All values are published: mean, median, min/max, and the raw per-run list.
+    No confidence intervals on tiny samples — when exactly two arms are
+    present, an exact one-sided Mann-Whitney rank-sum p-value is reported for
+    pass_rate and total_billed_tokens instead.
+  - Costs are recomputed here, identically for every arm, from API-reported
+    usage fields via scripts/cost.py and the round's rates.json. A run file
+    without usage fields is refused — no len/4 heuristics, no cache-blind
+    arithmetic.
 """
 import json
-import math
-import os
-from pathlib import Path
+import statistics
+import sys
 from collections import defaultdict
+from itertools import combinations
+from pathlib import Path
 
-def mean(values):
-    return sum(values) / len(values) if values else 0
+sys.path.insert(0, str(Path(__file__).parent))
+from cost import compute_cost, load_rates  # noqa: E402
 
-def stddev(values):
-    if len(values) < 2:
-        return 0
-    m = mean(values)
-    return math.sqrt(sum((x - m) ** 2 for x in values) / (len(values) - 1))
+REQUIRED_RUN_FIELDS = (
+    "approach", "freeze_tag", "model", "task", "pass_rate", "passed", "total",
+    "duration_seconds", "tool_calls", "usage",
+)
+REQUIRED_USAGE_FIELDS = (
+    "input_tokens", "output_tokens",
+    "cache_creation_input_tokens", "cache_read_input_tokens",
+)
 
-def ci95(values):
-    """95% confidence interval half-width (t-distribution for small n)."""
-    n = len(values)
-    if n < 2:
-        return 0
-    # t-values for 95% CI: n=2→12.71, n=3→4.30, n=4→3.18, n=5→2.78
-    t_values = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447}
-    t = t_values.get(n, 2.0)
-    return t * stddev(values) / math.sqrt(n)
 
-def aggregate():
-    script_dir = Path(__file__).parent
-    runs_dir = script_dir.parent / 'results' / 'runs'
-    output_path = script_dir.parent / 'results' / 'benchmark-results.json'
+def exact_rank_sum_p(a, b, larger_is_better=True):
+    """Exact one-sided Mann-Whitney p-value: probability, under the null of
+    exchangeability, of a rank sum for `a` at least as extreme as observed."""
+    pooled = a + b
+    n = len(pooled)
+    # Midranks so ties are handled symmetrically.
+    sorted_vals = sorted(pooled)
+    midrank = {}
+    for v in set(pooled):
+        first = sorted_vals.index(v) + 1
+        last = first + sorted_vals.count(v) - 1
+        midrank[v] = (first + last) / 2
+    ranks = [midrank[v] for v in pooled]
+    observed = sum(ranks[:len(a)])
+    count = total = 0
+    for idx in combinations(range(n), len(a)):
+        rs = sum(ranks[i] for i in idx)
+        total += 1
+        if (larger_is_better and rs >= observed) or (not larger_is_better and rs <= observed):
+            count += 1
+    return count / total
 
-    # Collect runs by approach
-    approaches = defaultdict(list)
-    for f in sorted(runs_dir.glob('*.json')):
-        with open(f) as fh:
-            run = json.load(fh)
-        approaches[run['approach']].append(run)
 
-    result = {
-        "benchmark": "stress-test-v3",
-        "date": "2026-07-11",
-        "task": "Multi-Tenant Event Processing Platform",
-        "validation_tests": 69,
-        "methodology": {
-            "model": "claude-sonnet-5",
-            "validation": "69 hidden tests across 13 categories, unseen by agent",
-            "baseline": "Independent Rust binary, same API + tools, single flat context window",
-            "seed_files": "11 spec files, 4 config files, identical for both approaches"
-        },
-        "approaches": {}
+def summarize(values, digits=2):
+    return {
+        "mean": round(statistics.mean(values), digits),
+        "median": round(statistics.median(values), digits),
+        "min": round(min(values), digits),
+        "max": round(max(values), digits),
+        "values": [round(v, digits) for v in values],
+        "n": len(values),
     }
 
-    for approach, runs in approaches.items():
-        n = len(runs)
-        pass_rates = [r['pass_rate'] for r in runs]
-        costs = [r['estimated_cost_usd'] for r in runs]
-        durations = [r['duration_seconds'] for r in runs]
-        tool_calls_list = [r['tool_calls'] for r in runs]
-        passed_list = [r['passed'] for r in runs]
 
-        # Category-level aggregation
-        # Count how many times each test failed across runs
-        all_failures = defaultdict(int)
-        for r in runs:
-            for f in r.get('failures', []):
-                all_failures[f] += 1
+def consistent(runs, field):
+    vals = {json.dumps(r[field], sort_keys=True) for r in runs}
+    if len(vals) != 1:
+        sys.exit(f"refusing to aggregate: field '{field}' differs across runs "
+                 f"of arm '{runs[0]['approach']}': {sorted(vals)}")
+    return runs[0][field]
 
-        approach_data = {
-            "version": "v3",
-            "model": "claude-sonnet-5",
-            "runs": n,
-            "pass_rate": {
-                "mean": round(mean(pass_rates), 1),
-                "stddev": round(stddev(pass_rates), 1),
-                "ci95": round(ci95(pass_rates), 1),
-                "min": round(min(pass_rates), 1),
-                "max": round(max(pass_rates), 1),
-                "values": [round(v, 1) for v in pass_rates]
-            },
-            "cost_usd": {
-                "mean": round(mean(costs), 2),
-                "stddev": round(stddev(costs), 2),
-                "ci95": round(ci95(costs), 2),
-                "values": [round(v, 2) for v in costs]
-            },
-            "duration_seconds": {
-                "mean": round(mean(durations)),
-                "stddev": round(stddev(durations)),
-                "values": durations
-            },
-            "tool_calls": {
-                "mean": round(mean(tool_calls_list)),
-                "stddev": round(stddev(tool_calls_list)),
-                "values": tool_calls_list
-            },
-            "tests_passed": {
-                "mean": round(mean(passed_list), 1),
-                "values": passed_list
-            },
-            "common_failures": {name: count for name, count in 
-                               sorted(all_failures.items(), key=lambda x: -x[1])
-                               if count >= n // 2 + 1}  # failures in majority of runs
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    round_dir = Path(sys.argv[1]).resolve()
+    tag = round_dir.name
+    runs_dir = round_dir / "runs"
+    run_files = sorted(runs_dir.glob("*.json"))
+    if not run_files:
+        sys.exit(f"no run files in {runs_dir}")
+    rates = load_rates(round_dir / "rates.json")
+
+    arms = defaultdict(list)
+    for f in run_files:
+        run = json.loads(f.read_text())
+        for field in REQUIRED_RUN_FIELDS:
+            if field not in run:
+                sys.exit(f"refusing {f.name}: missing required field '{field}'")
+        for field in REQUIRED_USAGE_FIELDS:
+            if field not in run["usage"]:
+                sys.exit(f"refusing {f.name}: usage missing '{field}' — costs "
+                         "must come from API-reported usage, not estimates")
+        if run["freeze_tag"] != tag:
+            sys.exit(f"refusing {f.name}: freeze_tag '{run['freeze_tag']}' != "
+                     f"round '{tag}' — do not mix rounds")
+        run["_file"] = f.name
+        arms[run["approach"]].append(run)
+
+    result = {"freeze_tag": tag, "run_files": [f.name for f in run_files], "arms": {}}
+    for arm, runs in sorted(arms.items()):
+        usage_totals = [sum(r["usage"][k] for k in REQUIRED_USAGE_FIELDS) for r in runs]
+        cache_rates = [
+            r["usage"]["cache_read_input_tokens"] /
+            max(1, r["usage"]["input_tokens"] + r["usage"]["cache_read_input_tokens"] +
+                r["usage"]["cache_creation_input_tokens"]) * 100
+            for r in runs
+        ]
+        result["arms"][arm] = {
+            "model": consistent(runs, "model"),
+            "task": consistent(runs, "task"),
+            "blueprint": consistent(runs, "blueprint") if all("blueprint" in r for r in runs) else None,
+            "runs": len(runs),
+            "pass_rate": summarize([r["pass_rate"] for r in runs], 1),
+            "cost_usd": summarize([compute_cost(r["usage"], r["model"], rates) for r in runs]),
+            "total_billed_tokens": summarize(usage_totals, 0),
+            "cache_hit_rate_pct": summarize(cache_rates, 1),
+            "duration_seconds": summarize([r["duration_seconds"] for r in runs], 0),
+            "tool_calls": summarize([r["tool_calls"] for r in runs], 0),
         }
 
-        if approach == "leviath":
-            approach_data["blueprint"] = "simple-coder"
+    if len(arms) == 2:
+        # The pre-registered hypothesis (METHODOLOGY.md) is that the
+        # structured arm scores higher and bills fewer tokens — so that arm is
+        # always A. Falls back to sorted order for other arm pairs.
+        names = sorted(arms, key=lambda n: (n != "structured", n))
+        (a_name, b_name) = names
+        a_runs, b_runs = arms[a_name], arms[b_name]
+        result["comparison"] = {
+            "arms": [a_name, b_name],
+            "note": "exact one-sided Mann-Whitney rank-sum p-values; "
+                    f"H1: {a_name} higher pass_rate / lower tokens",
+            "pass_rate_p": round(exact_rank_sum_p(
+                [r["pass_rate"] for r in a_runs], [r["pass_rate"] for r in b_runs],
+                larger_is_better=True), 4),
+            "total_billed_tokens_p": round(exact_rank_sum_p(
+                [sum(r["usage"][k] for k in REQUIRED_USAGE_FIELDS) for r in a_runs],
+                [sum(r["usage"][k] for k in REQUIRED_USAGE_FIELDS) for r in b_runs],
+                larger_is_better=False), 4),
+        }
 
-        result["approaches"][approach] = approach_data
+    out = round_dir / "benchmark-results.json"
+    out.write_text(json.dumps(result, indent=2) + "\n")
+    for arm, data in result["arms"].items():
+        print(f"{arm}: n={data['runs']} pass median {data['pass_rate']['median']}% "
+              f"[{data['pass_rate']['min']}–{data['pass_rate']['max']}], "
+              f"cost median ${data['cost_usd']['median']}, "
+              f"cache hit median {data['cache_hit_rate_pct']['median']}%")
+    if "comparison" in result:
+        c = result["comparison"]
+        print(f"p(pass_rate)={c['pass_rate_p']}  p(tokens)={c['total_billed_tokens_p']}")
+    print(f"wrote {out}")
 
-    with open(output_path, 'w') as f:
-        json.dump(result, f, indent=2)
 
-    # Print summary
-    for name, data in result['approaches'].items():
-        n = data['runs']
-        pr = data['pass_rate']
-        cost = data['cost_usd']
-        print(f"\n{'='*50}")
-        print(f"{name.upper()} ({n} runs)")
-        print(f"  Pass rate: {pr['mean']}% ± {pr['ci95']}% (95% CI)")
-        print(f"  Cost: ${cost['mean']} ± ${cost['ci95']}")
-        print(f"  Duration: {data['duration_seconds']['mean']}s")
-        print(f"  Tool calls: {data['tool_calls']['mean']}")
-        if data['common_failures']:
-            print(f"  Common failures ({len(data['common_failures'])}):")
-            for f, c in data['common_failures'].items():
-                print(f"    - {f} ({c}/{n} runs)")
-
-    print(f"\nSaved to {output_path}")
-
-if __name__ == '__main__':
-    aggregate()
+if __name__ == "__main__":
+    main()

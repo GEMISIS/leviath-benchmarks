@@ -55,7 +55,7 @@ for TASK in "${TASKS[@]}"; do
     AGENT_META="$WORKDIR/.agent-meta.json"
     START_TS=$(date +%s)
 
-    LEV_BIN="${LEV_BIN:-$(command -v lev 2>/dev/null || echo "$HOME/dev/leviath/target/release/lev")}"
+    LEV_BIN="${LEV_BIN:-$(command -v lev 2>/dev/null || echo "$HOME/.cargo/bin/lev")}"
     FLAT_BIN="${FLAT_BIN:-$BENCH_ROOT/target/release/flat-baseline}"
     API_KEY="${ANTHROPIC_API_KEY:-$(grep 'anthropic_api_key' ~/.leviath/config.toml 2>/dev/null | sed 's/.*= *"//' | sed 's/"//')}"
     ABS_TASK="$(realpath "$TASK_DIR/task.md")"

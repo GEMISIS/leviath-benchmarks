@@ -1,3 +1,10 @@
+> **SUPERSEDED (2026-07-29):** this document describes the original
+> pre-audit design, including an external flat-baseline binary and cost
+> estimates that did not survive review. The current contract is
+> [METHODOLOGY.md](METHODOLOGY.md); the withdrawn July 2026 data and the
+> reasons are in [results/archive-2026-07/README.md](results/archive-2026-07/README.md).
+> Kept for historical context only.
+
 # Leviath-Benchmarks Build Summary
 
 ## Status: ✅ Complete

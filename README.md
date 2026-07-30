@@ -1,71 +1,65 @@
 # Leviath Benchmarks
 
-Benchmark suite for testing Leviath agent blueprints against a stress-test task.
+Benchmarks for the [Leviath](https://github.com/Sun-Forge-AI/leviath) agent
+framework. **Read [METHODOLOGY.md](METHODOLOGY.md) first** — it is the
+contract every published number must satisfy, and it exists because the July
+2026 round was withdrawn after an internal audit (see
+[`results/archive-2026-07/README.md`](results/archive-2026-07/README.md)).
 
-## Quick Start
+What is measured (and what deliberately is not):
 
-### Prerequisites
-- `lev` CLI installed and built (`cargo install --path .` from leviath repo, then `codesign --force --sign - ~/.cargo/bin/lev`)
-- Anthropic API key in `~/.leviath/config.toml`
-- Python 3.10+ with venv support
+- **No head-to-head numbers against agent products** (Claude Code, Codex, Pi,
+  OpenCode, …). Leviath is a framework; those sit at a different layer, and
+  any purpose-built external baseline is permanently open to the "you wrote
+  the loser" objection.
+- **C1** — structured vs flat context as an **ablation of the same Leviath
+  binary**: `blueprints/engineer-v3/` vs `blueprints/flat-mode/`.
+- **C2** — cache-honest token/cost accounting from API-reported usage only
+  (`scripts/cost.py` + the round's pinned `rates.json`). Cache hit rate is
+  published for both arms even where the structured arm is worse.
+- **C3** — a task-completion ladder (`cli-tool` → `rest-api` → `stress-test`).
+- **C4** — retention probes graded by a different provider's model
+  (`evaluator/`); cut from a round if not fully wired at freeze time.
+- **C5** — absolute resource footprint of one daemon
+  (`scripts/resource-benchmark.sh`), real inference, no comparison bars.
 
-### Run a benchmark
+## Running a round
 
 ```bash
-# Create a fresh workdir with seed files
+# 0. Freeze: tag this repo + the leviath repo, write results/rounds/<tag>/rates.json
+# 1. Preflight (checks bins, keys, scoring deps, blueprint validity, clean tree)
+scripts/preflight.sh <freeze-tag>
+
+# 2. Run an arm on a task (repeat per run of the matrix in METHODOLOGY.md)
 WORKDIR=$(mktemp -d)
 cp -r tasks/stress-test/seed-files/* "$WORKDIR/"
+lev run blueprints/flat-mode/agent.leviath -t tasks/stress-test/task.md --yolo
 
-# Pick a blueprint and run
-lev run blueprints/engineer-v2/agent.leviath \
-  -t tasks/stress-test/task.md \
-  --yolo
+# 3. Score it (writes results/rounds/<tag>/runs/<arm>-run<N>.json)
+scripts/validate-run.sh "$WORKDIR" flat 1 ~/.leviath/runs/<run-id>/meta.json <freeze-tag>
 
-# Or use the runner script for 3 parallel runs
-./run-benchmark.sh blueprints/engineer-v2/agent.leviath 3
+# 4. Aggregate + chart (refuses runs whose freeze_tag doesn't match)
+scripts/aggregate-results.py results/rounds/<freeze-tag>/
+charts/generate.py results/rounds/<freeze-tag>/
 ```
 
-### Score a completed run
+To verify a published round from committed data:
 
 ```bash
-# Set up validation venv (first time only)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install flask pyyaml bcrypt pytest pytest-timeout
-
-# Copy validation tests to workdir and run
-cp tasks/stress-test/validation/*.py "$WORKDIR/"
-cd "$WORKDIR"
-python -m pytest test_algorithms.py test_behavioral.py -v --tb=short
+scripts/reproduce-everything.sh <freeze-tag>
 ```
 
-### Blueprints
+## Layout
 
-| Blueprint | Description | Avg Score | Avg Cost | Avg Time |
-|-----------|-------------|-----------|----------|----------|
-| `engineer/` (v1) | 9-stage pipeline, original | 55/59 (93.2%) | $31.63 | 60 min |
-| `engineer-v2/` (v2.1) | v1 + context filtering | 56/59 (94.9%) | $31.78 | 53 min |
-| `engineer-v3/` | Merged stages, generic prompts, batch hints | WIP | WIP | WIP |
-| `engineer-mixed/` | Opus plan → Haiku impl → Sonnet validate | 48/59 (81.4%) | $41.75 | 57 min |
+| Path | What |
+|---|---|
+| `tasks/<name>/` | task.md, seed files, held-out validation suite, probes.json |
+| `blueprints/` | agent blueprints; `flat-mode/` is the ablation arm |
+| `scripts/` | preflight, scoring, cost module, aggregator, resource benchmark |
+| `charts/generate.py` | round charts (light + dark), committed data only |
+| `evaluator/` | cross-provider probe grader (Rust) |
+| `results/rounds/<tag>/` | one published round: runs, rates.json, aggregate, resource data |
+| `results/archive-2026-07/` | withdrawn July 2026 data — do not aggregate or cite |
 
-### Scoring with Claude Code (comparison)
-
-```bash
-WORKDIR=$(mktemp -d)
-cp -r tasks/stress-test/seed-files/* "$WORKDIR/"
-cd "$WORKDIR"
-claude --model claude-sonnet-5 --permission-mode bypassPermissions \
-  -p "$(cat /path/to/tasks/stress-test/task.md)"
-
-# Then score
-cp /path/to/tasks/stress-test/validation/*.py .
-python -m pytest test_algorithms.py test_behavioral.py -v --tb=short
-```
-
-### Cost calculation (Sonnet 5)
-
-```python
-cost = (prompt*3.0 + completion*15.0 + cached*0.30 + cache_write*3.75) / 1_000_000
-```
-
-Token counts are in `~/.leviath/runs/<run-id>/meta.json`.
+Historical note: `SUMMARY.md` describes the original (pre-audit) design and is
+kept for context; where it conflicts with METHODOLOGY.md, METHODOLOGY.md wins.
