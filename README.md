@@ -1,6 +1,6 @@
 # Leviath Benchmarks
 
-Benchmarks for the [Leviath](https://github.com/Sun-Forge-AI/leviath) agent
+Benchmarks for the [Leviath](https://github.com/GEMISIS/leviath) agent
 framework. **Read [METHODOLOGY.md](METHODOLOGY.md) first** — it is the
 contract every published number must satisfy, and it exists because the July
 2026 round was withdrawn after an internal audit (see

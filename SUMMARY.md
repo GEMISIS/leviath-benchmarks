@@ -134,7 +134,7 @@ make help
 
 ## Next Steps
 
-1. **Install Leviath**: Follow [installation guide](https://github.com/Sun-Forge-AI/leviath)
+1. **Install Leviath**: Follow [installation guide](https://github.com/GEMISIS/leviath)
 2. **Set API Keys**:
    ```bash
    export ANTHROPIC_API_KEY=your_key
