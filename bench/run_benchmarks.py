@@ -158,8 +158,19 @@ def summarize_tier(csv_path: Path) -> dict:
         record["total_runs"] = len(ivals)
         record["exact_peak_concurrency"] = peak
         if ivals:
-            record["active_span_secs"] = round(
-                max(e for _, e in ivals) - min(s for s, _ in ivals), 1)
+            t_start = min(s for s, _ in ivals)
+            t_end = max(e for _, e in ivals)
+            record["active_span_secs"] = round(t_end - t_start, 1)
+            # CPU restricted to the span when runs were actually alive: the
+            # whole-window average dilutes over the idle settle tail and
+            # understates what the workload cost.
+            active_cpu = [float(r["cpu_percent"]) for r in rows
+                          if r["cpu_percent"]
+                          and t_start <= float(r["elapsed_seconds"]) <= t_end]
+            if active_cpu:
+                record["cpu_active_avg_pct"] = round(
+                    sum(active_cpu) / len(active_cpu), 2)
+                record["cpu_active_peak_pct"] = round(max(active_cpu), 2)
     return record
 
 
@@ -330,8 +341,8 @@ def resolve_lev(path_arg: str | None, allow_outdated: bool) -> str:
 AGGREGATE_FIELDS = (
     "cold_start_secs", "spawn_secs", "drained_at_secs", "live_mb_peak",
     "live_mb_settled", "rss_mb_peak", "cpu_machine_pct_peak",
-    "cpu_machine_pct_avg", "exact_peak_concurrency", "total_runs",
-    "active_span_secs",
+    "cpu_machine_pct_avg", "cpu_active_avg_pct", "cpu_active_peak_pct",
+    "exact_peak_concurrency", "total_runs", "active_span_secs",
 )
 
 
