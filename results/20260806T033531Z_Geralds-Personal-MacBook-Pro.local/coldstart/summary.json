@@ -1,0 +1,180 @@
+{
+  "track": "coldstart",
+  "repetitions": 25,
+  "ready_secs": {
+    "median": 0.0275,
+    "min": 0.0236,
+    "max": 0.042,
+    "n": 25
+  },
+  "probe_baseline_secs": {
+    "median": 0.008,
+    "min": 0.0059,
+    "max": 0.0086,
+    "n": 25
+  },
+  "spawn_ack_secs": {
+    "median": 0.0291,
+    "min": 0.0252,
+    "max": 0.0322,
+    "n": 25
+  },
+  "agent_started_secs": {
+    "median": 0.0295,
+    "min": 0.0255,
+    "max": 0.0326,
+    "n": 25
+  },
+  "samples": [
+    {
+      "ready_secs": 0.042,
+      "probe_baseline_secs": 0.0059,
+      "spawn_ack_secs": 0.0252,
+      "agent_started_secs": 0.0255
+    },
+    {
+      "ready_secs": 0.0282,
+      "probe_baseline_secs": 0.0086,
+      "spawn_ack_secs": 0.0289,
+      "agent_started_secs": 0.0293
+    },
+    {
+      "ready_secs": 0.0271,
+      "probe_baseline_secs": 0.0085,
+      "spawn_ack_secs": 0.0305,
+      "agent_started_secs": 0.0309
+    },
+    {
+      "ready_secs": 0.0283,
+      "probe_baseline_secs": 0.008,
+      "spawn_ack_secs": 0.029,
+      "agent_started_secs": 0.0293
+    },
+    {
+      "ready_secs": 0.0285,
+      "probe_baseline_secs": 0.0084,
+      "spawn_ack_secs": 0.0285,
+      "agent_started_secs": 0.0289
+    },
+    {
+      "ready_secs": 0.0273,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.03,
+      "agent_started_secs": 0.0304
+    },
+    {
+      "ready_secs": 0.0282,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.0291,
+      "agent_started_secs": 0.0294
+    },
+    {
+      "ready_secs": 0.0292,
+      "probe_baseline_secs": 0.008,
+      "spawn_ack_secs": 0.0294,
+      "agent_started_secs": 0.0298
+    },
+    {
+      "ready_secs": 0.0275,
+      "probe_baseline_secs": 0.0085,
+      "spawn_ack_secs": 0.0313,
+      "agent_started_secs": 0.0317
+    },
+    {
+      "ready_secs": 0.0313,
+      "probe_baseline_secs": 0.008,
+      "spawn_ack_secs": 0.0287,
+      "agent_started_secs": 0.029
+    },
+    {
+      "ready_secs": 0.0278,
+      "probe_baseline_secs": 0.008,
+      "spawn_ack_secs": 0.0294,
+      "agent_started_secs": 0.0297
+    },
+    {
+      "ready_secs": 0.0275,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.0289,
+      "agent_started_secs": 0.0293
+    },
+    {
+      "ready_secs": 0.0265,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.029,
+      "agent_started_secs": 0.0294
+    },
+    {
+      "ready_secs": 0.0265,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.0293,
+      "agent_started_secs": 0.0297
+    },
+    {
+      "ready_secs": 0.0281,
+      "probe_baseline_secs": 0.0083,
+      "spawn_ack_secs": 0.0291,
+      "agent_started_secs": 0.0295
+    },
+    {
+      "ready_secs": 0.0264,
+      "probe_baseline_secs": 0.0079,
+      "spawn_ack_secs": 0.0281,
+      "agent_started_secs": 0.0284
+    },
+    {
+      "ready_secs": 0.0286,
+      "probe_baseline_secs": 0.0082,
+      "spawn_ack_secs": 0.0287,
+      "agent_started_secs": 0.0291
+    },
+    {
+      "ready_secs": 0.0251,
+      "probe_baseline_secs": 0.0079,
+      "spawn_ack_secs": 0.028,
+      "agent_started_secs": 0.0284
+    },
+    {
+      "ready_secs": 0.0236,
+      "probe_baseline_secs": 0.0079,
+      "spawn_ack_secs": 0.0299,
+      "agent_started_secs": 0.0303
+    },
+    {
+      "ready_secs": 0.0287,
+      "probe_baseline_secs": 0.0076,
+      "spawn_ack_secs": 0.0289,
+      "agent_started_secs": 0.0293
+    },
+    {
+      "ready_secs": 0.0285,
+      "probe_baseline_secs": 0.0078,
+      "spawn_ack_secs": 0.0292,
+      "agent_started_secs": 0.0295
+    },
+    {
+      "ready_secs": 0.0244,
+      "probe_baseline_secs": 0.0084,
+      "spawn_ack_secs": 0.0317,
+      "agent_started_secs": 0.0322
+    },
+    {
+      "ready_secs": 0.0269,
+      "probe_baseline_secs": 0.0082,
+      "spawn_ack_secs": 0.0301,
+      "agent_started_secs": 0.0305
+    },
+    {
+      "ready_secs": 0.0256,
+      "probe_baseline_secs": 0.008,
+      "spawn_ack_secs": 0.0309,
+      "agent_started_secs": 0.0313
+    },
+    {
+      "ready_secs": 0.0259,
+      "probe_baseline_secs": 0.0079,
+      "spawn_ack_secs": 0.0322,
+      "agent_started_secs": 0.0326
+    }
+  ]
+}
