@@ -176,9 +176,21 @@ def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
                               stdout=subprocess.DEVNULL,
                               stderr=subprocess.STDOUT,
                               start_new_session=True)
-    time.sleep(2.5)
-    if daemon.poll() is not None:
-        raise RuntimeError(f"{label}: daemon died at start")
+    # Cold start: exec until the control socket answers a real request
+    # (includes one CLI round trip, ~50-100ms of which is client startup).
+    cold_t0 = time.time()
+    cold_start = None
+    while time.time() - cold_t0 < 30:
+        if daemon.poll() is not None:
+            raise RuntimeError(f"{label}: daemon died at start")
+        probe = subprocess.run([lev, "ps", "--json"], env=env,
+                               capture_output=True, timeout=10)
+        if probe.returncode == 0:
+            cold_start = round(time.time() - cold_t0, 3)
+            break
+        time.sleep(0.05)
+    if cold_start is None:
+        raise RuntimeError(f"{label}: daemon never became reachable")
     mon = subprocess.Popen(
         [sys.executable, str(BENCH_DIR / "monitor.py"), "--pid",
          str(daemon.pid), "-o", str(out_dir), "-i", str(interval),
@@ -207,7 +219,9 @@ def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
         time.sleep(min(10, max(2, spawns / 200)))
 
     if not aborted:
-        time.sleep(SETTLE_SECS)
+        # Bigger bursts release memory over a longer tail; a fixed 45s window
+        # snapshots mid-release at 10k+ and misreports the settle.
+        time.sleep(max(SETTLE_SECS, spawns // 80))
     # SIGINT makes the monitor write its CSV/PNG/runs outputs.
     os.killpg(os.getpgid(mon.pid), signal.SIGINT)
     try:
@@ -240,6 +254,7 @@ def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
         "spawns_ok": spawned,
         "pool": pool,
         "latency_ms": LATENCY_MS,
+        "cold_start_secs": cold_start,
         "spawn_secs": round(spawn_secs, 2),
         "drained_at_secs": drained_at,
         "aborted": aborted,
@@ -312,6 +327,54 @@ def resolve_lev(path_arg: str | None, allow_outdated: bool) -> str:
     return lev
 
 
+AGGREGATE_FIELDS = (
+    "cold_start_secs", "spawn_secs", "drained_at_secs", "live_mb_peak",
+    "live_mb_settled", "rss_mb_peak", "cpu_machine_pct_peak",
+    "cpu_machine_pct_avg", "exact_peak_concurrency", "total_runs",
+    "active_span_secs",
+)
+
+
+def aggregate(label: str, runs: list[dict]) -> dict:
+    """Median / min / max across a tier's repetitions.
+
+    Median rather than mean because one repetition disturbed by unrelated
+    system activity should not drag the reported number; min/max carry the
+    spread so readers see the variance instead of trusting a point value.
+    With one repetition all three are that run's value.
+    """
+    import statistics
+
+    def fold(fn):
+        out = {}
+        for field in AGGREGATE_FIELDS:
+            values = [r[field] for r in runs
+                      if isinstance(r.get(field), (int, float))]
+            if values:
+                out[field] = round(fn(values), 3)
+        return out
+
+    return {
+        "label": label,
+        "repetitions": len(runs),
+        "median": fold(statistics.median),
+        "min": fold(min),
+        "max": fold(max),
+        "runs": runs,
+    }
+
+
+def run_tier_repeated(lev: str, spawns: int, pool: int, label: str,
+                      out_dir: Path, interval: float, window_cap: int,
+                      repeat: int) -> dict:
+    runs = []
+    for rep in range(1, repeat + 1):
+        rep_label = label if repeat == 1 else f"{label}_rep{rep}"
+        runs.append(run_tier(lev, spawns, pool, rep_label, out_dir,
+                             interval, window_cap))
+    return aggregate(label, runs)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run the leviath performance benchmarks.")
@@ -320,11 +383,17 @@ def main() -> int:
     parser.add_argument("--track", choices=["memory", "pools", "all"],
                         default="all",
                         help="which benchmark track to run (default: all)")
+    parser.add_argument("--repeat", type=int, default=1,
+                        help="repetitions per tier; summaries report "
+                             "median and min/max (use 3+ for published "
+                             "numbers, default: 1)")
     parser.add_argument("--allow-outdated", action="store_true",
                         help="permit benchmarking a lev older than the "
                              "latest release")
     parser.add_argument("--out", default=str(BENCH_DIR.parent / "results"))
     args = parser.parse_args()
+    if args.repeat < 1:
+        parser.error("--repeat must be at least 1")
     lev = resolve_lev(args.lev, args.allow_outdated)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -343,10 +412,12 @@ def main() -> int:
         for n in MEMORY_TIERS:
             interval = 1.0 if n >= 10000 else 0.5
             window = {10: 240, 100: 240, 1000: 480}.get(n, 1800)
-            tiers.append(run_tier(lev, n, MEMORY_POOL, f"mem_{n}", mem_dir,
-                                  interval, window))
+            tiers.append(run_tier_repeated(lev, n, MEMORY_POOL, f"mem_{n}",
+                                           mem_dir, interval, window,
+                                           args.repeat))
         (mem_dir / "summary.json").write_text(
-            json.dumps({"track": "memory", "tiers": tiers}, indent=2) + "\n")
+            json.dumps({"track": "memory", "repetitions": args.repeat,
+                        "tiers": tiers}, indent=2) + "\n")
 
     if args.track in ("pools", "all"):
         print(f"== pool track ({POOL_SPAWNS} spawns, {LATENCY_MS}ms/call) ==",
@@ -355,10 +426,11 @@ def main() -> int:
         pool_dir.mkdir()
         tiers = []
         for p in POOL_TIERS:
-            tiers.append(run_tier(lev, POOL_SPAWNS, p, f"pool_{p}", pool_dir,
-                                  0.5, 900))
+            tiers.append(run_tier_repeated(lev, POOL_SPAWNS, p, f"pool_{p}",
+                                           pool_dir, 0.5, 900, args.repeat))
         (pool_dir / "summary.json").write_text(
-            json.dumps({"track": "pools", "tiers": tiers}, indent=2) + "\n")
+            json.dumps({"track": "pools", "repetitions": args.repeat,
+                        "tiers": tiers}, indent=2) + "\n")
 
     shutil.rmtree(HOME, ignore_errors=True)
     print(f"results: {result_dir}")

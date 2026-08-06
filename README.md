@@ -70,13 +70,20 @@ in `results/<utc-stamp>_<hostname>/`.
 
 `summary.json` per track, one record per tier:
 
+Each tier record carries `repetitions` and `median` / `min` / `max`
+blocks over these fields (with `--repeat 1`, all three are the single
+run's values):
+
 | field | meaning |
 |---|---|
 | `spawns_ok` / `total_runs` | agents requested vs total runs incl. fan-out children |
+| `cold_start_secs` | daemon exec until the control socket answers a request |
 | `drained_at_secs` | first spawn until the last run reached a terminal status |
 | `live_mb_peak` / `live_mb_settled` | honest memory: peak while working, tail after settle |
 | `exact_peak_concurrency` | most runs simultaneously alive (from per-run intervals, sub-second precision - interval sampling alone undercounts fast runs) |
 | `cpu_machine_pct_*` | daemon CPU as a share of the whole machine; multiply by `specs.json`'s core count for cores |
 
-`statuses` should be all `complete`; anything else is a finding, not a
-formatting problem.
+Single runs vary ~3-6% from OS scheduling and thermal state even though
+the workload is deterministic, so publish medians: `--repeat 3` (about
+100 minutes for the full suite). Each run's `statuses` should be all
+`complete`; anything else is a finding, not a formatting problem.
