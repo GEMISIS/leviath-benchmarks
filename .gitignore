@@ -1,27 +1,3 @@
-# Rust
-/target/
-**/*.rs.bk
-Cargo.lock
-
-# Results (large run artifacts, not the template)
-!/results/benchmark-results.json
-!/results/.gitkeep
-
-# Build artifacts
-*.o
-*.so
-*.dylib
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
 __pycache__/
+*.pyc
+/tmp/

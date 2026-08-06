@@ -1,65 +1,82 @@
-# Leviath Benchmarks
+# leviath-benchmarks
 
-Benchmarks for the [Leviath](https://github.com/GEMISIS/leviath) agent
-framework. **Read [METHODOLOGY.md](METHODOLOGY.md) first** — it is the
-contract every published number must satisfy, and it exists because the July
-2026 round was withdrawn after an internal audit (see
-[`results/archive-2026-07/README.md`](results/archive-2026-07/README.md)).
+Reproducible performance benchmarks for [leviath](https://github.com/GEMISIS/leviath).
+The rules that make numbers from this repo trustworthy:
 
-What is measured (and what deliberately is not):
+1. **Deterministic workloads.** Agents run against a mock provider with a
+   fixed per-call latency (1.5s, the shape of a real model call) - no
+   network, no token cost, byte-identical work every run. Live-model runs
+   measure the provider, not the runtime.
+2. **Honest metrics.** Memory is `live` (physical footprint minus
+   kernel-reclaimable pages on macOS, PSS minus LazyFree on Linux, USS on
+   Windows) - never bare RSS, which counts pages the allocator already
+   returned. CPU is percent of the whole machine, normalized by core
+   count. The full rationale lives in the leviath repo's
+   `perf-tools/README.md`.
+3. **Raw outputs only.** A benchmark run commits monitor CSVs, exact
+   per-run lifetime intervals, `summary.json` per track, and a
+   `specs.json` pinning the machine and binary (model, cores, RAM, OS,
+   binary sha256). Charts are rendered separately from the CSVs, never
+   generated here - data and presentation stay decoupled.
 
-- **No head-to-head numbers against agent products** (Claude Code, Codex, Pi,
-  OpenCode, …). Leviath is a framework; those sit at a different layer, and
-  any purpose-built external baseline is permanently open to the "you wrote
-  the loser" objection.
-- **C1** — structured vs flat context as an **ablation of the same Leviath
-  binary**: `blueprints/engineer-v3/` vs `blueprints/flat-mode/`.
-- **C2** — cache-honest token/cost accounting from API-reported usage only
-  (`scripts/cost.py` + the round's pinned `rates.json`). Cache hit rate is
-  published for both arms even where the structured arm is worse.
-- **C3** — a task-completion ladder (`cli-tool` → `rest-api` → `stress-test`).
-- **C4** — retention probes graded by a different provider's model
-  (`evaluator/`); cut from a round if not fully wired at freeze time.
-- **C5** — absolute resource footprint of one daemon
-  (`scripts/resource-benchmark.sh`), real inference, no comparison bars.
+## The tracks
 
-## Running a round
+**memory** - 10 / 100 / 1,000 / 10,000 spawned agents (a 30/30/20/20 mix
+of the bundled wide-researcher, deep-researcher, reviewer, and
+data-analyst blueprints, so fan-out sub-agents push total runs ~34%
+above spawn count), inference pool fixed at 512. Answers: what does N
+concurrent agents cost? Reports live-memory peak and settle, CPU, and
+the exact concurrency curve reconstructed from per-run filesystem
+timestamps.
 
-```bash
-# 0. Freeze: tag this repo + the leviath repo, write results/rounds/<tag>/rates.json
-# 1. Preflight (checks bins, keys, scoring deps, blueprint validity, clean tree)
-scripts/preflight.sh <freeze-tag>
+**pools** - a fixed 1,000-agent workload at inference-pool widths
+128 / 256 / 512 / 1024. Answers: what does throughput cost? The pool is
+leviath's provider-protection feature (`[limits]
+max_concurrent_inferences`); drain time scales as
+`total_calls x latency / pool` once saturated, and this track measures
+that curve plus the CPU each width spends. Pool 1024 requires a leviath
+build with the 2048-blocking-thread runtime (daemons before that
+silently gate script-provider pools at 512).
 
-# 2. Run an arm on a task (repeat per run of the matrix in METHODOLOGY.md)
-WORKDIR=$(mktemp -d)
-cp -r tasks/stress-test/seed-files/* "$WORKDIR/"
-lev run blueprints/flat-mode/agent.leviath -t tasks/stress-test/task.md --yolo
+## Running
 
-# 3. Score it (writes results/rounds/<tag>/runs/<arm>-run<N>.json)
-scripts/validate-run.sh "$WORKDIR" flat 1 ~/.leviath/runs/<run-id>/meta.json <freeze-tag>
+Requirements: a [leviath](https://github.com/GEMISIS/leviath#installation)
+install (`lev` on your PATH), and `python3` with `psutil` and
+`matplotlib`:
 
-# 4. Aggregate + chart (refuses runs whose freeze_tag doesn't match)
-scripts/aggregate-results.py results/rounds/<freeze-tag>/
-charts/generate.py results/rounds/<freeze-tag>/
+```
+pip3 install psutil matplotlib
+git clone https://github.com/GEMISIS/leviath-benchmarks
+cd leviath-benchmarks
+
+python3 bench/run_benchmarks.py                    # everything
+python3 bench/run_benchmarks.py --track memory     # just the memory ladder
+python3 bench/run_benchmarks.py --track pools      # just the pool sweep
 ```
 
-To verify a published round from committed data:
+The runner refuses to start without a leviath install (it never installs
+one for you - the error tells you where to get it), and refuses a `lev`
+older than the latest release unless you pass `--allow-outdated`, so
+published numbers can't silently come from stale builds. A specific
+binary can always be named with `--lev /path/to/lev`.
 
-```bash
-scripts/reproduce-everything.sh <freeze-tag>
-```
+The full suite takes ~45 minutes on a 16-core machine; single tracks are
+proportionally less. Everything runs in an isolated home
+(`/tmp/levbench`) - your real `~/.leviath` is never touched - and a
+guard aborts if system available memory drops under 4 GB. Results land
+in `results/<utc-stamp>_<hostname>/`.
 
-## Layout
+## Reading a result
 
-| Path | What |
+`summary.json` per track, one record per tier:
+
+| field | meaning |
 |---|---|
-| `tasks/<name>/` | task.md, seed files, held-out validation suite, probes.json |
-| `blueprints/` | agent blueprints; `flat-mode/` is the ablation arm |
-| `scripts/` | preflight, scoring, cost module, aggregator, resource benchmark |
-| `charts/generate.py` | round charts (light + dark), committed data only |
-| `evaluator/` | cross-provider probe grader (Rust) |
-| `results/rounds/<tag>/` | one published round: runs, rates.json, aggregate, resource data |
-| `results/archive-2026-07/` | withdrawn July 2026 data — do not aggregate or cite |
+| `spawns_ok` / `total_runs` | agents requested vs total runs incl. fan-out children |
+| `drained_at_secs` | first spawn until the last run reached a terminal status |
+| `live_mb_peak` / `live_mb_settled` | honest memory: peak while working, tail after settle |
+| `exact_peak_concurrency` | most runs simultaneously alive (from per-run intervals, sub-second precision - interval sampling alone undercounts fast runs) |
+| `cpu_machine_pct_*` | daemon CPU as a share of the whole machine; multiply by `specs.json`'s core count for cores |
 
-Historical note: `SUMMARY.md` describes the original (pre-audit) design and is
-kept for context; where it conflicts with METHODOLOGY.md, METHODOLOGY.md wins.
+`statuses` should be all `complete`; anything else is a finding, not a
+formatting problem.

@@ -1,0 +1,254 @@
+[agent]
+name = "deep-researcher"
+version = "0.0.2"
+description = "Thorough single-topic investigation - searches, follows citation chains, cross-checks claims, and produces a structured cited report"
+entry_stage = "gather"
+
+# Read/search agent: writes only its final report.
+[tool_permissions]
+read_file  = "allow"
+list_dir   = "allow"
+web_search = "allow"
+web_fetch  = "allow"
+write_file = "ask"
+bash       = "ask"
+
+# ─── Stage 1: Gather ──────────────────────────────────────────────────────────
+[stages.gather]
+mode = "autonomous"
+model = { provider = "mockx", model = "sim-1" }
+description = "Gather primary sources and key references on the topic"
+# web_search / web_fetch are provided by this agent's tools/ (issue #97).
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "context_append"]
+max_iterations = 25
+max_revisits = 3
+system_prompt = """
+You are investigating the topic in the `query` region in DEPTH, within any bounds
+in `scope`. This is a single-topic deep dive - go for primary sources and
+authoritative references, not a broad skim.
+
+- Run a focused first round of web_search calls across the distinct facets of the
+  question, then web_fetch the most authoritative results for detail. Prefer
+  primary sources (papers, standards, official docs) over summaries. read_file for
+  local documents. Raw content lands in `sources`.
+- For every source you actually use, append one bibliography line to
+  `sources_index` (context_append): `[n] <title> - <url/path> - <date> -
+  credibility: <high/med/low + why>`.
+- Note citations worth chasing - the analyze stage can send you to follow them.
+
+Once you have solid primary coverage of the core facets, hand off to analyze.
+"""
+
+[stages.gather.tool_routing]
+default_region = "conversation"
+[stages.gather.tool_routing.overrides]
+web_search = "sources"
+web_fetch  = "sources"
+read_file  = "sources"
+list_dir   = "sources"
+
+[stages.gather.transitions.analyze]
+hint = "Enough primary sources gathered for meaningful analysis"
+transform = "direct"
+
+# Un-exhaustible escape (lint: dead-end-possible): when every looping
+# target has spent its max_revisits budget, the run can still move forward
+# to the deliverable instead of dead-ending.
+[stages.gather.transitions.synthesize]
+hint = "Analysis is out of revisits - synthesize from the material in hand"
+transform = "compact"
+
+[stages.gather.transitions.error_recovery]
+condition = "error"
+transform = "direct"
+
+# ─── Stage 2: Analyze ─────────────────────────────────────────────────────────
+# Three open edges: more breadth (gather), chase a specific citation
+# (follow_citations), or write the report (synthesize).
+[stages.analyze]
+mode = "autonomous"
+model = { provider = "mockx", model = "sim-1" }
+description = "Analyze findings, cross-reference claims, and decide the next move"
+available_tools = ["read_file", "web_fetch", "context_write", "context_append"]
+max_iterations = 20
+max_revisits = 3
+transition_prompt = """
+Decide the next move:
+- Broad gaps that need new sources on a sub-topic → respond with: gather
+- A specific cited source you should pull and read before concluding →
+  respond with: follow_citations
+- Enough well-supported evidence to write the report → respond with: synthesize
+"""
+system_prompt = """
+Analyze the `sources` against `sources_index`. Be rigorous:
+1. Extract factual claims into `claims` (context_append), each with its source
+   ref: `<claim> [n]`. Separate well-supported (multiple credible sources) from
+   single-source or speculative.
+2. Record source disagreements in `contradictions` (context_write) - who claims
+   what, with refs. Never silently pick a side.
+3. Evaluate source quality and bias; note gaps and the specific citations worth
+   chasing next.
+
+Prefer following a key citation (follow_citations) over re-searching when a claim
+hinges on a source you haven't read directly.
+
+If `error_report` says a previous stage hit its iteration cap, that stage was cut
+off before finishing - treat its output as incomplete and verify coverage before
+concluding.
+"""
+
+[stages.analyze.transitions.gather]
+hint = "Broad gaps - need new sources on specific sub-topics"
+transform = "compact"
+
+[stages.analyze.transitions.follow_citations]
+hint = "A specific cited source should be pulled and read directly"
+transform = "compact"
+
+[stages.analyze.transitions.synthesize]
+hint = "Evidence is sufficient - write the report"
+transform = "compact"
+
+[stages.analyze.transitions.error_recovery]
+condition = "error"
+transform = "direct"
+
+# ─── Stage 3: Follow citations ────────────────────────────────────────────────
+# The "follows citation chains" behavior as a real stage: pull the specific
+# sources analyze flagged, then hand back.
+[stages.follow_citations]
+mode = "autonomous"
+model = { provider = "mockx", model = "sim-1" }
+description = "Pull and read specific cited sources flagged during analysis"
+available_tools = ["web_fetch", "web_search", "read_file", "context_append"]
+max_iterations = 12
+max_revisits = 3
+system_prompt = """
+Analysis flagged specific citations to chase. For each: web_fetch the source
+directly (or web_search for it by title/author first), read it, and append the
+new material to `sources` plus a bibliography line to `sources_index`. Extract
+any new or corrected claims to `claims`. Then hand back to analyze.
+
+Stay focused on the flagged citations - this is a targeted deep read, not a new
+broad search.
+"""
+
+[stages.follow_citations.tool_routing]
+default_region = "conversation"
+[stages.follow_citations.tool_routing.overrides]
+web_fetch  = "sources"
+web_search = "sources"
+read_file  = "sources"
+
+[stages.follow_citations.transitions.analyze]
+hint = "Cited sources read - resume analysis"
+transform = "compact"
+
+# Un-exhaustible escape (lint: dead-end-possible): when every looping
+# target has spent its max_revisits budget, the run can still move forward
+# to the deliverable instead of dead-ending.
+[stages.follow_citations.transitions.synthesize]
+hint = "Analysis is out of revisits - synthesize from the material in hand"
+transform = "compact"
+
+[stages.follow_citations.transitions.error_recovery]
+condition = "error"
+transform = "direct"
+
+# ─── Stage 4: Synthesize (terminal) ───────────────────────────────────────────
+[stages.synthesize]
+mode = "autonomous"
+model = { provider = "mockx", model = "sim-1" }
+description = "Produce a structured, cited research report"
+available_tools = ["write_file", "read_file"]
+max_iterations = 15
+system_prompt = """
+Write the report (write_file), built from `claims` and citing `sources_index`,
+following the citation/confidence rules in `format`. Structure:
+- Executive summary (key findings in 3-5 sentences, each with a confidence level)
+- Background and context
+- Findings organized by theme, every non-obvious claim carrying a [n] citation
+- Disagreements - pull these straight from `contradictions`; never drop a
+  recorded conflict
+- Analysis and implications
+- Open questions
+- References - the numbered bibliography from `sources_index`
+
+Write for a technical audience. Be precise. Distinguish evidence from inference.
+"""
+
+[stages.synthesize.transitions.summary]
+hint = "The synthesis is written"
+
+# ─── Stage 5: Error recovery ──────────────────────────────────────────────────
+[stages.error_recovery]
+mode = "autonomous"
+model = { provider = "mockx", model = "sim-1" }
+description = "Recover from a failed source fetch or parse during research"
+available_tools = ["read_file", "bash"]
+max_iterations = 8
+max_revisits = 1
+system_prompt = """
+A call failed mid-research. The `error_report` region holds the error text the
+runtime captured - read it first. Record which source is unavailable and why (as
+a gap), and hand back to analyze to continue with the material you do have.
+"""
+
+# Un-exhaustible escape (lint: dead-end-possible): when every looping
+# target has spent its max_revisits budget, the run can still move forward
+# to the deliverable instead of dead-ending.
+[stages.error_recovery.transitions.synthesize]
+hint = "Recovery is not converging - synthesize what was gathered"
+transform = "compact"
+
+[stages.error_recovery.transitions.analyze]
+hint = "Recovered - continue analysis"
+transform = "compact"
+
+[compaction]
+provider = "mockx"
+model = "sim-1"
+
+# ─── Final output ────────────────────────────────────────────────────────────
+# Terminal. `mode = "output"` grants `submit_output`, requires the call, and
+# lets the run end here. No file tools on purpose: this stage reports, it does
+# not work.
+[stages.summary]
+mode = "output"
+model = { provider = "mockx", model = "sim-1" }
+description = "Say what the investigation found"
+max_iterations = 8
+system_prompt = """
+Say what this investigation concluded, for whoever asked for it.
+
+Lead with the answer, then the evidence that carried the most weight and the
+open questions that remain. Name the file you wrote.
+
+Where the sources disagreed, say so - a summary that hides a live disagreement
+is worse than no summary.
+"""
+
+[stages.summary.transitions]
+
+# ─── Context layout ───────────────────────────────────────────────────────────
+# Percentage budgets (issue #100) with absolute guard-rails.
+[context.regions]
+query          = { kind = "pinned", budget = "1%", max_tokens = 1500, required = true, seed = "task", required_message = "State the research topic via --task." }
+scope          = { kind = "pinned", budget = "1%", max_tokens = 1500, seed = "scope" }
+sources_index  = { kind = "pinned", budget = "4%", max_tokens = 4000 }
+format         = { kind = "pinned", budget = "1%", max_tokens = 500, seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the References bibliography (title + URL/path). Mark each key finding's confidence as high / medium / low based on source count and credibility." } }
+
+sources        = { kind = "temporary",      budget = "30%", max_tokens = 50000 }
+claims         = { kind = "sliding_window", max_items = 40, budget = "8%", max_tokens = 9000 }
+contradictions = { kind = "clearable",      budget = "3%", max_tokens = 3000 }
+analysis         = { kind = "compacting",      budget = "30%", compact_at = "80%", threshold_tokens = 30000, max_tokens = 40000 }
+analysis_history = { kind = "compact_history", source_region = "analysis", budget = "3%", max_tokens = 15000 }
+
+conversation   = { kind = "sliding_window", max_items = 30, budget = "12%", max_tokens = 15000, strategy = "bulk", overflow = 10 }
+
+# Written by the RUNTIME on an abnormal stage ending (issue #154): a failed
+# inference call's error text, or a note that a stage hit its iteration cap.
+# Pinned so it survives the edge transform into the stage that acts on it.
+error_report   = { kind = "pinned", budget = "1%", max_tokens = 2000 }
+
+notes = { kind = "temporary", budget = "5%", max_tokens = 20000 }
