@@ -718,7 +718,7 @@ def main() -> int:
                         "tiers": tiers}, indent=2) + "\n")
 
     if args.track in ("coldstart", "all"):
-        print("== coldstart track (three all-cold scenarios) ==", flush=True)
+        print("== coldstart track (four all-cold scenarios) ==", flush=True)
         cold_dir = result_dir / "coldstart"
         cold_dir.mkdir()
         run_coldstart_track(lev, cold_dir)

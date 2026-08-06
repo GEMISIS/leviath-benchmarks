@@ -1,0 +1,290 @@
+{
+  "track": "coldstart",
+  "paused_resumption": {
+    "repetitions": 10,
+    "boot_cmd_secs": {
+      "median": 0.029,
+      "min": 0.0196,
+      "max": 0.0331,
+      "n": 10
+    },
+    "total_secs": {
+      "median": 0.075,
+      "min": 0.0624,
+      "max": 0.0791,
+      "n": 10
+    },
+    "samples": [
+      {
+        "boot_cmd_secs": 0.0283,
+        "total_secs": 0.0746
+      },
+      {
+        "boot_cmd_secs": 0.0246,
+        "total_secs": 0.0709
+      },
+      {
+        "boot_cmd_secs": 0.0227,
+        "total_secs": 0.0686
+      },
+      {
+        "boot_cmd_secs": 0.0292,
+        "total_secs": 0.075
+      },
+      {
+        "boot_cmd_secs": 0.0298,
+        "total_secs": 0.076
+      },
+      {
+        "boot_cmd_secs": 0.029,
+        "total_secs": 0.0758
+      },
+      {
+        "boot_cmd_secs": 0.0331,
+        "total_secs": 0.0791
+      },
+      {
+        "boot_cmd_secs": 0.0196,
+        "total_secs": 0.0624
+      },
+      {
+        "boot_cmd_secs": 0.0266,
+        "total_secs": 0.0713
+      },
+      {
+        "boot_cmd_secs": 0.0303,
+        "total_secs": 0.0765
+      }
+    ]
+  },
+  "daemon_boot": {
+    "repetitions": 25,
+    "ready_secs": {
+      "median": 0.0263,
+      "min": 0.0191,
+      "max": 0.0315,
+      "n": 25
+    },
+    "probe_baseline_secs": {
+      "median": 0.0075,
+      "min": 0.0058,
+      "max": 0.009,
+      "n": 25
+    },
+    "samples": [
+      {
+        "ready_secs": 0.0274,
+        "probe_baseline_secs": 0.0067
+      },
+      {
+        "ready_secs": 0.0256,
+        "probe_baseline_secs": 0.0076
+      },
+      {
+        "ready_secs": 0.0191,
+        "probe_baseline_secs": 0.0058
+      },
+      {
+        "ready_secs": 0.0241,
+        "probe_baseline_secs": 0.0081
+      },
+      {
+        "ready_secs": 0.0306,
+        "probe_baseline_secs": 0.0078
+      },
+      {
+        "ready_secs": 0.0263,
+        "probe_baseline_secs": 0.0077
+      },
+      {
+        "ready_secs": 0.029,
+        "probe_baseline_secs": 0.0078
+      },
+      {
+        "ready_secs": 0.0209,
+        "probe_baseline_secs": 0.0061
+      },
+      {
+        "ready_secs": 0.0254,
+        "probe_baseline_secs": 0.0082
+      },
+      {
+        "ready_secs": 0.0275,
+        "probe_baseline_secs": 0.0074
+      },
+      {
+        "ready_secs": 0.0271,
+        "probe_baseline_secs": 0.0074
+      },
+      {
+        "ready_secs": 0.0315,
+        "probe_baseline_secs": 0.0079
+      },
+      {
+        "ready_secs": 0.0311,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.031,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.0217,
+        "probe_baseline_secs": 0.0071
+      },
+      {
+        "ready_secs": 0.0228,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.0311,
+        "probe_baseline_secs": 0.0078
+      },
+      {
+        "ready_secs": 0.0263,
+        "probe_baseline_secs": 0.0074
+      },
+      {
+        "ready_secs": 0.023,
+        "probe_baseline_secs": 0.0071
+      },
+      {
+        "ready_secs": 0.025,
+        "probe_baseline_secs": 0.0074
+      },
+      {
+        "ready_secs": 0.0292,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.0246,
+        "probe_baseline_secs": 0.0068
+      },
+      {
+        "ready_secs": 0.0233,
+        "probe_baseline_secs": 0.007
+      },
+      {
+        "ready_secs": 0.0276,
+        "probe_baseline_secs": 0.009
+      },
+      {
+        "ready_secs": 0.0292,
+        "probe_baseline_secs": 0.0075
+      }
+    ]
+  },
+  "new_run_cold": {
+    "repetitions": 15,
+    "total_secs": {
+      "median": 0.0657,
+      "min": 0.0546,
+      "max": 0.074,
+      "n": 15
+    },
+    "samples": [
+      {
+        "total_secs": 0.0722
+      },
+      {
+        "total_secs": 0.0597
+      },
+      {
+        "total_secs": 0.0565
+      },
+      {
+        "total_secs": 0.0657
+      },
+      {
+        "total_secs": 0.0662
+      },
+      {
+        "total_secs": 0.0631
+      },
+      {
+        "total_secs": 0.0731
+      },
+      {
+        "total_secs": 0.0638
+      },
+      {
+        "total_secs": 0.0727
+      },
+      {
+        "total_secs": 0.074
+      },
+      {
+        "total_secs": 0.0546
+      },
+      {
+        "total_secs": 0.0714
+      },
+      {
+        "total_secs": 0.07
+      },
+      {
+        "total_secs": 0.058
+      },
+      {
+        "total_secs": 0.0611
+      }
+    ]
+  },
+  "cold_continuation": {
+    "repetitions": 10,
+    "boot_cmd_secs": {
+      "median": 0.0291,
+      "min": 0.0192,
+      "max": 0.0323,
+      "n": 10
+    },
+    "total_secs": {
+      "median": 0.0696,
+      "min": 0.0497,
+      "max": 0.5717,
+      "n": 10
+    },
+    "samples": [
+      {
+        "boot_cmd_secs": 0.0317,
+        "total_secs": 0.0696
+      },
+      {
+        "boot_cmd_secs": 0.0319,
+        "total_secs": 0.0619
+      },
+      {
+        "boot_cmd_secs": 0.0204,
+        "total_secs": 0.5518
+      },
+      {
+        "boot_cmd_secs": 0.0323,
+        "total_secs": 0.569
+      },
+      {
+        "boot_cmd_secs": 0.0291,
+        "total_secs": 0.5717
+      },
+      {
+        "boot_cmd_secs": 0.0192,
+        "total_secs": 0.0497
+      },
+      {
+        "boot_cmd_secs": 0.0275,
+        "total_secs": 0.058
+      },
+      {
+        "boot_cmd_secs": 0.03,
+        "total_secs": 0.0604
+      },
+      {
+        "boot_cmd_secs": 0.0211,
+        "total_secs": 0.5668
+      },
+      {
+        "boot_cmd_secs": 0.028,
+        "total_secs": 0.0586
+      }
+    ]
+  }
+}
