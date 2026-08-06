@@ -173,6 +173,18 @@ def summarize_tier(csv_path: Path) -> dict:
     return record
 
 
+def _stop(proc, sig, wait: int = 30) -> None:
+    """Signal a child's process group, tolerating one that already exited."""
+    try:
+        os.killpg(os.getpgid(proc.pid), sig)
+    except ProcessLookupError:
+        return
+    try:
+        proc.wait(timeout=wait)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+
+
 def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
              interval: float, window_cap: int) -> dict:
     """One tier: fresh daemon + monitor, batch spawn, drain, settle, stop."""
@@ -212,6 +224,10 @@ def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
     t0 = time.time()
     spawned, spawn_secs = spawn_batches(lev, spawns, label, env)
     print(f"  spawned {spawned} in {spawn_secs:.1f}s", flush=True)
+    if spawned == 0:
+        _stop(mon, signal.SIGINT)
+        _stop(daemon, signal.SIGTERM)
+        raise RuntimeError(f"{label}: no runs spawned - see batch errors above")
 
     drained_at = None
     aborted = False
@@ -233,17 +249,8 @@ def run_tier(lev: str, spawns: int, pool: int, label: str, out_dir: Path,
         # snapshots mid-release at 10k+ and misreports the settle.
         time.sleep(max(SETTLE_SECS, spawns // 80))
     # SIGINT makes the monitor write its CSV/PNG/runs outputs.
-    os.killpg(os.getpgid(mon.pid), signal.SIGINT)
-    try:
-        mon.wait(timeout=120)
-    except subprocess.TimeoutExpired:
-        mon.kill()
-    os.killpg(os.getpgid(daemon.pid),
-              signal.SIGKILL if aborted else signal.SIGTERM)
-    try:
-        daemon.wait(timeout=20)
-    except subprocess.TimeoutExpired:
-        os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
+    _stop(mon, signal.SIGINT, wait=120)
+    _stop(daemon, signal.SIGKILL if aborted else signal.SIGTERM, wait=20)
 
     # The monitor writes timestamped outputs; give them the tier's name.
     newest = max(p for p in out_dir.glob("leviath_monitor_*.csv")
