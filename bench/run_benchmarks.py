@@ -386,12 +386,107 @@ def run_tier_repeated(lev: str, spawns: int, pool: int, label: str,
     return aggregate(label, runs)
 
 
+COLD_REPS = 25
+
+
+def run_coldstart_track(lev: str, out_dir: Path) -> dict:
+    """Latency micro-track, repeated COLD_REPS times from scratch:
+
+    - ``ready_secs``: daemon exec until the control socket answers a probe.
+      Each probe is a full `lev ps` CLI invocation, so the floor of this
+      number is one CLI round trip; ``probe_baseline_secs`` measures that
+      round trip against the already-running daemon so readers can
+      subtract it.
+    - ``spawn_ack_secs``: `lev run` invocation until the daemon has
+      accepted the spawn (the CLI returns the run id).
+    - ``agent_started_secs``: spawn command start until the run's meta.json
+      exists on disk with a status - the agent observably exists.
+    """
+    import statistics
+
+    (HOME / ".leviath" / "config.toml").write_text(
+        CONFIG_TEMPLATE.format(pool=256))
+    env = env_for(0)  # no latency: this track measures leviath, not the mock
+    samples = []
+    for rep in range(COLD_REPS):
+        shutil.rmtree(RUNS_DIR, ignore_errors=True)
+        RUNS_DIR.mkdir(parents=True)
+        daemon = subprocess.Popen([lev, "daemon"], env=env,
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.STDOUT,
+                                  start_new_session=True)
+        t0 = time.time()
+        ready = None
+        while time.time() - t0 < 30:
+            if daemon.poll() is not None:
+                raise RuntimeError("coldstart: daemon died")
+            probe = subprocess.run([lev, "ps", "--json"], env=env,
+                                   capture_output=True, timeout=10)
+            if probe.returncode == 0:
+                ready = time.time() - t0
+                break
+        baselines = []
+        for _ in range(3):
+            b0 = time.time()
+            subprocess.run([lev, "ps", "--json"], env=env,
+                           capture_output=True, timeout=10)
+            baselines.append(time.time() - b0)
+
+        s0 = time.time()
+        spawn = subprocess.run(
+            [lev, "run", "reviewer", "--task", "cold start probe", "--yolo",
+             "--json", "--workdir", str(WORKDIR), "--diff", DIFF],
+            env=env, capture_output=True, timeout=60)
+        spawn_ack = time.time() - s0
+        agent_started = None
+        while time.time() - s0 < 30:
+            metas = list(RUNS_DIR.glob("*/meta.json"))
+            if metas and json.loads(metas[0].read_text()).get("status"):
+                agent_started = time.time() - s0
+                break
+            time.sleep(0.005)
+
+        samples.append({
+            "ready_secs": round(ready, 4) if ready else None,
+            "probe_baseline_secs": round(statistics.median(baselines), 4),
+            "spawn_ack_secs": round(spawn_ack, 4)
+            if spawn.returncode == 0 else None,
+            "agent_started_secs": round(agent_started, 4)
+            if agent_started else None,
+        })
+        os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
+        time.sleep(0.2)
+
+    def stats(field):
+        vals = sorted(s[field] for s in samples if s[field] is not None)
+        return {"median": vals[len(vals) // 2], "min": vals[0],
+                "max": vals[-1], "n": len(vals)} if vals else None
+
+    summary = {
+        "track": "coldstart",
+        "repetitions": COLD_REPS,
+        "ready_secs": stats("ready_secs"),
+        "probe_baseline_secs": stats("probe_baseline_secs"),
+        "spawn_ack_secs": stats("spawn_ack_secs"),
+        "agent_started_secs": stats("agent_started_secs"),
+        "samples": samples,
+    }
+    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    r = summary["ready_secs"]
+    a = summary["agent_started_secs"]
+    print(f"  cold start: ready median={r['median']}s "
+          f"[{r['min']}-{r['max']}] agent-started median={a['median']}s "
+          f"over {COLD_REPS} reps", flush=True)
+    return summary
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run the leviath performance benchmarks.")
     parser.add_argument("--lev", default=None,
                         help="path to the lev binary (default: `lev` on PATH)")
-    parser.add_argument("--track", choices=["memory", "pools", "all"],
+    parser.add_argument("--track",
+                        choices=["memory", "pools", "coldstart", "all"],
                         default="all",
                         help="which benchmark track to run (default: all)")
     parser.add_argument("--repeat", type=int, default=1,
@@ -429,6 +524,12 @@ def main() -> int:
         (mem_dir / "summary.json").write_text(
             json.dumps({"track": "memory", "repetitions": args.repeat,
                         "tiers": tiers}, indent=2) + "\n")
+
+    if args.track in ("coldstart", "all"):
+        print(f"== coldstart track ({COLD_REPS} repetitions) ==", flush=True)
+        cold_dir = result_dir / "coldstart"
+        cold_dir.mkdir()
+        run_coldstart_track(lev, cold_dir)
 
     if args.track in ("pools", "all"):
         print(f"== pool track ({POOL_SPAWNS} spawns, {LATENCY_MS}ms/call) ==",
