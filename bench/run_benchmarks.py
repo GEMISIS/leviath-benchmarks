@@ -556,8 +556,92 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
                        capture_output=True, timeout=30)
         _kill_daemon_by_pidfile()
 
+    # ── Scenario D: human-in-the-loop resumption, everything cold ──
+    # A run was PAUSED mid-flight (the human-in-the-loop shape: work held
+    # for a person), and the daemon is gone. Measure `lev daemon start`
+    # plus `lev resume` until the run is active again.
+    paused_samples = []
+    for _ in range(COLD_RESUME_REPS):
+        _kill_daemon_by_pidfile()
+        shutil.rmtree(RUNS_DIR, ignore_errors=True)
+        RUNS_DIR.mkdir(parents=True)
+        daemon = subprocess.Popen([lev, "daemon"], env=env_lat,
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.STDOUT,
+                                  start_new_session=True)
+        time.sleep(1.0)
+        spawn = subprocess.run(
+            [lev, "run", "wide-researcher", "--task", "paused resumption",
+             "--yolo", "--json", "--workdir", str(WORKDIR)],
+            env=env_lat, capture_output=True, text=True, timeout=60)
+        run_id = json.loads(spawn.stdout)["run_id"]
+        meta_path = RUNS_DIR / run_id / "meta.json"
+        deadline = time.time() + 30
+        ok = False
+        while time.time() < deadline:
+            try:
+                meta = json.loads(meta_path.read_text())
+            except (OSError, ValueError):
+                meta = {}
+            if meta.get("status") == "running" and meta.get("iteration", 0) >= 2:
+                ok = True
+                break
+            time.sleep(0.05)
+        if ok:
+            subprocess.run([lev, "pause", run_id], env=env_lat,
+                           capture_output=True, timeout=30)
+            deadline = time.time() + 20
+            ok = False
+            while time.time() < deadline:
+                try:
+                    meta = json.loads(meta_path.read_text())
+                except (OSError, ValueError):
+                    meta = {}
+                if meta.get("status") == "paused":
+                    ok = True
+                    break
+                time.sleep(0.05)
+        os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
+        time.sleep(0.3)
+        if not ok:
+            continue
+        pre = (meta.get("iteration"), meta.get("updated_at"))
+
+        t0 = time.time()
+        boot = subprocess.run([lev, "daemon", "start"], env=env_lat,
+                              capture_output=True, timeout=60)
+        boot_cmd = time.time() - t0
+        subprocess.run([lev, "resume", run_id], env=env_lat,
+                       capture_output=True, timeout=30)
+        resumed = None
+        deadline = time.time() + 60
+        while time.time() < deadline:
+            try:
+                meta = json.loads(meta_path.read_text())
+            except (OSError, ValueError):
+                meta = {}
+            if meta.get("status") in ("running", "complete") and \
+                    (meta.get("iteration", 0), meta.get("updated_at")) >= pre:
+                resumed = time.time() - t0
+                break
+            time.sleep(0.01)
+        paused_samples.append({
+            "boot_cmd_secs": round(boot_cmd, 4)
+            if boot.returncode == 0 else None,
+            "total_secs": round(resumed, 4) if resumed else None,
+        })
+        subprocess.run([lev, "cancel", run_id], env=env_lat,
+                       capture_output=True, timeout=30)
+        _kill_daemon_by_pidfile()
+
     summary = {
         "track": "coldstart",
+        "paused_resumption": {
+            "repetitions": COLD_RESUME_REPS,
+            "boot_cmd_secs": _stats(paused_samples, "boot_cmd_secs"),
+            "total_secs": _stats(paused_samples, "total_secs"),
+            "samples": paused_samples,
+        },
         "daemon_boot": {
             "repetitions": COLD_BOOT_REPS,
             "ready_secs": _stats(boot_samples, "ready_secs"),
@@ -580,9 +664,11 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
     b = summary["daemon_boot"]["ready_secs"]
     n = summary["new_run_cold"]["total_secs"]
     c = summary["cold_continuation"]["total_secs"]
+    pr = summary["paused_resumption"]["total_secs"]
     print(f"  daemon boot median={b['median']}s | new-run-cold "
-          f"median={n['median']}s | cold-continuation "
-          f"median={c['median'] if c else '?'}s", flush=True)
+          f"median={n['median']}s | crash-continuation "
+          f"median={c['median'] if c else '?'}s | paused-resumption "
+          f"median={pr['median'] if pr else '?'}s", flush=True)
     return summary
 
 
