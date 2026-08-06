@@ -1,0 +1,18 @@
+{
+  "captured_at_utc": "2026-08-06T13:05:56+00:00",
+  "hostname": "Geralds-Personal-MacBook-Pro.local",
+  "os": "Darwin",
+  "os_version": "25.5.0",
+  "os_version_pretty": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "arch": "arm64",
+  "cpu_model": "Apple M3 Max",
+  "cpu_logical_cores": 16,
+  "cpu_physical_cores": 16,
+  "ram_total_bytes": 137438953472,
+  "ram_available_at_start_bytes": 74643619840,
+  "python_version": "3.13.9",
+  "lev_path": "/private/tmp/claude-501/-Users-gemisis-Documents-projects-ai-personal-leviath/148b0bab-4641-4161-9b92-55c2b2c09b7b/scratchpad/lev-official",
+  "lev_version": "lev 0.2.0",
+  "lev_sha256": "e998c781953e7ef403e8975834c996789d003bb577dec77130b740d1cc0ffcad",
+  "lev_binary_size_bytes": 29503664
+}
