@@ -740,6 +740,12 @@ def main() -> int:
         json.dumps(machine_specs.gather(lev), indent=2) + "\n")
     install_home()
 
+    if args.track in ("coldstart", "all"):
+        print("== coldstart track (four all-cold scenarios) ==", flush=True)
+        cold_dir = result_dir / "coldstart"
+        cold_dir.mkdir()
+        run_coldstart_track(lev, cold_dir)
+
     if args.track in ("memory", "all"):
         print(f"== memory track (pool {MEMORY_POOL}, {LATENCY_MS}ms/call) ==",
               flush=True)
@@ -755,12 +761,6 @@ def main() -> int:
         (mem_dir / "summary.json").write_text(
             json.dumps({"track": "memory", "repetitions": args.repeat,
                         "tiers": tiers}, indent=2) + "\n")
-
-    if args.track in ("coldstart", "all"):
-        print("== coldstart track (four all-cold scenarios) ==", flush=True)
-        cold_dir = result_dir / "coldstart"
-        cold_dir.mkdir()
-        run_coldstart_track(lev, cold_dir)
 
     if args.track in ("pools", "all"):
         print(f"== pool track ({POOL_SPAWNS} spawns, {LATENCY_MS}ms/call) ==",
