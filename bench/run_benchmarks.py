@@ -425,6 +425,33 @@ def _stats(samples, field):
             "max": vals[-1], "n": len(vals)} if vals else None
 
 
+def _watch_socket_accept(t0: float, timeout: float = 30.0):
+    """Background watcher: the moment the control socket accepts a connect,
+    relative to t0. Same probe for every scenario, 1ms resolution, so the
+    boot portion of each bar is measured inside that scenario rather than
+    assumed from another."""
+    import socket as _socket
+    import threading
+
+    sock_path = str(HOME / ".leviath" / "control.sock")
+    result: dict = {}
+
+    def worker():
+        while time.time() - t0 < timeout:
+            try:
+                s = _socket.socket(_socket.AF_UNIX)
+                s.connect(sock_path)
+                s.close()
+                result["accept_secs"] = round(time.time() - t0, 4)
+                return
+            except OSError:
+                time.sleep(0.001)
+
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
+    return thread, result
+
+
 def run_coldstart_track(lev: str, out_dir: Path) -> dict:
     """Three fully-cold scenarios (no daemon running at each measurement):
 
@@ -452,11 +479,12 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
     for _ in range(COLD_BOOT_REPS):
         shutil.rmtree(RUNS_DIR, ignore_errors=True)
         RUNS_DIR.mkdir(parents=True)
+        t0 = time.time()
         daemon = subprocess.Popen([lev, "daemon"], env=env0,
                                   stdout=subprocess.DEVNULL,
                                   stderr=subprocess.STDOUT,
                                   start_new_session=True)
-        t0 = time.time()
+        accept_thread, accept = _watch_socket_accept(t0)
         ready = None
         while time.time() - t0 < 30:
             if daemon.poll() is not None:
@@ -472,8 +500,10 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
             subprocess.run([lev, "ps", "--json"], env=env0,
                            capture_output=True, timeout=10)
             baselines.append(time.time() - b0)
+        accept_thread.join(timeout=5)
         boot_samples.append({
             "ready_secs": round(ready, 4) if ready else None,
+            "socket_accept_secs": accept.get("accept_secs"),
             "probe_baseline_secs": round(statistics.median(baselines), 4),
         })
         os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
@@ -486,13 +516,16 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         shutil.rmtree(RUNS_DIR, ignore_errors=True)
         RUNS_DIR.mkdir(parents=True)
         t0 = time.time()
+        accept_thread, accept = _watch_socket_accept(t0)
         spawn = subprocess.run(
             [lev, "run", "reviewer", "--task", "cold start probe", "--yolo",
              "--json", "--workdir", str(WORKDIR), "--diff", DIFF],
             env=env0, capture_output=True, timeout=60)
         total = time.time() - t0
+        accept_thread.join(timeout=5)
         run_samples.append({
             "total_secs": round(total, 4) if spawn.returncode == 0 else None,
+            "boot_accept_secs": accept.get("accept_secs"),
         })
         _kill_daemon_by_pidfile()
 
@@ -608,9 +641,11 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         pre = (meta.get("iteration"), meta.get("updated_at"))
 
         t0 = time.time()
+        accept_thread, accept = _watch_socket_accept(t0)
         boot = subprocess.run([lev, "daemon", "start"], env=env_lat,
                               capture_output=True, timeout=60)
         boot_cmd = time.time() - t0
+        accept_thread.join(timeout=5)
         subprocess.run([lev, "resume", run_id], env=env_lat,
                        capture_output=True, timeout=30)
         resumed = None
@@ -628,6 +663,7 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         paused_samples.append({
             "boot_cmd_secs": round(boot_cmd, 4)
             if boot.returncode == 0 else None,
+            "boot_accept_secs": accept.get("accept_secs"),
             "total_secs": round(resumed, 4) if resumed else None,
         })
         subprocess.run([lev, "cancel", run_id], env=env_lat,
@@ -639,18 +675,21 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         "paused_resumption": {
             "repetitions": COLD_RESUME_REPS,
             "boot_cmd_secs": _stats(paused_samples, "boot_cmd_secs"),
+            "boot_accept_secs": _stats(paused_samples, "boot_accept_secs"),
             "total_secs": _stats(paused_samples, "total_secs"),
             "samples": paused_samples,
         },
         "daemon_boot": {
             "repetitions": COLD_BOOT_REPS,
             "ready_secs": _stats(boot_samples, "ready_secs"),
+            "socket_accept_secs": _stats(boot_samples, "socket_accept_secs"),
             "probe_baseline_secs": _stats(boot_samples, "probe_baseline_secs"),
             "samples": boot_samples,
         },
         "new_run_cold": {
             "repetitions": COLD_RUN_REPS,
             "total_secs": _stats(run_samples, "total_secs"),
+            "boot_accept_secs": _stats(run_samples, "boot_accept_secs"),
             "samples": run_samples,
         },
         "cold_continuation": {

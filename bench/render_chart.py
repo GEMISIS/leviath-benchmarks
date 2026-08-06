@@ -134,26 +134,37 @@ ax.set_title("CPU while runs were active\n(avg of whole-machine share; 100% = al
 
 # ── Row 3: cold start + CPU over time ──
 ax = axes[2][0]
-boot = cold["daemon_boot"]["ready_secs"]
-probe = cold["daemon_boot"]["probe_baseline_secs"]["median"]
-newrun = cold["new_run_cold"]["total_secs"]
-paused = cold["paused_resumption"]["total_secs"]
-boot_ms = (boot["median"] - probe) * 1000
+boot = cold["daemon_boot"]
+ready_ms = (boot["ready_secs"]["median"]
+            - boot["probe_baseline_secs"]["median"]) * 1000
+accept_ms = boot["socket_accept_secs"]["median"] * 1000
+newrun = cold["new_run_cold"]
+paused = cold["paused_resumption"]
 
 def spread(s):
     return ((s["median"] - s["min"]) * 1000,
             min((s["max"] - s["median"]) * 1000, 60))
 
+# The boot segment of every bar is measured INSIDE that scenario (a 1ms
+# socket-accept watcher runs during the command), never assumed from
+# another bar.
 scen = [
-    ("daemon boot", boot_ms, 0.0, *spread(boot)),
-    ("new run,\nnothing running", boot_ms,
-     newrun["median"] * 1000 - boot_ms, *spread(newrun)),
-    ("paused run\nresumed", boot_ms,
-     paused["median"] * 1000 - boot_ms, *spread(paused)),
+    ("daemon boot\n(accept -> serving)",
+     accept_ms, ready_ms - accept_ms, *spread(boot["ready_secs"])),
+    ("new run,\nnothing running",
+     newrun["boot_accept_secs"]["median"] * 1000,
+     (newrun["total_secs"]["median"]
+      - newrun["boot_accept_secs"]["median"]) * 1000,
+     *spread(newrun["total_secs"])),
+    ("paused run\nresumed",
+     paused["boot_accept_secs"]["median"] * 1000,
+     (paused["total_secs"]["median"]
+      - paused["boot_accept_secs"]["median"]) * 1000,
+     *spread(paused["total_secs"])),
 ]
 xs = range(len(scen))
 b1 = ax.bar(xs, [s[1] for s in scen], color="tab:blue",
-            label="daemon boot portion")
+            label="daemon boot (socket accepting)")
 b2 = ax.bar(xs, [s[2] for s in scen], bottom=[s[1] for s in scen],
             color="lightsteelblue", label="everything after boot")
 totals = [s[1] + s[2] for s in scen]
@@ -167,8 +178,7 @@ ax.set_xticks(xs, [s[0] for s in scen])
 ax.set_ylabel("Milliseconds")
 ax.legend(fontsize=8, loc="upper left")
 ax.set_title("Fully-cold scenarios (25/15/10 reps)\n"
-             "(boot portion shown inside each; whiskers = min/max,\n"
-             "clipped at +60ms)")
+             "(boot measured within each scenario; whiskers = min/max)")
 
 ax = axes[2][1]
 for stem, label, color in MEM_SERIES:
