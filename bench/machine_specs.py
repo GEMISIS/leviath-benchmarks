@@ -59,6 +59,13 @@ def _sha256(path: str) -> str | None:
         return None
 
 
+def _file_size(path: str) -> int | None:
+    try:
+        return __import__("os").path.getsize(path)
+    except OSError:
+        return None
+
+
 def gather(lev_path: str) -> dict:
     """Everything worth pinning about this run's environment."""
     vm = psutil.virtual_memory()
@@ -78,6 +85,7 @@ def gather(lev_path: str) -> dict:
         "lev_path": lev_path,
         "lev_version": _lev_version(lev_path),
         "lev_sha256": _sha256(lev_path),
+        "lev_binary_size_bytes": _file_size(lev_path),
     }
 
 

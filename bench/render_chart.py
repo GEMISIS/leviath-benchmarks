@@ -208,9 +208,18 @@ for row in axes:
         ax.spines["right"].set_visible(False)
 
 ram_gb = round(spec["ram_total_bytes"] / 2**30)
+size_bytes = spec.get("lev_binary_size_bytes")
+if size_bytes is None:
+    # Results recorded before the field existed: read the binary if it is
+    # still where specs.json says it was.
+    try:
+        size_bytes = Path(spec["lev_path"]).stat().st_size
+    except OSError:
+        size_bytes = None
+size_note = f", {size_bytes / 2**20:.1f} MB single binary" if size_bytes else ""
 fig.suptitle(
     f"leviath benchmarks - {spec['cpu_model']} ({spec['cpu_logical_cores']} cores, "
-    f"{ram_gb} GB RAM), {spec['lev_version']}\n"
+    f"{ram_gb} GB RAM), {spec['lev_version']}{size_note}\n"
     "row 1: memory ladder at pool 512  |  row 2: pool sweep at 1,000 agents  |  "
     "row 3: fully-cold scenarios and CPU over time\n"
     "mixed multi-stage agent fleet, mock inference 1.5s/call",
