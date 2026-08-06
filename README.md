@@ -30,7 +30,11 @@ the exact concurrency curve reconstructed from per-run filesystem
 timestamps.
 
 **pools** - a fixed 1,000-agent workload at inference-pool widths
-128 / 256 / 512 / 1024. Answers: what does throughput cost? The pool is
+128 / 256 / 512 / 1024. The pool width is the benchmark's declared
+independent variable: a default leviath install ships with a
+deliberately conservative pool of 8 (it protects your provider's rate
+limits), and these tiers measure what raising it buys. Every other
+limit stays at its install default. Answers: what does throughput cost? The pool is
 leviath's provider-protection feature (`[limits]
 max_concurrent_inferences`); drain time scales as
 `total_calls x latency / pool` once saturated, and this track measures

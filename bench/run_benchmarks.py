@@ -68,7 +68,6 @@ script = "mockx"
 
 [limits]
 max_concurrent_inferences = {pool}
-max_concurrent_tools = 32
 """
 
 
