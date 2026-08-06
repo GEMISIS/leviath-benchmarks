@@ -149,8 +149,7 @@ def spread(s):
 # socket-accept watcher runs during the command), never assumed from
 # another bar.
 scen = [
-    ("daemon boot\n(accept -> serving)",
-     accept_ms, ready_ms - accept_ms, *spread(boot["ready_secs"])),
+    ("daemon boot", ready_ms, 0.0, *spread(boot["ready_secs"])),
     ("new run,\nnothing running",
      newrun["boot_accept_secs"]["median"] * 1000,
      (newrun["total_secs"]["median"]
@@ -164,7 +163,7 @@ scen = [
 ]
 xs = range(len(scen))
 b1 = ax.bar(xs, [s[1] for s in scen], color="tab:blue",
-            label="daemon boot (socket accepting)")
+            label="daemon boot portion")
 b2 = ax.bar(xs, [s[2] for s in scen], bottom=[s[1] for s in scen],
             color="lightsteelblue", label="everything after boot")
 totals = [s[1] + s[2] for s in scen]
