@@ -135,11 +135,21 @@ def summarize_tier(csv_path: Path) -> dict:
     live = [float(r["live_mb"]) for r in rows if r["live_mb"]]
     rss = [float(r["rss_mb"]) for r in rows if r["rss_mb"]]
     cpu = [float(r["cpu_percent"]) for r in rows if r["cpu_percent"]]
+    lazy = [float(r["lazy_free_mb"]) for r in rows if r.get("lazy_free_mb")]
+
+    def tail_avg(series):
+        tail = series[-20:] if len(series) >= 20 else series
+        return round(sum(tail) / len(tail), 1) if tail else None
+
     tail = live[-20:] if len(live) >= 20 else live
     record = {
         "samples": len(rows),
         "live_mb_peak": max(live) if live else None,
+        # Both components of the settle, so nothing is subtracted away:
+        # settled = non-reclaimable (the hard floor) + reclaimable (charged
+        # to the process by the OS until it wants the pages back).
         "live_mb_settled": round(sum(tail) / len(tail), 1) if tail else None,
+        "reclaimable_mb_settled": tail_avg(lazy),
         "rss_mb_peak": max(rss) if rss else None,
         "cpu_machine_pct_peak": max(cpu) if cpu else None,
         "cpu_machine_pct_avg": round(sum(cpu) / len(cpu), 2) if cpu else None,
@@ -346,7 +356,7 @@ def resolve_lev(path_arg: str | None, allow_outdated: bool) -> str:
 
 AGGREGATE_FIELDS = (
     "cold_start_secs", "spawn_secs", "drained_at_secs", "live_mb_peak",
-    "live_mb_settled", "rss_mb_peak", "cpu_machine_pct_peak",
+    "live_mb_settled", "reclaimable_mb_settled", "rss_mb_peak", "cpu_machine_pct_peak",
     "cpu_machine_pct_avg", "cpu_active_avg_pct", "cpu_active_peak_pct",
     "exact_peak_concurrency", "total_runs", "active_span_secs",
 )
