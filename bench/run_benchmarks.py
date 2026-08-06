@@ -402,32 +402,57 @@ def run_tier_repeated(lev: str, spawns: int, pool: int, label: str,
     return aggregate(label, runs)
 
 
-COLD_REPS = 25
+COLD_BOOT_REPS = 25
+COLD_RUN_REPS = 15
+COLD_RESUME_REPS = 10
+
+
+def _kill_daemon_by_pidfile() -> None:
+    """SIGKILL a daemon the CLI auto-started (it is not our child, so the
+    recorded pid file is the only handle). Tolerates none running."""
+    pid_file = HOME / ".leviath" / "daemon.pid"
+    try:
+        pid = int(pid_file.read_text().split()[0])
+        os.killpg(os.getpgid(pid), signal.SIGKILL)
+    except (OSError, ValueError, ProcessLookupError):
+        pass
+    time.sleep(0.3)
+
+
+def _stats(samples, field):
+    vals = sorted(s[field] for s in samples if s.get(field) is not None)
+    return {"median": vals[len(vals) // 2], "min": vals[0],
+            "max": vals[-1], "n": len(vals)} if vals else None
 
 
 def run_coldstart_track(lev: str, out_dir: Path) -> dict:
-    """Latency micro-track, repeated COLD_REPS times from scratch:
+    """Three fully-cold scenarios (no daemon running at each measurement):
 
-    - ``ready_secs``: daemon exec until the control socket answers a probe.
-      Each probe is a full `lev ps` CLI invocation, so the floor of this
-      number is one CLI round trip; ``probe_baseline_secs`` measures that
-      round trip against the already-running daemon so readers can
-      subtract it.
-    - ``spawn_ack_secs``: `lev run` invocation until the daemon has
-      accepted the spawn (the CLI returns the run id).
-    - ``agent_started_secs``: spawn command start until the run's meta.json
-      exists on disk with a status - the agent observably exists.
+    - ``daemon_boot``: daemon exec until the control socket answers a probe
+      (the probe is a `lev ps` round trip; ``probe_baseline_secs`` measures
+      that trip alone so it can be subtracted).
+    - ``new_run_cold``: `lev run` typed with NO daemon running - the CLI
+      auto-starts one, waits for it, and spawns. Total is command start
+      until the run id is returned; the daemon-boot portion inside it is the
+      ``daemon_boot`` median (the CLI's readiness poll runs on a 50ms tick,
+      so this scenario carries up to 50ms of quantization by design).
+    - ``cold_continuation``: a daemon is SIGKILLed mid-run, then
+      `lev daemon start` boots a fresh one whose recovery pass reloads the
+      interrupted run. ``boot_cmd_secs`` is the start command; ``total`` is
+      until the reloaded run observably makes new progress.
     """
     import statistics
 
     (HOME / ".leviath" / "config.toml").write_text(
         CONFIG_TEMPLATE.format(pool=256))
-    env = env_for(0)  # no latency: this track measures leviath, not the mock
-    samples = []
-    for rep in range(COLD_REPS):
+    env0 = env_for(0)
+
+    # ── Scenario A: daemon boot ──
+    boot_samples = []
+    for _ in range(COLD_BOOT_REPS):
         shutil.rmtree(RUNS_DIR, ignore_errors=True)
         RUNS_DIR.mkdir(parents=True)
-        daemon = subprocess.Popen([lev, "daemon"], env=env,
+        daemon = subprocess.Popen([lev, "daemon"], env=env0,
                                   stdout=subprocess.DEVNULL,
                                   stderr=subprocess.STDOUT,
                                   start_new_session=True)
@@ -436,7 +461,7 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         while time.time() - t0 < 30:
             if daemon.poll() is not None:
                 raise RuntimeError("coldstart: daemon died")
-            probe = subprocess.run([lev, "ps", "--json"], env=env,
+            probe = subprocess.run([lev, "ps", "--json"], env=env0,
                                    capture_output=True, timeout=10)
             if probe.returncode == 0:
                 ready = time.time() - t0
@@ -444,55 +469,120 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         baselines = []
         for _ in range(3):
             b0 = time.time()
-            subprocess.run([lev, "ps", "--json"], env=env,
+            subprocess.run([lev, "ps", "--json"], env=env0,
                            capture_output=True, timeout=10)
             baselines.append(time.time() - b0)
-
-        s0 = time.time()
-        spawn = subprocess.run(
-            [lev, "run", "reviewer", "--task", "cold start probe", "--yolo",
-             "--json", "--workdir", str(WORKDIR), "--diff", DIFF],
-            env=env, capture_output=True, timeout=60)
-        spawn_ack = time.time() - s0
-        agent_started = None
-        while time.time() - s0 < 30:
-            metas = list(RUNS_DIR.glob("*/meta.json"))
-            if metas and json.loads(metas[0].read_text()).get("status"):
-                agent_started = time.time() - s0
-                break
-            time.sleep(0.005)
-
-        samples.append({
+        boot_samples.append({
             "ready_secs": round(ready, 4) if ready else None,
             "probe_baseline_secs": round(statistics.median(baselines), 4),
-            "spawn_ack_secs": round(spawn_ack, 4)
-            if spawn.returncode == 0 else None,
-            "agent_started_secs": round(agent_started, 4)
-            if agent_started else None,
         })
         os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
         time.sleep(0.2)
 
-    def stats(field):
-        vals = sorted(s[field] for s in samples if s[field] is not None)
-        return {"median": vals[len(vals) // 2], "min": vals[0],
-                "max": vals[-1], "n": len(vals)} if vals else None
+    # ── Scenario B: a user starts a brand-new run, everything cold ──
+    run_samples = []
+    for _ in range(COLD_RUN_REPS):
+        _kill_daemon_by_pidfile()
+        shutil.rmtree(RUNS_DIR, ignore_errors=True)
+        RUNS_DIR.mkdir(parents=True)
+        t0 = time.time()
+        spawn = subprocess.run(
+            [lev, "run", "reviewer", "--task", "cold start probe", "--yolo",
+             "--json", "--workdir", str(WORKDIR), "--diff", DIFF],
+            env=env0, capture_output=True, timeout=60)
+        total = time.time() - t0
+        run_samples.append({
+            "total_secs": round(total, 4) if spawn.returncode == 0 else None,
+        })
+        _kill_daemon_by_pidfile()
+
+    # ── Scenario C: continuation of interrupted work, everything cold ──
+    env_lat = env_for(500)  # calls take 500ms so a run is reliably mid-flight
+    resume_samples = []
+    for _ in range(COLD_RESUME_REPS):
+        _kill_daemon_by_pidfile()
+        shutil.rmtree(RUNS_DIR, ignore_errors=True)
+        RUNS_DIR.mkdir(parents=True)
+        daemon = subprocess.Popen([lev, "daemon"], env=env_lat,
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.STDOUT,
+                                  start_new_session=True)
+        time.sleep(1.0)
+        spawn = subprocess.run(
+            [lev, "run", "wide-researcher", "--task", "cold continuation",
+             "--yolo", "--json", "--workdir", str(WORKDIR)],
+            env=env_lat, capture_output=True, text=True, timeout=60)
+        run_id = json.loads(spawn.stdout)["run_id"]
+        meta_path = RUNS_DIR / run_id / "meta.json"
+        # Let it get properly mid-flight, then pull the plug.
+        deadline = time.time() + 30
+        pre = None
+        while time.time() < deadline:
+            try:
+                meta = json.loads(meta_path.read_text())
+            except (OSError, ValueError):
+                meta = {}
+            if meta.get("status") == "running" and meta.get("iteration", 0) >= 2:
+                pre = (meta.get("iteration"), meta.get("updated_at"))
+                break
+            time.sleep(0.05)
+        os.killpg(os.getpgid(daemon.pid), signal.SIGKILL)
+        time.sleep(0.3)
+        if pre is None:
+            continue
+
+        t0 = time.time()
+        boot = subprocess.run([lev, "daemon", "start"], env=env_lat,
+                              capture_output=True, timeout=60)
+        boot_cmd = time.time() - t0
+        progressed = None
+        deadline = time.time() + 60
+        while time.time() < deadline:
+            try:
+                meta = json.loads(meta_path.read_text())
+            except (OSError, ValueError):
+                meta = {}
+            if (meta.get("iteration", 0), meta.get("updated_at")) > pre and \
+                    meta.get("status") in ("running", "complete"):
+                progressed = time.time() - t0
+                break
+            time.sleep(0.01)
+        resume_samples.append({
+            "boot_cmd_secs": round(boot_cmd, 4)
+            if boot.returncode == 0 else None,
+            "total_secs": round(progressed, 4) if progressed else None,
+        })
+        subprocess.run([lev, "cancel", run_id], env=env_lat,
+                       capture_output=True, timeout=30)
+        _kill_daemon_by_pidfile()
 
     summary = {
         "track": "coldstart",
-        "repetitions": COLD_REPS,
-        "ready_secs": stats("ready_secs"),
-        "probe_baseline_secs": stats("probe_baseline_secs"),
-        "spawn_ack_secs": stats("spawn_ack_secs"),
-        "agent_started_secs": stats("agent_started_secs"),
-        "samples": samples,
+        "daemon_boot": {
+            "repetitions": COLD_BOOT_REPS,
+            "ready_secs": _stats(boot_samples, "ready_secs"),
+            "probe_baseline_secs": _stats(boot_samples, "probe_baseline_secs"),
+            "samples": boot_samples,
+        },
+        "new_run_cold": {
+            "repetitions": COLD_RUN_REPS,
+            "total_secs": _stats(run_samples, "total_secs"),
+            "samples": run_samples,
+        },
+        "cold_continuation": {
+            "repetitions": COLD_RESUME_REPS,
+            "boot_cmd_secs": _stats(resume_samples, "boot_cmd_secs"),
+            "total_secs": _stats(resume_samples, "total_secs"),
+            "samples": resume_samples,
+        },
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
-    r = summary["ready_secs"]
-    a = summary["agent_started_secs"]
-    print(f"  cold start: ready median={r['median']}s "
-          f"[{r['min']}-{r['max']}] agent-started median={a['median']}s "
-          f"over {COLD_REPS} reps", flush=True)
+    b = summary["daemon_boot"]["ready_secs"]
+    n = summary["new_run_cold"]["total_secs"]
+    c = summary["cold_continuation"]["total_secs"]
+    print(f"  daemon boot median={b['median']}s | new-run-cold "
+          f"median={n['median']}s | cold-continuation "
+          f"median={c['median'] if c else '?'}s", flush=True)
     return summary
 
 
@@ -542,7 +632,7 @@ def main() -> int:
                         "tiers": tiers}, indent=2) + "\n")
 
     if args.track in ("coldstart", "all"):
-        print(f"== coldstart track ({COLD_REPS} repetitions) ==", flush=True)
+        print("== coldstart track (three all-cold scenarios) ==", flush=True)
         cold_dir = result_dir / "coldstart"
         cold_dir.mkdir()
         run_coldstart_track(lev, cold_dir)

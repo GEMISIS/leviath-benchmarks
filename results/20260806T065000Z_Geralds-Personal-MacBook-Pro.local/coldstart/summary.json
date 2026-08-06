@@ -1,0 +1,233 @@
+{
+  "track": "coldstart",
+  "daemon_boot": {
+    "repetitions": 25,
+    "ready_secs": {
+      "median": 0.0266,
+      "min": 0.021,
+      "max": 0.0327,
+      "n": 25
+    },
+    "probe_baseline_secs": {
+      "median": 0.0076,
+      "min": 0.0067,
+      "max": 0.0088,
+      "n": 25
+    },
+    "samples": [
+      {
+        "ready_secs": 0.0222,
+        "probe_baseline_secs": 0.007
+      },
+      {
+        "ready_secs": 0.0327,
+        "probe_baseline_secs": 0.0076
+      },
+      {
+        "ready_secs": 0.0289,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.0279,
+        "probe_baseline_secs": 0.0088
+      },
+      {
+        "ready_secs": 0.0267,
+        "probe_baseline_secs": 0.0085
+      },
+      {
+        "ready_secs": 0.0286,
+        "probe_baseline_secs": 0.0073
+      },
+      {
+        "ready_secs": 0.021,
+        "probe_baseline_secs": 0.0068
+      },
+      {
+        "ready_secs": 0.0265,
+        "probe_baseline_secs": 0.0078
+      },
+      {
+        "ready_secs": 0.026,
+        "probe_baseline_secs": 0.0076
+      },
+      {
+        "ready_secs": 0.0263,
+        "probe_baseline_secs": 0.0076
+      },
+      {
+        "ready_secs": 0.0246,
+        "probe_baseline_secs": 0.0075
+      },
+      {
+        "ready_secs": 0.0274,
+        "probe_baseline_secs": 0.0073
+      },
+      {
+        "ready_secs": 0.0283,
+        "probe_baseline_secs": 0.0088
+      },
+      {
+        "ready_secs": 0.0259,
+        "probe_baseline_secs": 0.0074
+      },
+      {
+        "ready_secs": 0.0241,
+        "probe_baseline_secs": 0.0087
+      },
+      {
+        "ready_secs": 0.0259,
+        "probe_baseline_secs": 0.0073
+      },
+      {
+        "ready_secs": 0.0301,
+        "probe_baseline_secs": 0.0081
+      },
+      {
+        "ready_secs": 0.0267,
+        "probe_baseline_secs": 0.0079
+      },
+      {
+        "ready_secs": 0.0273,
+        "probe_baseline_secs": 0.0073
+      },
+      {
+        "ready_secs": 0.0266,
+        "probe_baseline_secs": 0.0076
+      },
+      {
+        "ready_secs": 0.0253,
+        "probe_baseline_secs": 0.0077
+      },
+      {
+        "ready_secs": 0.0224,
+        "probe_baseline_secs": 0.0067
+      },
+      {
+        "ready_secs": 0.0285,
+        "probe_baseline_secs": 0.0079
+      },
+      {
+        "ready_secs": 0.0257,
+        "probe_baseline_secs": 0.0085
+      },
+      {
+        "ready_secs": 0.0293,
+        "probe_baseline_secs": 0.0073
+      }
+    ]
+  },
+  "new_run_cold": {
+    "repetitions": 15,
+    "total_secs": {
+      "median": 0.0971,
+      "min": 0.0892,
+      "max": 0.1057,
+      "n": 15
+    },
+    "samples": [
+      {
+        "total_secs": 0.0904
+      },
+      {
+        "total_secs": 0.0931
+      },
+      {
+        "total_secs": 0.0931
+      },
+      {
+        "total_secs": 0.0993
+      },
+      {
+        "total_secs": 0.0971
+      },
+      {
+        "total_secs": 0.0968
+      },
+      {
+        "total_secs": 0.1006
+      },
+      {
+        "total_secs": 0.101
+      },
+      {
+        "total_secs": 0.0892
+      },
+      {
+        "total_secs": 0.0993
+      },
+      {
+        "total_secs": 0.1057
+      },
+      {
+        "total_secs": 0.0984
+      },
+      {
+        "total_secs": 0.0949
+      },
+      {
+        "total_secs": 0.095
+      },
+      {
+        "total_secs": 0.0996
+      }
+    ]
+  },
+  "cold_continuation": {
+    "repetitions": 10,
+    "boot_cmd_secs": {
+      "median": 0.0728,
+      "min": 0.0617,
+      "max": 0.076,
+      "n": 10
+    },
+    "total_secs": {
+      "median": 0.0763,
+      "min": 0.0619,
+      "max": 0.5761,
+      "n": 10
+    },
+    "samples": [
+      {
+        "boot_cmd_secs": 0.0637,
+        "total_secs": 0.064
+      },
+      {
+        "boot_cmd_secs": 0.076,
+        "total_secs": 0.0763
+      },
+      {
+        "boot_cmd_secs": 0.0728,
+        "total_secs": 0.0731
+      },
+      {
+        "boot_cmd_secs": 0.0754,
+        "total_secs": 0.5761
+      },
+      {
+        "boot_cmd_secs": 0.0669,
+        "total_secs": 0.5528
+      },
+      {
+        "boot_cmd_secs": 0.0739,
+        "total_secs": 0.5649
+      },
+      {
+        "boot_cmd_secs": 0.0721,
+        "total_secs": 0.0724
+      },
+      {
+        "boot_cmd_secs": 0.0617,
+        "total_secs": 0.0619
+      },
+      {
+        "boot_cmd_secs": 0.0651,
+        "total_secs": 0.0653
+      },
+      {
+        "boot_cmd_secs": 0.0743,
+        "total_secs": 0.5613
+      }
+    ]
+  }
+}
