@@ -49,6 +49,25 @@ from core.levctl import QualityHome  # noqa: E402
 DEFAULT_TIMEOUT_SECS = 1800
 
 
+def load_dotenv(path: Path) -> None:
+    """Load KEY=VALUE lines from the repo's gitignored .env.
+
+    Real environment variables always win; empty values are skipped.
+    Keys reach provider SDKs through the process environment only and
+    are never written into results (scrub.py enforces that end-side).
+    """
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if value and key not in os.environ:
+            os.environ[key] = value
+
+
 def require_result_capable(lev: str) -> None:
     """Gate on capability, not version number.
 
@@ -181,6 +200,7 @@ def main() -> int:
                              "stamped UNFROZEN-SMOKE")
     args = parser.parse_args()
 
+    load_dotenv(REPO_DIR / ".env")
     require_result_capable(args.lev)
 
     if args.unsafe_smoke:

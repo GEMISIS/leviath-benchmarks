@@ -1,10 +1,14 @@
 {
-  "_comment": "Model roster and context arms. Tier names are how charts group models; exact model ids are pinned at freeze time and never left as placeholders in a counted round. The mockx entry exists only for offline smoke runs against the deterministic script provider.",
+  "_comment": "Model roster and context arms. Tier names are how charts group models; exact model ids are pinned at freeze time. Meta models route through OpenRouter (no native Meta provider in leviath yet). The mockx entry exists only for offline smoke runs against the deterministic script provider.",
   "models": {
     "Claude Opus 5": {"id": "anthropic/claude-opus-5", "tier": "frontier"},
+    "GPT-5.6 Sol": {"id": "openai/gpt-5.6-sol", "tier": "frontier"},
     "Claude Sonnet 5": {"id": "anthropic/claude-sonnet-5", "tier": "workhorse"},
+    "GPT-5.6 Terra": {"id": "openai/gpt-5.6-terra", "tier": "workhorse"},
     "Kimi K3": {"id": "openrouter/moonshotai/kimi-k3", "tier": "open-weight"},
     "Claude Haiku 4.5": {"id": "anthropic/claude-haiku-4-5", "tier": "economy"},
+    "Muse Spark 1.2": {"id": "openrouter/meta/muse-spark-1.2", "tier": "economy"},
+    "GPT-5.6 Luna": {"id": "openai/gpt-5.6-luna", "tier": "economy"},
     "mockx": {"id": "mockx/sim-1", "tier": "smoke"}
   },
   "tiers": {
