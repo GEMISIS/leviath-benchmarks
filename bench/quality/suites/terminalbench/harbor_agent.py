@@ -181,6 +181,10 @@ class LeviathAgent(BaseAgent):
                 f"echo {META_BEGIN}; cat {shlex.quote(meta_path)} "
                 f"2>/dev/null; echo; echo {META_END}"))
             meta = _between(text) or {}
+            # Populate the context every poll, not just at the end, so
+            # a harness-side timeout still reports the tokens spent
+            # (per the BaseAgent contract's own guidance).
+            self._report(context, meta, run_id, blueprint)
             if meta.get("status") in TERMINAL:
                 break
             time.sleep(5.0)
@@ -198,6 +202,10 @@ class LeviathAgent(BaseAgent):
             'git -C "$PWD" -c user.email=agent@localhost '
             '-c user.name=agent commit -m "agent work" || true; fi'))
 
+        self._report(context, meta, run_id, blueprint)
+
+    def _report(self, context: AgentContext, meta: dict, run_id: str,
+                blueprint: str) -> None:
         prompt = int(meta.get("prompt_tokens", 0) or 0)
         cached = int(meta.get("cached_tokens", 0) or 0)
         cache_write = int(meta.get("cache_write_tokens", 0) or 0)
