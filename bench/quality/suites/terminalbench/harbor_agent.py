@@ -53,12 +53,19 @@ def _json_payload(text: str):
 # Pier (the deep-swe runner) is a Harbor fork with the identical
 # BaseAgent/BaseEnvironment/AgentContext interface, so one adapter file
 # serves terminal-bench/frontier-bench (harbor) and deep-swe (pier).
-try:
-    from harbor.agents.base import AgentContext, BaseAgent
-    from harbor.environments.base import BaseEnvironment
-except ImportError:  # pragma: no cover - pier-driven runs
+# When both packages are installed, LEVIATH_ADAPTER_RUNTIME=pier forces
+# the pier base classes (a pier-driven run must subclass pier's
+# BaseAgent, not harbor's).
+if os.environ.get("LEVIATH_ADAPTER_RUNTIME") == "pier":
     from pier.agents.base import AgentContext, BaseAgent
     from pier.environments.base import BaseEnvironment
+else:
+    try:
+        from harbor.agents.base import AgentContext, BaseAgent
+        from harbor.environments.base import BaseEnvironment
+    except ImportError:  # pragma: no cover - pier-only installs
+        from pier.agents.base import AgentContext, BaseAgent
+        from pier.environments.base import BaseEnvironment
 
 QUALITY_DIR = Path(__file__).resolve().parents[2]
 HOME = "/opt/levbench"
