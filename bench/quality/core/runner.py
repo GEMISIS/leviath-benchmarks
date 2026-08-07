@@ -111,12 +111,14 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         started = _utcnow()
         t0 = time.time()
         status, meta, answer = "error", None, None
+        stage_records: list[dict] = []
         try:
             prompt = suite.prepare(task, workdir)
             run_id = home.launch(blueprint, prompt, workdir,
                                  model=arm["model_id"],
                                  extra_args=extra_cli)
             status, meta = home.wait(run_id, task_timeout_secs)
+            stage_records = home.stages(run_id)
             if status == "complete":
                 answer = home.result(run_id)
                 if answer is None:
@@ -148,9 +150,19 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         if score is None and status != "complete":
             score = {"passed": False, "detail": f"status {status}"}
 
+        mix_mapping = None
+        if arm["model_id"] is None:
+            blueprint_toml = (home.home / ".leviath" / "agents"
+                              / blueprint / "agent.leviath")
+            try:
+                mix_mapping = cost_mod.stagemix_mapping(blueprint_toml)
+            except Exception:
+                mix_mapping = None
         rec = _finish(base, runs_dir, status=status, started=started,
                       ended=_utcnow(), wall=wall, meta=meta, arm=arm,
-                      rates=rates, score=score)
+                      rates=rates, score=score,
+                      stage_records=stage_records,
+                      mix_mapping=mix_mapping)
         if isinstance(rec.get("cost_usd"), (int, float)):
             spent += rec["cost_usd"]
         records.append(rec)
@@ -169,7 +181,9 @@ def _artifacts_dir(artifacts_root: Path, base: dict) -> Path:
 
 def _finish(base: dict, runs_dir: Path, status: str, started: str,
             ended: str, wall: float, meta: dict | None, arm: dict,
-            rates: dict, score: dict | None) -> dict:
+            rates: dict, score: dict | None,
+            stage_records: list[dict] | None = None,
+            mix_mapping: dict | None = None) -> dict:
     usage = _usage_of(meta)
     model_id = arm["model_id"]
     priced = model_id is not None and cost_mod.is_pinned(rates, model_id)
@@ -191,5 +205,21 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
                      if priced else None),
         "score": score,
     })
+    if model_id is None and stage_records and mix_mapping:
+        # Native mix: price per stage from the stage ledger. Cache
+        # writes are unattributed in the ledger and priced at the most
+        # expensive stage model's write rate - an upper bound, so the
+        # mix is never flattered.
+        mix_cost = cost_mod.stagemix_cost(stage_records, mix_mapping,
+                                          usage, rates)
+        if mix_cost is not None:
+            record["cost_usd"] = mix_cost
+            record["cost_basis"] = "stagewise_estimate_upper_bound"
+            record["stage_models"] = mix_mapping
+            record["usage_by_stage"] = [
+                {k: s.get(k) for k in ("name", "prompt_tokens",
+                                       "completion_tokens",
+                                       "cached_tokens")}
+                for s in stage_records]
     record_mod.write_record(runs_dir, record)
     return record

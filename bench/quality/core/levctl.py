@@ -112,6 +112,14 @@ class QualityHome:
             payload = payload[0]
         return payload["run_id"]
 
+    def stages(self, run_id: str) -> list[dict]:
+        """Per-stage ledger (name + token counts) from stages.json."""
+        path = self.runs_dir / run_id / "stages.json"
+        try:
+            return json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            return []
+
     def meta(self, run_id: str) -> dict | None:
         path = self.runs_dir / run_id / "meta.json"
         try:

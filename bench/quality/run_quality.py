@@ -206,7 +206,10 @@ def main() -> int:
     if args.unsafe_smoke:
         freeze_tag = freeze.SMOKE_TAG
     else:
-        freeze_tag = freeze.require_frozen(REPO_DIR)
+        try:
+            freeze_tag = freeze.require_frozen(REPO_DIR)
+        except RuntimeError as exc:
+            sys.exit(str(exc))
 
     suite_mod = importlib.import_module(f"suites.{args.suite}.suite")
     suite = suite_mod.Suite()
@@ -264,7 +267,11 @@ def main() -> int:
         "task_timeout_secs": args.task_timeout,
         "arms": arms,
         "roster": arms_cfg["models"],
-        "stagemix_mapping": getattr(suite, "stagemix_mapping", None),
+        "stagemix_mapping": cost_mod.stagemix_mapping(
+            blueprints_dir
+            / suite.agent_for({"name": "", "role": "structured",
+                               "model_label": None, "model_id": None})[0]
+            / "agent.leviath"),
         "subset": subset_record,
         "rates_sha256": rates_sha,
         "blueprints": blueprint_shas,

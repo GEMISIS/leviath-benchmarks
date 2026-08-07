@@ -108,6 +108,55 @@ def cost_usd(usage: dict, model_id: str, rates: dict) -> float:
     return round(usd, 6)
 
 
+def stagemix_mapping(blueprint_path: Path) -> dict[str, str]:
+    """Stage -> provider/model for a blueprint's native mix.
+
+    Native runs resolve each stage to the first configured provider in
+    its model list; with every roster provider keyed, that is the first
+    entry. The mapping is recorded alongside any cost computed from it
+    so the assumption is inspectable.
+    """
+    import tomllib
+    doc = tomllib.loads(Path(blueprint_path).read_text())
+    mapping = {}
+    for name, stage in doc.get("stages", {}).items():
+        models = (stage.get("model") or {}).get("models") or []
+        if models:
+            mapping[name] = f"{models[0]['provider']}/{models[0]['model']}"
+    return mapping
+
+
+def stagemix_cost(stage_records: list[dict], mapping: dict[str, str],
+                  total_usage: dict, rates: dict) -> float | None:
+    """Price a native-mix run stage-wise from the per-stage ledger.
+
+    Each stage's prompt/cached/completion tokens are priced at that
+    stage's model rate. The ledger does not attribute cache WRITES per
+    stage, so the run's total cache-write tokens are priced at the most
+    expensive write rate among the stages' models - a deliberate upper
+    bound, disclosed via cost_basis on the record. Returns None when
+    any stage's model has no pinned rate.
+    """
+    total = 0.0
+    max_write_rate = 0.0
+    for srec in stage_records:
+        model_id = mapping.get(srec.get("name"))
+        if not model_id or not is_pinned(rates, model_id):
+            return None
+        stage_usage = {
+            "prompt_tokens": srec.get("prompt_tokens", 0),
+            "completion_tokens": srec.get("completion_tokens", 0),
+            "cached_tokens": srec.get("cached_tokens", 0),
+            "cache_write_tokens": 0,
+        }
+        total += cost_usd(stage_usage, model_id, rates)
+        max_write_rate = max(max_write_rate,
+                             rates[model_id]["cache_write_per_mtok"])
+    total += (int(total_usage.get("cache_write_tokens", 0))
+              * max_write_rate / _MTOK)
+    return round(total, 6)
+
+
 def cache_hit_rate(usage: dict,
                    prompt_includes_cache_read: bool) -> float | None:
     """Cache reads as a share of all input-side tokens, or None if no input."""
