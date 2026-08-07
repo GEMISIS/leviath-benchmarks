@@ -1,12 +1,12 @@
 {
-  "answer": 10,
+  "answer": 444,
   "answer_format": "a single integer",
-  "dataset": "HDFS",
+  "dataset": "Apache",
   "id": "log_009",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"jk2_init() Found child\" appear for the last time?",
   "slice": {
-    "end_line": 1648,
-    "start_line": 1207
+    "end_line": 2000,
+    "start_line": 1555
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }

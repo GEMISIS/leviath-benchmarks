@@ -68,6 +68,12 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
     records = []
     for i, (task, arm, rep) in enumerate(cells, 1):
         blueprint, extra_cli = suite.agent_for(arm)
+        # Per-task output spec (lev run --output-format/--output-
+        # instructions) is applied to every arm identically, so the
+        # answer-shape guidance rides the runtime's own mechanism
+        # rather than fighting a blueprint's output-stage prompt.
+        if hasattr(suite, "task_cli"):
+            extra_cli = list(extra_cli) + list(suite.task_cli(task))
         label = (f"{suite.name}/{task['id']} {arm['name']} "
                  f"[{arm['model_label'] or 'native'}] rep{rep}")
         base = {

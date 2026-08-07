@@ -1,12 +1,12 @@
 {
-  "answer": 12,
+  "answer": 675,
   "answer_format": "a single integer",
-  "dataset": "HDFS",
+  "dataset": "Apache",
   "id": "log_029",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"mod_jk child workerEnv in error state\" appear for the last time?",
   "slice": {
-    "end_line": 1325,
-    "start_line": 553
+    "end_line": 1186,
+    "start_line": 506
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }

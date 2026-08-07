@@ -1,12 +1,12 @@
 {
-  "answer": 233,
+  "answer": 1,
   "answer_format": "a single integer",
   "dataset": "Apache",
   "id": "log_035",
-  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "Between lines 275 and 494 of the file (1-indexed, inclusive), how many lines contain the exact text \"] Directory index forbidden by rule:\"?",
   "slice": {
-    "end_line": 1897,
-    "start_line": 1343
+    "end_line": 2000,
+    "start_line": 1394
   },
-  "type": "template_top_count"
+  "type": "window_substring_count"
 }

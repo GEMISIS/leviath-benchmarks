@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "5279a4588425bb893e8cd190d78aa9a24495bfd5673195b6af832030bad24db6",
+  "answer_sha256": "9d962f3c451c9c2ee2aab9d5f220106330f50ac6026ab1461d76816ab413bf47",
   "dataset": "HDFS",
   "id": "log_037",
-  "question": "How many log lines contain the exact text \"Served block blk_\"?",
+  "question": "How many log lines contain the exact text \":Got exception while serving blk_\"?",
   "slice": {
-    "end_line": 711,
-    "start_line": 286
+    "end_line": 855,
+    "start_line": 324
   },
   "type": "substring_count"
 }

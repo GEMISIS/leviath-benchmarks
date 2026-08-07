@@ -45,6 +45,11 @@ class Suite:
                      else "flat-analyst")
         return blueprint, []
 
+    def task_cli(self, task: dict) -> list:
+        return ["--output-format", "text", "--output-instructions",
+                "Reply with ONLY the final answer, formatted exactly as "
+                f"these guidelines require: {task['guidelines']}"]
+
     def prepare(self, task: dict, workdir: Path) -> str:
         for name in datasets.CONTEXT_FILES:
             shutil.copy(datasets.context_path(name), workdir / name)

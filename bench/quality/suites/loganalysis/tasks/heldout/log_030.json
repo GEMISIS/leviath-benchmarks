@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "c48c7f3a7ee1cba593c7fd1748b5147a74b8d7db2f8cf8dd5063f2df2ea8e1ce",
-  "dataset": "Zookeeper",
+  "answer_sha256": "450cfc51dbdb7246071e95f9276ea15d44c72191664df0bab02201fbcbea10a1",
+  "dataset": "HDFS",
   "id": "log_030",
-  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "Between lines 127 and 242 of the file (1-indexed, inclusive), how many lines contain the exact text \"Served block blk_\"?",
   "slice": {
-    "end_line": 1994,
-    "start_line": 1410
+    "end_line": 819,
+    "start_line": 450
   },
-  "type": "template_top_count"
+  "type": "window_substring_count"
 }

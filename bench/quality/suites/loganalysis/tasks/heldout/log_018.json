@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "07e6ee1b4dab52c39eaff4b5ed4c26da1e67863f73310923048f5caa0981ec67",
-  "dataset": "Zookeeper",
+  "answer_sha256": "774719d0347d28d570b308b59594076f2d68418f7a218533d21472d7ba74258f",
+  "dataset": "HDFS",
   "id": "log_018",
-  "question": "On which line number (1-indexed from the top of the file) does the text \"Snapshotting:\" first appear?",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Received block blk_\" first appear?",
   "slice": {
     "end_line": 2000,
-    "start_line": 1267
+    "start_line": 1302
   },
   "type": "first_occurrence"
 }

@@ -1,12 +1,12 @@
 {
-  "answer": 53,
+  "answer": 6,
   "answer_format": "a single integer",
-  "dataset": "Zookeeper",
+  "dataset": "Apache",
   "id": "log_027",
-  "question": "How many log lines contain the exact text \"Received connection request /\"?",
+  "question": "How many log lines contain the exact text \"mod_jk child init\"?",
   "slice": {
-    "end_line": 1687,
-    "start_line": 1301
+    "end_line": 1897,
+    "start_line": 1343
   },
   "type": "substring_count"
 }

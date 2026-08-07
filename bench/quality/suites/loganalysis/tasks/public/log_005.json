@@ -1,12 +1,12 @@
 {
-  "answer": 56,
+  "answer": 88,
   "answer_format": "a single integer",
-  "dataset": "HDFS",
+  "dataset": "Apache",
   "id": "log_005",
-  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "Between lines 60 and 275 of the file (1-indexed, inclusive), how many lines contain the exact text \"jk2_init() Found child\"?",
   "slice": {
-    "end_line": 380,
-    "start_line": 66
+    "end_line": 408,
+    "start_line": 62
   },
-  "type": "template_top_count"
+  "type": "window_substring_count"
 }

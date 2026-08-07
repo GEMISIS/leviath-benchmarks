@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "9e4093758fb436848d1012953bdb578e15b9eacfebaa8a077d5017a974172c11",
+  "answer_sha256": "f86299dcf634b417d5ae2d6a26c69e28ecfb5d438d21b21ff29f31b99dee06a3",
   "dataset": "Zookeeper",
   "id": "log_034",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"My election bind port:\" appear for the last time?",
   "slice": {
-    "end_line": 1931,
-    "start_line": 1471
+    "end_line": 1311,
+    "start_line": 515
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }

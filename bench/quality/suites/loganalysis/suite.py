@@ -60,6 +60,12 @@ class Suite:
                      else "flat-loganalyzer")
         return blueprint, []
 
+    def task_cli(self, task: dict) -> list:
+        return ["--output-format", "text", "--output-instructions",
+                f"Reply with ONLY the final answer: "
+                f"{task['answer_format']}. No prose, no report text, no "
+                "formatting - the answer alone."]
+
     def prepare(self, task: dict, workdir: Path) -> str:
         lines = datasets.raw_lines(task["dataset"])
         lo = task["slice"]["start_line"] - 1

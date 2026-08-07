@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "5ce43a2a761545b9e5095d22d952a071f70c814b5c0f2efe57cdff19f0c42011",
-  "dataset": "HDFS",
+  "answer_sha256": "3fba8093ee8911790d30ef6a12a1be0e53daf79ee727ac7037b562b55db41da9",
+  "dataset": "Zookeeper",
   "id": "log_012",
-  "question": "How many log lines contain the exact text \"PacketResponder\"?",
+  "question": "How many log lines contain the exact text \"; will be dropped if server is in r-o mode\"?",
   "slice": {
-    "end_line": 728,
-    "start_line": 319
+    "end_line": 1514,
+    "start_line": 941
   },
   "type": "substring_count"
 }

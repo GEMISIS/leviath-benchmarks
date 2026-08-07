@@ -1,12 +1,12 @@
 {
-  "answer": 137,
+  "answer": 106,
   "answer_format": "a single integer",
   "dataset": "Apache",
   "id": "log_031",
   "question": "How many log lines have severity level 'error' (case-insensitive)?",
   "slice": {
-    "end_line": 1868,
-    "start_line": 1403
+    "end_line": 602,
+    "start_line": 225
   },
   "type": "level_count"
 }

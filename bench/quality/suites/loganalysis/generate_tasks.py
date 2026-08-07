@@ -4,11 +4,13 @@
 A pure function of (seed, pinned dataset bytes): re-running with the
 same seed must produce byte-identical task files - that property is
 itself a test. Each task slices a contiguous window out of one dataset
-and asks one question whose ground truth is machine-computed, either
-from the raw lines alone (substring counts, first occurrence, level
-counts - independently checkable with grep) or from the loghub 2k
-line-by-line annotations (template questions - the annotation is the
-declared arbiter, stated in the task prompt).
+and asks one question whose ground truth is computed from the raw
+lines alone - level counts, substring counts, first/last occurrence,
+windowed counts - so every answer is independently checkable with grep
+against the input file. Annotation-arbitrated question types (distinct
+templates, most-frequent template) were deliberately dropped: two
+models can reasonably disagree with the annotations' clustering, which
+makes those tasks measure annotation agreement rather than analysis.
 
 Split: half public (answer committed in plaintext), half held-out
 (answer committed only as sha256(salt || normalized answer)). Both the
@@ -36,7 +38,7 @@ import datasets  # noqa: E402
 
 SLICE_MIN, SLICE_MAX = 300, 800
 _TYPES = ("level_count", "substring_count", "first_occurrence",
-          "template_distinct", "template_top_count")
+          "last_occurrence", "window_substring_count")
 
 
 def _salt(seed: int) -> str:
@@ -94,24 +96,36 @@ def _make_task(rng: random.Random, dataset: str, raw: list[str],
             return None
         question = (f"On which line number (1-indexed from the top of "
                     f"the file) does the text \"{needle}\" first appear?")
-    elif kind == "template_distinct":
-        answer = len({r["EventId"] for r in slice_rows})
-        question = (
-            "How many distinct message templates appear? A template "
-            "treats variable fields (ids, numbers, paths, addresses) as "
-            "wildcards; two lines share a template when they differ only "
-            "in such fields. Ground truth follows the loghub 2k "
-            "annotations for this dataset.")
-    elif kind == "template_top_count":
-        counts: dict[str, int] = {}
-        for r in slice_rows:
-            counts[r["EventId"]] = counts.get(r["EventId"], 0) + 1
-        answer = max(counts.values())
-        question = (
-            "How many times does the most frequent message template "
-            "occur? A template treats variable fields (ids, numbers, "
-            "paths, addresses) as wildcards. Ground truth follows the "
-            "loghub 2k annotations for this dataset.")
+    elif kind == "last_occurrence":
+        needles = sorted({f for r in slice_rows
+                          if (f := _constant_fragment(r["EventTemplate"]))})
+        if not needles:
+            return None
+        needle = rng.choice(needles)
+        answer = max((i + 1 for i, line in enumerate(slice_raw)
+                      if needle in line), default=None)
+        if answer is None:
+            return None
+        question = (f"On which line number (1-indexed from the top of "
+                    f"the file) does the text \"{needle}\" appear for "
+                    "the last time?")
+    elif kind == "window_substring_count":
+        needles = sorted({f for r in slice_rows
+                          if (f := _constant_fragment(r["EventTemplate"]))})
+        if not needles:
+            return None
+        needle = rng.choice(needles)
+        n = len(slice_raw)
+        lo_w = rng.randrange(1, max(2, n // 2))
+        hi_w = rng.randrange(lo_w + n // 4, n + 1) if lo_w + n // 4 <= n \
+            else n
+        answer = sum(1 for line in slice_raw[lo_w - 1:hi_w]
+                     if needle in line)
+        if answer == 0:
+            return None
+        question = (f"Between lines {lo_w} and {hi_w} of the file "
+                    f"(1-indexed, inclusive), how many lines contain "
+                    f"the exact text \"{needle}\"?")
     else:
         raise ValueError(kind)
 

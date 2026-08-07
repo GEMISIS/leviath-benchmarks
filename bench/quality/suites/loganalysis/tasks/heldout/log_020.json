@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "aa1e96b1b99ff95f9b2a250d60e79a74ec381f3313577d4f440d2153847e03b0",
-  "dataset": "Apache",
+  "answer_sha256": "f8c42a083488d1241e349d2f8bf72090862f2ac4a49e1bdec8135195d750839b",
+  "dataset": "Zookeeper",
   "id": "log_020",
-  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "Between lines 37 and 512 of the file (1-indexed, inclusive), how many lines contain the exact text \"Send worker leaving thread\"?",
   "slice": {
-    "end_line": 731,
-    "start_line": 94
+    "end_line": 1205,
+    "start_line": 547
   },
-  "type": "template_top_count"
+  "type": "window_substring_count"
 }

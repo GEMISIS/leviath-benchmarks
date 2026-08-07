@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "dd3d0f3440500ff586c77cde7bcf52860feef4152bc2c104a13b129815bb2132",
-  "dataset": "Apache",
+  "answer_sha256": "e9655f7ea8046f1b0ae43a2c592be7d24ec5e22274ba4c39ef742b6888162952",
+  "dataset": "Zookeeper",
   "id": "log_032",
-  "question": "How many log lines contain the exact text \"mod_jk child workerEnv in error state\"?",
+  "question": "How many log lines contain the exact text \": info : org.apache.zookeeper.server.quorum.QuorumPeer$QuorumServer@\"?",
   "slice": {
-    "end_line": 1999,
-    "start_line": 1684
+    "end_line": 1469,
+    "start_line": 865
   },
   "type": "substring_count"
 }

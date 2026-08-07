@@ -1,12 +1,12 @@
 {
-  "answer": 534,
+  "answer": 74,
   "answer_format": "a single integer",
-  "dataset": "HDFS",
+  "dataset": "Zookeeper",
   "id": "log_036",
   "question": "How many log lines have severity level 'INFO' (case-insensitive)?",
   "slice": {
-    "end_line": 1850,
-    "start_line": 1317
+    "end_line": 1053,
+    "start_line": 697
   },
   "type": "level_count"
 }

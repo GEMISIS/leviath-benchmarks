@@ -61,6 +61,14 @@ class Suite:
                      else "flat-researcher")
         return blueprint, []
 
+    def task_cli(self, task: dict) -> list:
+        return ["--output-format", "text", "--output-instructions",
+                "End with a line in exactly this format: "
+                "FINAL ANSWER: [YOUR FINAL ANSWER] - a number OR as few "
+                "words as possible OR a comma separated list, with no "
+                "commas/units in numbers, no articles/abbreviations in "
+                "strings unless specified."]
+
     def prepare(self, task: dict, workdir: Path) -> str:
         file_note = "\n"
         name = task.get("file_name")

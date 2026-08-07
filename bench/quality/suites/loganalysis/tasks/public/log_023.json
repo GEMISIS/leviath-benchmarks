@@ -1,12 +1,12 @@
 {
-  "answer": 4,
+  "answer": 269,
   "answer_format": "a single integer",
   "dataset": "HDFS",
   "id": "log_023",
-  "question": "On which line number (1-indexed from the top of the file) does the text \"Received block blk_\" first appear?",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"to delete  blk_\" first appear?",
   "slice": {
-    "end_line": 2000,
-    "start_line": 1302
+    "end_line": 1962,
+    "start_line": 1311
   },
   "type": "first_occurrence"
 }

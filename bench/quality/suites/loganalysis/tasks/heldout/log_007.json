@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "edfd8051f0ea8daf302cb2a72a456ceface4aefc0bab8fcb8e01dd528bee4aa5",
+  "answer_sha256": "3e61d308ade231fe459cacaa452826b995520407979b0723cab7f8cad79d6e04",
   "dataset": "Zookeeper",
   "id": "log_007",
-  "question": "How many log lines contain the exact text \"Revalidating client:\"?",
+  "question": "How many log lines contain the exact text \"caught end of stream exception\"?",
   "slice": {
-    "end_line": 1073,
-    "start_line": 408
+    "end_line": 1989,
+    "start_line": 1331
   },
   "type": "substring_count"
 }

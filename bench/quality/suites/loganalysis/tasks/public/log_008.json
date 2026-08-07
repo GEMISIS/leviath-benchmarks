@@ -1,12 +1,12 @@
 {
-  "answer": 297,
+  "answer": 1,
   "answer_format": "a single integer",
-  "dataset": "Zookeeper",
+  "dataset": "Apache",
   "id": "log_008",
-  "question": "On which line number (1-indexed from the top of the file) does the text \"Client attempting to renew session\" first appear?",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"jk2_init() Found child\" first appear?",
   "slice": {
-    "end_line": 1630,
-    "start_line": 1117
+    "end_line": 1520,
+    "start_line": 920
   },
   "type": "first_occurrence"
 }

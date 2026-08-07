@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "9323059821f48eb78b15a42559686506a1deed2a722511d1cc2ef889e8f3363d",
-  "dataset": "HDFS",
+  "answer_sha256": "f0ac566ad83da8f02b1c24ad8cbc22e5a74ca2b73ae42bd0160d88c8f3ff7eed",
+  "dataset": "Apache",
   "id": "log_039",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"] Directory index forbidden by rule:\" appear for the last time?",
   "slice": {
-    "end_line": 1699,
-    "start_line": 1196
+    "end_line": 1806,
+    "start_line": 1040
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }

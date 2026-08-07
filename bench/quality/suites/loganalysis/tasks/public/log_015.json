@@ -1,12 +1,12 @@
 {
-  "answer": 56,
+  "answer": 19,
   "answer_format": "a single integer",
-  "dataset": "HDFS",
+  "dataset": "Zookeeper",
   "id": "log_015",
-  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "Between lines 24 and 527 of the file (1-indexed, inclusive), how many lines contain the exact text \"******* GOODBYE /\"?",
   "slice": {
-    "end_line": 1974,
-    "start_line": 1653
+    "end_line": 1053,
+    "start_line": 394
   },
-  "type": "template_top_count"
+  "type": "window_substring_count"
 }

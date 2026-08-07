@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "540465351da0bcfffadbbef98526e1fad7f50944bb9b60330bedf2b5be6a5d63",
-  "dataset": "Zookeeper",
+  "answer_sha256": "ba03445a68c22d7f543757dffea3a89ed1bf04c5134240d654e5fc26e998187e",
+  "dataset": "Apache",
   "id": "log_019",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"jk2_init() Can't find child\" appear for the last time?",
   "slice": {
-    "end_line": 1053,
-    "start_line": 394
+    "end_line": 1239,
+    "start_line": 759
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }

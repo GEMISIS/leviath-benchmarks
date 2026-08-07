@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "2ae59cd3d7826efaac5cd72a112a58ab5e93a7f51bedcdf670dd41f27f40a27c",
+  "answer_sha256": "edfd8051f0ea8daf302cb2a72a456ceface4aefc0bab8fcb8e01dd528bee4aa5",
   "dataset": "HDFS",
   "id": "log_033",
-  "question": "On which line number (1-indexed from the top of the file) does the text \"BLOCK* NameSystem.delete: blk_\" first appear?",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Receiving block blk_\" first appear?",
   "slice": {
-    "end_line": 881,
-    "start_line": 549
+    "end_line": 1386,
+    "start_line": 782
   },
   "type": "first_occurrence"
 }

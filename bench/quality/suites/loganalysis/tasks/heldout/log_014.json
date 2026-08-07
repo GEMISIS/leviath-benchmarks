@@ -1,12 +1,12 @@
 {
   "answer_format": "a single integer",
-  "answer_sha256": "9e4093758fb436848d1012953bdb578e15b9eacfebaa8a077d5017a974172c11",
-  "dataset": "HDFS",
+  "answer_sha256": "b9966053edc0dfafbebff4372c71e457055aa131e14fa90705a4a47ba0efaa0c",
+  "dataset": "Zookeeper",
   "id": "log_014",
-  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Snapshotting:\" appear for the last time?",
   "slice": {
-    "end_line": 1313,
-    "start_line": 705
+    "end_line": 2000,
+    "start_line": 1267
   },
-  "type": "template_distinct"
+  "type": "last_occurrence"
 }
