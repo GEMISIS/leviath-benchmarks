@@ -1,0 +1,12 @@
+{
+  "answer": 34,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_004",
+  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "slice": {
+    "end_line": 780,
+    "start_line": 179
+  },
+  "type": "template_distinct"
+}

@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "7a4a267d09cb6ed9120adba05f6d43a7fcde7c68afc7ead3e22d0e9b267dca34",
+  "dataset": "HDFS",
+  "id": "log_017",
+  "question": "How many log lines contain the exact text \"Deleting block blk_\"?",
+  "slice": {
+    "end_line": 743,
+    "start_line": 162
+  },
+  "type": "substring_count"
+}

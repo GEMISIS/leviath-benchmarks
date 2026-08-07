@@ -1,0 +1,12 @@
+{
+  "answer": 534,
+  "answer_format": "a single integer",
+  "dataset": "HDFS",
+  "id": "log_036",
+  "question": "How many log lines have severity level 'INFO' (case-insensitive)?",
+  "slice": {
+    "end_line": 1850,
+    "start_line": 1317
+  },
+  "type": "level_count"
+}

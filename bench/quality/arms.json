@@ -1,0 +1,22 @@
+{
+  "_comment": "Model roster and context arms. Tier names are how charts group models; exact model ids are pinned at freeze time and never left as placeholders in a counted round. The mockx entry exists only for offline smoke runs against the deterministic script provider.",
+  "models": {
+    "Claude Opus 5": {"id": "anthropic/claude-opus-5", "tier": "frontier"},
+    "Claude Sonnet 5": {"id": "anthropic/claude-sonnet-5", "tier": "workhorse"},
+    "Kimi K3": {"id": "openrouter/moonshotai/kimi-k3", "tier": "open-weight"},
+    "Claude Haiku 4.5": {"id": "anthropic/claude-haiku-4-5", "tier": "economy"},
+    "mockx": {"id": "mockx/sim-1", "tier": "smoke"}
+  },
+  "tiers": {
+    "frontier": "most capable model available",
+    "workhorse": "the everyday mid-tier",
+    "open-weight": "best available open model",
+    "economy": "cheapest capable tier",
+    "smoke": "deterministic mock provider, development only"
+  },
+  "arms": [
+    {"name": "flat-pinned", "role": "flat", "model": "$sweep"},
+    {"name": "structured-pinned", "role": "structured", "model": "$sweep"},
+    {"name": "structured-stagemix", "role": "structured", "model": null}
+  ]
+}

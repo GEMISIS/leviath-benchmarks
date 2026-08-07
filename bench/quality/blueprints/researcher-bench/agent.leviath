@@ -1,0 +1,220 @@
+# Frozen benchmark copy of the bundled researcher agent (leviath commit 876809e).
+# Byte-frozen for the quality track; its sha256 is recorded in every run record.
+
+[agent]
+name = "researcher"
+version = "0.0.2"
+description = "Research assistant - gather, analyze, and summarize with a gather↔analyze refinement loop, error recovery, and multi-provider fallback"
+entry_stage = "gather"
+
+# Read/search agent: it gathers and synthesizes, writing only its final report.
+[tool_permissions]
+read_file  = "allow"
+list_dir   = "allow"
+web_search = "allow"
+web_fetch  = "allow"
+write_file = "ask"
+bash       = "ask"
+
+# ─── Stage 1: Gather ──────────────────────────────────────────────────────────
+[stages.gather]
+mode = "autonomous"
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+description = "Gather relevant information on the topic"
+# web_search / web_fetch are provided by the agent's script tools (issue #97).
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "context_append"]
+max_iterations = 8
+max_revisits = 2
+system_prompt = """
+You are gathering source material on the topic in the `query` region, within any
+bounds set in `scope`.
+
+Be efficient - do not search exhaustively:
+1. Run a FOCUSED first round of 3-5 web_search calls covering the distinct
+   sub-topics of the question (not many rephrasings of the same query).
+2. web_fetch only the 2-3 most promising sources for detail; the search snippets
+   in `raw_findings` are usually enough on their own.
+3. As you go, append one bibliography line per source you actually use to the
+   `sources_index` region with context_append:
+   `[n] <title> - <url or path> - credibility: <high/med/low + why>`.
+
+Prefer primary sources and well-established outlets; note when something is a blog,
+forum, or vendor claim. Once you have solid coverage of the sub-topics, transition
+to analyze - don't keep searching for marginal additions. The analyze stage will
+send you back if it finds a real gap.
+"""
+
+[stages.gather.tool_routing]
+default_region = "raw_findings"
+
+[stages.gather.transitions.analyze]
+hint = "Enough gathered for a first pass of analysis"
+transform = "direct"
+
+# Un-exhaustible escape (lint: dead-end-possible): when every looping
+# target has spent its max_revisits budget, the run can still move forward
+# to the deliverable instead of dead-ending.
+[stages.gather.transitions.summarize]
+hint = "Analysis is out of revisits - summarize from the material in hand"
+transform = "compact"
+
+[stages.gather.transitions.error_recovery]
+condition = "error"
+transform = "direct"
+
+# ─── Stage 2: Analyze ─────────────────────────────────────────────────────────
+# Two open edges (gather / summarize) → the LLM decides via transition_prompt
+# whether it needs more sources or is ready to summarize.
+[stages.analyze]
+mode = "autonomous"
+model = { models = [{ provider = "anthropic", model = "claude-opus-5" }, { provider = "openai", model = "gpt-5.5" }, { provider = "google", model = "gemini-3.1-pro-preview" }, { provider = "openrouter", model = "deepseek/deepseek-v4-pro" }, { provider = "ollama", model = "qwen3.6:27b" }] }
+description = "Analyze and synthesize findings"
+available_tools = ["read_file", "web_fetch", "context_write", "context_append"]
+max_iterations = 20
+max_revisits = 3
+transition_prompt = """
+You've analyzed the material gathered so far. Decide what happens next:
+- If there are clear gaps you can't fill from what you have, respond with: gather
+- If you have enough to write a useful summary, respond with: summarize
+"""
+system_prompt = """
+Analyze the `raw_findings` against the `sources_index`. Do three things:
+
+1. Extract factual claims into the `claims` region (context_append), each with its
+   source reference: `<claim> [n]`. These are what the summary is built from.
+2. When sources DISAGREE, record the conflict in `contradictions` (context_write)
+   - who claims what, with source refs. Don't silently pick a side; surface it.
+3. Judge strength: separate well-supported claims (multiple credible sources) from
+   single-source or speculative ones.
+
+Use web_fetch for a targeted follow-up only when a specific gap blocks a claim.
+Flag open questions you couldn't resolve.
+
+If `error_report` says a previous stage hit its iteration cap, that stage was cut
+off before finishing - treat its output as incomplete and verify coverage before
+concluding.
+"""
+
+[stages.analyze.tool_routing]
+default_region = "raw_findings"
+
+[stages.analyze.transitions.gather]
+hint = "More information needed on specific sub-topics"
+transform = "compact"
+
+[stages.analyze.transitions.summarize]
+hint = "Analysis complete - ready to summarize"
+transform = "compact"
+
+[stages.analyze.transitions.error_recovery]
+condition = "error"
+transform = "direct"
+
+# ─── Stage 3: Summarize (terminal) ────────────────────────────────────────────
+[stages.summarize]
+mode = "autonomous"
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+description = "Create a concise, well-organized summary"
+available_tools = ["write_file", "read_file"]
+max_iterations = 10
+system_prompt = """
+Write the research report (write_file), built from the `claims` region and citing
+`sources_index`. Follow the citation/confidence rules in the `format` region.
+
+Structure:
+- Key findings organized by theme, each with a confidence level.
+- Notable disagreements - pull these straight from the `contradictions` region;
+  never drop a recorded conflict.
+- Open questions.
+- Sources - the numbered bibliography from `sources_index`.
+
+Keep it tight and skimmable. Every non-obvious claim must carry a [n] citation.
+"""
+
+[stages.summarize.transitions.summary]
+hint = "The report is written"
+
+# ─── Stage 4: Error recovery ──────────────────────────────────────────────────
+[stages.error_recovery]
+mode = "autonomous"
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+description = "Diagnose and recover from errors during gathering or analysis"
+available_tools = ["read_file", "bash"]
+max_iterations = 8
+max_revisits = 1
+system_prompt = """
+Something failed during research (a source fetch, a parse, etc.). The
+`error_report` region holds the error text the runtime captured - read it first,
+work out what went wrong, and note a workaround. Then hand back to analyze to
+continue with whatever material is available.
+"""
+
+# Un-exhaustible escape (lint: dead-end-possible): when every looping
+# target has spent its max_revisits budget, the run can still move forward
+# to the deliverable instead of dead-ending.
+[stages.error_recovery.transitions.summarize]
+hint = "Recovery is not converging - summarize what was found"
+transform = "compact"
+
+[stages.error_recovery.transitions.analyze]
+hint = "Recovered - continue analysis"
+transform = "compact"
+
+[compaction]
+provider = "anthropic"
+model = "claude-sonnet-5"
+
+# ─── Final output ────────────────────────────────────────────────────────────
+# Terminal. `mode = "output"` grants `submit_output`, requires the call, and
+# lets the run end here. No file tools on purpose: this stage reports, it does
+# not work.
+[stages.summary]
+mode = "output"
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+description = "Say what the research found"
+max_iterations = 8
+system_prompt = """
+Say what this research produced, for whoever asked for it.
+
+Lead with the answer to the question, in two or three sentences. Then the two or
+three findings that matter most, each with its confidence level. Name the report
+file you wrote so they can read the whole thing.
+
+Do not re-derive anything or re-list every source. This is the summary someone
+reads instead of the report, not a second copy of it.
+"""
+
+[stages.summary.transitions]
+
+# ─── Context layout ───────────────────────────────────────────────────────────
+# Budgets are a percentage of the model's context window (issue #100) with an
+# absolute `max_tokens`/`threshold_tokens` guard-rail. Percentages are ceilings.
+[context.regions]
+# The research question - required. Supplied via --task (or the API/ACP task field).
+query          = { kind = "pinned", budget = "1%", max_tokens = 1000, required = true, seed = "task", required_message = "State the research question via --task." }
+# Optional caller bounds: --scope "peer-reviewed sources since 2020 only".
+scope          = { kind = "pinned", budget = "1%", max_tokens = 1000, seed = "scope" }
+# Growing bibliography with credibility notes (curated by the agent).
+sources_index  = { kind = "pinned", budget = "3%", max_tokens = 3000 }
+# Citation/confidence rules (seeded with a sensible default the agent follows).
+format         = { kind = "pinned", budget = "1%", max_tokens = 500, seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
+
+# Raw source material (bulk, evictable).
+raw_findings   = { kind = "temporary", budget = "30%", max_tokens = 40000 }
+# Extracted claims (with source refs) and cross-source conflicts.
+claims         = { kind = "sliding_window", max_items = 30, budget = "7%", max_tokens = 8000 }
+contradictions = { kind = "clearable",      budget = "3%", max_tokens = 3000 }
+
+# Synthesis workspace (compacts to a running history when it grows).
+synthesis         = { kind = "compacting",      budget = "40%", compact_at = "80%", threshold_tokens = 30000, max_tokens = 50000 }
+synthesis_history = { kind = "compact_history", source_region = "synthesis", budget = "3%", max_tokens = 10000 }
+
+# The message stream. An explicit sliding_window `conversation` region is required -
+# the per-stage layout is rebuilt from this table on each transition, so an
+# auto-added one would be dropped after the first stage.
+conversation      = { kind = "sliding_window", max_items = 30, budget = "12%", max_tokens = 15000, strategy = "bulk", overflow = 10 }
+
+# Written by the RUNTIME on an abnormal stage ending (issue #154): a failed
+# inference call's error text, or a note that a stage hit its iteration cap.
+# Pinned so it survives the edge transform into the stage that acts on it.
+error_report      = { kind = "pinned", budget = "1%", max_tokens = 2000 }

@@ -1,0 +1,12 @@
+{
+  "answer": 70,
+  "answer_format": "a single integer",
+  "dataset": "HDFS",
+  "id": "log_040",
+  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "slice": {
+    "end_line": 819,
+    "start_line": 450
+  },
+  "type": "template_top_count"
+}

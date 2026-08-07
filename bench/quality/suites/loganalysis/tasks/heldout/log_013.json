@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "3bc2bb4d793804d7bbcd73e6281def07d5844dc89c297f49376b29bf9e928931",
+  "dataset": "Apache",
+  "id": "log_013",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"] Directory index forbidden by rule:\" first appear?",
+  "slice": {
+    "end_line": 683,
+    "start_line": 190
+  },
+  "type": "first_occurrence"
+}

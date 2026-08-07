@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "5279a4588425bb893e8cd190d78aa9a24495bfd5673195b6af832030bad24db6",
+  "dataset": "HDFS",
+  "id": "log_037",
+  "question": "How many log lines contain the exact text \"Served block blk_\"?",
+  "slice": {
+    "end_line": 711,
+    "start_line": 286
+  },
+  "type": "substring_count"
+}

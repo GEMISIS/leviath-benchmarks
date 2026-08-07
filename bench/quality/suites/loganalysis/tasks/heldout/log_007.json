@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "edfd8051f0ea8daf302cb2a72a456ceface4aefc0bab8fcb8e01dd528bee4aa5",
+  "dataset": "Zookeeper",
+  "id": "log_007",
+  "question": "How many log lines contain the exact text \"Revalidating client:\"?",
+  "slice": {
+    "end_line": 1073,
+    "start_line": 408
+  },
+  "type": "substring_count"
+}

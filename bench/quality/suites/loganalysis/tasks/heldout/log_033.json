@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "2ae59cd3d7826efaac5cd72a112a58ab5e93a7f51bedcdf670dd41f27f40a27c",
+  "dataset": "HDFS",
+  "id": "log_033",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"BLOCK* NameSystem.delete: blk_\" first appear?",
+  "slice": {
+    "end_line": 881,
+    "start_line": 549
+  },
+  "type": "first_occurrence"
+}

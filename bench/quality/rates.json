@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "note": "Placeholder rates for development. A counted round pins real provider prices here with source_url and captured_utc, and the file's sha256 is recorded in every run record.",
+    "source_url": null,
+    "captured_utc": null
+  },
+  "anthropic/claude-opus-5": {
+    "input_per_mtok": 0.0,
+    "output_per_mtok": 0.0,
+    "cache_read_per_mtok": 0.0,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": false
+  },
+  "anthropic/claude-sonnet-5": {
+    "input_per_mtok": 0.0,
+    "output_per_mtok": 0.0,
+    "cache_read_per_mtok": 0.0,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": false
+  },
+  "anthropic/claude-haiku-4-5": {
+    "input_per_mtok": 0.0,
+    "output_per_mtok": 0.0,
+    "cache_read_per_mtok": 0.0,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": false
+  },
+  "openrouter/moonshotai/kimi-k3": {
+    "input_per_mtok": 0.0,
+    "output_per_mtok": 0.0,
+    "cache_read_per_mtok": 0.0,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true
+  }
+}

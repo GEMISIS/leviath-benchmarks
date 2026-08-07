@@ -1,0 +1,12 @@
+{
+  "answer": 53,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_027",
+  "question": "How many log lines contain the exact text \"Received connection request /\"?",
+  "slice": {
+    "end_line": 1687,
+    "start_line": 1301
+  },
+  "type": "substring_count"
+}

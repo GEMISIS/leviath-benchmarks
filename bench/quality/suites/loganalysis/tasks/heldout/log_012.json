@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "5ce43a2a761545b9e5095d22d952a071f70c814b5c0f2efe57cdff19f0c42011",
+  "dataset": "HDFS",
+  "id": "log_012",
+  "question": "How many log lines contain the exact text \"PacketResponder\"?",
+  "slice": {
+    "end_line": 728,
+    "start_line": 319
+  },
+  "type": "substring_count"
+}

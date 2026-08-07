@@ -1,0 +1,12 @@
+{
+  "answer": 6,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_038",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Processed session termination for sessionid:\" first appear?",
+  "slice": {
+    "end_line": 1220,
+    "start_line": 539
+  },
+  "type": "first_occurrence"
+}

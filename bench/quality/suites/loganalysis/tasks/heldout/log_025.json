@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "ff146d80e624bee22201ba1f1bf57333a1d163e9f384f8b5098d13c8f2fbd8f8",
+  "dataset": "Apache",
+  "id": "log_025",
+  "question": "How many times does the most frequent message template occur? A template treats variable fields (ids, numbers, paths, addresses) as wildcards. Ground truth follows the loghub 2k annotations for this dataset.",
+  "slice": {
+    "end_line": 1808,
+    "start_line": 1373
+  },
+  "type": "template_top_count"
+}

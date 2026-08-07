@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "dda2ba18ec4cfed0f7d362e6473e0cd8ea6eb70e11bba8e1f8ccc36d0f03614e",
+  "dataset": "Zookeeper",
+  "id": "log_003",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Unexpected Exception:\" first appear?",
+  "slice": {
+    "end_line": 855,
+    "start_line": 210
+  },
+  "type": "first_occurrence"
+}

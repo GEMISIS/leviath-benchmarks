@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "9323059821f48eb78b15a42559686506a1deed2a722511d1cc2ef889e8f3363d",
+  "dataset": "HDFS",
+  "id": "log_039",
+  "question": "How many distinct message templates appear? A template treats variable fields (ids, numbers, paths, addresses) as wildcards; two lines share a template when they differ only in such fields. Ground truth follows the loghub 2k annotations for this dataset.",
+  "slice": {
+    "end_line": 1699,
+    "start_line": 1196
+  },
+  "type": "template_distinct"
+}
