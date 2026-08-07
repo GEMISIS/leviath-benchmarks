@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the quality-track charts from committed results. Charts only.
+"""Render the quality-track charts from recorded results. Charts only.
 
 Reads results/<stamp>_<host>/quality/ (round.json, per-suite
 summary.json and raw run records) plus specs.json, and renders:

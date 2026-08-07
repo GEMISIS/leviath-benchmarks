@@ -105,9 +105,11 @@ context with one model second, structured with mixed models last.
    Any post-tag change to frozen inputs means a new tag and a full
    re-run.
 2. **No run selection.** Every run writes one raw record - crashes,
-   timeouts, empty outputs, and budget cap-outs included - and all of
-   them are committed. Cap-outs count as non-completion. There is no
-   mechanism for excluding a run after the fact.
+   timeouts, empty outputs, and budget cap-outs included - and a
+   round's results tree is published as one unit (a CI-produced
+   artifact), never assembled or trimmed by hand. Results are never
+   committed to this repo. Cap-outs count as non-completion. There is
+   no mechanism for excluding a run after the fact.
 3. **Cache-honest cost.** Token numbers come from provider-reported
    usage fields only (prompt, completion, cache-read, cache-write) as
    the runtime copies them into each run's `meta.json`. One cost
@@ -142,8 +144,8 @@ context with one model second, structured with mixed models last.
    override (or null for the native mix), rates sha256, and timestamps;
    `specs.json` pins the machine. Provider-side model drift between
    rounds is uncontrollable and therefore stated.
-9. **Charts read only committed data.** Data collection never renders;
-   `render_quality.py` and `render_chart.py` read committed results
+9. **Charts read only recorded data.** Data collection never renders;
+   `render_quality.py` and `render_chart.py` read a round's results
    and stamp every figure with n, freeze tag, binary hash, rates date,
    and the exact p-value wherever a comparison is claimed. A secret
    scrub runs over the results tree before the runner will exit clean.
@@ -157,7 +159,7 @@ flowchart TD
     C --> D["Grade: suite verifiers, never re-graded here"]
     D --> E["Reveal: held-out answers committed"]
     E --> F["Aggregate: medians, min max, every point, exact p"]
-    F --> G["Render: charts from committed data only"]
+    F --> G["Render: charts from the recorded results only"]
     G --> H["Publish: tag the round -published"]
 ```
 
@@ -167,21 +169,25 @@ as `cap` (non-completion), never silently dropped.
 
 ## Results are an interface
 
-Committed results are consumed by other tooling, so they are treated as
-an API: every number a chart shows exists in committed JSON; the record
-schema (`quality-run-v1`) is versioned and bumped, never mutated;
-`round.json` is the machine-readable entry point (arm matrix, model
-roster with tiers, stage→model mapping for the mix arm, input hashes);
+Results never live in this repo: runs write into a local, git-ignored
+`results/` directory, and counted rounds will be produced by a CI job
+that publishes the complete raw tree as an artifact. Published results
+are consumed by other tooling, so they are treated as an API: every
+number a chart shows exists in the round's JSON; the record schema
+(`quality-run-v1`) is versioned and bumped, never mutated; `round.json`
+is the machine-readable entry point (arm matrix, model roster with
+tiers, stage→model mapping for the mix arm, input hashes);
 `results/SCHEMA.md` documents the formats.
 
 ## Reproducing a published round
 
 ```bash
 git checkout <freeze-tag>
+# fetch the round's published results artifact into results/<round-dir>
 python3 bench/quality/render_quality.py results/<round-dir> -o charts/
 ```
 
 Re-running the agents reproduces the *protocol*, not the exact numbers
 (models are nondeterministic and drift server-side). What must always
-reproduce from a checkout alone is the path from committed raw records
-to aggregates to charts.
+reproduce byte-for-byte is the path from a round's published raw
+records to aggregates to charts.

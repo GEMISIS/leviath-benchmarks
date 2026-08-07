@@ -1,9 +1,11 @@
 # Result formats
 
-Committed results are an interface: every number any chart shows exists
-in the JSON documented here, schemas are versioned and bumped rather
-than mutated, and downstream tooling should read these files rather
-than scraping charts.
+Results are an interface: every number any chart shows exists in the
+JSON documented here, schemas are versioned and bumped rather than
+mutated, and downstream tooling should read these files rather than
+scraping charts. Results never live in this repo - runs write into the
+git-ignored `results/` directory, and counted rounds will be produced
+and published whole by CI.
 
 ## Layout
 

@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 /tmp/
 .env
+
+# Results never live in the repo: runs write here locally, and counted
+# rounds will be produced and published by CI as complete artifacts.
+/results/*
+!/results/SCHEMA.md
