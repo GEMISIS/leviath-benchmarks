@@ -252,8 +252,9 @@ def render_ablation(suites: dict, round_meta: dict, specs: dict,
         for comp in summary.get("comparisons", []):
             if (comp["a"], comp["b"]) == ("structured-pinned",
                                           "flat-pinned"):
-                ax1.text(i, 103, f"p={comp['p_pass_exact_permutation']:.3f}",
-                         fontsize=7, ha="center", color=INK2)
+                p = comp.get("p_pass_exact_permutation")
+                label = f"p={p:.3f}" if isinstance(p, (int, float)) else "p: n/a"
+                ax1.text(i, 103, label, fontsize=7, ha="center", color=INK2)
                 break
 
     ax1.set_ylabel("verified pass rate (%)", fontsize=9, color=INK2)

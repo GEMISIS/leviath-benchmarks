@@ -47,6 +47,28 @@ from core import freeze, record, runner, scrub, stats, subset  # noqa: E402
 from core.levctl import QualityHome  # noqa: E402
 
 DEFAULT_TIMEOUT_SECS = 1800
+
+
+def require_result_capable(lev: str) -> None:
+    """Gate on capability, not version number.
+
+    The quality track's answer-capture contract is `lev result`; any
+    build that has it works - mainline, an alpha, or whatever release
+    the user installed. A version gate would wrongly reject source
+    builds, so we probe the subcommand instead.
+    """
+    try:
+        probe = subprocess.run([lev, "result", "--help"],
+                               capture_output=True, text=True, timeout=15)
+    except (OSError, subprocess.TimeoutExpired):
+        sys.exit(f"could not run {lev!r}; pass --lev /path/to/lev")
+    if probe.returncode != 0:
+        sys.exit(
+            "the quality track needs a lev with the `result` subcommand "
+            "(mainline, or v0.3.0+ once released). The lev at "
+            f"{lev!r} does not have it - build from source "
+            "(cargo build --release -p leviath-cli) or install a newer "
+            "build, then point --lev at it.")
 # Comparisons are pre-registered: arm a is hypothesized to pass MORE and
 # bill FEWER tokens than arm b.
 COMPARISONS = [("structured-pinned", "flat-pinned")]
@@ -103,13 +125,26 @@ def comparisons_block(records_list: list[dict]) -> list[dict]:
                 continue
             entry = {"a": arm_a, "b": arm_b, "model_label": model,
                      "hypothesis": "a passes more and bills fewer tokens"}
-            entry["p_pass_exact_permutation"] = stats.permutation_exact(
-                [bool(r["score"] and r["score"].get("passed")) for r in a],
-                [bool(r["score"] and r["score"].get("passed")) for r in b])
-            tok_a = [float(r["billed_tokens"]) for r in a]
-            tok_b = [float(r["billed_tokens"]) for r in b]
-            entry["p_tokens_exact_mann_whitney"] = stats.mann_whitney_exact(
-                tok_a, tok_b)
+            # Exact tests refuse to approximate above their enumeration
+            # cap; a summary must still be written (the raw records
+            # already exist), so record the refusal rather than crash.
+            try:
+                entry["p_pass_exact_permutation"] = stats.permutation_exact(
+                    [bool(r["score"] and r["score"].get("passed"))
+                     for r in a],
+                    [bool(r["score"] and r["score"].get("passed"))
+                     for r in b])
+            except ValueError as exc:
+                entry["p_pass_exact_permutation"] = None
+                entry["p_pass_note"] = str(exc)
+            try:
+                entry["p_tokens_exact_mann_whitney"] = (
+                    stats.mann_whitney_exact(
+                        [float(r["billed_tokens"]) for r in a],
+                        [float(r["billed_tokens"]) for r in b]))
+            except ValueError as exc:
+                entry["p_tokens_exact_mann_whitney"] = None
+                entry["p_tokens_note"] = str(exc)
             out.append(entry)
     return out
 
@@ -145,6 +180,8 @@ def main() -> int:
                         help="run without a freeze tag; records are "
                              "stamped UNFROZEN-SMOKE")
     args = parser.parse_args()
+
+    require_result_capable(args.lev)
 
     if args.unsafe_smoke:
         freeze_tag = freeze.SMOKE_TAG
