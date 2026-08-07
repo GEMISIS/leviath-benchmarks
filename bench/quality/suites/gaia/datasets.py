@@ -46,10 +46,18 @@ def ensure(datasets_dir: Path = DATASETS_DIR) -> None:
     manifest = (json.loads(manifest_path.read_text())
                 if manifest_path.is_file() else {})
 
+    # Upstream ships metadata as parquet; convert once at fetch time to
+    # the jsonl the suite reads (pandas is only needed for this step).
     meta_path = datasets_dir / "metadata.jsonl"
     if not meta_path.is_file():
-        meta_path.write_bytes(
-            _request(f"{_BASE}/{_SPLIT}/metadata.jsonl"))
+        parquet_path = datasets_dir / "metadata.parquet"
+        if not parquet_path.is_file():
+            parquet_path.write_bytes(
+                _request(f"{_BASE}/{_SPLIT}/metadata.parquet"))
+        import pandas as pd
+        frame = pd.read_parquet(parquet_path)
+        meta_path.write_text(frame.to_json(orient="records", lines=True))
+        _record(manifest, parquet_path)
     _record(manifest, meta_path)
 
     for row in _rows(meta_path):
