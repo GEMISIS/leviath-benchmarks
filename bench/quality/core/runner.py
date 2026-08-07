@@ -115,7 +115,11 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                 answer = home.result(run_id)
                 if answer is None:
                     status = "no_answer"
-            if keep_context:
+            # Suites over gated datasets never write context replays:
+            # a replay embeds task text and attachment contents, which
+            # their terms forbid storing in a public repository.
+            if keep_context and not getattr(suite, "contains_gated_data",
+                                            False):
                 dump = home.context_dump(run_id)
                 if dump:
                     art = _artifacts_dir(artifacts_root, base)

@@ -43,6 +43,11 @@ _FINAL = re.compile(r"FINAL ANSWER:\s*(.+)", re.IGNORECASE)
 class Suite:
     name = "gaia_validation"
     stagemix_mapping = None
+    # GAIA's terms forbid storing the dataset in any public repository.
+    # The runner honors this flag by never writing context replays for
+    # this suite (they would embed question text and attachment
+    # contents), and grade detail below carries no ground-truth answers.
+    contains_gated_data = True
 
     def load_tasks(self, subset_record: dict | None) -> list[dict]:
         tasks = datasets.tasks()
@@ -75,7 +80,7 @@ class Suite:
     def grade(self, task: dict, submission: str) -> dict:
         matches = _FINAL.findall(str(submission))
         candidate = matches[-1].strip() if matches else str(submission).strip()
-        expected = task["Final answer"]
-        passed = scorer.question_scorer(candidate, expected)
-        return {"passed": bool(passed),
-                "detail": {"expected": expected, "got": candidate}}
+        passed = scorer.question_scorer(candidate, task["Final answer"])
+        # The model's own answer is our output and may be recorded; the
+        # dataset's gold answer is gated content and never is.
+        return {"passed": bool(passed), "detail": {"got": candidate}}
