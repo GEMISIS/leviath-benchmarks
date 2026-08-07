@@ -51,6 +51,7 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                freeze_tag: str, lev_info: dict, blueprint_shas: dict,
                rates_sha: str, seed: int, task_timeout_secs: float,
                budget_usd: float | None, keep_context: bool,
+               per_run_max_tokens: int | None = None,
                log=print) -> list[dict]:
     """Run every (task x arm x rep) cell and return the written records.
 
@@ -117,7 +118,14 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
             run_id = home.launch(blueprint, prompt, workdir,
                                  model=arm["model_id"],
                                  extra_args=extra_cli)
-            status, meta = home.wait(run_id, task_timeout_secs)
+            should_cancel = None
+            if per_run_max_tokens:
+                # Model-agnostic mid-run ceiling on billed tokens; the
+                # cancelled run is recorded as "cap" with its spend.
+                should_cancel = (lambda m: cost_mod.billed_tokens(
+                    _usage_of(m), False) > per_run_max_tokens)
+            status, meta = home.wait(run_id, task_timeout_secs,
+                                     should_cancel=should_cancel)
             stage_records = home.stages(run_id)
             if status == "complete":
                 answer = home.result(run_id)

@@ -107,7 +107,14 @@ class QualityHome:
                              capture_output=True, text=True, timeout=120)
         if out.returncode != 0:
             raise RuntimeError(f"lev run failed: {out.stderr.strip()[:400]}")
-        payload = json.loads(out.stdout)
+        # Without a TTY the runtime's INFO log line can land on stdout
+        # ahead of the JSON payload, ANSI-colored - strip escapes, then
+        # parse from the first JSON character.
+        import re
+        text = re.sub(r"\x1b\[[0-9;]*m", "", out.stdout)
+        start = min((i for i in (text.find("{"), text.find("["))
+                     if i >= 0), default=0)
+        payload = json.loads(text[start:])
         if isinstance(payload, list):
             payload = payload[0]
         return payload["run_id"]
@@ -128,11 +135,17 @@ class QualityHome:
             return None
 
     def wait(self, run_id: str, timeout_secs: float,
-             poll_secs: float = 1.0) -> tuple[str, dict | None]:
+             poll_secs: float = 1.0,
+             should_cancel=None) -> tuple[str, dict | None]:
         """Poll meta.json until terminal. Returns (status, meta).
 
-        On timeout the run is cancelled and status "timeout" returned;
-        the meta captured at that moment still carries the tokens spent.
+        On timeout the run is cancelled and status "timeout" returned.
+        ``should_cancel(meta)`` is checked each poll; returning True
+        cancels the run with status "cap" - the per-run spend ceiling,
+        enforced mid-run because a single runaway run can otherwise
+        blow through a whole round budget before the next between-run
+        check. Either way the captured meta still carries the tokens
+        spent.
         """
         deadline = time.time() + timeout_secs
         meta = None
@@ -140,6 +153,12 @@ class QualityHome:
             meta = self.meta(run_id)
             if meta and meta.get("status") in TERMINAL:
                 return meta["status"], meta
+            if meta and should_cancel is not None and should_cancel(meta):
+                subprocess.run([self.lev, "cancel", run_id],
+                               env=self.env(), capture_output=True,
+                               text=True)
+                time.sleep(2.0)
+                return "cap", self.meta(run_id) or meta
             time.sleep(poll_secs)
         subprocess.run([self.lev, "cancel", run_id], env=self.env(),
                        capture_output=True, text=True)

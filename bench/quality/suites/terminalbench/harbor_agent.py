@@ -34,9 +34,21 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import time
 from pathlib import Path
+
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _json_payload(text: str):
+    """Parse JSON from CLI stdout that may carry an ANSI-colored log
+    line ahead of the payload (TTY-less containers log to stdout)."""
+    clean = _ANSI.sub("", text)
+    start = min((i for i in (clean.find("{"), clean.find("["))
+                 if i >= 0), default=0)
+    return json.loads(clean[start:])
 
 # Pier (the deep-swe runner) is a Harbor fork with the identical
 # BaseAgent/BaseEnvironment/AgentContext interface, so one adapter file
@@ -76,24 +88,55 @@ class LeviathAgent(BaseAgent):
         return result.stdout or ""
 
     async def setup(self, environment: BaseEnvironment) -> None:
-        lev_bin = os.environ.get("LEV_LINUX_BIN")
+        # Pick the binary by the CONTAINER's architecture - task images
+        # may be x86_64 under emulation on an arm host.
+        arch_out = await environment.exec("uname -m")
+        arch = (arch_out.stdout or "").strip()
+        env_var = ("LEV_LINUX_ARM64" if arch in ("aarch64", "arm64")
+                   else "LEV_LINUX_X64")
+        lev_bin = os.environ.get(env_var) or os.environ.get("LEV_LINUX_BIN")
         if not lev_bin or not Path(lev_bin).is_file():
             raise RuntimeError(
-                "LEV_LINUX_BIN must point at a Linux lev binary")
-        await environment.upload_file(Path(lev_bin), "/opt/lev")
+                f"{env_var} (or LEV_LINUX_BIN) must point at a Linux "
+                f"lev binary for container arch {arch!r}")
         blueprint = self._blueprint()
+        # Parent directories must exist before any upload lands.
+        await self._sh(environment,
+                       f"mkdir -p {HOME}/.leviath/agents/{blueprint}")
+        await environment.upload_file(Path(lev_bin), "/opt/lev")
         await environment.upload_dir(
             QUALITY_DIR / "blueprints" / blueprint,
             f"{HOME}/.leviath/agents/{blueprint}")
+        await self._sh(environment, "chmod +x /opt/lev")
+        # Provider keys travel as an uploaded config file, never inside
+        # shell command lines (which containers log).
+        import tempfile
+        keys = {
+            "anthropic_api_key": os.environ.get("ANTHROPIC_API_KEY"),
+            "openai_api_key": os.environ.get("OPENAI_API_KEY"),
+            "google_api_key": os.environ.get("GOOGLE_API_KEY"),
+        }
+        lines = ["[providers]"]
+        lines += [f'{k} = "{v}"' for k, v in keys.items() if v]
+        openrouter = os.environ.get("OPENROUTER_API_KEY")
+        if openrouter:
+            lines.insert(0, f'openrouter_api_key = "{openrouter}"')
+        with tempfile.NamedTemporaryFile("w", suffix=".toml",
+                                         delete=False) as fh:
+            fh.write("\n".join(lines) + "\n")
+            tmp = fh.name
+        try:
+            await environment.upload_file(
+                Path(tmp), f"{HOME}/.leviath/config.toml")
+        finally:
+            os.unlink(tmp)
         # The provider HTTP client refuses to build without system CA
         # certificates; minimal images ship none.
         await self._sh(environment, (
-            "chmod +x /opt/lev && "
-            f"mkdir -p {HOME}/.leviath && "
-            f"printf '' > {HOME}/.leviath/config.toml && "
             "if [ ! -e /etc/ssl/certs/ca-certificates.crt ]; then "
             "apt-get update -qq && "
-            "apt-get install -y -qq ca-certificates >/dev/null; fi"))
+            "apt-get install -y -qq ca-certificates >/dev/null; fi"),
+            timeout=600)
 
     async def run(self, instruction: str, environment: BaseEnvironment,
                   context: AgentContext) -> None:
@@ -101,11 +144,23 @@ class LeviathAgent(BaseAgent):
         model_flag = f"-m {shlex.quote(self.model_name)}" if self.model_name else ""
         env_prefix = f"LEVIATH_HOME={HOME} LEVIATH_SKIP_DOTENV=1"
 
-        launch = await self._sh(environment, (
+        launch_cmd = (
             f"{env_prefix} /opt/lev run {shlex.quote(blueprint)} "
             f"{model_flag} --yolo --json --workdir \"$PWD\" "
-            f"--task {shlex.quote(instruction)}"))
-        payload = json.loads(launch)
+            f"--task {shlex.quote(instruction)}")
+        result = await environment.exec(launch_cmd, timeout_sec=300)
+        launch = result.stdout or ""
+        if not launch.strip():
+            raise RuntimeError(
+                f"lev run produced no output (rc={result.return_code}); "
+                f"stderr: {(result.stderr or '')[-500:]}")
+        try:
+            payload = _json_payload(launch)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"lev run stdout was not JSON (rc={result.return_code}): "
+                f"stdout[:400]={launch[:400]!r} "
+                f"stderr[-400:]={(result.stderr or '')[-400:]!r}") from exc
         if isinstance(payload, list):
             payload = payload[0]
         run_id = payload["run_id"]
@@ -159,6 +214,6 @@ class LeviathAgent(BaseAgent):
 def _between(text: str) -> dict | None:
     try:
         body = text.split(META_BEGIN, 1)[1].split(META_END, 1)[0].strip()
-        return json.loads(body) if body else None
+        return _json_payload(body) if body else None
     except (IndexError, json.JSONDecodeError):
         return None

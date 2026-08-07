@@ -185,6 +185,11 @@ def main() -> int:
     parser.add_argument("--out", default=None,
                         help="results dir (default: results/<stamp>_<host>)")
     parser.add_argument("--budget-usd", type=float, default=None)
+    parser.add_argument("--per-run-max-tokens", type=int,
+                        default=3_000_000,
+                        help="mid-run billed-token ceiling per run; the "
+                             "run is cancelled and recorded as 'cap' "
+                             "when exceeded (0 disables)")
     parser.add_argument("--task-timeout", type=float,
                         default=DEFAULT_TIMEOUT_SECS)
     parser.add_argument("--seed", type=int, default=1,
@@ -264,6 +269,7 @@ def main() -> int:
         "seed": args.seed,
         "reps": args.reps,
         "budget_usd": args.budget_usd,
+        "per_run_max_tokens": args.per_run_max_tokens or None,
         "task_timeout_secs": args.task_timeout,
         "arms": arms,
         "roster": arms_cfg["models"],
@@ -299,7 +305,8 @@ def main() -> int:
             home, suite, tasks, arms, args.reps, rates, runs_dir,
             runs_dir, freeze_tag, lev_info, blueprint_shas, rates_sha,
             args.seed, args.task_timeout, args.budget_usd,
-            args.keep_context)
+            args.keep_context,
+            per_run_max_tokens=args.per_run_max_tokens or None)
     finally:
         home.stop_daemon()
         if latency_proc is not None:
