@@ -181,25 +181,46 @@ context with one model second, structured with mixed models last.
    Mann-Whitney for tokens/cost/wall-clock, an exact permutation test
    for pass rates (rank-sum is the wrong tool for booleans). The
    implementation refuses to fall back to approximations silently.
-5. **Seeded subsets.** Task subsets are drawn once, before the freeze,
+5. **Subsets sized for the effect being claimed.** A comparison that
+   cannot detect the difference it reports is not evidence, so subset
+   size is chosen against measured power rather than convenience.
+   Simulating this benchmark's own randomization test - two arms, per
+   task difficulty shared across repetitions, one-sided at p<0.05:
+
+   | shape | +8 pts | +13 pts | +20 pts | +30 pts |
+   |---|---|---|---|---|
+   | 8 tasks x 3 reps | 4% | 12% | 22% | 54% |
+   | 10 tasks x 3 reps | 8% | 20% | 34% | 62% |
+   | 30 tasks x 3 reps | 22% | 44% | 81% | 99% |
+   | 50 tasks x 3 reps | 30% | 72% | 95% | 100% |
+   | 89 tasks x 2 reps | 42% | 72% | 99% | 100% |
+
+   A ten-task suite cannot support a headline claim: at a thirteen-point
+   difference it will miss it four times in five. Such suites are run as
+   **diagnostics** - they find defects, and their numbers are reported as
+   observations rather than as findings - while **evidence** suites carry
+   enough tasks for the effect size being claimed. Which role a suite is
+   serving is stated wherever its numbers appear.
+
+6. **Seeded subsets.** Task subsets are drawn once, before the freeze,
    by a committed RNG seed over a hashed task universe
    (`core/subset.py`). Exclusions (e.g. a task whose environment image
    cannot build on the benchmark host) are declared with reasons in the
    committed subset file before the draw. The runner only reads subset
    files; it never samples live.
-6. **Interleaved arms.** The runner shuffles (task × arm × model × rep)
+7. **Interleaved arms.** The runner shuffles (task × arm × model × rep)
    cells with a recorded seed so provider drift and time-of-day effects
    never load onto one arm.
-7. **External graders stay external.** Container suites are scored by
+8. **External graders stay external.** Container suites are scored by
    their own verifiers and never re-graded here. Local graders are the
    upstream scorers vendored verbatim with pinned sha256s, under unit
    test against published examples.
-8. **Pin and disclose.** Every record carries the freeze tag, lev
+9. **Pin and disclose.** Every record carries the freeze tag, lev
    version + binary sha256, blueprint sha256, the verbatim model
    override (or null for the native mix), rates sha256, and timestamps;
    `specs.json` pins the machine. Provider-side model drift between
    rounds is uncontrollable and therefore stated.
-9. **Charts read only recorded data.** Data collection never renders;
+10. **Charts read only recorded data.** Data collection never renders;
    `render_quality.py` and `render_chart.py` read a round's results
    and stamp every figure with n, freeze tag, binary hash, rates date,
    and the exact p-value wherever a comparison is claimed. A secret
