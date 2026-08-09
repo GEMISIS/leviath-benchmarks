@@ -1,4 +1,4 @@
-# Frozen benchmark copy of the bundled data-analyst agent (leviath commit 876809e).
+# Frozen benchmark copy of the bundled data-analyst agent (leviath commit a47a97d52984).
 # Byte-frozen for the quality track; its sha256 is recorded in every run record.
 
 [agent]
