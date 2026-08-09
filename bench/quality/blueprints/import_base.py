@@ -25,8 +25,10 @@ check_pairs.py.
 """
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -37,6 +39,7 @@ PAIRS = {
     "log-analyzer": "loganalyzer-bench",
 }
 _RAW = "https://raw.githubusercontent.com/GEMISIS/leviath"
+_API = "https://api.github.com/repos/GEMISIS/leviath"
 
 
 def main() -> int:
@@ -53,6 +56,27 @@ def main() -> int:
             url = (f"{_RAW}/{commit}/crates/leviath-cli/agents/"
                    f"{name}/agent.leviath")
             return urllib.request.urlopen(url, timeout=60).read().decode()
+
+        def tools(name: str) -> dict[str, str]:
+            """The agent's own tools/*.rhai - it is invalid without them."""
+            url = (f"{_API}/contents/crates/leviath-cli/agents/{name}"
+                   f"/tools?ref={commit}")
+            req = urllib.request.Request(
+                url, headers={"accept": "application/vnd.github+json"})
+            try:
+                listing = json.loads(
+                    urllib.request.urlopen(req, timeout=60).read())
+            except urllib.error.HTTPError as exc:
+                if exc.code == 404:
+                    return {}      # this agent ships no tools
+                raise
+            out = {}
+            for entry in listing:
+                if entry["type"] != "file":
+                    continue
+                out[entry["name"]] = urllib.request.urlopen(
+                    entry["download_url"], timeout=60).read().decode()
+            return out
         commit_label = commit[:12]
     else:
         repo = Path(argv[0])
@@ -63,6 +87,12 @@ def main() -> int:
 
         def read(name: str) -> str:
             return (agents / name / "agent.leviath").read_text()
+
+        def tools(name: str) -> dict[str, str]:
+            d = agents / name / "tools"
+            return {p.name: p.read_text()
+                    for p in sorted(d.glob("*")) if p.is_file()} \
+                if d.is_dir() else {}
 
     here = Path(__file__).resolve().parent
     existing = [d for d in PAIRS.values() if (here / d / "agent.leviath").exists()]
@@ -85,8 +115,13 @@ def main() -> int:
             "per round, sha256 recorded in every run record.\n\n")
         text = read(name)
         (out / "agent.leviath").write_text(header + text)
-        print(f"{dest}: {len(text.splitlines())} upstream lines "
-              f"@ {commit_label}")
+        agent_tools = tools(name)
+        if agent_tools:
+            (out / "tools").mkdir(exist_ok=True)
+            for fname, body in agent_tools.items():
+                (out / "tools" / fname).write_text(body)
+        print(f"{dest}: {len(text.splitlines())} upstream lines, "
+              f"{len(agent_tools)} tool script(s) @ {commit_label}")
     return 0
 
 

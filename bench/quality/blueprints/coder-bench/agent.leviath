@@ -4,14 +4,13 @@
 
 [agent]
 name = "coder"
-version = "0.0.2"
+version = "0.1.0"
 description = "Multi-stage coding agent - discover, analyze, optionally prototype, implement, and review, with stuck detection and graph-based error recovery"
 entry_stage = "discover"
 
-# Model selection is an ordered fallback list per stage: the first provider
-# configured at runtime wins. Anthropic first, then OpenAI, then a local Ollama
-# model as a last resort. `allow_user_default` (on by default) still lets the
-# user's configured default model catch anything unlisted.
+# Each stage names exactly one model - see the policy header. A second
+# model firing mid-run would silently change what was measured, so
+# there is no second model to reach for.
 
 # Global tool permissions: write/exec require approval unless overridden.
 [tool_permissions]
@@ -226,6 +225,11 @@ transform = "compact"
 hint = "Every hypothesis failed - the plan's premise is wrong, re-plan"
 transform = "compact"
 
+# Un-exhaustible escape (lint: dead-end-possible).
+[stages.prototype.transitions.summary]
+hint = "The work is out of revisits - report the state of the spike"
+transform = "compact"
+
 [stages.prototype.transitions.reassess]
 condition = "stuck"
 stuck_after_iterations = 12
@@ -318,6 +322,13 @@ edit_file  = "implementation"
 hint = "Implementation complete, ready for review"
 transform = "compact"
 gate = { require_modifications = true, region = "implementation" }
+
+# Un-exhaustible escape (lint: dead-end-possible): review and reassess both
+# carry revisit budgets, so without this a long run ends stranded - an error
+# record where the work itself may have succeeded.
+[stages.implement.transitions.summary]
+hint = "Review and reassess are out of revisits - report the state of the work"
+transform = "compact"
 
 # Runtime escape hatch (issue #106). This is the fix for the observed failure
 # mode: ~100 iterations spent editing the wrong file, a working fix broken and
@@ -490,6 +501,13 @@ compact_prompt = "Summarize the reassessment as three things: the wrong assumpti
 condition = "error"
 transform = "direct"
 
+# Un-exhaustible escape (lint: dead-end-possible): when implement has spent
+# its revisits, the run reports what it did instead of erroring as stranded -
+# a stranded run in a benchmark is a lost task, not a signal.
+[stages.reassess.transitions.summary]
+hint = "Implementation is out of revisits - report the state of the work"
+transform = "compact"
+
 # ─── Stage 5: Error recovery ──────────────────────────────────────────────────
 # Only reachable via error edges - invisible during normal flow.
 [stages.error_recovery]
@@ -521,6 +539,11 @@ read_file = "codebase"
 hint = "Error diagnosed - retry implementation"
 transform = "compact"
 
+# Un-exhaustible escape (lint: dead-end-possible).
+[stages.error_recovery.transitions.summary]
+hint = "Recovery is not converging - report the state of the work"
+transform = "compact"
+
 # ─── Compaction ───────────────────────────────────────────────────────────────
 [compaction]
 provider = "anthropic"
@@ -534,9 +557,16 @@ model = "claude-sonnet-5"
 mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what changed"
-max_iterations = 8
+# Reporting an answer is one call. The budget covers a retry -
+# a schema refusal handed back, a format corrected - not a loop:
+# an unbounded output stage bills its whole context per attempt.
+max_iterations = 5
 system_prompt = """
 Say what you changed, for whoever asked for it.
+
+If the task states an exact output format - a required final line, a particular
+shape, "reply with only X" - reproduce it literally, with nothing wrapped around
+it, and skip the rest of this.
 
 List the files you touched and what each change does - one line each. Then
 anything they need to know: a decision you made, a test you could not run, a

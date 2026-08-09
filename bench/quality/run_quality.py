@@ -242,6 +242,14 @@ def main() -> int:
     suite_mod = importlib.import_module(f"suites.{args.suite}.suite")
     suite = suite_mod.Suite()
 
+    missing = {name: why
+               for name, why in getattr(suite, "requires_env", {}).items()
+               if not os.environ.get(name)}
+    if missing:
+        for name, why in missing.items():
+            print(f"{suite.name} requires {name}: {why}", file=sys.stderr)
+        return 2
+
     arms_cfg = load_arms_config(QUALITY_DIR / "arms.json")
     model_labels = (args.models.split(",") if args.models
                     else list(arms_cfg["models"]))

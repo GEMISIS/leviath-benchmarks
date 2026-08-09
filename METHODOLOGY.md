@@ -84,6 +84,13 @@ of routing cheap models to cheap stages.
 | research | GAIA validation | upstream quasi-exact-match scorer, vendored verbatim |
 | log analysis | generated from loghub 2k annotated datasets | exact match; ground truths machine-computed and grep-checkable |
 
+**Web access is per-suite, and minimal.** An agent carries web tools
+only where its suite's tasks cannot be answered without them - GAIA,
+whose questions are defined by needing to browse, and nowhere else.
+Every suite we run has its tasks, and often its answers, published on
+the web, so a search tool an agent does not need is a contamination
+path rather than a capability (`blueprints/AGENTS.md` holds the table).
+
 Suite-specific caveats travel with any published number: GAIA answers
 are public and its questions are web-dependent (absolute numbers
 drift; interleaved arms keep the ablation fair); the log-analysis

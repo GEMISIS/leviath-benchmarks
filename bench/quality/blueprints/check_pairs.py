@@ -58,6 +58,11 @@ def check_policy(name: str) -> list[str]:
     if "ask_user_confirm" in raw:
         problems.append(f"{name}: prompt text still references "
                         "ask_user_confirm")
+    for i, line in enumerate(raw.splitlines(), 1):
+        # The policy header is the one place allowed to say the word.
+        if "fallback" in line.lower() and "BENCHMARK POLICY" not in line:
+            problems.append(f"{name}:{i}: text describes fallback models, "
+                            "which the policy removed")
     return problems
 
 
@@ -123,6 +128,21 @@ def check_pair(structured_name: str, flat_name: str) -> list[str]:
     if f_regions != {"task", "conversation", "error_report"}:
         problems.append(f"flat regions {sorted(f_regions)} != "
                         "[task, conversation, error_report]")
+
+    # An agent's own tools/*.rhai are part of it: a granted tool whose
+    # script is missing makes the blueprint invalid, so the flat copy
+    # must carry the same scripts byte-for-byte.
+    def scripts(name: str) -> dict[str, bytes]:
+        d = HERE / name / "tools"
+        return {p.name: p.read_bytes()
+                for p in sorted(d.glob("*")) if p.is_file()} \
+            if d.is_dir() else {}
+
+    s_scripts, f_scripts = scripts(structured_name), scripts(flat_name)
+    if s_scripts != f_scripts:
+        problems.append(
+            f"tools/ differ: structured {sorted(s_scripts)}, flat "
+            f"{sorted(f_scripts)} (regenerate with make_flat.py)")
 
     s_comp = s.get("compaction")
     f_comp = f.get("compaction")

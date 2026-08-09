@@ -104,11 +104,13 @@ only the structure differs.
 ### Running the quality track
 
 Requirements: a leviath install, `python3` with `psutil` and
-`matplotlib`, provider API keys in the environment (never written into
-results - a secret scrub refuses to exit clean otherwise), and per
-suite: nothing extra for log analysis and DABstep beyond a one-time
-dataset fetch; an HF token for the gated GAIA download; Docker plus the
-suite's runner for the container coding suites.
+`matplotlib`, and API keys in the environment - copy `.env.example` to
+`.env` and fill it in (keys are never written into results; a secret
+scrub refuses to exit clean otherwise). Per suite: nothing extra for
+log analysis and DABstep beyond a one-time dataset fetch; an HF token
+for the gated GAIA download plus a Brave Search key so the research
+agents search the web rather than falling back to Wikipedia; Docker
+plus the suite's runner for the container coding suites.
 
 ```
 # one-time dataset fetches (nothing downloads implicitly at run time)

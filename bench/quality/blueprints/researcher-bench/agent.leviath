@@ -4,8 +4,8 @@
 
 [agent]
 name = "researcher"
-version = "0.0.2"
-description = "Research assistant - gather, analyze, and summarize with a gather↔analyze refinement loop, error recovery, and multi-provider fallback"
+version = "0.1.0"
+description = "Research assistant - gather, analyze, and summarize with a gather↔analyze refinement loop and error recovery"
 entry_stage = "gather"
 
 # Read/search agent: it gathers and synthesizes, writing only its final report.
@@ -55,8 +55,8 @@ transform = "direct"
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
 # target has spent its max_revisits budget, the run can still move forward
 # to the deliverable instead of dead-ending.
-[stages.gather.transitions.summarize]
-hint = "Analysis is out of revisits - summarize from the material in hand"
+[stages.gather.transitions.summary]
+hint = "Analysis is out of revisits - answer from the material in hand"
 transform = "compact"
 
 [stages.gather.transitions.error_recovery]
@@ -76,7 +76,8 @@ max_revisits = 3
 transition_prompt = """
 You've analyzed the material gathered so far. Decide what happens next:
 - If there are clear gaps you can't fill from what you have, respond with: gather
-- If you have enough to write a useful summary, respond with: summarize
+- If the task asked a specific question and the claims answer it, respond with: summary
+- If the task asked for a written report or a survey of a topic, respond with: summarize
 """
 system_prompt = """
 Analyze the `raw_findings` against the `sources_index`. Do three things:
@@ -103,8 +104,14 @@ default_region = "raw_findings"
 hint = "More information needed on specific sub-topics"
 transform = "compact"
 
+# The deliverable follows the request: a written report when one was asked
+# for, otherwise the answer to the question that was asked.
+[stages.analyze.transitions.summary]
+hint = "The task asked a specific question and the claims answer it"
+transform = "compact"
+
 [stages.analyze.transitions.summarize]
-hint = "Analysis complete - ready to summarize"
+hint = "The task asked for a written report or a survey of a topic"
 transform = "compact"
 
 [stages.analyze.transitions.error_recovery]
@@ -119,6 +126,11 @@ description = "Create a concise, well-organized summary"
 available_tools = ["write_file", "read_file"]
 max_iterations = 10
 system_prompt = """
+Check `task` first. If it only asked a specific question, writing a report is
+work nobody asked for: do not write one, and move to summary with the answer.
+
+Otherwise the task asked for a written report, so write one.
+
 Write the research report (write_file), built from the `claims` region and citing
 `sources_index`. Follow the citation/confidence rules in the `format` region.
 
@@ -153,8 +165,8 @@ continue with whatever material is available.
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
 # target has spent its max_revisits budget, the run can still move forward
 # to the deliverable instead of dead-ending.
-[stages.error_recovery.transitions.summarize]
-hint = "Recovery is not converging - summarize what was found"
+[stages.error_recovery.transitions.summary]
+hint = "Recovery is not converging - answer from what was found"
 transform = "compact"
 
 [stages.error_recovery.transitions.analyze]
@@ -173,16 +185,26 @@ model = "claude-sonnet-5"
 mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what the research found"
-max_iterations = 8
+# Reporting an answer is one call. The budget covers a retry -
+# a schema refusal handed back, a format corrected - not a loop:
+# an unbounded output stage bills its whole context per attempt.
+max_iterations = 5
 system_prompt = """
-Say what this research produced, for whoever asked for it.
+Answer whoever asked, in the form they asked for.
 
-Lead with the answer to the question, in two or three sentences. Then the two or
-three findings that matter most, each with its confidence level. Name the report
-file you wrote so they can read the whole thing.
+If the task states an exact output format - a required final line, a particular
+shape, "reply with only X" - reproduce it literally, with nothing wrapped around
+it. An answer that is right but not in the requested form is unusable by whoever
+asked, so it is not an answer.
 
-Do not re-derive anything or re-list every source. This is the summary someone
-reads instead of the report, not a second copy of it.
+If `task` asked a specific question, give that answer and nothing else - no
+preamble, no citations list, no restating the question. If it asked for a survey
+or a report, lead with the answer in two or three sentences, then the two or
+three findings that matter most with their confidence levels, and name the report
+file if you wrote one.
+
+Do not re-derive anything or re-list every source. This is what someone reads
+instead of the report, not a second copy of it.
 """
 
 [stages.summary.transitions]

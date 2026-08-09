@@ -13,6 +13,7 @@ comparison fair even as the web moves.
 """
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import sys
@@ -39,6 +40,37 @@ each element."""
 
 _FINAL = re.compile(r"FINAL ANSWER:\s*(.+)", re.IGNORECASE)
 
+_ANSWER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "final_answer": {
+            "type": "string",
+            "description": "The answer alone - a number, a few words, or "
+                           "a comma separated list. No explanation.",
+        },
+    },
+    "required": ["final_answer"],
+    # Deliberately permissive: a refused submission is handed back to
+    # the agent, and an output stage that spends its whole budget being
+    # refused ends the run with no answer at all. Only final_answer is
+    # ever read, so an agent that adds a field it wanted to explain
+    # itself with still gets graded on the answer.
+    "additionalProperties": True,
+}
+
+
+def _extract(submission: str) -> str:
+    """The answer, however the agent chose to hand it back."""
+    text = str(submission).strip()
+    try:
+        obj = json.loads(text)
+        if isinstance(obj, dict) and isinstance(obj.get("final_answer"), str):
+            return obj["final_answer"].strip()
+    except (json.JSONDecodeError, TypeError):
+        pass
+    matches = _FINAL.findall(text)
+    return matches[-1].strip() if matches else text
+
 
 class Suite:
     name = "gaia_validation"
@@ -48,6 +80,16 @@ class Suite:
     # this suite (they would embed question text and attachment
     # contents), and grade detail below carries no ground-truth answers.
     contains_gated_data = True
+    # The researcher's web_search tool uses Brave when BRAVE_API_KEY is
+    # set and otherwise falls back, silently, to a Wikipedia-only
+    # search. That fallback would quietly turn a web-research benchmark
+    # into a Wikipedia benchmark, so the runner refuses the suite
+    # without the key rather than publishing a degraded number.
+    requires_env = {
+        "BRAVE_API_KEY": "without it the agents' web_search falls back "
+                         "to Wikipedia-only results, which understates a "
+                         "web-dependent suite",
+    }
 
     def load_tasks(self, subset_record: dict | None) -> list[dict]:
         tasks = datasets.tasks()
@@ -62,12 +104,21 @@ class Suite:
         return blueprint, []
 
     def task_cli(self, task: dict) -> list:
-        return ["--output-format", "text", "--output-instructions",
-                "End with a line in exactly this format: "
-                "FINAL ANSWER: [YOUR FINAL ANSWER] - a number OR as few "
-                "words as possible OR a comma separated list, with no "
-                "commas/units in numbers, no articles/abbreviations in "
-                "strings unless specified."]
+        # GAIA grades one short string by exact match, and a research
+        # answer wrapped in prose fails on form rather than substance -
+        # measuring formatting instead of research. The schema makes the
+        # shape a contract the runtime enforces (a submission that does
+        # not satisfy it is handed back to the agent), identically for
+        # every arm, so what is graded is the answer itself.
+        return ["--output-format", "json",
+                "--output-schema", json.dumps(_ANSWER_SCHEMA),
+                "--output-instructions",
+                "Put ONLY the final answer in final_answer: a number OR "
+                "as few words as possible OR a comma separated list, "
+                "with no commas/units in numbers and no "
+                "articles/abbreviations in strings unless specified. "
+                "Nothing else: no explanation, no confidence note, no "
+                "restating of the question."]
 
     def prepare(self, task: dict, workdir: Path) -> str:
         file_note = "\n"
@@ -86,8 +137,7 @@ class Suite:
         return answer
 
     def grade(self, task: dict, submission: str) -> dict:
-        matches = _FINAL.findall(str(submission))
-        candidate = matches[-1].strip() if matches else str(submission).strip()
+        candidate = _extract(submission)
         passed = scorer.question_scorer(candidate, task["Final answer"])
         # The model's own answer is our output and may be recorded; the
         # dataset's gold answer is gated content and never is.

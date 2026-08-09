@@ -4,7 +4,7 @@
 
 [agent]
 name = "log-analyzer"
-version = "0.0.3"
+version = "0.1.0"
 description = "Analyzes log files - identifies anomalies, trends, and error patterns via a scripted analyze⇄script loop, maintaining a severity-ranked findings index"
 entry_stage = "ingest"
 
@@ -28,11 +28,13 @@ Ingest the log files named in `task`. Determine:
 3. Available fields/columns
 4. Obvious structural issues (corrupted lines, encoding problems)
 
-Use bash to sample rather than reading whole huge files - the first N lines, a
-line count, a file type probe. Reach for whatever your shell actually provides
-(`head`/`wc`/`file` on Unix, `Get-Content -TotalCount` and `Measure-Object` on
-Windows). Write a short format/structure summary to `findings` (context_write) so
-the analyze stage starts oriented. Raw sampled content lands in `logs`.
+Use bash to sample rather than reading whole files into context - the first N
+lines, a line count, a file type probe. Reach for whatever your shell actually
+provides (`head`/`wc`/`file` on Unix, `Get-Content -TotalCount` and
+`Measure-Object` on Windows). The later stages compute over the file on disk with
+scripts; pulling the whole log into context buys nothing and costs a lot. Write a
+short format/structure summary to `findings` (context_write) so the analyze stage
+starts oriented. Raw sampled content lands in `logs`.
 """
 
 [stages.ingest.tool_routing]
@@ -48,8 +50,8 @@ transform = "direct"
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
 # target has spent its max_revisits budget, the run can still move forward
 # to the deliverable instead of dead-ending.
-[stages.ingest.transitions.report]
-hint = "Analysis is out of revisits - report what ingestion established"
+[stages.ingest.transitions.summary]
+hint = "Analysis is out of revisits - answer from what ingestion established"
 transform = "compact"
 
 [stages.ingest.transitions.error_recovery]
@@ -67,9 +69,16 @@ max_revisits = 3
 transition_prompt = """
 Decide what happens next:
 - If you need a script to parse/filter/aggregate the data more precisely, respond with: script
-- If you have enough findings to produce a report, respond with: report
+- If the task asked a specific question and you can now answer it, respond with: summary
+- If the task asked for a written report or a broad review of these logs, respond with: report
 """
 system_prompt = """
+Match the work to what was asked. If `task` asks a specific question - a count, a
+timestamp, which host, when something first appeared - establish that answer
+precisely and go to summary; do not tour the rest of the file or write a report
+nobody asked for. Only when the task asks for a review, an investigation, or a
+written report do you sweep the log for everything below.
+
 Analyze the log data for:
 1. Error patterns - recurring errors, error spikes, cascading failures
 2. Anomalies - unusual request rates, latency outliers, unexpected status codes
@@ -97,8 +106,14 @@ bash      = "scratch"
 hint = "Need a script to parse/filter/aggregate log data"
 transform = "compact"
 
+# The deliverable follows the request: a written report when one was
+# asked for, otherwise the answer to the question that was asked.
+[stages.analyze.transitions.summary]
+hint = "The task asked a specific question and the analysis answers it"
+transform = "compact"
+
 [stages.analyze.transitions.report]
-hint = "Analysis complete - ready to produce report"
+hint = "The task asked for a written report or a broad review"
 transform = "compact"
 
 [stages.analyze.transitions.error_recovery]
@@ -116,7 +131,8 @@ max_revisits = 5
 transition_prompt = """
 Your script has produced results. Decide what happens next:
 - If you need to refine this script or write another, respond with: script
-- If the results answer the analysis questions, respond with: analyze
+- If the results settle a specific question the task asked, respond with: summary
+- If the results feed a broader analysis still in progress, respond with: analyze
 """
 system_prompt = """
 Write scripts to process the logs, in whatever your shell can run (awk/grep/sed
@@ -144,11 +160,10 @@ transform = "direct"
 hint = "Script results ready - return to analysis"
 transform = "compact"
 
-# Un-exhaustible escape (lint: dead-end-possible): when every looping
-# target has spent its max_revisits budget, the run can still move forward
-# to the deliverable instead of dead-ending.
-[stages.script.transitions.report]
-hint = "Analysis is out of revisits - report the findings so far"
+# Also the un-exhaustible escape (lint: dead-end-possible): summary has
+# no revisit budget, so this edge is always available.
+[stages.script.transitions.summary]
+hint = "The script settled the question - or analysis is out of revisits"
 transform = "compact"
 
 [stages.script.transitions.error_recovery]
@@ -165,6 +180,11 @@ max_iterations = 10
 # Generating the final report - don't inject mid-run user messages into it.
 accepts_messages = false
 system_prompt = """
+Check `task` first. If it only asked a specific question, writing a report is
+work nobody asked for: do not write one, and move to summary with the answer.
+
+Otherwise the task asked for a written report, so write one.
+
 Write a structured log analysis report (write_file) from the `findings` region,
 structured by the `severity_index` tally. Include:
 - Executive summary (top findings in 3-5 bullets)
@@ -220,13 +240,22 @@ model = "claude-sonnet-5"
 mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what the logs showed"
-max_iterations = 8
+# Reporting an answer is one call. The budget covers a retry -
+# a schema refusal handed back, a format corrected - not a loop:
+# an unbounded output stage bills its whole context per attempt.
+max_iterations = 5
 system_prompt = """
-Say what these logs showed, for whoever asked for it.
+Answer whoever asked, in the form they asked for.
 
-Lead with the diagnosis: what went wrong, and how confident you are. Then the
-evidence that points at it, and anything you could not explain. Name the report
-file you wrote.
+If the task states an exact output format - a required final line, a particular
+shape, "reply with only X" - reproduce it literally, with nothing wrapped around
+it. An answer that is right but not in the requested form is unusable by whoever
+asked, so it is not an answer.
+
+If `task` asked a specific question, give that answer and nothing else - no
+preamble, no report text, no restating the question. If it asked for an analysis,
+lead with the diagnosis and how confident you are, then the evidence, then
+anything you could not explain, and name the report file if you wrote one.
 
 If you found nothing conclusive, say that plainly rather than dressing up a
 guess.

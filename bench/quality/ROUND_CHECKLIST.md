@@ -37,6 +37,7 @@ retried away.
 | Anthropic | $600 | the frontier and workhorse sweeps, and the heavy stages of the mixed-models arm - the largest single line |
 | OpenRouter | $150 | the open-weight and economy entries that route through it |
 | OpenAI | $120 | the frontier/workhorse/economy entries on the native provider |
+| Brave Search | free tier, or a paid plan for a large research round | the agents' `web_search` tool; without the key it degrades to Wikipedia-only results, and the runner refuses the GAIA suite rather than publish that. Estimate queries as runs x roughly 5-15 searches and check the tier's monthly cap before the round |
 | Hugging Face | - | dataset access only (a gated download token, no billing) |
 
 These are round-scale figures, not per-suite: the container coding
@@ -44,6 +45,12 @@ suites dominate them, because a single long agentic task there bills
 one to two orders of magnitude more tokens than a log-analysis or
 DABstep task. Set `--budget-usd` per invocation regardless; cells past
 the cap are recorded as `cap` (non-completion), never dropped.
+
+Size `--per-run-max-tokens` from the smoke cells, not from taste. It is
+a runaway guard, not a budget: set below what a healthy run of that
+suite costs, it silently converts working cells into non-completions
+and the arm looks broken rather than expensive. Take the most expensive
+healthy smoke run for the suite and leave real headroom above it.
 
 ## After the round
 
