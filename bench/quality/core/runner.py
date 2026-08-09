@@ -113,6 +113,7 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         t0 = time.time()
         status, meta, answer = "error", None, None
         stage_records: list[dict] = []
+        archived: list[str] = []
         try:
             prompt = suite.prepare(task, workdir)
             run_id = home.launch(blueprint, prompt, workdir,
@@ -131,16 +132,21 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                 answer = home.result(run_id)
                 if answer is None:
                     status = "no_answer"
+            gated = bool(getattr(suite, "contains_gated_data", False))
             # Suites over gated datasets never write context replays:
             # a replay embeds task text and attachment contents, which
             # their terms forbid storing in a public repository.
-            if keep_context and not getattr(suite, "contains_gated_data",
-                                            False):
+            if keep_context and not gated:
                 dump = home.context_dump(run_id)
                 if dump:
                     art = _artifacts_dir(artifacts_root, base)
                     (art / "context.json.gz").write_bytes(
                         gzip.compress(dump.encode()))
+            # The daemon's own files for this run, kept beside the
+            # record: the isolated home is wiped before the next suite,
+            # so this is the only chance to keep them.
+            archived = home.archive_run(
+                run_id, _artifacts_dir(artifacts_root, base) / "run", gated)
         except Exception as exc:  # recorded, never skipped
             log(f"  run errored: {exc}")
             status = "error" if status not in ("timeout",) else status
@@ -170,7 +176,7 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                       ended=_utcnow(), wall=wall, meta=meta, arm=arm,
                       rates=rates, score=score,
                       stage_records=stage_records,
-                      mix_mapping=mix_mapping)
+                      mix_mapping=mix_mapping, archived=archived)
         if isinstance(rec.get("cost_usd"), (int, float)):
             spent += rec["cost_usd"]
         records.append(rec)
@@ -191,7 +197,8 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
             ended: str, wall: float, meta: dict | None, arm: dict,
             rates: dict, score: dict | None,
             stage_records: list[dict] | None = None,
-            mix_mapping: dict | None = None) -> dict:
+            mix_mapping: dict | None = None,
+            archived: list[str] | None = None) -> dict:
     usage = _usage_of(meta)
     model_id = arm["model_id"]
     priced = model_id is not None and cost_mod.is_pinned(rates, model_id)
@@ -213,6 +220,20 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
                      if priced else None),
         "score": score,
     })
+    if stage_records:
+        # Every arm carries its stage ledger, not just the mixed one:
+        # which stages a run actually entered is the first question any
+        # post-mortem asks, and it cannot be recovered later.
+        record["usage_by_stage"] = [
+            {k: s.get(k) for k in ("name", "prompt_tokens",
+                                   "completion_tokens", "cached_tokens")}
+            for s in stage_records]
+        record["stages_entered"] = [
+            s["name"] for s in stage_records
+            if (s.get("prompt_tokens") or 0) or (s.get("completion_tokens")
+                                                 or 0)]
+    if archived:
+        record["run_archive"] = sorted(archived)
     if model_id is None and stage_records and mix_mapping:
         # Native mix: price per stage from the stage ledger. Cache
         # writes are unattributed in the ledger and priced at the most
@@ -224,10 +245,5 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
             record["cost_usd"] = mix_cost
             record["cost_basis"] = "stagewise_estimate_upper_bound"
             record["stage_models"] = mix_mapping
-            record["usage_by_stage"] = [
-                {k: s.get(k) for k in ("name", "prompt_tokens",
-                                       "completion_tokens",
-                                       "cached_tokens")}
-                for s in stage_records]
     record_mod.write_record(runs_dir, record)
     return record

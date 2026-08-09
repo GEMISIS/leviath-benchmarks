@@ -43,6 +43,10 @@ class Suite:
     def agent_for(self, arm: dict) -> tuple[str, list]:
         blueprint = ("analyst-bench" if arm["role"] == "structured"
                      else "flat-analyst")
+        # A stage-mix arm names a generated variant of the same agent:
+        # identical shape, a different model on each stage.
+        if arm.get("variant"):
+            blueprint = f"{blueprint}-{arm['variant']}"
         return blueprint, []
 
     def task_cli(self, task: dict) -> list:

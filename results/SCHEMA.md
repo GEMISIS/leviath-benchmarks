@@ -49,6 +49,8 @@ sha256. Everything needed to say exactly what ran.
 | `billed_tokens` | every billed token incl. cache, using the provider's declared prompt-token semantics |
 | `cache_hit_rate` | cache reads / all input-side tokens (null when no input) |
 | `tool_calls` / `iterations` / `final_stage` | run shape |
+| `usage_by_stage` / `stages_entered` | the per-stage token ledger, and the stages the run actually entered in order - the first thing any post-mortem needs, recorded for every arm |
+| `run_archive` | the runtime's own files kept beside this record under `<record>.artifacts/run/`: `meta.json`, `stages.json`, `context.json` (final window), `final_output`, and the gzipped `run.lvr` event log. Suites over gated datasets keep only the first two, since the rest embed dataset text |
 | `cost_usd` | priced from `rates.json`; null for unpinned rates and for the mixed-models arm (no single rate applies to its aggregate usage) |
 | `rates_sha256` | the rates file this cost came from |
 | `score` | `{passed: bool, detail: ...}` from the suite's grader |

@@ -1,0 +1,84 @@
+{
+  "_comment": "Stage-to-model assignments for the mixed arms. Every stage of every agent is named explicitly - a mix is a claim about which model does which job, so it is written out rather than inferred from stage names. make_mix.py generates <agent>-<mix> from these; run_quality.py selects one with an arm's `variant`. Model ids must exist in arms.json.",
+  "_design": {
+    "loops": "Stages that iterate with tools (gather, ingest, profile, compute, script, implement, prototype) dominate token spend, because each turn re-sends the working context. This is where a cheap model pays for itself.",
+    "thinking": "Stages that decide what to do (plan, analyze, reassess) are few calls over a small context. A frontier model here costs little and changes the outcome most.",
+    "checking": "Verification (verify, review) benefits from a strong model, and from being a different model than the one that did the work.",
+    "recovery": "Error recovery runs rarely; a strong model there is nearly free in aggregate and is exactly when capability matters.",
+    "output": "The output stage reformats what is already established. Cheapest capable model, held to the requested format."
+  },
+
+  "econ": {
+    "_note": "Cheapest defensible configuration: economy model in every loop, workhorse for thinking and checking.",
+    "coder-bench": {
+      "discover": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-sonnet-5",
+      "prototype": "openai/gpt-5.6-luna",
+      "implement": "openai/gpt-5.6-luna",
+      "review": "anthropic/claude-sonnet-5",
+      "reassess": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openai/gpt-5.6-luna"
+    },
+    "analyst-bench": {
+      "profile": "openai/gpt-5.6-luna",
+      "plan": "anthropic/claude-sonnet-5",
+      "compute": "openai/gpt-5.6-luna",
+      "verify": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "answer": "openai/gpt-5.6-luna"
+    },
+    "researcher-bench": {
+      "gather": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-sonnet-5",
+      "summarize": "openai/gpt-5.6-luna",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openai/gpt-5.6-luna"
+    },
+    "loganalyzer-bench": {
+      "ingest": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-sonnet-5",
+      "script": "openai/gpt-5.6-luna",
+      "report": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openai/gpt-5.6-luna"
+    }
+  },
+
+  "frontier-brain": {
+    "_note": "Cheap hands, expensive head: economy model in every loop, frontier model wherever a decision is made or checked - including recovery, which fires rarely enough that its capability is nearly free.",
+    "coder-bench": {
+      "discover": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-opus-5",
+      "prototype": "openai/gpt-5.6-luna",
+      "implement": "openai/gpt-5.6-luna",
+      "review": "anthropic/claude-opus-5",
+      "reassess": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openai/gpt-5.6-luna"
+    },
+    "analyst-bench": {
+      "profile": "openai/gpt-5.6-luna",
+      "plan": "anthropic/claude-opus-5",
+      "compute": "openai/gpt-5.6-luna",
+      "verify": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "answer": "openai/gpt-5.6-luna"
+    },
+    "researcher-bench": {
+      "gather": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-opus-5",
+      "summarize": "openai/gpt-5.6-luna",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openai/gpt-5.6-luna"
+    },
+    "loganalyzer-bench": {
+      "ingest": "openai/gpt-5.6-luna",
+      "analyze": "anthropic/claude-opus-5",
+      "script": "openai/gpt-5.6-luna",
+      "report": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openai/gpt-5.6-luna"
+    }
+  }
+}

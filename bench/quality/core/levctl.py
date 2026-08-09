@@ -10,6 +10,7 @@ quality run can never contaminate each other.
 """
 from __future__ import annotations
 
+import gzip
 import json
 import os
 import shutil
@@ -34,6 +35,36 @@ class QualityHome:
         self._daemon: subprocess.Popen | None = None
 
     # -- home ---------------------------------------------------------
+    @staticmethod
+    def capability_overrides(roster: dict) -> str:
+        """`[model_capabilities]` pinning each model's context window.
+
+        Region budgets are percentages of the model's window, so the
+        window silently decides how large every region is. The runtime's
+        own table is incomplete - OpenRouter-fronted models resolve to a
+        conservative 128k while their providers report 1M - so a round
+        that does not pin the window measures region sizes it never
+        chose. Keys are the model id as the provider sees it, without
+        the leading provider segment.
+
+        Only models whose declared window differs from what the runtime
+        resolves are overridden, and each entry carries all six fields:
+        the capability struct has no serde defaults, so a partial entry
+        is silently ignored rather than rejected (verified: a lone
+        max_context_tokens leaves the window unchanged).
+        """
+        lines = []
+        for name, entry in sorted(roster.items()):
+            caps = entry.get("capability_override")
+            if not caps:
+                continue
+            model = entry["id"].split("/", 1)[1]
+            body = "\n".join(
+                f"{k} = {json.dumps(v)}" for k, v in caps.items())
+            lines.append(f'# {name}: {entry.get("override_reason", "")}\n'
+                         f'[model_capabilities."{model}"]\n{body}\n')
+        return "\n".join(lines)
+
     def install(self, blueprints_dir: Path, config_text: str,
                 providers_dir: Path | None = None) -> None:
         """Fresh home with the frozen blueprints and the given config."""
@@ -192,6 +223,40 @@ class QualityHome:
                     return payload[key]
             return json.dumps(payload)
         return str(payload)
+
+    def archive_run(self, run_id: str, dest: Path,
+                    gated: bool = False) -> list[str]:
+        """Keep the daemon's own files for a run, next to its record.
+
+        The daemon writes everything needed to reconstruct a run - the
+        meta, the per-stage ledger, the final context snapshot, the
+        answer, and the full event log - but the isolated home is wiped
+        at the start of the next suite, so a round that does not copy
+        them cannot be investigated afterwards. The event log is bulky
+        and compresses well, so it travels gzipped.
+
+        ``gated`` restricts the archive to the two files that carry no
+        dataset content: a gated suite's context snapshot and event log
+        embed the question text its terms forbid us from storing.
+        """
+        src = self.runs_dir / run_id
+        if not src.is_dir():
+            return []
+        keep = ["meta.json", "stages.json"]
+        if not gated:
+            keep += ["context.json", "final_output"]
+        dest.mkdir(parents=True, exist_ok=True)
+        written = []
+        for name in keep:
+            p = src / name
+            if p.is_file():
+                shutil.copyfile(p, dest / name)
+                written.append(name)
+        lvr = src / "run.lvr"
+        if not gated and lvr.is_file():
+            (dest / "run.lvr.gz").write_bytes(gzip.compress(lvr.read_bytes()))
+            written.append("run.lvr.gz")
+        return written
 
     def context_dump(self, run_id: str) -> str | None:
         out = subprocess.run(

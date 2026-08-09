@@ -101,6 +101,8 @@ class Suite:
     def agent_for(self, arm: dict) -> tuple[str, list]:
         blueprint = ("researcher-bench" if arm["role"] == "structured"
                      else "flat-researcher")
+        if arm.get("variant"):
+            blueprint = f"{blueprint}-{arm['variant']}"
         return blueprint, []
 
     def task_cli(self, task: dict) -> list:

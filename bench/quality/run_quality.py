@@ -141,8 +141,11 @@ def resolve_arms(cfg: dict, arm_names: list[str],
                                  "model_label": label,
                                  "model_id": roster[label]["id"]})
         elif arm["model"] is None:
+            # A mixed arm runs the blueprint's own per-stage assignment;
+            # `variant` picks which generated mix that is.
             resolved.append({"name": arm["name"], "role": arm["role"],
-                             "model_label": None, "model_id": None})
+                             "model_label": None, "model_id": None,
+                             "variant": arm.get("variant")})
         else:
             resolved.append({"name": arm["name"], "role": arm["role"],
                              "model_label": arm["model"],
@@ -297,6 +300,12 @@ def main() -> int:
     config_text = (Path(args.provider_config).read_text()
                    if args.provider_config else
                    "# leviath-benchmarks quality isolated home (generated)\n")
+    # Every model's context window, pinned: it is what region budgets
+    # are a percentage of, so it belongs in the frozen inputs rather
+    # than in whatever the runtime's model table happens to know.
+    windows = QualityHome.capability_overrides(arms_cfg["models"])
+    if windows:
+        config_text = f"{config_text}\n{windows}"
     home.install(blueprints_dir, config_text,
                  providers_dir=(Path(args.providers_dir)
                                 if args.providers_dir else None))
@@ -319,11 +328,14 @@ def main() -> int:
         "arms": arms,
         "roster": arms_cfg["models"],
         "roster_ages": ages,
-        "stagemix_mapping": cost_mod.stagemix_mapping(
-            blueprints_dir
-            / suite.agent_for({"name": "", "role": "structured",
-                               "model_label": None, "model_id": None})[0]
-            / "agent.leviath"),
+        "context_windows": {n: e.get("context_window")
+                            for n, e in arms_cfg["models"].items()},
+        # One mapping per mixed arm in the round: with several mixes,
+        # "which models, on which stages" has more than one answer.
+        "stagemix_mapping": {
+            a["name"]: cost_mod.stagemix_mapping(
+                blueprints_dir / suite.agent_for(a)[0] / "agent.leviath")
+            for a in arms if a["model_id"] is None},
         "subset": subset_record,
         "rates_sha256": rates_sha,
         "blueprints": blueprint_shas,

@@ -49,6 +49,27 @@ ARM_LABELS = {
     "structured-stagemix": "structured context, mixed models per stage",
 }
 SMOKE_TAG = "UNFROZEN-SMOKE"
+# Extra mixed arms (structured-mix-<name>) get their own shades of the
+# mix identity, so several compositions can share a chart.
+MIX_SHADES = ["#1baf7a", "#0d7f7f", "#6aa84f", "#2f8f5b"]
+
+
+def arm_color(arm: str) -> str:
+    if arm in ARM_COLORS:
+        return ARM_COLORS[arm]
+    extras = sorted(a for a in _seen_arms if a not in ARM_COLORS)
+    idx = extras.index(arm) if arm in extras else 0
+    return MIX_SHADES[idx % len(MIX_SHADES)]
+
+
+def arm_label(arm: str) -> str:
+    if arm in ARM_LABELS:
+        return ARM_LABELS[arm]
+    tail = arm.replace("structured-mix-", "").replace("structured-", "")
+    return f"structured context, {tail} model mix"
+
+
+_seen_arms: set[str] = set()
 
 
 def style_ax(ax):
@@ -97,6 +118,7 @@ def load_round(results_dir: Path) -> tuple[dict, dict, dict]:
                 "summary": json.loads(summary.read_text()),
                 "runs": runs,
             }
+            _seen_arms.update(r["arm"] for r in runs)
     return round_meta, specs, suites
 
 
@@ -129,12 +151,16 @@ def cell_points(summary: dict) -> list[dict]:
     return points
 
 
-def mix_label(round_meta: dict) -> str:
-    mapping = round_meta.get("stagemix_mapping")
+def mix_label(round_meta: dict, arm: str | None = None) -> str:
+    """The composition of a mixed arm, short enough to sit beside a point."""
+    mapping = round_meta.get("stagemix_mapping") or {}
+    if mapping and all(isinstance(v, dict) for v in mapping.values()):
+        mapping = mapping.get(arm) or (next(iter(mapping.values()))
+                                       if len(mapping) == 1 else {})
     if isinstance(mapping, dict) and mapping:
-        # Model ids without the provider prefix: the composition has to
-        # fit beside a point, and round.json carries the full mapping.
-        models = sorted({m.split("/")[-1] for m in mapping.values()})
+        # Model ids without the provider prefix; round.json carries the
+        # full stage-to-model mapping.
+        models = sorted({str(m).split("/")[-1] for m in mapping.values()})
         return "mix: " + " + ".join(models)
     return "mix (per-stage mapping in round.json)"
 
@@ -143,8 +169,8 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
                            specs: dict, out: Path) -> Path | None:
     roster = round_meta.get("roster", {})
     points = [p for p in cell_points(data["summary"])
-              if p["cost"] is not None and p["cost"] > 0
-              or p["arm"] == "structured-stagemix"]
+              if (p["cost"] is not None and p["cost"] > 0)
+              or p["model"] is None]
     priced = [p for p in points if p["cost"]]
     if not priced:
         return None
@@ -154,7 +180,7 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
     style_ax(ax)
 
     for p in priced:
-        color = ARM_COLORS.get(p["arm"], MUTED)
+        color = arm_color(p["arm"])
         if p["cost_lo"] is not None and p["cost_hi"] is not None:
             ax.errorbar(p["cost"], p["pass_rate"],
                         xerr=[[p["cost"] - p["cost_lo"]],
@@ -169,8 +195,8 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
                    color=SURFACE if mostly_unfinished else color,
                    zorder=3, edgecolors=color,
                    linewidths=2.0 if mostly_unfinished else 1.5)
-        mix = p["arm"] == "structured-stagemix"
-        label = mix_label(round_meta) if mix else p["model"]
+        mix = p["model"] is None
+        label = mix_label(round_meta, p["arm"]) if mix else p["model"]
         tier = (roster.get(p["model"], {}) or {}).get("tier", "")
         # The mix label is long and sits at whatever pass rate it earned,
         # often beside a pinned point; drop it below the marker so the
@@ -207,7 +233,7 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
     ax.set_ylim(0, max(80, max(p["pass_rate"] for p in priced) + 10))
 
     handles = [plt.Line2D([], [], marker="o", linestyle="",
-                          color=ARM_COLORS[a], label=ARM_LABELS[a],
+                          color=arm_color(a), label=arm_label(a),
                           markersize=7)
                for a in ARM_ORDER
                if any(p["arm"] == a for p in priced)]
@@ -276,10 +302,10 @@ def render_ablation(suites: dict, round_meta: dict, specs: dict,
             tok = sorted(r["billed_tokens"] / 1000.0 for r in arm_runs
                          if r["status"] == "complete")
             tok_med = tok[len(tok) // 2] if tok else 0.0
-            label = ARM_LABELS[arm] if i == 0 else None
-            ax1.bar(i + off, pass_rate, w, color=ARM_COLORS[arm],
+            label = arm_label(arm) if i == 0 else None
+            ax1.bar(i + off, pass_rate, w, color=arm_color(arm),
                     label=label)
-            ax2.bar(i + off, tok_med, w, color=ARM_COLORS[arm], label=label)
+            ax2.bar(i + off, tok_med, w, color=arm_color(arm), label=label)
             for r in arm_runs:
                 passed = 100.0 if (r["score"] or {}).get("passed") else 0.0
                 ax1.scatter([i + off], [passed], s=10, color=INK,
@@ -372,9 +398,9 @@ def render_poster(suites: dict, round_meta: dict, specs: dict,
                 heights.append(v)
                 los.append(lo)
                 his.append(hi)
-            label = ARM_LABELS[arm] if ax is axes[0][0] else None
+            label = arm_label(arm) if ax is axes[0][0] else None
             positions = [i + (j - 1) * w for i in xs]
-            ax.bar(positions, heights, w, color=ARM_COLORS[arm],
+            ax.bar(positions, heights, w, color=arm_color(arm),
                    label=label)
             if field != "pass_rate":
                 yerr = [[max(0.0, h - lo) for h, lo in zip(heights, los)],

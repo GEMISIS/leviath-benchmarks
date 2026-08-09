@@ -152,8 +152,24 @@ def check_pair(structured_name: str, flat_name: str) -> list[str]:
     return problems
 
 
+def variants() -> list[str]:
+    """Generated mixes: same shape, one model per stage, still policed."""
+    return sorted(d.name for d in HERE.iterdir()
+                  if d.is_dir() and (d / "agent.leviath").is_file()
+                  and d.name not in PAIRS and d.name not in PAIRS.values())
+
+
 def main() -> int:
     failed = False
+    for name in variants():
+        problems = check_policy(name) + check_no_leakage(name)
+        if problems:
+            failed = True
+            print(f"{name}:")
+            for p in problems:
+                print(f"  FAIL {p}")
+        else:
+            print(f"{name}: OK (mix)")
     for structured_name, flat_name in PAIRS.items():
         problems = (check_policy(structured_name)
                     + check_policy(flat_name)
