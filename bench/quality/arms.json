@@ -114,6 +114,12 @@
       "role": "structured",
       "model": null,
       "variant": "sonnet-opus"
+    },
+    {
+      "name": "structured-mix-adversarial",
+      "role": "structured",
+      "model": null,
+      "variant": "adversarial"
     }
   ],
   "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is; the runtime's own table is incomplete (OpenRouter-fronted models resolve to 128000 while their providers report 1048576), which would silently shrink every region on those models. Each value here was verified against the provider, and the resolved window is recorded in every round.",

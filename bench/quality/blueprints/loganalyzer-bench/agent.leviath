@@ -38,6 +38,8 @@ starts oriented. Raw sampled content lands in `logs`.
 """
 
 [stages.ingest.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 6000
 default_region = "conversation"
 [stages.ingest.tool_routing.overrides]
 read_file = "logs"
@@ -90,6 +92,8 @@ off before finishing - treat its output as incomplete and re-check what it misse
 """
 
 [stages.analyze.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "conversation"
 [stages.analyze.tool_routing.overrides]
 read_file = "logs"
@@ -141,6 +145,8 @@ then return to analyze.
 """
 
 [stages.script.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "scripts"
 [stages.script.tool_routing.overrides]
 read_file = "logs"

@@ -50,6 +50,8 @@ send you back if it finds a real gap.
 """
 
 [stages.gather.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 6000
 default_region = "raw_findings"
 
 [stages.gather.transitions.analyze]
@@ -95,6 +97,8 @@ concluding.
 """
 
 [stages.analyze.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "raw_findings"
 
 [stages.analyze.transitions.gather]

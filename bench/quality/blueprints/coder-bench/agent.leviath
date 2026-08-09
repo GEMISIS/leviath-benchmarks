@@ -79,6 +79,8 @@ so explicitly in `workflow` rather than inventing a command that won't run.
 # Scan output is bulky and single-use - park it in clearable scratch, not the
 # knowledge regions the later stages read.
 [stages.discover.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 6000
 default_region = "conversation"
 [stages.discover.tool_routing.overrides]
 read_file = "codebase"
@@ -148,6 +150,8 @@ implement stage does the actual coding and reads this plan from the conversation
 # Only passive reads route to the persistent `codebase` region; everything else
 # stays in conversation.
 [stages.analyze.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "conversation"
 [stages.analyze.tool_routing.overrides]
 read_file = "codebase"
@@ -209,6 +213,8 @@ created purely to test a hypothesis.
 """
 
 [stages.prototype.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "conversation"
 [stages.prototype.tool_routing.overrides]
 read_file  = "codebase"
@@ -302,6 +308,8 @@ explicit statement that nothing regressed against `baseline`.
 # `conversation` eviction, and - being persisted context - it also satisfies the
 # transition gate below after a daemon restart, when per-stage counters are gone.
 [stages.implement.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 6000
 default_region = "conversation"
 [stages.implement.tool_routing.overrides]
 read_file  = "codebase"
@@ -394,6 +402,8 @@ bash      = "ask"
 
 # Test re-runs persist to `test_results` (a pointer + preview stays in conversation).
 [stages.review.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 6000
 default_region = "conversation"
 [stages.review.tool_routing.overrides]
 read_file = "codebase"
@@ -465,6 +475,8 @@ bash      = "ask"
 
 # Diagnostic bash output (git diff, greps, test re-runs) persists to test_results.
 [stages.reassess.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "conversation"
 [stages.reassess.tool_routing.overrides]
 read_file = "codebase"
@@ -514,6 +526,8 @@ approach rather than repeating the fix.
 # (a second sliding_window desyncs the result from its tool_use → API 400).
 # The agent still records failures to `errors` explicitly via context_append.
 [stages.error_recovery.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "conversation"
 [stages.error_recovery.tool_routing.overrides]
 read_file = "codebase"

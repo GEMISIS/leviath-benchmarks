@@ -47,6 +47,8 @@ in that line - an ambiguous field is where wrong answers come from.
 """
 
 [stages.profile.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 8000
 default_region = "conversation"
 [stages.profile.tool_routing.overrides]
 read_file = "data_preview"
@@ -97,6 +99,8 @@ here; that is the next stage's job.
 """
 
 [stages.plan.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 3000
 default_region = "conversation"
 [stages.plan.tool_routing.overrides]
 read_file = "data_preview"
@@ -141,6 +145,8 @@ rather than quietly working around it.
 """
 
 [stages.compute.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "scripts"
 [stages.compute.tool_routing.overrides]
 read_file = "data_preview"
@@ -188,6 +194,8 @@ them or picking the friendlier number.
 """
 
 [stages.verify.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 4000
 default_region = "scripts"
 [stages.verify.tool_routing.overrides]
 read_file = "data_preview"
@@ -223,6 +231,14 @@ different library, or compute the same quantity another way.
 """
 
 # Un-exhaustible escape (lint: dead-end-possible).
+# Recovery reads diagnostics, which can be large; they go to
+# an evictable region rather than the conversation.
+[stages.error_recovery.tool_routing]
+default_region = "scratch"
+max_result_tokens = 4000
+[stages.error_recovery.tool_routing.overrides]
+read_file = "data_preview"
+
 [stages.error_recovery.transitions.answer]
 hint = "Recovery is not converging - answer with what has been established"
 transform = "compact"
@@ -270,7 +286,7 @@ question, say that rather than presenting a guess as a result.
 [context.regions]
 task         = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 # What the data is: written once in profile, read by every later stage.
-data_map     = { kind = "pinned", budget = "3%" }
+data_map     = { kind = "pinned", budget = "3%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.
 plan         = { kind = "pinned", budget = "3%" }
 # Every figure established, with how it was computed.
