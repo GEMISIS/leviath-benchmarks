@@ -175,6 +175,10 @@ class LeviathAgent(BaseAgent):
 
         deadline = time.time() + float(
             os.environ.get("LEVIATH_TASK_TIMEOUT_SECS", "3600"))
+        # Same runaway protection as the local runner: cancel mid-run
+        # past a billed-token ceiling (0 disables).
+        max_tokens = int(os.environ.get("LEVIATH_MAX_BILLED_TOKENS",
+                                        "10000000"))
         meta: dict = {}
         while time.time() < deadline:
             text = await self._sh(environment, (
@@ -186,6 +190,14 @@ class LeviathAgent(BaseAgent):
             # (per the BaseAgent contract's own guidance).
             self._report(context, meta, run_id, blueprint)
             if meta.get("status") in TERMINAL:
+                break
+            billed = sum(int(meta.get(k, 0) or 0) for k in
+                         ("prompt_tokens", "completion_tokens",
+                          "cached_tokens", "cache_write_tokens"))
+            if max_tokens and billed > max_tokens:
+                await self._sh(environment,
+                               f"{env_prefix} /opt/lev cancel {run_id} "
+                               "|| true")
                 break
             time.sleep(5.0)
         else:
