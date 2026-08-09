@@ -92,10 +92,14 @@ and a purpose-built log-analysis suite generated deterministically from
 loghub 2k annotated datasets (half public, half held-out behind salted
 answer hashes revealed at publish time).
 
-Frozen blueprints live in `bench/quality/blueprints/`: byte-frozen
-copies of the bundled agents plus generated flat counterparts.
-`check_pairs.py` proves each pair identical in tools, permissions, and
-total iteration budget - only the structure differs.
+The agents live in `bench/quality/blueprints/`: this repo's own
+benchmark agents (based on the bundled agents, evolved here under
+[`blueprints/AGENTS.md`](bench/quality/blueprints/AGENTS.md)) plus
+generated flat counterparts. `check_pairs.py` enforces the rules that
+make the numbers mean something - one model per stage, nothing
+human-in-the-loop, no suite or dataset names in agent text, and each
+pair identical in tools, permissions, and total iteration budget so
+only the structure differs.
 
 ### Running the quality track
 
@@ -118,7 +122,8 @@ LEVMOCK_LATENCY_MS=150 python3 bench/quality/run_quality.py \
     --models mockx --unsafe-smoke \
     --provider-config <mockx config> --providers-dir bench/providers
 
-# a counted run (requires a qbench-* freeze tag on a clean tree)
+# a counted run (see bench/quality/ROUND_CHECKLIST.md first; requires
+# a qbench-* freeze tag on a clean tree)
 python3 bench/quality/run_quality.py --suite dabstep \
     --arms flat-pinned,structured-pinned,structured-stagemix \
     --models "Claude Sonnet 5" --reps 3 --subset <subset file> \

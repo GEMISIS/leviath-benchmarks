@@ -43,15 +43,21 @@ arms**:
 | `structured-pinned` | frozen staged blueprint with context regions | the same pinned model (`-m`) |
 | `structured-stagemix` | the same frozen staged blueprint, byte-identical | the blueprint's native per-stage model mix |
 
-The blueprints are **benchmark-owned agents**: derived once from the
-upstream bundled agents (`freeze_from_upstream.py` records the exact
-commit), then transformed by a committed policy
+The blueprints are **benchmark-owned agents**: the upstream bundled
+agents were imported once as a base (`import_base.py` records the exact
+commit), the benchmark policy was applied
 (`apply_bench_policy.py`) - exactly one model per stage so no fallback
 chain can silently change what was measured, and no human-in-the-loop
 tools or prompt passages, since benchmark runs are unattended by
-definition. The agents that run are exactly the agents this repo
-defines, stable across upstream drift; `check_pairs.py` asserts the
-policy held on every blueprint.
+definition - and from there they **evolve in this repo**. leviath is a
+runtime whose value is describing the right agent for the job, so the
+benchmark runs agents designed well for their jobs; what keeps that
+honest is a set of enforceable rules (`blueprints/AGENTS.md`):
+job-level design only (no text derived from benchmark tasks, answers,
+graders, or datasets), tuning against public splits only, every
+improvement inherited by the flat baseline via regeneration, agents
+frozen per round with sha256s in every record, and the no-fallback /
+no-HITL policy asserted on every blueprint by `check_pairs.py`.
 
 The `-m` override replaces every stage's model list, so the two pinned
 arms run **byte-identical blueprints** and differ only in the model
@@ -93,6 +99,15 @@ exact model ids are pinned at freeze time. Tier names appear **beside**
 model names on charts, never instead of them, and a mixed-models arm is
 always labeled with its full composition (the stage→model mapping is
 recorded in `round.json`).
+
+**Recency rule.** The roster carries only models released within
+roughly two months of the freeze - a benchmark of current tooling is
+worth reading only if it runs current models, and an older model on the
+roster invites the reading that a tier was filled by whatever was
+convenient. Each roster entry records its release date, so the rule is
+checkable against the freeze tag rather than asserted. A tier with no
+qualifying model at freeze time is left empty and said to be empty; it
+is never backfilled with an older model.
 
 | tier | meaning |
 |---|---|

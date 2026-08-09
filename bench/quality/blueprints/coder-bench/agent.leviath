@@ -1,5 +1,5 @@
-# Frozen benchmark copy of the bundled coder agent (leviath commit a47a97d52984).
-# Byte-frozen for the quality track; its sha256 is recorded in every run record.
+# Benchmark agent, based on the bundled coder agent (leviath commit a47a97d52984).
+# Evolved in this repo under blueprints/AGENTS.md; frozen per round, sha256 recorded in every run record.
 # BENCHMARK POLICY APPLIED (apply_bench_policy.py): exactly one model per stage (no fallbacks); no human-in-the-loop tools or prompts.
 
 [agent]

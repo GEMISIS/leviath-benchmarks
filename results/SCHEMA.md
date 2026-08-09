@@ -26,7 +26,9 @@ results/<utc-stamp>_<hostname>/
 ## quality/round.json
 
 Freeze tag, seed, reps, budget, the resolved arm list, the model roster
-with tier labels, the stage→model mapping for the mixed-models arm, the
+with tier labels, `roster_ages` (each model's release date and its age
+in days at round start, for the recency rule), the stage→model mapping
+for the mixed-models arm, the
 subset record (seed + universe hash + task ids + declared exclusions),
 rates.json sha256, per-blueprint sha256s, and the lev version + binary
 sha256. Everything needed to say exactly what ran.

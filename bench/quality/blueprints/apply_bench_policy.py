@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """Apply the benchmark policy to the structured blueprints, in place.
 
-The blueprints in this directory are BENCHMARK-OWNED agents. They are
-derived from the upstream bundled agents once (freeze_from_upstream.py
-records the commit), then this script applies the benchmark policy so
-the agents that run are exactly the agents this repo defines - stable
-across upstream drift, and reproducible from the repo alone:
+The blueprints in this directory are BENCHMARK-OWNED agents: based on
+the upstream bundled agents (import_base.py records the commit) and
+evolved here under the rules in AGENTS.md. This script applies the
+benchmark policy, which holds for every blueprint however it evolves:
 
 1. **Exactly one model per stage - no fallback chains.** Each stage's
-   model list is collapsed to its first entry (the upstream author's
-   primary choice per stage, so the native mix keeps upstream's
-   cheap-stage/heavy-stage intent). A fallback firing mid-benchmark
-   would silently change what was measured; now it cannot.
+   model list is collapsed to its first entry - the primary choice for
+   that stage, so the native mix keeps its cheap-stage/heavy-stage
+   intent. A fallback firing mid-benchmark would silently change what
+   was measured; now it cannot.
 2. **No human in the loop.** Blocking tools (ask_user_*,
    present_for_review, edit_document) are removed from every stage's
    available_tools along with their allow_blocking_tools opt-ins, and
    the one prompt passage that steers toward asking a person is
    replaced with an explicit unattended-run instruction.
 
-Pipeline: freeze_from_upstream.py -> apply_bench_policy.py ->
-make_flat.py -> check_pairs.py (which asserts this policy held). Run
-deliberately and review the diff; any change means a new freeze tag.
+Pipeline: import_base.py -> apply_bench_policy.py -> <ordinary
+evolution commits> -> make_flat.py -> check_pairs.py (which asserts
+this policy held). Idempotent, so it is safe to re-run after an
+evolution commit. Review the diff; any change means a new freeze tag.
 """
 from __future__ import annotations
 

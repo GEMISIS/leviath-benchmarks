@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-"""Assert every structured/flat blueprint pair differs only in structure.
+"""Assert the benchmark agents satisfy the rules that make scores mean
+something (blueprints/AGENTS.md). Run before any freeze; exits
+non-zero on any violation.
 
-The ablation's claim is "same tools, same permissions, same budget -
-only the structure removed". This script is the proof, run in CI-less
-fashion before any freeze:
+Policy, on every blueprint:
+
+- exactly one model per stage (no fallback chains)
+- no blocking/human-in-the-loop tools or opt-ins, or prompt text
+  steering toward asking a person
+
+No benchmark leakage, on every blueprint:
+
+- no prompt text naming a suite, dataset, grader, or split. Agents may
+  know their job; they may not know the test.
+
+Pair invariants - the ablation's claim is "same tools, same
+permissions, same budget - only the structure removed":
 
 - identical [tool_permissions]
 - flat work tools == union of structured stages' tools minus context_*
 - flat total iteration budget == sum of structured stages' budgets
 - flat regions are exactly {task, conversation, error_report}
 - same [compaction] model when the structured copy has one
-
-Exits non-zero on any violation.
 """
 from __future__ import annotations
 
@@ -48,6 +58,32 @@ def check_policy(name: str) -> list[str]:
     if "ask_user_confirm" in raw:
         problems.append(f"{name}: prompt text still references "
                         "ask_user_confirm")
+    return problems
+
+
+# Names of the suites, datasets, graders, and splits this repo runs.
+# An agent that mentions any of them is tuned to the test rather than
+# to its job, which is exactly what rule 1 in AGENTS.md forbids.
+LEAKAGE = (
+    "terminal-bench", "terminalbench", "frontier-bench", "frontierbench",
+    "deep-swe", "deepswe", "swe-bench", "swebench", "dabstep", "gaia",
+    "loghub", "harbor", "pier", "held-out", "heldout", "public split",
+    "test set", "leaderboard", "grader", "verifier",
+)
+
+
+def check_no_leakage(name: str) -> list[str]:
+    """Agents may know their job; they may not know the test."""
+    problems = []
+    for i, line in enumerate(
+            (HERE / name / "agent.leviath").read_text().splitlines(), 1):
+        if line.lstrip().startswith("#"):
+            continue  # provenance/policy headers, not agent text
+        low = line.lower()
+        for term in LEAKAGE:
+            if term in low:
+                problems.append(f"{name}:{i}: benchmark leakage {term!r} "
+                                "in agent text")
     return problems
 
 
@@ -101,6 +137,8 @@ def main() -> int:
     for structured_name, flat_name in PAIRS.items():
         problems = (check_policy(structured_name)
                     + check_policy(flat_name)
+                    + check_no_leakage(structured_name)
+                    + check_no_leakage(flat_name)
                     + check_pair(structured_name, flat_name))
         if problems:
             failed = True

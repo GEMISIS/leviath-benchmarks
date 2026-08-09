@@ -8,6 +8,8 @@ dependency). Run directly:
 """
 from __future__ import annotations
 
+import datetime as dt
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -146,6 +148,49 @@ class GaiaScorerTests(unittest.TestCase):
         self.assertFalse(s("right, left, up", "right, left"))
         self.assertTrue(s("Paris", "paris"))
         self.assertFalse(s("Lyon", "paris"))
+
+
+class RosterTests(unittest.TestCase):
+    """The roster and the price list must not drift apart.
+
+    A roster model with no pinned rate would be priced as free (or
+    crash mid-round); a rate with no roster model is a stale price a
+    reader would take for a model we ran.
+    """
+
+    def setUp(self):
+        self.arms = json.loads((QUALITY_DIR / "arms.json").read_text())
+        self.rates = cost.load_rates(QUALITY_DIR / "rates.json")
+        self.real = {name: m["id"]
+                     for name, m in self.arms["models"].items()
+                     if m["tier"] != "smoke"}
+
+    def test_every_roster_model_has_pinned_rates(self):
+        for name, model_id in self.real.items():
+            with self.subTest(model=name):
+                self.assertTrue(cost.is_pinned(self.rates, model_id),
+                                f"{name} ({model_id}) has no pinned rate")
+
+    def test_no_rates_for_models_outside_the_roster(self):
+        priced = {k for k in self.rates if not k.startswith("_")}
+        self.assertEqual(priced - set(self.real.values()), set())
+
+    def test_release_dates_parse_and_are_not_in_the_future(self):
+        # Recency itself is judged at round time (run_quality.py records
+        # each model's age in round.json); a test cannot assert it
+        # without breaking every re-run of an older freeze tag.
+        today = dt.date.today()
+        for name, m in self.arms["models"].items():
+            if m["tier"] == "smoke":
+                continue
+            with self.subTest(model=name):
+                released = dt.date.fromisoformat(m["released"])
+                self.assertLessEqual(released, today)
+
+    def test_every_tier_is_declared(self):
+        for name, m in self.arms["models"].items():
+            with self.subTest(model=name):
+                self.assertIn(m["tier"], self.arms["tiers"])
 
 
 if __name__ == "__main__":

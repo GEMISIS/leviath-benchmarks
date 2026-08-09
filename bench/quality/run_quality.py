@@ -32,6 +32,7 @@ import os
 import socket
 import subprocess
 import sys
+import datetime as dt
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -93,12 +94,34 @@ def require_result_capable(lev: str) -> None:
 COMPARISONS = [("structured-pinned", "flat-pinned")]
 
 
+# Roster recency (METHODOLOGY.md): the roster carries models released
+# within roughly two months of the round. Past this many days a model
+# is reported as aged - the round still runs, and the age travels into
+# round.json so a reader can judge it instead of guessing.
+RECENCY_DAYS = 75
+
+
 def load_arms_config(path: Path) -> dict:
     cfg = json.loads(path.read_text())
     for name, entry in cfg["models"].items():
         if not {"id", "tier"} <= set(entry):
             raise ValueError(f"arms.json model {name!r} needs id + tier")
+        if entry["tier"] != "smoke" and not entry.get("released"):
+            raise ValueError(f"arms.json model {name!r} needs a released "
+                             "date (YYYY-MM-DD) for the recency rule")
     return cfg
+
+
+def roster_ages(cfg: dict, as_of: dt.date) -> dict:
+    """Age in days of every real roster model, as of the round start."""
+    ages = {}
+    for name, entry in cfg["models"].items():
+        if entry["tier"] == "smoke":
+            continue
+        released = dt.date.fromisoformat(entry["released"])
+        ages[name] = {"released": entry["released"],
+                      "age_days": (as_of - released).days}
+    return ages
 
 
 def resolve_arms(cfg: dict, arm_names: list[str],
@@ -225,6 +248,13 @@ def main() -> int:
     arms = resolve_arms(arms_cfg, args.arms.split(","),
                         [m.strip() for m in model_labels])
 
+    ages = roster_ages(arms_cfg, dt.datetime.now(timezone.utc).date())
+    for label in sorted({a["model_label"] for a in arms} & set(ages)):
+        if ages[label]["age_days"] > RECENCY_DAYS:
+            print(f"note: {label} was released {ages[label]['released']}, "
+                  f"{ages[label]['age_days']} days ago - past the "
+                  f"{RECENCY_DAYS}-day roster recency rule", file=sys.stderr)
+
     rates = cost_mod.load_rates(QUALITY_DIR / "rates.json")
     rates_sha = cost_mod.rates_sha256(QUALITY_DIR / "rates.json")
 
@@ -273,6 +303,7 @@ def main() -> int:
         "task_timeout_secs": args.task_timeout,
         "arms": arms,
         "roster": arms_cfg["models"],
+        "roster_ages": ages,
         "stagemix_mapping": cost_mod.stagemix_mapping(
             blueprints_dir
             / suite.agent_for({"name": "", "role": "structured",
