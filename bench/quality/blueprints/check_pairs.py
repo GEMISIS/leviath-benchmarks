@@ -29,6 +29,28 @@ def load(name: str) -> dict:
     return tomllib.loads((HERE / name / "agent.leviath").read_text())
 
 
+def check_policy(name: str) -> list[str]:
+    """The benchmark policy, asserted: single-model stages, no HITL."""
+    doc = load(name)
+    problems = []
+    for sname, stage in doc.get("stages", {}).items():
+        models = (stage.get("model") or {}).get("models") or []
+        if len(models) != 1:
+            problems.append(f"{name}/{sname}: {len(models)} models in "
+                            "list (policy: exactly 1, no fallbacks)")
+        blocking = [t for t in stage.get("available_tools", [])
+                    if _excluded_tool(t) and not t.startswith("context_")]
+        if blocking:
+            problems.append(f"{name}/{sname}: blocking tools {blocking}")
+        if stage.get("allow_blocking_tools"):
+            problems.append(f"{name}/{sname}: allow_blocking_tools set")
+    raw = (HERE / name / "agent.leviath").read_text()
+    if "ask_user_confirm" in raw:
+        problems.append(f"{name}: prompt text still references "
+                        "ask_user_confirm")
+    return problems
+
+
 def check_pair(structured_name: str, flat_name: str) -> list[str]:
     s, f = load(structured_name), load(flat_name)
     problems = []
@@ -77,7 +99,9 @@ def check_pair(structured_name: str, flat_name: str) -> list[str]:
 def main() -> int:
     failed = False
     for structured_name, flat_name in PAIRS.items():
-        problems = check_pair(structured_name, flat_name)
+        problems = (check_policy(structured_name)
+                    + check_policy(flat_name)
+                    + check_pair(structured_name, flat_name))
         if problems:
             failed = True
             print(f"{structured_name} vs {flat_name}:")

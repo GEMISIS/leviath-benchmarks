@@ -43,12 +43,25 @@ arms**:
 | `structured-pinned` | frozen staged blueprint with context regions | the same pinned model (`-m`) |
 | `structured-stagemix` | the same frozen staged blueprint, byte-identical | the blueprint's native per-stage model mix |
 
-The `-m` override replaces every stage's model list and skips all
-fallbacks, so the two pinned arms run **byte-identical blueprints** and
-differ only in the model dimension the sweep varies; the flat arm's
-blueprint is generated from the structured one and proven identical in
-tools, permissions, and total iteration budget (`blueprints/
-check_pairs.py`) - only the structure is removed.
+The blueprints are **benchmark-owned agents**: derived once from the
+upstream bundled agents (`freeze_from_upstream.py` records the exact
+commit), then transformed by a committed policy
+(`apply_bench_policy.py`) - exactly one model per stage so no fallback
+chain can silently change what was measured, and no human-in-the-loop
+tools or prompt passages, since benchmark runs are unattended by
+definition. The agents that run are exactly the agents this repo
+defines, stable across upstream drift; `check_pairs.py` asserts the
+policy held on every blueprint.
+
+The `-m` override replaces every stage's model list, so the two pinned
+arms run **byte-identical blueprints** and differ only in the model
+dimension the sweep varies; the flat arm's blueprint is generated from
+the structured one and proven identical in tools, permissions, and
+total iteration budget (`blueprints/check_pairs.py`) - only the
+structure is removed. The mixed-models arm runs the blueprint's
+committed single-model-per-stage assignments, so its stage-to-model
+mapping is a fact of the bytes rather than a resolution-time
+assumption.
 
 `flat-pinned` vs `structured-pinned` is the context-structure ablation.
 `structured-pinned` vs `structured-stagemix` is the cost/quality trade

@@ -1,5 +1,6 @@
 # Frozen benchmark copy of the bundled data-analyst agent (leviath commit a47a97d52984).
 # Byte-frozen for the quality track; its sha256 is recorded in every run record.
+# BENCHMARK POLICY APPLIED (apply_bench_policy.py): exactly one model per stage (no fallbacks); no human-in-the-loop tools or prompts.
 
 [agent]
 name = "data-analyst"
@@ -24,7 +25,7 @@ bash       = "ask"
 # were invented row by row is the usual way this work goes wrong.
 [stages.scope]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Decide the table's columns before gathering anything"
 available_tools = ["web_search", "context_write"]
 max_iterations = 8
@@ -69,7 +70,7 @@ transform = "direct"
 # stage assembles them into a single table.
 [stages.split]
 mode = "fan_out"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Split the subject into slices, one worker each"
 available_tools = []
 max_iterations = 4
@@ -116,7 +117,7 @@ transform = "direct"
 # a hope.
 [stages.gather_worker]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Gather the rows for one slice of the subject"
 available_tools = ["web_search", "web_fetch", "submit_output"]
 allow_as_worker = true
@@ -151,7 +152,7 @@ instructions = "A header line matching the schema's columns in order, then one r
 # wrote.
 [stages.build]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Assemble the workers' rows into one dataset"
 available_tools = ["write_file", "read_file", "context_read", "context_write"]
 max_iterations = 15
@@ -188,7 +189,7 @@ transform = "direct"
 # prose.
 [stages.present]
 mode = "output"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what the data shows"
 max_iterations = 8
 system_prompt = """
@@ -215,7 +216,7 @@ instructions = "Use a short `## Findings` list. Put figures inline, not in a tab
 # ─── Error recovery ───────────────────────────────────────────────────────────
 [stages.error_recovery]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Recover from a failed fetch, parse, or write"
 available_tools = ["read_file", "context_read", "context_write"]
 max_iterations = 8

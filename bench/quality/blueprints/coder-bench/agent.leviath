@@ -1,5 +1,6 @@
 # Frozen benchmark copy of the bundled coder agent (leviath commit a47a97d52984).
 # Byte-frozen for the quality track; its sha256 is recorded in every run record.
+# BENCHMARK POLICY APPLIED (apply_bench_policy.py): exactly one model per stage (no fallbacks); no human-in-the-loop tools or prompts.
 
 [agent]
 name = "coder"
@@ -26,7 +27,7 @@ bash       = "ask"
 # single non-error edge so the runtime auto-follows it without a routing call.
 [stages.discover]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Map the codebase and synthesize a verification workflow"
 available_tools = ["read_file", "list_dir", "bash", "context_write"]
 max_iterations = 8
@@ -96,7 +97,7 @@ transform = "direct"
 # ─── Stage 2: Analyze ─────────────────────────────────────────────────────────
 [stages.analyze]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Understand requirements and plan the implementation"
 available_tools = ["read_file", "list_dir"]
 max_iterations = 15
@@ -173,7 +174,7 @@ transform = "direct"
 # rather than a guess.
 [stages.prototype]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "devstral:24b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Spike the riskiest assumption in the plan before committing to it"
 available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 15
@@ -239,15 +240,11 @@ transform = "direct"
 # ─── Stage 3: Implement ───────────────────────────────────────────────────────
 [stages.implement]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-opus-5" }, { provider = "openai", model = "gpt-5.5" }, { provider = "google", model = "gemini-3.1-pro-preview" }, { provider = "openrouter", model = "deepseek/deepseek-v4-pro" }, { provider = "ollama", model = "devstral:24b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Write code according to the plan, verifying continuously"
-available_tools = ["write_file", "read_file", "edit_file", "list_dir", "bash", "context_write", "ask_user_confirm"]
+available_tools = ["write_file", "read_file", "edit_file", "list_dir", "bash", "context_write"]
 max_iterations = 50
 max_revisits = 3
-# ask_user_confirm suspends the run until a person answers, which is deliberate
-# here: this stage checks in before doing something it cannot undo. Declared so
-# `lev validate` reports it as a choice rather than an oversight.
-allow_blocking_tools = true
 system_prompt = """
 You are implementing the plan from the `plan` region. Write working,
 production-quality code that matches the project's `conventions`.
@@ -289,8 +286,8 @@ so you can spot a repeating pattern instead of chasing the same wall.
 Do NOT spend iterations re-reading the codebase unless you need something
 specific; `discovery` already has the map.
 
-If you hit a destructive or hard-to-reverse action you're unsure about, use
-ask_user_confirm before proceeding. Otherwise work autonomously.
+This is an unattended run: there is no human to ask. Work autonomously,
+and take only the actions the task itself requires.
 
 Finish with a short summary of what changed, the final test counts, and an
 explicit statement that nothing regressed against `baseline`.
@@ -353,7 +350,7 @@ transform = "direct"
 # back into another implementation pass by a lone outgoing edge.
 [stages.review]
 mode = "interactive"
-model = { models = [{ provider = "anthropic", model = "claude-opus-5" }, { provider = "openai", model = "gpt-5.5" }, { provider = "google", model = "gemini-3.1-pro-preview" }, { provider = "openrouter", model = "deepseek/deepseek-v4-pro" }, { provider = "ollama", model = "devstral:24b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Review the code before finalizing"
 available_tools = ["read_file", "list_dir", "bash"]
 max_iterations = 10
@@ -436,7 +433,7 @@ transform = "direct"
 # the plan before handing back to implement.
 [stages.reassess]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-opus-5" }, { provider = "openai", model = "gpt-5.5" }, { provider = "google", model = "gemini-3.1-pro-preview" }, { provider = "openrouter", model = "deepseek/deepseek-v4-pro" }, { provider = "ollama", model = "devstral:24b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Step back after no progress: diagnose the dead end and re-plan"
 available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
 max_iterations = 8
@@ -497,7 +494,7 @@ transform = "direct"
 # Only reachable via error edges - invisible during normal flow.
 [stages.error_recovery]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Diagnose and resolve errors encountered during implementation"
 available_tools = ["read_file", "bash", "context_append"]
 max_iterations = 10
@@ -535,7 +532,7 @@ model = "claude-sonnet-5"
 # not work.
 [stages.summary]
 mode = "output"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what changed"
 max_iterations = 8
 system_prompt = """

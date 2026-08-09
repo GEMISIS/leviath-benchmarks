@@ -1,5 +1,6 @@
 # Frozen benchmark copy of the bundled researcher agent (leviath commit a47a97d52984).
 # Byte-frozen for the quality track; its sha256 is recorded in every run record.
+# BENCHMARK POLICY APPLIED (apply_bench_policy.py): exactly one model per stage (no fallbacks); no human-in-the-loop tools or prompts.
 
 [agent]
 name = "researcher"
@@ -19,7 +20,7 @@ bash       = "ask"
 # ─── Stage 1: Gather ──────────────────────────────────────────────────────────
 [stages.gather]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Gather relevant information on the topic"
 # web_search / web_fetch are provided by the agent's script tools (issue #97).
 available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "context_append"]
@@ -67,7 +68,7 @@ transform = "direct"
 # whether it needs more sources or is ready to summarize.
 [stages.analyze]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-opus-5" }, { provider = "openai", model = "gpt-5.5" }, { provider = "google", model = "gemini-3.1-pro-preview" }, { provider = "openrouter", model = "deepseek/deepseek-v4-pro" }, { provider = "ollama", model = "qwen3.6:27b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Analyze and synthesize findings"
 available_tools = ["read_file", "web_fetch", "context_write", "context_append"]
 max_iterations = 20
@@ -113,7 +114,7 @@ transform = "direct"
 # ─── Stage 3: Summarize (terminal) ────────────────────────────────────────────
 [stages.summarize]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Create a concise, well-organized summary"
 available_tools = ["write_file", "read_file"]
 max_iterations = 10
@@ -137,7 +138,7 @@ hint = "The report is written"
 # ─── Stage 4: Error recovery ──────────────────────────────────────────────────
 [stages.error_recovery]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Diagnose and recover from errors during gathering or analysis"
 available_tools = ["read_file", "bash"]
 max_iterations = 8
@@ -170,7 +171,7 @@ model = "claude-sonnet-5"
 # not work.
 [stages.summary]
 mode = "output"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Say what the research found"
 max_iterations = 8
 system_prompt = """

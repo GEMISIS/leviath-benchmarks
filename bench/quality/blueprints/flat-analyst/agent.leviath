@@ -21,7 +21,7 @@ bash = "ask"
 
 [stages.work]
 mode = "autonomous"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Do the whole task in one loop"
 available_tools = ["read_file", "submit_output", "web_fetch", "web_search", "write_file"]
 max_iterations = 68
@@ -44,7 +44,7 @@ hint = "The task is complete - deliver the final answer"
 
 [stages.answer]
 mode = "output"
-model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }, { provider = "openai", model = "gpt-5.4-mini" }, { provider = "google", model = "gemini-3.5-flash" }, { provider = "openrouter", model = "deepseek/deepseek-v4-flash" }, { provider = "ollama", model = "qwen3.5:9b" }] }
+model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Deliver the final answer"
 max_iterations = 8
 system_prompt = """
