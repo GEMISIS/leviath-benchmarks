@@ -9,7 +9,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.3.0"
+version = "0.4.0"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -181,12 +181,19 @@ Decide what happens next:
 - If the figure holds up, respond with: answer
 """
 system_prompt = """
-Recompute the answer by the independent route named in `plan` - a different
+Check the question before you check the arithmetic. Re-read `task` as if you had
+not seen the plan, and ask whether the quantity in `results` is what it asks
+for. Where the data's documentation defines the metric, that definition decides
+it - a figure computed correctly under the wrong definition is a wrong answer,
+and recomputing it a second way will confirm it every time. If the reading is
+wrong, say so and send it back; that is the failure this stage exists to catch.
+
+Then recompute the answer by the independent route named in `plan` - a different
 grouping, a different tool, a manual count on a small slice, an identity that
 must hold (parts summing to the total).
 
-Then sanity-check it: is the magnitude plausible for this many rows, is the unit
-right, does it answer the question that was asked rather than a nearby one?
+Sanity-check the result: is the magnitude plausible for this many rows, is the
+unit right, is the answer in the form the task demands?
 
 Append the check and its outcome to `results`. If the two routes disagree,
 say which one you believe and why, and go back to compute rather than averaging

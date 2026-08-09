@@ -5,7 +5,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.3.0-adversarial"
+version = "0.4.0-adversarial"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -151,6 +151,12 @@ Append your verdict to `results` (context_append) as
 `plan review = accepted | rejected: <the specific defect>`. Be concrete: name
 the step and what it should be instead. If the plan is sound, say so plainly
 and let it through - rejecting a good plan costs a full recomputation.
+
+Count your own rejections in `results` before rejecting again. If you have
+already sent this plan back twice, accept it with your remaining concerns
+recorded and let the work proceed: a third rejection spends the revisit budget
+and the run ends with no answer at all, which is worse than a flawed one you
+have documented. Say "accepted under protest" and name what you still doubt.
 """
 
 [stages.plan_review.tool_routing]
@@ -240,12 +246,19 @@ Decide what happens next:
 - If the figure holds up, respond with: answer
 """
 system_prompt = """
-Recompute the answer by the independent route named in `plan` - a different
+Check the question before you check the arithmetic. Re-read `task` as if you had
+not seen the plan, and ask whether the quantity in `results` is what it asks
+for. Where the data's documentation defines the metric, that definition decides
+it - a figure computed correctly under the wrong definition is a wrong answer,
+and recomputing it a second way will confirm it every time. If the reading is
+wrong, say so and send it back; that is the failure this stage exists to catch.
+
+Then recompute the answer by the independent route named in `plan` - a different
 grouping, a different tool, a manual count on a small slice, an identity that
 must hold (parts summing to the total).
 
-Then sanity-check it: is the magnitude plausible for this many rows, is the unit
-right, does it answer the question that was asked rather than a nearby one?
+Sanity-check the result: is the magnitude plausible for this many rows, is the
+unit right, is the answer in the form the task demands?
 
 Append the check and its outcome to `results`. If the two routes disagree,
 say which one you believe and why, and go back to compute rather than averaging
