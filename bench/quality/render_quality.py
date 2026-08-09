@@ -121,6 +121,9 @@ def cell_points(summary: dict) -> list[dict]:
             "tokens": cell["billed_tokens"],
             "wall": cell["wall_clock_secs"],
             "cache": cell["cache_hit_rate"],
+            "runs": cell["runs"],
+            "unfinished": cell["runs"] - (cell.get("statuses", {})
+                                          .get("complete", 0)),
         })
     points.sort(key=lambda p: (arm_sort_key(p["arm"]), p["model"]))
     return points
@@ -129,7 +132,9 @@ def cell_points(summary: dict) -> list[dict]:
 def mix_label(round_meta: dict) -> str:
     mapping = round_meta.get("stagemix_mapping")
     if isinstance(mapping, dict) and mapping:
-        models = sorted({m for m in mapping.values()})
+        # Model ids without the provider prefix: the composition has to
+        # fit beside a point, and round.json carries the full mapping.
+        models = sorted({m.split("/")[-1] for m in mapping.values()})
         return "mix: " + " + ".join(models)
     return "mix (per-stage mapping in round.json)"
 
@@ -156,17 +161,32 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
                               [p["cost_hi"] - p["cost"]]],
                         fmt="none", ecolor=color, elinewidth=1.0,
                         capsize=2, alpha=0.45)
-        ax.scatter([p["cost"]], [p["pass_rate"]], s=64, color=color,
-                   zorder=3, edgecolors=SURFACE, linewidths=1.5)
-        label = (mix_label(round_meta)
-                 if p["arm"] == "structured-stagemix" else p["model"])
+        # A point whose runs mostly never finished is a different claim
+        # from a point that failed the tasks, so it does not get to look
+        # like one: hollow marker, and the count said out loud.
+        mostly_unfinished = p["unfinished"] > p["runs"] / 2
+        ax.scatter([p["cost"]], [p["pass_rate"]], s=64,
+                   color=SURFACE if mostly_unfinished else color,
+                   zorder=3, edgecolors=color,
+                   linewidths=2.0 if mostly_unfinished else 1.5)
+        mix = p["arm"] == "structured-stagemix"
+        label = mix_label(round_meta) if mix else p["model"]
         tier = (roster.get(p["model"], {}) or {}).get("tier", "")
+        # The mix label is long and sits at whatever pass rate it earned,
+        # often beside a pinned point; drop it below the marker so the
+        # two never overprint.
         ax.annotate(label, (p["cost"], p["pass_rate"]),
-                    textcoords="offset points", xytext=(8, 6), fontsize=8,
-                    color=INK)
-        if tier and p["arm"] != "structured-stagemix":
-            ax.annotate(tier, (p["cost"], p["pass_rate"]),
-                        textcoords="offset points", xytext=(8, -3),
+                    textcoords="offset points",
+                    xytext=(8, -14) if mix else (8, 6),
+                    fontsize=7.5 if mix else 8, color=INK)
+        sub = tier if (tier and not mix) else ""
+        if p["unfinished"]:
+            note = f"{p['unfinished']}/{p['runs']} unfinished"
+            sub = f"{sub} - {note}" if sub else note
+        if sub:
+            ax.annotate(sub, (p["cost"], p["pass_rate"]),
+                        textcoords="offset points",
+                        xytext=(8, -25) if mix else (8, -3),
                         fontsize=6.5, color=MUTED)
 
     frontier = sorted([(p["cost"], p["pass_rate"]) for p in priced])
