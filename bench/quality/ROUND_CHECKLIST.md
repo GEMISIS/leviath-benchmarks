@@ -46,6 +46,14 @@ one to two orders of magnitude more tokens than a log-analysis or
 DABstep task. Set `--budget-usd` per invocation regardless; cells past
 the cap are recorded as `cap` (non-completion), never dropped.
 
+Suites that ship a large context file need headroom on both guards. A
+flat-context arm can pull the whole file into its one window and then
+re-send it every iteration; the ceiling counts cache reads, because
+they are billed, so such a run reaches a million tokens in under twenty
+seconds. That is a real result about flat context and it should be
+recorded as one - but only if the ceiling was set high enough that the
+run was allowed to be a result rather than a guard artifact.
+
 Size `--per-run-max-tokens` from the smoke cells, not from taste. It is
 a runaway guard, not a budget: set below what a healthy run of that
 suite costs, it silently converts working cells into non-completions
