@@ -39,7 +39,7 @@ arms**:
 
 | arm | blueprint | model |
 |---|---|---|
-| `flat-pinned` | flat counterpart (one working stage, one sliding conversation window) | one pinned model on every stage (`-m`) |
+| `flat-pinned` | flat counterpart: one stage that works and answers, one sliding conversation window | one pinned model (`-m`) |
 | `structured-pinned` | frozen staged blueprint with context regions | the same pinned model (`-m`) |
 | `structured-stagemix` | the same frozen staged blueprint, byte-identical | the blueprint's native per-stage model mix |
 
@@ -58,6 +58,26 @@ graders, or datasets), tuning against public splits only, every
 improvement inherited by the flat baseline via regeneration, agents
 frozen per round with sha256s in every record, and the no-fallback /
 no-HITL policy asserted on every blueprint by `check_pairs.py`.
+
+**What the flat arm represents.** It is one model loop with every tool,
+a large conversation window, and compaction when that window fills -
+the shape the widely used coding agents share today. Their published
+architectures were checked rather than assumed: the ones whose sources
+are readable run a single loop that ends when the model stops calling
+tools, and the ones that are closed describe the same control flow.
+Two things that shape is commonly paired with are deliberately **not**
+in this arm, and both are named here so the comparison is not read as
+more than it is: tool-invoked sub-agents with their own context, and a
+plan step that some setups route to a different model than the one that
+executes. The second is a per-phase model choice, which is what the
+mixed arms measure directly.
+
+Both arms size their context the same way: every region, including the
+flat arm's single window, is a percentage of the model's context window
+rather than an absolute ceiling, and the window itself is pinned per
+model in `arms.json` and recorded in `round.json`. An ablation where
+one arm's working memory is capped smaller than the other's is not an
+ablation of structure.
 
 The `-m` override replaces every stage's model list, so the two pinned
 arms run **byte-identical blueprints** and differ only in the model

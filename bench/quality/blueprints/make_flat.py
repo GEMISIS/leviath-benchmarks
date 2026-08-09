@@ -58,9 +58,12 @@ and make sure everything you changed actually runs.
 Complete the data-analysis task described in `task`.
 
 Inspect the available data files first - formats, row counts, columns and
-what they mean - and read any documentation shipped with them, since it
-usually defines the fields and the rules that decide what a correct
-answer is. Then work out what exactly to compute, including the traps:
+what they mean - and read any documentation shipped with them properly
+rather than noting that it exists. Its definitions govern: if a manual
+or data dictionary defines a metric, compute that definition even when
+an everyday reading of the question suggests another one, and when two
+readings are genuinely defensible, follow the documented one and say
+why. Then work out what exactly to compute, including the traps:
 rows to exclude, joins that duplicate rows, nulls, mixed units, dates
 that need parsing, categories defined by the documentation rather than
 intuition.

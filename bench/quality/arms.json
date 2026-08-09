@@ -86,10 +86,36 @@
       "model": "$sweep"
     },
     {
-      "name": "structured-stagemix",
+      "name": "structured-mix-econ",
       "role": "structured",
-      "model": null
+      "model": null,
+      "variant": "econ"
+    },
+    {
+      "name": "structured-mix-frontier-brain",
+      "role": "structured",
+      "model": null,
+      "variant": "frontier-brain"
+    },
+    {
+      "name": "structured-mix-muse-sonnet",
+      "role": "structured",
+      "model": null,
+      "variant": "muse-sonnet"
+    },
+    {
+      "name": "structured-mix-muse-opus",
+      "role": "structured",
+      "model": null,
+      "variant": "muse-opus"
+    },
+    {
+      "name": "structured-mix-sonnet-opus",
+      "role": "structured",
+      "model": null,
+      "variant": "sonnet-opus"
     }
   ],
-  "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is; the runtime's own table is incomplete (OpenRouter-fronted models resolve to 128000 while their providers report 1048576), which would silently shrink every region on those models. Each value here was verified against the provider, and the resolved window is recorded in every round."
+  "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is; the runtime's own table is incomplete (OpenRouter-fronted models resolve to 128000 while their providers report 1048576), which would silently shrink every region on those models. Each value here was verified against the provider, and the resolved window is recorded in every round.",
+  "_arms": "Mixed arms name a generated variant (blueprints/mixes.json): the same agent with one model named per stage. The grid crosses the model in the loop stages, which carry the token spend, with the model in the stages that decide and check, which are few calls over small contexts: econ = economy loops + workhorse thinking, frontier-brain = economy loops + frontier thinking, muse-sonnet / muse-opus = the same with the coding-oriented economy model, sonnet-opus = workhorse loops + frontier thinking."
 }

@@ -7,7 +7,6 @@
     "recovery": "Error recovery runs rarely; a strong model there is nearly free in aggregate and is exactly when capability matters.",
     "output": "The output stage reformats what is already established. Cheapest capable model, held to the requested format."
   },
-
   "econ": {
     "_note": "Cheapest defensible configuration: economy model in every loop, workhorse for thinking and checking.",
     "coder-bench": {
@@ -44,7 +43,6 @@
       "summary": "openai/gpt-5.6-luna"
     }
   },
-
   "frontier-brain": {
     "_note": "Cheap hands, expensive head: economy model in every loop, frontier model wherever a decision is made or checked - including recovery, which fires rarely enough that its capability is nearly free.",
     "coder-bench": {
@@ -79,6 +77,114 @@
       "report": "anthropic/claude-opus-5",
       "error_recovery": "anthropic/claude-opus-5",
       "summary": "openai/gpt-5.6-luna"
+    }
+  },
+  "muse-sonnet": {
+    "_note": "Coding-oriented economy model in the loops, workhorse thinking.",
+    "analyst-bench": {
+      "profile": "openrouter/meta/muse-spark-1.2",
+      "compute": "openrouter/meta/muse-spark-1.2",
+      "plan": "anthropic/claude-sonnet-5",
+      "verify": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "answer": "openrouter/meta/muse-spark-1.2"
+    },
+    "loganalyzer-bench": {
+      "ingest": "openrouter/meta/muse-spark-1.2",
+      "script": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-sonnet-5",
+      "report": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    },
+    "researcher-bench": {
+      "gather": "openrouter/meta/muse-spark-1.2",
+      "summarize": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    },
+    "coder-bench": {
+      "discover": "openrouter/meta/muse-spark-1.2",
+      "prototype": "openrouter/meta/muse-spark-1.2",
+      "implement": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-sonnet-5",
+      "review": "anthropic/claude-sonnet-5",
+      "reassess": "anthropic/claude-sonnet-5",
+      "error_recovery": "anthropic/claude-sonnet-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    }
+  },
+  "muse-opus": {
+    "_note": "Coding-oriented economy model in the loops, frontier thinking.",
+    "analyst-bench": {
+      "profile": "openrouter/meta/muse-spark-1.2",
+      "compute": "openrouter/meta/muse-spark-1.2",
+      "plan": "anthropic/claude-opus-5",
+      "verify": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "answer": "openrouter/meta/muse-spark-1.2"
+    },
+    "loganalyzer-bench": {
+      "ingest": "openrouter/meta/muse-spark-1.2",
+      "script": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-opus-5",
+      "report": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    },
+    "researcher-bench": {
+      "gather": "openrouter/meta/muse-spark-1.2",
+      "summarize": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    },
+    "coder-bench": {
+      "discover": "openrouter/meta/muse-spark-1.2",
+      "prototype": "openrouter/meta/muse-spark-1.2",
+      "implement": "openrouter/meta/muse-spark-1.2",
+      "analyze": "anthropic/claude-opus-5",
+      "review": "anthropic/claude-opus-5",
+      "reassess": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "openrouter/meta/muse-spark-1.2"
+    }
+  },
+  "sonnet-opus": {
+    "_note": "Workhorse in the loops, frontier thinking - the quality-first corner of the grid.",
+    "analyst-bench": {
+      "profile": "anthropic/claude-sonnet-5",
+      "compute": "anthropic/claude-sonnet-5",
+      "plan": "anthropic/claude-opus-5",
+      "verify": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "answer": "anthropic/claude-sonnet-5"
+    },
+    "loganalyzer-bench": {
+      "ingest": "anthropic/claude-sonnet-5",
+      "script": "anthropic/claude-sonnet-5",
+      "analyze": "anthropic/claude-opus-5",
+      "report": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "anthropic/claude-sonnet-5"
+    },
+    "researcher-bench": {
+      "gather": "anthropic/claude-sonnet-5",
+      "summarize": "anthropic/claude-sonnet-5",
+      "analyze": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "anthropic/claude-sonnet-5"
+    },
+    "coder-bench": {
+      "discover": "anthropic/claude-sonnet-5",
+      "prototype": "anthropic/claude-sonnet-5",
+      "implement": "anthropic/claude-sonnet-5",
+      "analyze": "anthropic/claude-opus-5",
+      "review": "anthropic/claude-opus-5",
+      "reassess": "anthropic/claude-opus-5",
+      "error_recovery": "anthropic/claude-opus-5",
+      "summary": "anthropic/claude-sonnet-5"
     }
   }
 }

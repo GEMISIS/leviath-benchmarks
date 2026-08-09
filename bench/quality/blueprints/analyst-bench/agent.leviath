@@ -11,7 +11,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.2.0"
+version = "0.3.0"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -33,9 +33,10 @@ system_prompt = """
 Find out what data you actually have before computing anything.
 
 List the working directory, then for each data file establish: format, size, row
-count, and column names with their types and units. Read documentation files
-(readme, data dictionary, manual, schema) if any are present - they usually
-define the fields and the domain rules that decide what a correct answer is.
+count, and column names with their types and units. Read the documentation
+files (readme, data dictionary, manual, schema) rather than noting that they
+exist: they define the fields and the domain rules that decide what a correct
+answer is, and a metric defined there is the metric to compute.
 
 Sample with the shell rather than reading whole files into context (`head`,
 `wc -l`, `column -t`, a small pandas/duckdb probe). Every later stage computes
@@ -74,6 +75,13 @@ max_iterations = 12
 max_revisits = 2
 system_prompt = """
 Turn the question in `task` into a computation, using `data_map`.
+
+Where the data ships documentation - a manual, a data dictionary, a readme -
+its definitions govern. If it defines a metric, compute that definition, even
+when an everyday reading of the question suggests a different one: "top by
+fraud" means whatever the manual says fraud is, not whatever seems natural.
+When two readings are genuinely defensible, name both in the plan, follow the
+documented one, and say why.
 
 Write `plan` (context_write):
 - the exact quantity asked for, restated unambiguously (which rows, which
