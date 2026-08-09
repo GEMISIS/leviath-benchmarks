@@ -14,14 +14,30 @@ because run counts here are single digits per cell and t-intervals on
 Both return the exact p-value as a float. Enumeration is capped: above
 ``_MAX_ENUM`` combinations the caller gets an error rather than a
 silently approximate number.
+
+Whole-suite comparisons run past that cap - 36 runs against 36 is
+C(72,36), which no machine will enumerate - so ``rank_sum_test`` and
+``pass_rate_test`` wrap the pair: exact enumeration when it fits,
+otherwise a seeded random-permutation test with a declared number of
+resamples. Both return the method, the resample count, and the seed
+alongside the p-value, so a published number always says how it was
+computed. The Monte-Carlo estimator is (r+1)/(m+1), which is valid
+rather than merely close: it never reports a p smaller than one
+resample's worth of resolution.
 """
 from __future__ import annotations
 
 import itertools
 import math
+import random
 from statistics import median
 
-__all__ = ["mann_whitney_exact", "permutation_exact", "summary_stats"]
+__all__ = ["mann_whitney_exact", "permutation_exact", "pass_rate_test",
+           "rank_sum_test", "summary_stats"]
+
+# Enough resolution to distinguish p = 0.001 from p = 0.01, cheap enough
+# to run for every pre-registered comparison in a round.
+DEFAULT_RESAMPLES = 200_000
 
 _MAX_ENUM = 5_000_000
 
@@ -90,6 +106,71 @@ def permutation_exact(a: list[bool], b: list[bool]) -> float:
             at_least += 1
         total += 1
     return at_least / total
+
+
+def _monte_carlo(pooled: list, n_a: int, statistic, observed: float,
+                 resamples: int, seed: int) -> float:
+    """Share of random label reassignments at least as extreme as the
+    observed one, by the (r+1)/(m+1) estimator."""
+    rng = random.Random(seed)
+    at_least = 0
+    shuffled = list(pooled)
+    for _ in range(resamples):
+        rng.shuffle(shuffled)
+        if statistic(shuffled[:n_a], shuffled[n_a:]) >= observed - 1e-12:
+            at_least += 1
+    return (at_least + 1) / (resamples + 1)
+
+
+def _test(a: list, b: list, statistic, exact_fn,
+          resamples: int, seed: int) -> dict:
+    if not a or not b:
+        raise ValueError("both samples must be non-empty")
+    n_comb = math.comb(len(a) + len(b), len(a))
+    if n_comb <= _MAX_ENUM:
+        return {"p": exact_fn(a, b), "method": "exact_enumeration",
+                "combinations": n_comb, "resamples": None, "seed": None}
+    observed = statistic(list(a), list(b))
+    p = _monte_carlo(list(a) + list(b), len(a), statistic, observed,
+                     resamples, seed)
+    return {"p": p, "method": "random_permutation",
+            "combinations": n_comb, "resamples": resamples, "seed": seed}
+
+
+def _u_statistic(xs: list[float], ys: list[float]) -> float:
+    u = 0.0
+    for x in xs:
+        for y in ys:
+            if x < y:
+                u += 1.0
+            elif x == y:
+                u += 0.5
+    return u
+
+
+def _pass_gap(xs: list, ys: list) -> float:
+    return sum(bool(v) for v in xs) / len(xs) - \
+        sum(bool(v) for v in ys) / len(ys)
+
+
+def rank_sum_test(a: list[float], b: list[float],
+                  resamples: int = DEFAULT_RESAMPLES,
+                  seed: int = 0) -> dict:
+    """One-sided rank-sum for H1: a tends LOWER than b.
+
+    Exact when the enumeration fits, a seeded random-permutation test
+    otherwise; the returned dict always says which, so nothing silently
+    becomes an approximation.
+    """
+    return _test(a, b, _u_statistic, mann_whitney_exact, resamples, seed)
+
+
+def pass_rate_test(a: list[bool], b: list[bool],
+                   resamples: int = DEFAULT_RESAMPLES,
+                   seed: int = 0) -> dict:
+    """One-sided test for H1: a passes MORE often than b."""
+    return _test([bool(v) for v in a], [bool(v) for v in b], _pass_gap,
+                 permutation_exact, resamples, seed)
 
 
 def summary_stats(values: list[float]) -> dict:

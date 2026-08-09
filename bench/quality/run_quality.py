@@ -152,8 +152,17 @@ def resolve_arms(cfg: dict, arm_names: list[str],
     return resolved
 
 
-def comparisons_block(records_list: list[dict]) -> list[dict]:
-    """Exact p-values for every pre-registered arm pair, per model."""
+def comparisons_block(records_list: list[dict], seed: int = 0) -> list[dict]:
+    """p-values for every pre-registered arm pair, per model.
+
+    Exact enumeration where it fits, a seeded random-permutation test
+    where it cannot (whole-suite cells run to C(72,36) and beyond); each
+    entry records which was used, with the resample count and seed.
+    Only cells that produced a measurement are compared - a cap-out or a
+    crash is a non-completion in the pass rate, but it has no token
+    total to rank, so including it would compare a zero against real
+    work.
+    """
     out = []
     for arm_a, arm_b in COMPARISONS:
         models = sorted({r["model_label"] for r in records_list
@@ -166,27 +175,25 @@ def comparisons_block(records_list: list[dict]) -> list[dict]:
             if not a or not b:
                 continue
             entry = {"a": arm_a, "b": arm_b, "model_label": model,
-                     "hypothesis": "a passes more and bills fewer tokens"}
-            # Exact tests refuse to approximate above their enumeration
-            # cap; a summary must still be written (the raw records
-            # already exist), so record the refusal rather than crash.
-            try:
-                entry["p_pass_exact_permutation"] = stats.permutation_exact(
-                    [bool(r["score"] and r["score"].get("passed"))
-                     for r in a],
-                    [bool(r["score"] and r["score"].get("passed"))
-                     for r in b])
-            except ValueError as exc:
-                entry["p_pass_exact_permutation"] = None
-                entry["p_pass_note"] = str(exc)
-            try:
-                entry["p_tokens_exact_mann_whitney"] = (
-                    stats.mann_whitney_exact(
-                        [float(r["billed_tokens"]) for r in a],
-                        [float(r["billed_tokens"]) for r in b]))
-            except ValueError as exc:
-                entry["p_tokens_exact_mann_whitney"] = None
-                entry["p_tokens_note"] = str(exc)
+                     "hypothesis": "a passes more and bills fewer tokens",
+                     "n_a": len(a), "n_b": len(b)}
+            entry["pass"] = stats.pass_rate_test(
+                [bool(r["score"] and r["score"].get("passed")) for r in a],
+                [bool(r["score"] and r["score"].get("passed")) for r in b],
+                seed=seed)
+            measured_a = [r for r in a if r["status"] == "complete"]
+            measured_b = [r for r in b if r["status"] == "complete"]
+            entry["tokens_n_a"] = len(measured_a)
+            entry["tokens_n_b"] = len(measured_b)
+            if measured_a and measured_b:
+                entry["tokens"] = stats.rank_sum_test(
+                    [float(r["billed_tokens"]) for r in measured_a],
+                    [float(r["billed_tokens"]) for r in measured_b],
+                    seed=seed)
+            else:
+                entry["tokens"] = None
+                entry["tokens_note"] = ("no completed runs on one side; "
+                                        "nothing to rank")
             out.append(entry)
     return out
 
@@ -355,7 +362,7 @@ def main() -> int:
         "suite": suite.name,
         "freeze_tag": freeze_tag,
         "aggregate": record.aggregate(written),
-        "comparisons": comparisons_block(written),
+        "comparisons": comparisons_block(written, seed=args.seed),
     }
     (suite_dir / "summary.json").write_text(
         json.dumps(summary, indent=2) + "\n")

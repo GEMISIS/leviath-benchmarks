@@ -76,7 +76,8 @@ def provenance(fig, round_meta: dict, specs: dict) -> None:
              f"{lev.get('version', '?')} (sha {sha}) - "
              f"{specs.get('cpu_model', '?')} - reps={round_meta.get('reps')}"
              " - medians, whiskers = min/max, dots = every run, no run "
-             "excluded - costs from provider-billed usage incl. cache",
+             "excluded - costs from provider-billed usage incl. cache"
+             " - p* = seeded random-permutation test, otherwise exact",
              fontsize=6.6, color=MUTED, ha="left")
 
 
@@ -210,63 +211,96 @@ def render_cost_vs_quality(suite: str, data: dict, round_meta: dict,
 
 def render_ablation(suites: dict, round_meta: dict, specs: dict,
                     out: Path) -> Path | None:
-    names = [s for s in suites
-             if _has_arms(suites[s], "structured-pinned", "flat-pinned")]
-    if not names:
+    """Flat vs structured, one group per (suite, pinned model).
+
+    Pooling the swept models into one bar would average a model that
+    finished with one that capped out on every run - a pass rate
+    neither model had. The comparison is per pinned model by
+    construction, so the chart is too.
+    """
+    groups = []
+    for name in suites:
+        if not _has_arms(suites[name], "structured-pinned", "flat-pinned"):
+            continue
+        models = sorted({r["model_label"] for r in suites[name]["runs"]
+                         if r["arm"] in ("flat-pinned", "structured-pinned")
+                         and r["model_label"]})
+        for model in models:
+            groups.append((name, model))
+    if not groups:
         return None
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.4, 5.4), dpi=150)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.2, 5.8), dpi=150)
     fig.patch.set_facecolor(SURFACE)
-    xs = range(len(names))
+    xs = range(len(groups))
     w = 0.34
+    labels = [f"{s}\n{m}" for s, m in groups]
     for ax in (ax1, ax2):
         style_ax(ax)
         ax.set_xticks(list(xs))
-        ax.set_xticklabels(names, fontsize=8, color=INK2)
+        ax.set_xticklabels(labels, fontsize=7.5, color=INK2)
 
-    for i, name in enumerate(names):
+    for i, (name, model) in enumerate(groups):
         summary = suites[name]["summary"]
-        runs = suites[name]["runs"]
+        runs = [r for r in suites[name]["runs"] if r["model_label"] == model]
         for off, arm in ((-w / 2, "flat-pinned"),
-                        (w / 2, "structured-pinned")):
-            cells = [c for c in summary["aggregate"]["cells"]
-                     if c["arm"] == arm]
-            if not cells:
-                continue
-            pass_rate = 100.0 * (sum(c["passes"] for c in cells)
-                                 / sum(c["runs"] for c in cells))
+                         (w / 2, "structured-pinned")):
             arm_runs = [r for r in runs if r["arm"] == arm]
-            tok = [r["billed_tokens"] / 1000.0 for r in arm_runs]
-            tok_med = sorted(tok)[len(tok) // 2] if tok else 0
+            if not arm_runs:
+                continue
+            passes = sum(1 for r in arm_runs
+                         if (r["score"] or {}).get("passed"))
+            pass_rate = 100.0 * passes / len(arm_runs)
+            # Cap-outs and errors have no measurement to rank; they are
+            # still failures above, but they are not a token total.
+            tok = sorted(r["billed_tokens"] / 1000.0 for r in arm_runs
+                         if r["status"] == "complete")
+            tok_med = tok[len(tok) // 2] if tok else 0.0
             label = ARM_LABELS[arm] if i == 0 else None
             ax1.bar(i + off, pass_rate, w, color=ARM_COLORS[arm],
                     label=label)
-            ax2.bar(i + off, tok_med, w, color=ARM_COLORS[arm],
-                    label=label)
+            ax2.bar(i + off, tok_med, w, color=ARM_COLORS[arm], label=label)
             for r in arm_runs:
                 passed = 100.0 if (r["score"] or {}).get("passed") else 0.0
                 ax1.scatter([i + off], [passed], s=10, color=INK,
                             alpha=0.35, zorder=3, linewidths=0)
-                ax2.scatter([i + off], [r["billed_tokens"] / 1000.0],
-                            s=10, color=INK, alpha=0.35, zorder=3,
-                            linewidths=0)
+                if r["status"] == "complete":
+                    ax2.scatter([i + off], [r["billed_tokens"] / 1000.0],
+                                s=10, color=INK, alpha=0.35, zorder=3,
+                                linewidths=0)
+            incomplete = [r for r in arm_runs if r["status"] != "complete"]
+            if incomplete:
+                # Said out loud on the chart: a bar this low can mean the
+                # runs failed the task or never finished it, and those
+                # are different claims.
+                ax1.text(i + off, pass_rate + 2.5,
+                         f"{len(incomplete)}/{len(arm_runs)} unfinished",
+                         fontsize=5.8, ha="center", va="bottom",
+                         color=INK2, rotation=90, zorder=4)
         for comp in summary.get("comparisons", []):
-            if (comp["a"], comp["b"]) == ("structured-pinned",
+            if (comp["a"], comp["b"]) != ("structured-pinned",
                                           "flat-pinned"):
-                p = comp.get("p_pass_exact_permutation")
-                label = f"p={p:.3f}" if isinstance(p, (int, float)) else "p: n/a"
-                ax1.text(i, 103, label, fontsize=7, ha="center", color=INK2)
-                break
+                continue
+            if comp.get("model_label") != model:
+                continue
+            test = comp.get("pass") or {}
+            p = test.get("p", comp.get("p_pass_exact_permutation"))
+            if isinstance(p, (int, float)):
+                mark = "" if test.get("method") == "exact_enumeration" else "*"
+                ax1.text(i, 110, f"p={p:.3f}{mark}", fontsize=7,
+                         ha="center", color=INK2)
+            break
 
     ax1.set_ylabel("verified pass rate (%)", fontsize=9, color=INK2)
-    ax1.set_ylim(0, 112)
+    ax1.set_ylim(0, 118)
     ax1.legend(fontsize=8, frameon=False, loc="upper left",
-               labelcolor=INK2)
+               bbox_to_anchor=(0.0, 0.94), labelcolor=INK2)
     ax1.set_title("pass rate - same binary, same pinned model, context "
                   "structure only", fontsize=10, color=INK, loc="left")
     ax2.set_ylabel("billed tokens per task (thousands, incl. cache "
                    "reads+writes)", fontsize=9, color=INK2)
-    ax2.set_title("total billed tokens per task", fontsize=10, color=INK,
-                  loc="left")
+    ax2.set_title("billed tokens per task, completed runs only",
+                  fontsize=10, color=INK, loc="left")
 
     if round_meta.get("freeze_tag") == SMOKE_TAG:
         smoke_watermark(fig)

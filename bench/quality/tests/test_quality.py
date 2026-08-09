@@ -85,6 +85,34 @@ class StatsTests(unittest.TestCase):
         self.assertGreaterEqual(
             stats.mann_whitney_exact([1, 2], [1, 2]), 0.5)
 
+    def test_wrapper_uses_exact_enumeration_when_it_fits(self):
+        r = stats.pass_rate_test([True] * 3, [False] * 3)
+        self.assertEqual(r["method"], "exact_enumeration")
+        self.assertAlmostEqual(r["p"], 0.05)
+        self.assertIsNone(r["resamples"])
+
+    def test_wrapper_declares_when_it_resamples(self):
+        a, b = [True] * 30 + [False] * 6, [False] * 30 + [True] * 6
+        r = stats.pass_rate_test(a, b, resamples=2000, seed=7)
+        self.assertEqual(r["method"], "random_permutation")
+        self.assertEqual(r["resamples"], 2000)
+        self.assertEqual(r["seed"], 7)
+        # (r+1)/(m+1) never reports a p below one resample's resolution.
+        self.assertGreaterEqual(r["p"], 1 / 2001)
+        self.assertEqual(r, stats.pass_rate_test(a, b, resamples=2000, seed=7))
+
+    def test_resampled_p_is_near_the_exact_one(self):
+        # A case small enough to enumerate, forced down both paths.
+        a, b = [True, True, True, False], [False, False, False, True]
+        exact = stats.permutation_exact(a, b)
+        mc = stats._test(a, b, stats._pass_gap, stats.permutation_exact,
+                         resamples=20000, seed=3)
+        # _test picks exact here; drive the Monte-Carlo path directly.
+        approx = stats._monte_carlo(a + b, len(a), stats._pass_gap,
+                                    stats._pass_gap(a, b), 20000, 3)
+        self.assertEqual(mc["method"], "exact_enumeration")
+        self.assertAlmostEqual(exact, approx, delta=0.02)
+
     def test_enumeration_never_silently_approximates(self):
         with self.assertRaises(ValueError):
             stats.mann_whitney_exact(list(range(20)), list(range(20)))
