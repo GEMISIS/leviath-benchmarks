@@ -123,5 +123,20 @@
     }
   ],
   "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is; the runtime's own table is incomplete (OpenRouter-fronted models resolve to 128000 while their providers report 1048576), which would silently shrink every region on those models. Each value here was verified against the provider, and the resolved window is recorded in every round.",
-  "_arms": "Mixed arms name a generated variant (blueprints/mixes.json): the same agent with one model named per stage. The grid crosses the model in the loop stages, which carry the token spend, with the model in the stages that decide and check, which are few calls over small contexts: econ = economy loops + workhorse thinking, frontier-brain = economy loops + frontier thinking, muse-sonnet / muse-opus = the same with the coding-oriented economy model, sonnet-opus = workhorse loops + frontier thinking."
+  "_arms": "Mixed arms name a generated variant (blueprints/mixes.json): the same agent with one model named per stage. The grid crosses the model in the loop stages, which carry the token spend, with the model in the stages that decide and check, which are few calls over small contexts: econ = economy loops + workhorse thinking, frontier-brain = economy loops + frontier thinking, muse-sonnet / muse-opus = the same with the coding-oriented economy model, sonnet-opus = workhorse loops + frontier thinking.",
+  "rate_limits": {
+    "anthropic": {
+      "requests_per_minute": 900,
+      "tokens_per_minute": 600000
+    },
+    "openai": {
+      "requests_per_minute": 900,
+      "tokens_per_minute": 600000
+    },
+    "openrouter": {
+      "requests_per_minute": 300,
+      "tokens_per_minute": 300000
+    }
+  },
+  "_rate_limits": "What each provider account is allowed to sustain, declared here and written into the runtime's config so the daemon paces itself instead of discovering the limit as rejected requests. These are deliberately conservative placeholders: replace each with the tier limits on the account actually being billed before a counted round, since a round that was throttled measures the throttling as much as the agent. The values are frozen with the round and recorded, because what a round promised to stay under is part of what it measured."
 }

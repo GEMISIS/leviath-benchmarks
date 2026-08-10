@@ -65,6 +65,38 @@ class QualityHome:
                          f'[model_capabilities."{model}"]\n{body}\n')
         return "\n".join(lines)
 
+    @staticmethod
+    def concurrency_config(concurrency: int, rate_limits: dict) -> str:
+        """Daemon limits and provider rate limits for a parallel round.
+
+        Two install defaults throttle a round long before the machine
+        does: `max_concurrent_inferences` caps in-flight calls per model
+        at 8, and `max_concurrent_tools` caps how many *agents* may run
+        tools across the whole daemon, also at 8. Every turn of these
+        agents runs a tool, so the second is the one that decides
+        throughput. Both are raised to the concurrency the round asked
+        for, with headroom for the sub-runs an agent may spawn.
+
+        The real ceiling is the provider, not the host, so a round also
+        declares the limits it is running under and lets the daemon
+        throttle itself rather than discovering them as 429s. Values
+        come from arms.json, which is frozen with the round: what we
+        promised to stay under is part of what was measured.
+        """
+        lanes = max(8, int(concurrency) * 2)
+        out = ["[limits]",
+               f"max_concurrent_inferences = {lanes}",
+               f"max_concurrent_tools = {lanes}", ""]
+        for provider, limits in sorted(rate_limits.items()):
+            rpm = int(limits.get("requests_per_minute", 0) or 0)
+            tpm = int(limits.get("tokens_per_minute", 0) or 0)
+            if not rpm and not tpm:
+                continue
+            out += [f"[rate_limits.{provider}]",
+                    f"requests_per_minute = {rpm}",
+                    f"tokens_per_minute = {tpm}", ""]
+        return "\n".join(out)
+
     def install(self, blueprints_dir: Path, config_text: str,
                 providers_dir: Path | None = None) -> None:
         """Fresh home with the frozen blueprints and the given config."""

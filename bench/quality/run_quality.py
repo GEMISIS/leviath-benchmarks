@@ -45,6 +45,7 @@ sys.path.insert(0, str(BENCH_DIR))
 import machine_specs  # noqa: E402
 from core import cost as cost_mod  # noqa: E402
 from core import freeze, record, runner, scrub, stats, subset  # noqa: E402
+from core import throughput as throughput_mod  # noqa: E402
 from core.levctl import QualityHome  # noqa: E402
 
 DEFAULT_TIMEOUT_SECS = 1800
@@ -225,6 +226,13 @@ def main() -> int:
                              "when exceeded (0 disables)")
     parser.add_argument("--task-timeout", type=float,
                         default=DEFAULT_TIMEOUT_SECS)
+    parser.add_argument("--concurrency", type=int, default=1,
+                        help="cells to run at once. The host handles "
+                             "hundreds of agents; the provider is the real "
+                             "ceiling, so raise this alongside the rate "
+                             "limits in arms.json. Wall-clock is only "
+                             "comparable between rounds run at the same "
+                             "level, and every record carries it")
     parser.add_argument("--seed", type=int, default=1,
                         help="interleaving order seed (recorded)")
     parser.add_argument("--provider-config", default=None,
@@ -306,6 +314,10 @@ def main() -> int:
     windows = QualityHome.capability_overrides(arms_cfg["models"])
     if windows:
         config_text = f"{config_text}\n{windows}"
+    # Daemon lanes and provider pacing for the concurrency asked for.
+    config_text = (f"{config_text}\n"
+                   + QualityHome.concurrency_config(
+                       args.concurrency, arms_cfg.get("rate_limits", {})))
     home.install(blueprints_dir, config_text,
                  providers_dir=(Path(args.providers_dir)
                                 if args.providers_dir else None))
@@ -324,6 +336,8 @@ def main() -> int:
         "reps": args.reps,
         "budget_usd": args.budget_usd,
         "per_run_max_tokens": args.per_run_max_tokens or None,
+        "concurrency": args.concurrency,
+        "rate_limits": arms_cfg.get("rate_limits", {}),
         "task_timeout_secs": args.task_timeout,
         "arms": arms,
         "roster": arms_cfg["models"],
@@ -364,7 +378,8 @@ def main() -> int:
             runs_dir, freeze_tag, lev_info, blueprint_shas, rates_sha,
             args.seed, args.task_timeout, args.budget_usd,
             args.keep_context,
-            per_run_max_tokens=args.per_run_max_tokens or None)
+            per_run_max_tokens=args.per_run_max_tokens or None,
+            concurrency=args.concurrency)
     finally:
         home.stop_daemon()
         if latency_proc is not None:
@@ -375,6 +390,7 @@ def main() -> int:
         "freeze_tag": freeze_tag,
         "aggregate": record.aggregate(written),
         "comparisons": comparisons_block(written, seed=args.seed),
+        "throughput": throughput_mod.throughput(written, args.concurrency),
     }
     (suite_dir / "summary.json").write_text(
         json.dumps(summary, indent=2) + "\n")

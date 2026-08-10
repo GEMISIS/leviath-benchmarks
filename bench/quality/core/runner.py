@@ -22,9 +22,11 @@ usage harvesting is wired; its token counters are still exact.
 """
 from __future__ import annotations
 
+import concurrent.futures as cf
 import gzip
 import random
 import shutil
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,6 +54,7 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                rates_sha: str, seed: int, task_timeout_secs: float,
                budget_usd: float | None, keep_context: bool,
                per_run_max_tokens: int | None = None,
+               concurrency: int = 1,
                log=print) -> list[dict]:
     """Run every (task x arm x rep) cell and return the written records.
 
@@ -67,7 +70,12 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
 
     spent = 0.0
     records = []
-    for i, (task, arm, rep) in enumerate(cells, 1):
+    lock = threading.Lock()
+    concurrency = max(1, int(concurrency or 1))
+
+    def run_cell(i: int, cell: tuple) -> None:
+        nonlocal spent
+        task, arm, rep = cell
         blueprint, extra_cli = suite.agent_for(arm)
         # Per-task output spec (lev run --output-format/--output-
         # instructions) is applied to every arm identically, so the
@@ -90,17 +98,21 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                           "sha256": blueprint_shas.get(blueprint)},
             "lev": lev_info,
             "rates_sha256": rates_sha,
+            "concurrency": concurrency,
         }
 
-        if budget_usd is not None and spent >= budget_usd:
+        with lock:
+            over_budget = budget_usd is not None and spent >= budget_usd
+        if over_budget:
             log(f"[{i}/{len(cells)}] {label}: BUDGET CAP "
                 f"(${spent:.2f} >= ${budget_usd:.2f})")
-            records.append(_finish(base, runs_dir, status="cap",
-                                   started=_utcnow(), ended=_utcnow(),
-                                   wall=0.0, meta=None, arm=arm,
-                                   rates=rates, score={"passed": False,
-                                                       "detail": "budget cap"}))
-            continue
+            with lock:
+                records.append(_finish(
+                    base, runs_dir, status="cap", started=_utcnow(),
+                    ended=_utcnow(), wall=0.0, meta=None, arm=arm,
+                    rates=rates,
+                    score={"passed": False, "detail": "budget cap"}))
+            return
 
         log(f"[{i}/{len(cells)}] {label}")
         workdir = home.home / "work" / record_mod.record_filename(
@@ -177,9 +189,24 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                       rates=rates, score=score,
                       stage_records=stage_records,
                       mix_mapping=mix_mapping, archived=archived)
-        if isinstance(rec.get("cost_usd"), (int, float)):
-            spent += rec["cost_usd"]
-        records.append(rec)
+        with lock:
+            if isinstance(rec.get("cost_usd"), (int, float)):
+                spent += rec["cost_usd"]
+            records.append(rec)
+
+    if concurrency == 1:
+        for i, cell in enumerate(cells, 1):
+            run_cell(i, cell)
+    else:
+        log(f"running {len(cells)} cells at concurrency {concurrency}; "
+            "wall-clock is only comparable to other runs at this level")
+        with cf.ThreadPoolExecutor(max_workers=concurrency) as pool:
+            futures = [pool.submit(run_cell, i, cell)
+                       for i, cell in enumerate(cells, 1)]
+            for fut in cf.as_completed(futures):
+                fut.result()
+    records.sort(key=lambda r: (r["task_id"], r["arm"],
+                                str(r["model_label"]), r["rep"]))
     log(f"done: {len(records)} records, ~${spent:.2f} priced spend")
     return records
 
