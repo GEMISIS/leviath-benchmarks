@@ -1,190 +1,214 @@
 {
-  "_comment": "Stage-to-model assignments for the mixed arms. Every stage of every agent is named explicitly - a mix is a claim about which model does which job, so it is written out rather than inferred from stage names. make_mix.py generates <agent>-<mix> from these; run_quality.py selects one with an arm's `variant`. Model ids must exist in arms.json.",
-  "_design": {
-    "loops": "Stages that iterate with tools (gather, ingest, profile, compute, script, implement, prototype) dominate token spend, because each turn re-sends the working context. This is where a cheap model pays for itself.",
-    "thinking": "Stages that decide what to do (plan, analyze, reassess) are few calls over a small context. A frontier model here costs little and changes the outcome most.",
-    "checking": "Verification (verify, review) benefits from a strong model, and from being a different model than the one that did the work.",
-    "recovery": "Error recovery runs rarely; a strong model there is nearly free in aggregate and is exactly when capability matters.",
-    "output": "The output stage reformats what is already established. Cheapest capable model, held to the requested format."
+ "_comment": "Stage-to-model assignments for the mixed arms. Every stage of every agent is named explicitly - a mix is a claim about which model does which job, so it is written out rather than inferred from stage names. make_mix.py generates <agent>-<mix> from these; run_quality.py selects one with an arm's `variant`. Model ids must exist in arms.json.",
+ "_design": {
+  "loops": "Stages that iterate with tools (gather, ingest, profile, compute, script, implement, prototype) dominate token spend, because each turn re-sends the working context. This is where a cheap model pays for itself.",
+  "thinking": "Stages that decide what to do (plan, analyze, reassess) are few calls over a small context. A frontier model here costs little and changes the outcome most.",
+  "checking": "Verification (verify, review) benefits from a strong model, and from being a different model than the one that did the work.",
+  "recovery": "Error recovery runs rarely; a strong model there is nearly free in aggregate and is exactly when capability matters.",
+  "output": "The output stage reformats what is already established. Cheapest capable model, held to the requested format."
+ },
+ "econ": {
+  "_note": "Cheapest defensible configuration: economy model in every loop, workhorse for thinking and checking.",
+  "coder-bench": {
+   "discover": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-sonnet-5",
+   "prototype": "openai/gpt-5.6-luna",
+   "implement": "openai/gpt-5.6-luna",
+   "review": "anthropic/claude-sonnet-5",
+   "reassess": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openai/gpt-5.6-luna"
   },
-  "econ": {
-    "_note": "Cheapest defensible configuration: economy model in every loop, workhorse for thinking and checking.",
-    "coder-bench": {
-      "discover": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-sonnet-5",
-      "prototype": "openai/gpt-5.6-luna",
-      "implement": "openai/gpt-5.6-luna",
-      "review": "anthropic/claude-sonnet-5",
-      "reassess": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openai/gpt-5.6-luna"
-    },
-    "analyst-bench": {
-      "profile": "openai/gpt-5.6-luna",
-      "plan": "anthropic/claude-sonnet-5",
-      "compute": "openai/gpt-5.6-luna",
-      "verify": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "answer": "openai/gpt-5.6-luna"
-    },
-    "researcher-bench": {
-      "gather": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-sonnet-5",
-      "summarize": "openai/gpt-5.6-luna",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openai/gpt-5.6-luna"
-    },
-    "loganalyzer-bench": {
-      "ingest": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-sonnet-5",
-      "script": "openai/gpt-5.6-luna",
-      "report": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openai/gpt-5.6-luna"
-    }
+  "analyst-bench": {
+   "profile": "openai/gpt-5.6-luna",
+   "plan": "anthropic/claude-sonnet-5",
+   "compute": "openai/gpt-5.6-luna",
+   "verify": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "answer": "openai/gpt-5.6-luna"
   },
-  "frontier-brain": {
-    "_note": "Cheap hands, expensive head: economy model in every loop, frontier model wherever a decision is made or checked - including recovery, which fires rarely enough that its capability is nearly free.",
-    "coder-bench": {
-      "discover": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-opus-5",
-      "prototype": "openai/gpt-5.6-luna",
-      "implement": "openai/gpt-5.6-luna",
-      "review": "anthropic/claude-opus-5",
-      "reassess": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openai/gpt-5.6-luna"
-    },
-    "analyst-bench": {
-      "profile": "openai/gpt-5.6-luna",
-      "plan": "anthropic/claude-opus-5",
-      "compute": "openai/gpt-5.6-luna",
-      "verify": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "answer": "openai/gpt-5.6-luna"
-    },
-    "researcher-bench": {
-      "gather": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-opus-5",
-      "summarize": "openai/gpt-5.6-luna",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openai/gpt-5.6-luna"
-    },
-    "loganalyzer-bench": {
-      "ingest": "openai/gpt-5.6-luna",
-      "analyze": "anthropic/claude-opus-5",
-      "script": "openai/gpt-5.6-luna",
-      "report": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openai/gpt-5.6-luna"
-    }
+  "researcher-bench": {
+   "gather": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-sonnet-5",
+   "summarize": "openai/gpt-5.6-luna",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openai/gpt-5.6-luna"
   },
-  "muse-sonnet": {
-    "_note": "Coding-oriented economy model in the loops, workhorse thinking.",
-    "analyst-bench": {
-      "profile": "openrouter/meta/muse-spark-1.2",
-      "compute": "openrouter/meta/muse-spark-1.2",
-      "plan": "anthropic/claude-sonnet-5",
-      "verify": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "answer": "openrouter/meta/muse-spark-1.2"
-    },
-    "loganalyzer-bench": {
-      "ingest": "openrouter/meta/muse-spark-1.2",
-      "script": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-sonnet-5",
-      "report": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    },
-    "researcher-bench": {
-      "gather": "openrouter/meta/muse-spark-1.2",
-      "summarize": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    },
-    "coder-bench": {
-      "discover": "openrouter/meta/muse-spark-1.2",
-      "prototype": "openrouter/meta/muse-spark-1.2",
-      "implement": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-sonnet-5",
-      "review": "anthropic/claude-sonnet-5",
-      "reassess": "anthropic/claude-sonnet-5",
-      "error_recovery": "anthropic/claude-sonnet-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    }
-  },
-  "muse-opus": {
-    "_note": "Coding-oriented economy model in the loops, frontier thinking.",
-    "analyst-bench": {
-      "profile": "openrouter/meta/muse-spark-1.2",
-      "compute": "openrouter/meta/muse-spark-1.2",
-      "plan": "anthropic/claude-opus-5",
-      "verify": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "answer": "openrouter/meta/muse-spark-1.2"
-    },
-    "loganalyzer-bench": {
-      "ingest": "openrouter/meta/muse-spark-1.2",
-      "script": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-opus-5",
-      "report": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    },
-    "researcher-bench": {
-      "gather": "openrouter/meta/muse-spark-1.2",
-      "summarize": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    },
-    "coder-bench": {
-      "discover": "openrouter/meta/muse-spark-1.2",
-      "prototype": "openrouter/meta/muse-spark-1.2",
-      "implement": "openrouter/meta/muse-spark-1.2",
-      "analyze": "anthropic/claude-opus-5",
-      "review": "anthropic/claude-opus-5",
-      "reassess": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "openrouter/meta/muse-spark-1.2"
-    }
-  },
-  "sonnet-opus": {
-    "_note": "Workhorse in the loops, frontier thinking - the quality-first corner of the grid.",
-    "analyst-bench": {
-      "profile": "anthropic/claude-sonnet-5",
-      "compute": "anthropic/claude-sonnet-5",
-      "plan": "anthropic/claude-opus-5",
-      "verify": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "answer": "anthropic/claude-sonnet-5"
-    },
-    "loganalyzer-bench": {
-      "ingest": "anthropic/claude-sonnet-5",
-      "script": "anthropic/claude-sonnet-5",
-      "analyze": "anthropic/claude-opus-5",
-      "report": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "anthropic/claude-sonnet-5"
-    },
-    "researcher-bench": {
-      "gather": "anthropic/claude-sonnet-5",
-      "summarize": "anthropic/claude-sonnet-5",
-      "analyze": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "anthropic/claude-sonnet-5"
-    },
-    "coder-bench": {
-      "discover": "anthropic/claude-sonnet-5",
-      "prototype": "anthropic/claude-sonnet-5",
-      "implement": "anthropic/claude-sonnet-5",
-      "analyze": "anthropic/claude-opus-5",
-      "review": "anthropic/claude-opus-5",
-      "reassess": "anthropic/claude-opus-5",
-      "error_recovery": "anthropic/claude-opus-5",
-      "summary": "anthropic/claude-sonnet-5"
-    }
+  "loganalyzer-bench": {
+   "ingest": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-sonnet-5",
+   "script": "openai/gpt-5.6-luna",
+   "report": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openai/gpt-5.6-luna"
   }
+ },
+ "frontier-brain": {
+  "_note": "Cheap hands, expensive head: economy model in every loop, frontier model wherever a decision is made or checked - including recovery, which fires rarely enough that its capability is nearly free.",
+  "coder-bench": {
+   "discover": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-opus-5",
+   "prototype": "openai/gpt-5.6-luna",
+   "implement": "openai/gpt-5.6-luna",
+   "review": "anthropic/claude-opus-5",
+   "reassess": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openai/gpt-5.6-luna"
+  },
+  "analyst-bench": {
+   "profile": "openai/gpt-5.6-luna",
+   "plan": "anthropic/claude-opus-5",
+   "compute": "openai/gpt-5.6-luna",
+   "verify": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "answer": "openai/gpt-5.6-luna"
+  },
+  "researcher-bench": {
+   "gather": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-opus-5",
+   "summarize": "openai/gpt-5.6-luna",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openai/gpt-5.6-luna"
+  },
+  "loganalyzer-bench": {
+   "ingest": "openai/gpt-5.6-luna",
+   "analyze": "anthropic/claude-opus-5",
+   "script": "openai/gpt-5.6-luna",
+   "report": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openai/gpt-5.6-luna"
+  }
+ },
+ "muse-sonnet": {
+  "_note": "Coding-oriented economy model in the loops, workhorse thinking.",
+  "analyst-bench": {
+   "profile": "openrouter/meta/muse-spark-1.2",
+   "compute": "openrouter/meta/muse-spark-1.2",
+   "plan": "anthropic/claude-sonnet-5",
+   "verify": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "answer": "openrouter/meta/muse-spark-1.2"
+  },
+  "loganalyzer-bench": {
+   "ingest": "openrouter/meta/muse-spark-1.2",
+   "script": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-sonnet-5",
+   "report": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  },
+  "researcher-bench": {
+   "gather": "openrouter/meta/muse-spark-1.2",
+   "summarize": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  },
+  "coder-bench": {
+   "discover": "openrouter/meta/muse-spark-1.2",
+   "prototype": "openrouter/meta/muse-spark-1.2",
+   "implement": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-sonnet-5",
+   "review": "anthropic/claude-sonnet-5",
+   "reassess": "anthropic/claude-sonnet-5",
+   "error_recovery": "anthropic/claude-sonnet-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  }
+ },
+ "muse-opus": {
+  "_note": "Coding-oriented economy model in the loops, frontier thinking.",
+  "analyst-bench": {
+   "profile": "openrouter/meta/muse-spark-1.2",
+   "compute": "openrouter/meta/muse-spark-1.2",
+   "plan": "anthropic/claude-opus-5",
+   "verify": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "answer": "openrouter/meta/muse-spark-1.2"
+  },
+  "loganalyzer-bench": {
+   "ingest": "openrouter/meta/muse-spark-1.2",
+   "script": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-opus-5",
+   "report": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  },
+  "researcher-bench": {
+   "gather": "openrouter/meta/muse-spark-1.2",
+   "summarize": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  },
+  "coder-bench": {
+   "discover": "openrouter/meta/muse-spark-1.2",
+   "prototype": "openrouter/meta/muse-spark-1.2",
+   "implement": "openrouter/meta/muse-spark-1.2",
+   "analyze": "anthropic/claude-opus-5",
+   "review": "anthropic/claude-opus-5",
+   "reassess": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "openrouter/meta/muse-spark-1.2"
+  }
+ },
+ "sonnet-opus": {
+  "_note": "Workhorse in the loops, frontier thinking - the quality-first corner of the grid.",
+  "analyst-bench": {
+   "profile": "anthropic/claude-sonnet-5",
+   "compute": "anthropic/claude-sonnet-5",
+   "plan": "anthropic/claude-opus-5",
+   "verify": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "answer": "anthropic/claude-sonnet-5"
+  },
+  "loganalyzer-bench": {
+   "ingest": "anthropic/claude-sonnet-5",
+   "script": "anthropic/claude-sonnet-5",
+   "analyze": "anthropic/claude-opus-5",
+   "report": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "anthropic/claude-sonnet-5"
+  },
+  "researcher-bench": {
+   "gather": "anthropic/claude-sonnet-5",
+   "summarize": "anthropic/claude-sonnet-5",
+   "analyze": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "anthropic/claude-sonnet-5"
+  },
+  "coder-bench": {
+   "discover": "anthropic/claude-sonnet-5",
+   "prototype": "anthropic/claude-sonnet-5",
+   "implement": "anthropic/claude-sonnet-5",
+   "analyze": "anthropic/claude-opus-5",
+   "review": "anthropic/claude-opus-5",
+   "reassess": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "summary": "anthropic/claude-sonnet-5"
+  }
+ },
+ "flagship": {
+  "_note": "The composed configuration, not an ablation arm: stage scoping, the adversarial plan critic, and a cross-vendor model assignment in one agent. Every check is performed by a different vendor than the work it checks - a critic that shares the author's training has the author's blind spots. The loop stage is the workhorse rather than the economy model: measured head to head on ten tasks, the economy model on that stage cost 1.8x the tokens, 1.16x the dollars and 2.6x the wall clock for one fewer pass. Cheap-model-on-the-loop is a cost argument that loses on cost here, because a weaker model iterates more.",
+  "analyst-bench-adversarial-scoped": {
+   "profile": "openai/gpt-5.6-luna",
+   "plan": "anthropic/claude-opus-5",
+   "plan_review": "openai/gpt-5.6-terra",
+   "compute": "anthropic/claude-sonnet-5",
+   "verify": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "answer": "openai/gpt-5.6-luna"
+  }
+ },
+ "sonnet-loop": {
+  "_note": "flagship with the loop stage on the workhorse model instead of the economy one. Held identical otherwise so the loop model is the only variable.",
+  "analyst-bench-adversarial-scoped": {
+   "profile": "openai/gpt-5.6-luna",
+   "plan": "anthropic/claude-opus-5",
+   "plan_review": "openai/gpt-5.6-terra",
+   "compute": "anthropic/claude-sonnet-5",
+   "verify": "anthropic/claude-opus-5",
+   "error_recovery": "anthropic/claude-opus-5",
+   "answer": "openai/gpt-5.6-luna"
+  }
+ }
 }
