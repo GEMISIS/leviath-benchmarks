@@ -1,0 +1,12 @@
+{
+  "answer": 444,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_009",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"jk2_init() Found child\" appear for the last time?",
+  "slice": {
+    "end_line": 2000,
+    "start_line": 1555
+  },
+  "type": "last_occurrence"
+}

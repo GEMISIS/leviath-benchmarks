@@ -1,3 +1,39 @@
 __pycache__/
 *.pyc
 /tmp/
+.env
+.DS_Store
+
+# Results never live in the repo: runs write here locally, and counted
+# rounds will be produced and published by CI as complete artifacts.
+/results/*
+!/results/SCHEMA.md
+
+# Fetched at setup time, never committed. Each suite's own .gitignore
+# covers its datasets/ directory; these are the shared ones. GAIA in
+# particular is HF-gated and must not be redistributed from a public
+# repo, so its data stays local by policy and not merely by habit.
+/.tasks/
+/.harness/
+/.lev-linux/
+
+# Built or downloaded binaries. `bench/setup.sh --coding` puts a static
+# Linux lev in .lev-linux/; a stray `lev` at the root is someone's local
+# copy. Neither belongs in a repo whose whole claim is that published
+# numbers name the binary that produced them.
+/lev
+*.whl
+
+# Harness leftovers: harbor writes job trees wherever it is pointed, and
+# its default is the working directory.
+/tbjobs/
+/jobs/
+/.harbor/
+
+# Python tooling caches and local environments.
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

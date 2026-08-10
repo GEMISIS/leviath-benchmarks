@@ -1,0 +1,12 @@
+{
+  "answer": 4,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_040",
+  "question": "Between lines 277 and 648 of the file (1-indexed, inclusive), how many lines contain the exact text \"jk2_init() Can't find child\"?",
+  "slice": {
+    "end_line": 1455,
+    "start_line": 766
+  },
+  "type": "window_substring_count"
+}

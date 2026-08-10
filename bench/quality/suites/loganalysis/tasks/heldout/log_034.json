@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "f86299dcf634b417d5ae2d6a26c69e28ecfb5d438d21b21ff29f31b99dee06a3",
+  "dataset": "Zookeeper",
+  "id": "log_034",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"My election bind port:\" appear for the last time?",
+  "slice": {
+    "end_line": 1311,
+    "start_line": 515
+  },
+  "type": "last_occurrence"
+}

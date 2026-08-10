@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "450cfc51dbdb7246071e95f9276ea15d44c72191664df0bab02201fbcbea10a1",
+  "dataset": "HDFS",
+  "id": "log_030",
+  "question": "Between lines 127 and 242 of the file (1-indexed, inclusive), how many lines contain the exact text \"Served block blk_\"?",
+  "slice": {
+    "end_line": 819,
+    "start_line": 450
+  },
+  "type": "window_substring_count"
+}

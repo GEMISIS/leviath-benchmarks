@@ -1,0 +1,12 @@
+{
+  "answer": 312,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_004",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Interrupted while waiting for message on queue\" appear for the last time?",
+  "slice": {
+    "end_line": 780,
+    "start_line": 179
+  },
+  "type": "last_occurrence"
+}

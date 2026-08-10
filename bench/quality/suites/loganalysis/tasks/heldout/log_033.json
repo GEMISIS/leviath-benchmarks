@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "edfd8051f0ea8daf302cb2a72a456ceface4aefc0bab8fcb8e01dd528bee4aa5",
+  "dataset": "HDFS",
+  "id": "log_033",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Receiving block blk_\" first appear?",
+  "slice": {
+    "end_line": 1386,
+    "start_line": 782
+  },
+  "type": "first_occurrence"
+}

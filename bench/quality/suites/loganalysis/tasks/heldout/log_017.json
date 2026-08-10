@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "d624992db122aac1246a1cd298dacc860a27c16924ee0a251bb5711541c21b08",
+  "dataset": "Apache",
+  "id": "log_017",
+  "question": "How many log lines contain the exact text \"mod_jk child workerEnv in error state\"?",
+  "slice": {
+    "end_line": 700,
+    "start_line": 207
+  },
+  "type": "substring_count"
+}

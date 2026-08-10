@@ -1,0 +1,12 @@
+{
+  "answer": 535,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_026",
+  "question": "How many log lines have severity level 'notice' (case-insensitive)?",
+  "slice": {
+    "end_line": 1199,
+    "start_line": 433
+  },
+  "type": "level_count"
+}

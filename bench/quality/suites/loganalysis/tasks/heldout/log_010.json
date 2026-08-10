@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "d342ec6ae39cd5991fe95d1f7845b61a134e93cf09856851ed5aac07f461e32e",
+  "dataset": "HDFS",
+  "id": "log_010",
+  "question": "Between lines 25 and 202 of the file (1-indexed, inclusive), how many lines contain the exact text \"Received block blk_\"?",
+  "slice": {
+    "end_line": 556,
+    "start_line": 210
+  },
+  "type": "window_substring_count"
+}

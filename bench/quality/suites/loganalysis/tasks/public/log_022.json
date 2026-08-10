@@ -1,0 +1,12 @@
+{
+  "answer": 2,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_022",
+  "question": "How many log lines contain the exact text \"mod_jk child init\"?",
+  "slice": {
+    "end_line": 870,
+    "start_line": 335
+  },
+  "type": "substring_count"
+}

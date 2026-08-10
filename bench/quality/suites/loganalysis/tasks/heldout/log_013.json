@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "ef2e5f287a8bbcbe32c3b4ae614ceeadbeb6ed768a94be7a7daf7e3066eda69d",
+  "dataset": "HDFS",
+  "id": "log_013",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Deleting block blk_\" first appear?",
+  "slice": {
+    "end_line": 743,
+    "start_line": 162
+  },
+  "type": "first_occurrence"
+}

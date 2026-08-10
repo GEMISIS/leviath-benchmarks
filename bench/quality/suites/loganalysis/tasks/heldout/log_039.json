@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "f0ac566ad83da8f02b1c24ad8cbc22e5a74ca2b73ae42bd0160d88c8f3ff7eed",
+  "dataset": "Apache",
+  "id": "log_039",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"] Directory index forbidden by rule:\" appear for the last time?",
+  "slice": {
+    "end_line": 1806,
+    "start_line": 1040
+  },
+  "type": "last_occurrence"
+}

@@ -1,0 +1,12 @@
+{
+  "answer": 19,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_015",
+  "question": "Between lines 24 and 527 of the file (1-indexed, inclusive), how many lines contain the exact text \"******* GOODBYE /\"?",
+  "slice": {
+    "end_line": 1053,
+    "start_line": 394
+  },
+  "type": "window_substring_count"
+}

@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "3e61d308ade231fe459cacaa452826b995520407979b0723cab7f8cad79d6e04",
+  "dataset": "Zookeeper",
+  "id": "log_007",
+  "question": "How many log lines contain the exact text \"caught end of stream exception\"?",
+  "slice": {
+    "end_line": 1989,
+    "start_line": 1331
+  },
+  "type": "substring_count"
+}

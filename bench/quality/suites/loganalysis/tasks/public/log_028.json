@@ -1,0 +1,12 @@
+{
+  "answer": 342,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_028",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Closed socket connection for client /\" first appear?",
+  "slice": {
+    "end_line": 1312,
+    "start_line": 940
+  },
+  "type": "first_occurrence"
+}

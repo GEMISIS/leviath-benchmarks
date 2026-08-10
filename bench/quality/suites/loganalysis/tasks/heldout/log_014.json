@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "b9966053edc0dfafbebff4372c71e457055aa131e14fa90705a4a47ba0efaa0c",
+  "dataset": "Zookeeper",
+  "id": "log_014",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"Snapshotting:\" appear for the last time?",
+  "slice": {
+    "end_line": 2000,
+    "start_line": 1267
+  },
+  "type": "last_occurrence"
+}

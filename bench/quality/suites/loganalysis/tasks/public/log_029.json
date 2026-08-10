@@ -1,0 +1,12 @@
+{
+  "answer": 675,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_029",
+  "question": "On which line number (1-indexed from the top of the file) does the text \"mod_jk child workerEnv in error state\" appear for the last time?",
+  "slice": {
+    "end_line": 1186,
+    "start_line": 506
+  },
+  "type": "last_occurrence"
+}

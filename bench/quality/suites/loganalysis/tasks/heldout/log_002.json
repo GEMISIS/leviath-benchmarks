@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "60ff00e85fbbf1e77d4b25c49f1823bccbc4b6af7405be0c5ad81b73301aeebf",
+  "dataset": "HDFS",
+  "id": "log_002",
+  "question": "How many log lines contain the exact text \"BLOCK* NameSystem.allocateBlock: /\"?",
+  "slice": {
+    "end_line": 915,
+    "start_line": 502
+  },
+  "type": "substring_count"
+}

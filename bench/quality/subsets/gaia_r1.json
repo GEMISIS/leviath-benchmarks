@@ -1,0 +1,15 @@
+{
+  "suite": "gaia_validation",
+  "seed": 20260809,
+  "n": 6,
+  "universe_sha256": "7eb68cded274bdd7c7e64e624523d313cbad0ba0dded0bb892675dafea0e2e74",
+  "excluded": [],
+  "task_ids": [
+    "gaia_08c0b6e9-1b43-4c2e-ae55-4e3fce2c2715",
+    "gaia_1f975693-876d-457b-a649-393859e79bf3",
+    "gaia_23dd907f-1261-4488-b21c-e9185af91d5e",
+    "gaia_935e2cff-ae78-4218-b3f5-115589b19dae",
+    "gaia_c714ab3a-da30-4603-bacd-d008800188b9",
+    "gaia_d0633230-7067-47a9-9dbf-ee11e0a2cdd6"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "suite": "loganalysis",
+  "seed": 20260809,
+  "n": 12,
+  "universe_sha256": "5bb8633297e199f1d535574c396884ad24357ce1d9d49b0057a27b75d443bd02",
+  "excluded": [],
+  "task_ids": [
+    "log_002",
+    "log_006",
+    "log_007",
+    "log_008",
+    "log_012",
+    "log_014",
+    "log_025",
+    "log_031",
+    "log_032",
+    "log_034",
+    "log_036",
+    "log_037"
+  ]
+}

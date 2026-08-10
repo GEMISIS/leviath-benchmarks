@@ -1,0 +1,65 @@
+{
+  "_meta": {
+    "note": "Pinned provider prices per million tokens. cache_write is the 5-minute-TTL write premium rate (Anthropic bills cache writes at 1.25x input INSTEAD of the input rate; cache reads at 0.1x). OpenAI-style providers (OpenAI, OpenRouter) report cached tokens inside prompt_tokens (prompt_includes_cache_read: true) and have no write premium, so cache_write is 0 to avoid double-charging writes already counted in prompt_tokens. A counted round must re-capture this file at freeze time; every run record carries its sha256.",
+    "openrouter_variance": "OpenRouter routes each model across multiple upstream providers whose prices differ; entries marked pricing_varies_by_provider pin the DEFAULT-route list price from the OpenRouter models API at capture time, with the observed spread recorded. For a counted round, pin the route (OpenRouter account-level provider preferences, or a provider-suffixed slug) so the pinned price is the billed price, and re-capture here.",
+    "openai_long_context": "GPT-5.6 prices below are the short-context tier; inputs beyond the long-context threshold (~272K) bill at roughly double. Benchmark tasks stay well under it; a round that does not must add the long-context rates.",
+    "sources": {
+      "anthropic": "https://platform.claude.com/docs/en/pricing (Sonnet 5 pinned at the introductory $2/$10 rate, effective through 2026-08-31 - re-pin after that date)",
+      "openai": "https://developers.openai.com/api/docs/pricing",
+      "openrouter": "https://openrouter.ai/api/v1/models"
+    },
+    "captured_utc": "2026-08-07"
+  },
+  "anthropic/claude-opus-5": {
+    "input_per_mtok": 5.0,
+    "output_per_mtok": 25.0,
+    "cache_read_per_mtok": 0.5,
+    "cache_write_per_mtok": 6.25,
+    "prompt_includes_cache_read": false
+  },
+  "anthropic/claude-sonnet-5": {
+    "input_per_mtok": 2.0,
+    "output_per_mtok": 10.0,
+    "cache_read_per_mtok": 0.2,
+    "cache_write_per_mtok": 2.5,
+    "prompt_includes_cache_read": false
+  },
+  "openai/gpt-5.6-sol": {
+    "input_per_mtok": 5.0,
+    "output_per_mtok": 30.0,
+    "cache_read_per_mtok": 0.5,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true
+  },
+  "openai/gpt-5.6-terra": {
+    "input_per_mtok": 2.0,
+    "output_per_mtok": 12.0,
+    "cache_read_per_mtok": 0.2,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true
+  },
+  "openai/gpt-5.6-luna": {
+    "input_per_mtok": 0.2,
+    "output_per_mtok": 1.2,
+    "cache_read_per_mtok": 0.02,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true
+  },
+  "openrouter/moonshotai/kimi-k3": {
+    "input_per_mtok": 3.0,
+    "output_per_mtok": 15.0,
+    "cache_read_per_mtok": 3.0,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true,
+    "pricing_varies_by_provider": true,
+    "observed_spread": "input 2.90-3.00, output 14.00-15.00 across routes at capture"
+  },
+  "openrouter/meta/muse-spark-1.2": {
+    "input_per_mtok": 1.25,
+    "output_per_mtok": 4.25,
+    "cache_read_per_mtok": 1.25,
+    "cache_write_per_mtok": 0.0,
+    "prompt_includes_cache_read": true,
+    "pricing_varies_by_provider": true
+  }
+}

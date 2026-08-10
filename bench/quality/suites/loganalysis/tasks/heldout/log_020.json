@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "f8c42a083488d1241e349d2f8bf72090862f2ac4a49e1bdec8135195d750839b",
+  "dataset": "Zookeeper",
+  "id": "log_020",
+  "question": "Between lines 37 and 512 of the file (1-indexed, inclusive), how many lines contain the exact text \"Send worker leaving thread\"?",
+  "slice": {
+    "end_line": 1205,
+    "start_line": 547
+  },
+  "type": "window_substring_count"
+}

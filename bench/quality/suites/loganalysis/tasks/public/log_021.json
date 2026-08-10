@@ -1,0 +1,12 @@
+{
+  "answer": 360,
+  "answer_format": "a single integer",
+  "dataset": "Zookeeper",
+  "id": "log_021",
+  "question": "How many log lines have severity level 'WARN' (case-insensitive)?",
+  "slice": {
+    "end_line": 923,
+    "start_line": 351
+  },
+  "type": "level_count"
+}

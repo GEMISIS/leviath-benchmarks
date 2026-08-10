@@ -1,0 +1,12 @@
+{
+  "answer_format": "a single integer",
+  "answer_sha256": "e9655f7ea8046f1b0ae43a2c592be7d24ec5e22274ba4c39ef742b6888162952",
+  "dataset": "Zookeeper",
+  "id": "log_006",
+  "question": "How many log lines have severity level 'ERROR' (case-insensitive)?",
+  "slice": {
+    "end_line": 641,
+    "start_line": 55
+  },
+  "type": "level_count"
+}

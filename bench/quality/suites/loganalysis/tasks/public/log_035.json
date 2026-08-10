@@ -1,0 +1,12 @@
+{
+  "answer": 1,
+  "answer_format": "a single integer",
+  "dataset": "Apache",
+  "id": "log_035",
+  "question": "Between lines 275 and 494 of the file (1-indexed, inclusive), how many lines contain the exact text \"] Directory index forbidden by rule:\"?",
+  "slice": {
+    "end_line": 2000,
+    "start_line": 1394
+  },
+  "type": "window_substring_count"
+}
