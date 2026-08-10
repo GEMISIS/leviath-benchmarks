@@ -66,7 +66,16 @@ transform = "direct"
 [stages.profile.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.profile.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.profile.transitions.error_recovery]
 condition = "error"
@@ -113,6 +122,16 @@ Write `plan` (context_write):
 If the question depends on a definition you could not pin down in the data or
 its documentation, state the reading you are taking and why. Do not compute
 here; that is the next stage's job.
+
+Separate the two ways a question can be hard. One is that the answer takes work
+to compute. The other is that the question names something the data and its
+documentation do not define - a threshold nobody wrote down, a category that
+does not exist here, a comparison the data cannot support. For the second kind,
+inventing a reasonable-sounding threshold and computing against it produces a
+confident number that answers a question nobody asked. Say in the plan which
+kind you are looking at, and if it is the second, say precisely which term is
+undefined and what the data would have to contain for the question to have an
+answer.
 """
 
 [stages.plan.tool_routing]
@@ -125,7 +144,16 @@ bash      = "scratch"
 
 [stages.plan.transitions.compute]
 hint = "The plan is written - compute it"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.plan.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 # Reachable only when every normal route is spent - a
 # conditioned edge is never offered to the model, so this is an
@@ -134,7 +162,16 @@ transform = "compact"
 [stages.plan.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.plan.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.plan.transitions.error_recovery]
 condition = "error"
@@ -165,6 +202,13 @@ Append every figure you establish to `results` (context_append) as
 `<what it measures> = <value> | <how it was computed>`. Script code and output
 land in `scripts`.
 
+`results` is the only region the stage that writes the final answer can read.
+It cannot open files, rerun a script, or look at `scripts`. So whatever the
+question actually asks for has to be *in* `results`, in full: if the answer is
+a list of four hundred ids, the four hundred ids go in `results`, not a note
+saying they are in a file. A pointer to a file you can see is, to the stage
+that answers, a pointer to nothing.
+
 Follow the plan's units and rounding. If the data contradicts the plan - a column
 is not what `data_map` said, a join explodes the row count - say so in `results`
 rather than quietly working around it.
@@ -188,11 +232,29 @@ transform = "direct"
 [stages.compute.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.compute.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.compute.transitions.verify]
 hint = "The figure is computed - check it"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.compute.transitions.verify.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize how each figure was produced: the filter applied, the rows it selected, and the arithmetic. Enough for someone to reproduce it without rereading the transcript."
 
 [stages.compute.transitions.error_recovery]
 condition = "error"
@@ -233,6 +295,12 @@ must hold (parts summing to the total).
 Sanity-check the result: is the magnitude plausible for this many rows, is the
 unit right, is the answer in the form the task demands?
 
+Then check that the answer is actually present. The stage that writes the final
+response reads `results` and nothing else - no files, no scripts. If `results`
+refers to a list, a table or a file rather than containing it, the answer is
+already lost; write the missing content into `results` yourself before you
+hand off.
+
 Append the check and its outcome to `results`. If the two routes disagree,
 say which one you believe and why, and go back to compute rather than averaging
 them or picking the friendlier number.
@@ -247,11 +315,29 @@ read_file = "data_preview"
 
 [stages.verify.transitions.compute]
 hint = "The check disagrees - recompute"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.verify.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 [stages.verify.transitions.answer]
 hint = "The figure holds up - answer"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.verify.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.verify.transitions.error_recovery]
 condition = "error"
@@ -286,11 +372,29 @@ read_file = "data_preview"
 
 [stages.error_recovery.transitions.answer]
 hint = "Recovery is not converging - answer with what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.error_recovery.transitions.compute]
 hint = "Recovered - resume computing"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 [compaction]
 provider = "anthropic"

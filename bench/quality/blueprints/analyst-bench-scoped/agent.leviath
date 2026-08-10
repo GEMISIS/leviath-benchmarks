@@ -4,7 +4,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.5.0"
+version = "0.5.0-scoped"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -51,9 +51,12 @@ list_dir  = "data_preview"
 bash      = "data_preview"
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 92% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 92% of this stage's window.
 [stages.profile.context.regions]
 task = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", budget = "6%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
@@ -72,7 +75,16 @@ transform = "direct"
 [stages.profile.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.profile.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.profile.transitions.error_recovery]
 condition = "error"
@@ -119,6 +131,16 @@ Write `plan` (context_write):
 If the question depends on a definition you could not pin down in the data or
 its documentation, state the reading you are taking and why. Do not compute
 here; that is the next stage's job.
+
+Separate the two ways a question can be hard. One is that the answer takes work
+to compute. The other is that the question names something the data and its
+documentation do not define - a threshold nobody wrote down, a category that
+does not exist here, a comparison the data cannot support. For the second kind,
+inventing a reasonable-sounding threshold and computing against it produces a
+confident number that answers a question nobody asked. Say in the plan which
+kind you are looking at, and if it is the second, say precisely which term is
+undefined and what the data would have to contain for the question to have an
+answer.
 """
 
 [stages.plan.tool_routing]
@@ -130,20 +152,39 @@ read_file = "data_preview"
 bash      = "scratch"
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 94% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 95% of this stage's window.
 [stages.plan.context.regions]
 task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", budget = "12%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", budget = "12%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
-data_preview = { kind = "temporary", budget = "40%" }
+data_preview = { kind = "temporary", budget = "38%" }
 conversation = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
+scratch = { kind = "clearable", budget = "3%" }
 error_report = { kind = "pinned", budget = "3%" }
 
 [stages.plan.transitions.compute]
 hint = "The plan is written - compute it"
-transform = "compact"
+transform = "custom"
+# Belt and braces on top of `required` on the region itself. Measured on
+# ten runs of the composed agent, `plan` was still empty at the end of four
+# of them and the run proceeded anyway - a planning stage that skips writing
+# the plan takes the whole structure with it, because every later stage is
+# told to work from the plan rather than from the transcript.
+gate = { require_modifications = true, region = "plan", tools = ["context_write"], max_attempts = 2, message = "The plan region is still empty. Write it with context_write before moving on - the computing stage works from `plan`, not from this conversation, and the conversation is summarized on the way out." }
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.plan.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 # Reachable only when every normal route is spent - a
 # conditioned edge is never offered to the model, so this is an
@@ -152,7 +193,16 @@ transform = "compact"
 [stages.plan.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.plan.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.plan.transitions.error_recovery]
 condition = "error"
@@ -183,6 +233,13 @@ Append every figure you establish to `results` (context_append) as
 `<what it measures> = <value> | <how it was computed>`. Script code and output
 land in `scripts`.
 
+`results` is the only region the stage that writes the final answer can read.
+It cannot open files, rerun a script, or look at `scripts`. So whatever the
+question actually asks for has to be *in* `results`, in full: if the answer is
+a list of four hundred ids, the four hundred ids go in `results`, not a note
+saying they are in a file. A pointer to a file you can see is, to the stage
+that answers, a pointer to nothing.
+
 Follow the plan's units and rounding. If the data contradicts the plan - a column
 is not what `data_map` said, a join explodes the row count - say so in `results`
 rather than quietly working around it.
@@ -196,17 +253,21 @@ default_region = "scripts"
 read_file = "data_preview"
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 96% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 95% of this stage's window.
 [stages.compute.context.regions]
 task = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
-data_map = { kind = "pinned", budget = "8%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
+data_map = { kind = "pinned", budget = "6%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", budget = "10%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "14%", strategy = "bulk", overflow = 10 }
-scripts = { kind = "compacting", budget = "34%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "4%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+scripts = { kind = "compacting", budget = "22%", compact_at = "80%" }
+scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+data_preview = { kind = "temporary", budget = "18%" }
+conversation = { kind = "sliding_window", max_items = 30, budget = "16%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", budget = "3%" }
 
 [stages.compute.transitions.compute]
@@ -220,11 +281,29 @@ transform = "direct"
 [stages.compute.transitions.answer]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.compute.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.compute.transitions.verify]
 hint = "The figure is computed - check it"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.compute.transitions.verify.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize how each figure was produced: the filter applied, the rows it selected, and the arithmetic. Enough for someone to reproduce it without rereading the transcript."
 
 [stages.compute.transitions.error_recovery]
 condition = "error"
@@ -265,6 +344,14 @@ must hold (parts summing to the total).
 Sanity-check the result: is the magnitude plausible for this many rows, is the
 unit right, is the answer in the form the task demands?
 
+Then hand off the deliverable. Write `answer_draft` (context_write) containing
+the answer itself, complete, in the form `task` asks for - not a description of
+it, not its length, not a pointer to a file that holds it. Where the answer is
+long, write it out in full anyway. The stage that responds has no tools and
+cannot see the data, the scripts or your scratch space: whatever is not in
+`answer_draft` does not exist as far as the answer is concerned, and a model
+asked to produce an answer it cannot see will produce one anyway.
+
 Append the check and its outcome to `results`. If the two routes disagree,
 say which one you believe and why, and go back to compute rather than averaging
 them or picking the friendlier number.
@@ -278,25 +365,48 @@ default_region = "scripts"
 read_file = "data_preview"
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 94% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 97% of this stage's window.
 [stages.verify.context.regions]
 task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 plan = { kind = "pinned", budget = "12%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
-results = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
-scripts = { kind = "compacting", budget = "30%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "4%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+results = { kind = "sliding_window", max_items = 30, budget = "18%", strategy = "bulk", overflow = 10 }
+scripts = { kind = "compacting", budget = "14%", compact_at = "80%" }
+scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+data_preview = { kind = "temporary", budget = "15%" }
+answer_draft = { kind = "pinned", budget = "12%", required = true, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
+conversation = { kind = "sliding_window", max_items = 30, budget = "15%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", budget = "3%" }
 
 [stages.verify.transitions.compute]
 hint = "The check disagrees - recompute"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.verify.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 [stages.verify.transitions.answer]
 hint = "The figure holds up - answer"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.verify.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.verify.transitions.error_recovery]
 condition = "error"
@@ -330,25 +440,47 @@ max_result_tokens = 4000
 read_file = "data_preview"
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 97% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 95% of this stage's window.
 [stages.error_recovery.context.regions]
 task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 plan = { kind = "pinned", budget = "10%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "15%", strategy = "bulk", overflow = 10 }
-scripts = { kind = "compacting", budget = "25%", compact_at = "80%" }
+scripts = { kind = "compacting", budget = "20%", compact_at = "80%" }
 data_preview = { kind = "temporary", budget = "15%" }
 conversation = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
+scratch = { kind = "clearable", budget = "3%" }
 error_report = { kind = "pinned", budget = "5%" }
 
 [stages.error_recovery.transitions.answer]
 hint = "Recovery is not converging - answer with what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.answer.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize only what bears on the final answer: the figure, its units, and the rule it was computed under."
 
 [stages.error_recovery.transitions.compute]
 hint = "Recovered - resume computing"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.compute.transform_config]
+carry = ["task", "data_map", "plan", "results", "data_preview", "scripts", "scripts_history", "error_report"]
+compact = ["conversation"]
+clear = ["scratch"]
+compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 [compaction]
 provider = "anthropic"
@@ -379,19 +511,31 @@ restating the question, no units it did not ask for. If it asked for an
 explanation, lead with the answer, then the figures from `results` that support
 it, then anything that stayed uncertain.
 
-Report only figures that are in `results`. If the analysis did not settle the
-question, say that rather than presenting a guess as a result.
+`answer_draft` holds the deliverable as the checking stage committed it. Emit
+that content - reformatted to the task's requested shape if it is not already,
+but not regenerated. You cannot see the data, the scripts, or the working: the
+deliverable is either in front of you or it is nowhere you can reach.
+
+So: never reconstruct, extend, or fill in content that is not in front of you.
+If `answer_draft` and `results` do not contain what the task asks for, say
+exactly that - name what is missing. A wrong answer that looks complete is
+worse than a short one that admits the gap, because nobody downstream can tell
+the first one is wrong.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and
-# nothing else. The rest are parked, not dropped - a later
-# stage that declares them gets them back with their content.
-# Budgets sum to 94% of this stage's model window.
+# nothing else. The rest are parked, not dropped - a later stage
+# that declares them gets them back with their content. Every
+# region this stage routes tool output into is declared here;
+# routing into a parked region is a dead drop (make_scoped.py
+# refuses to generate one).
+# Budgets sum to 91% of this stage's window.
 [stages.answer.context.regions]
 task = { kind = "pinned", budget = "8%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
-plan = { kind = "pinned", budget = "10%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
-results = { kind = "sliding_window", max_items = 30, budget = "40%", strategy = "bulk", overflow = 10 }
-conversation = { kind = "sliding_window", max_items = 30, budget = "33%", strategy = "bulk", overflow = 10 }
+plan = { kind = "pinned", budget = "8%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
+results = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
+answer_draft = { kind = "pinned", budget = "30%", required = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
+conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", budget = "3%" }
 
 [stages.answer.transitions]
@@ -405,6 +549,14 @@ data_map     = { kind = "pinned", budget = "3%", required = true, required_messa
 plan         = { kind = "pinned", budget = "3%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 # Every figure established, with how it was computed.
 results      = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10 }
+# The deliverable itself, committed by the stage that checked it. Separate
+# from `results` because working notes and the answer are different things:
+# `results` accumulates figures and how they were derived, and a stage reading
+# it cannot tell which part IS the answer. Pinned, so no transform touches it;
+# required, so a checking stage that forgets to write it is re-run and told to.
+# The failure this exists to stop: an output stage with no tools, handed only
+# a description of a four-hundred-item answer, invents four hundred items.
+answer_draft = { kind = "pinned", budget = "10%", required = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 
 # Bulk and evictable: samples of the data pulled in for orientation.
 data_preview = { kind = "temporary", budget = "28%" }

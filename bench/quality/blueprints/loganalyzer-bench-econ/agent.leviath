@@ -61,7 +61,16 @@ transform = "direct"
 [stages.ingest.transitions.summary]
 condition = "dead_end"
 hint = "No route left - report what has been established"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.ingest.transitions.summary.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [stages.ingest.transitions.error_recovery]
 condition = "error"
@@ -115,17 +124,44 @@ bash      = "scratch"
 
 [stages.analyze.transitions.script]
 hint = "Need a script to parse/filter/aggregate log data"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analyze.transitions.script.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 # The deliverable follows the request: a written report when one was
 # asked for, otherwise the answer to the question that was asked.
 [stages.analyze.transitions.summary]
 hint = "The task asked a specific question and the analysis answers it"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analyze.transitions.summary.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [stages.analyze.transitions.report]
 hint = "The task asked for a written report or a broad review"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analyze.transitions.report.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [stages.analyze.transitions.error_recovery]
 condition = "error"
@@ -171,13 +207,31 @@ transform = "direct"
 
 [stages.script.transitions.analyze]
 hint = "Script results ready - return to analysis"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.script.transitions.analyze.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 # Also the un-exhaustible escape (lint: dead-end-possible): summary has
 # no revisit budget, so this edge is always available.
 [stages.script.transitions.summary]
 hint = "The script settled the question - or analysis is out of revisits"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.script.transitions.summary.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [stages.script.transitions.error_recovery]
 condition = "error"
@@ -235,11 +289,29 @@ continue with the data available.
 # to the deliverable instead of dead-ending.
 [stages.error_recovery.transitions.report]
 hint = "Recovery is not converging - report the findings so far"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.report.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [stages.error_recovery.transitions.analyze]
 hint = "Recovered - resume analysis"
-transform = "compact"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `results` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.error_recovery.transitions.analyze.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the conversation so far, preserving every figure verbatim."
 
 [compaction]
 provider = "anthropic"
