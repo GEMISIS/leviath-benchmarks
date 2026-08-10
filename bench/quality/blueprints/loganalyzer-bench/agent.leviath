@@ -49,6 +49,15 @@ bash      = "logs"
 hint = "Log format identified, ready to analyze"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.ingest.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.ingest.transitions.error_recovery]
 condition = "error"
 transform = "direct"

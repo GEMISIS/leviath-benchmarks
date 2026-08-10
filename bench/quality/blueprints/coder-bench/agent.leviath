@@ -91,6 +91,15 @@ bash      = "scratch"
 hint = "Codebase mapped and verification workflow synthesized"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.discover.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.discover.transitions.error_recovery]
 condition = "error"
 transform = "direct"
@@ -161,6 +170,15 @@ list_dir  = "codebase"
 hint = "The fix location and approach are clear - begin implementation"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.analyze.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.analyze.transitions.prototype]
 hint = "The approach is uncertain - spike it before committing to a full implementation"
 transform = "direct"
@@ -225,6 +243,15 @@ edit_file  = "implementation"
 
 [stages.prototype.transitions.implement]
 hint = "A hypothesis held up - implement it properly"
+transform = "compact"
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.prototype.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
 transform = "compact"
 
 [stages.prototype.transitions.analyze]
@@ -325,6 +352,15 @@ edit_file  = "implementation"
 hint = "Implementation complete, ready for review"
 transform = "compact"
 gate = { require_modifications = true, region = "implementation" }
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.implement.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
 
 [stages.implement.transitions.reassess]
 condition = "stuck"

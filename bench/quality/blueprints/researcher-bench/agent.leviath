@@ -54,6 +54,15 @@ default_region = "raw_findings"
 hint = "Enough gathered for a first pass of analysis"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.gather.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.gather.transitions.error_recovery]
 condition = "error"
 transform = "direct"

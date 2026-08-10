@@ -11,7 +11,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.4.0"
+version = "0.5.0"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -61,6 +61,15 @@ bash      = "data_preview"
 hint = "The data is mapped - plan the computation"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.profile.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.profile.transitions.error_recovery]
 condition = "error"
 transform = "direct"
@@ -84,6 +93,14 @@ when an everyday reading of the question suggests a different one: "top by
 fraud" means whatever the manual says fraud is, not whatever seems natural.
 When two readings are genuinely defensible, name both in the plan, follow the
 documented one, and say why.
+
+Where the documentation describes how its rules or categories are applied,
+settle the mechanics here rather than in the middle of computing: which fields
+are optional or stand for "any value", what to do when more than one rule
+applies to the same row, and what to do when none does. Write the resolution
+into the plan as the rule you will follow. A procedure improvised while
+computing is decided again on every run, and two runs of the same question then
+disagree - which is a wrong answer that looks like a judgement call.
 
 Write `plan` (context_write):
 - the exact quantity asked for, restated unambiguously (which rows, which
@@ -110,6 +127,15 @@ bash      = "scratch"
 
 [stages.plan.transitions.compute]
 hint = "The plan is written - compute it"
+transform = "compact"
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.plan.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
 transform = "compact"
 
 [stages.plan.transitions.error_recovery]
@@ -157,6 +183,15 @@ read_file = "data_preview"
 hint = "More of the plan left to run"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.compute.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.compute.transitions.verify]
 hint = "The figure is computed - check it"
 transform = "compact"
@@ -185,7 +220,10 @@ Decide what happens next:
 system_prompt = """
 Check the question before you check the arithmetic. Re-read `task` as if you had
 not seen the plan, and ask whether the quantity in `results` is what it asks
-for. Where the data's documentation defines the metric, that definition decides
+for. Where the plan committed to a rule the documentation describes, check that
+rule against the documentation itself rather than against the plan's account of
+it: a plan that read the rules wrongly will describe its own reading
+convincingly, and recomputing under it agrees every time. Where the data's documentation defines the metric, that definition decides
 it - a figure computed correctly under the wrong definition is a wrong answer,
 and recomputing it a second way will confirm it every time. If the reading is
 wrong, say so and send it back; that is the failure this stage exists to catch.
@@ -297,7 +335,7 @@ task         = { kind = "pinned", budget = "2%", required = true, seed = "task",
 # What the data is: written once in profile, read by every later stage.
 data_map     = { kind = "pinned", budget = "3%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.
-plan         = { kind = "pinned", budget = "3%" }
+plan         = { kind = "pinned", budget = "3%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 # Every figure established, with how it was computed.
 results      = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10 }
 

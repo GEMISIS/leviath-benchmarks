@@ -68,6 +68,18 @@ answers.
    developed and evaluated against public/dev splits (log-analysis
    public half, DABstep dev). Held-out splits are never used to tune
    agents - that is what they are held out from.
+
+   **And a diagnostic suite is not a scoreboard.** Ten tasks that get
+   read closely, run after run, are a fixture the agent will drift
+   toward even when every prompt edit is written at the job level - the
+   author is the leak, not the text. So a change developed against a
+   diagnostic suite is provisional until it has been confirmed on a
+   suite that was not used to develop it, and a number from a suite the
+   agents were tuned against is reported as a diagnostic, never as
+   evidence. Two questions decide whether a change is design or
+   fixture-fitting, and both must be answerable before it lands: does
+   this help a user with their own data, and would it still be right if
+   the task it came from were deleted?
 3. **The flat baseline inherits every improvement.** `make_flat.py`
    regenerates the flat counterpart from the structured agent, so its
    tools, permissions, budget, and tool scripts follow automatically

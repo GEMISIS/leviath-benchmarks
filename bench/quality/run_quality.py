@@ -138,9 +138,13 @@ def resolve_arms(cfg: dict, arm_names: list[str],
             continue
         if arm["model"] == "$sweep":
             for label in model_labels:
+                # A swept arm may still name a variant: that is how a
+                # layout change is compared against the same model
+                # rather than against a different one.
                 resolved.append({"name": arm["name"], "role": arm["role"],
                                  "model_label": label,
-                                 "model_id": roster[label]["id"]})
+                                 "model_id": roster[label]["id"],
+                                 "variant": arm.get("variant")})
         elif arm["model"] is None:
             # A mixed arm runs the blueprint's own per-stage assignment;
             # `variant` picks which generated mix that is.

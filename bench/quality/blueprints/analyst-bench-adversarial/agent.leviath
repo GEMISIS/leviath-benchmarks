@@ -55,6 +55,15 @@ bash      = "data_preview"
 hint = "The data is mapped - plan the computation"
 transform = "direct"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.profile.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.profile.transitions.error_recovery]
 condition = "error"
 transform = "direct"
@@ -108,6 +117,15 @@ bash      = "scratch"
 
 [stages.plan.transitions.plan_review]
 hint = "The plan is written - have it reviewed"
+transform = "compact"
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.plan.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
 transform = "compact"
 
 [stages.plan.transitions.error_recovery]
@@ -171,6 +189,15 @@ bash      = "scratch"
 hint = "The plan has a defect that would make the result wrong"
 transform = "compact"
 
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.plan_review.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
+
 [stages.plan_review.transitions.compute]
 hint = "The plan is sound - compute it"
 transform = "compact"
@@ -219,6 +246,15 @@ read_file = "data_preview"
 [stages.compute.transitions.compute]
 hint = "More of the plan left to run"
 transform = "direct"
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.compute.transitions.answer]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "compact"
 
 [stages.compute.transitions.verify]
 hint = "The figure is computed - check it"
