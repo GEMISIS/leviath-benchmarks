@@ -11,9 +11,35 @@ in two tracks:
   itself (flat context vs structured context vs structured with
   per-stage models), with cache-honest token and cost accounting.
 
-The full contract every published number must satisfy - freeze tags, no
-run selection, exact small-sample statistics, seeded subsets, and the
-rest - is [`METHODOLOGY.md`](METHODOLOGY.md). The short version:
+## Quick start
+
+Needs [leviath](https://github.com/GEMISIS/leviath#installation) on your
+PATH and `python3`. Setup is idempotent - re-run it any time.
+
+```
+./bench/setup.sh                                   # deps + datasets
+python3 bench/run_benchmarks.py                    # performance track
+python3 bench/quality/run_quality.py --suite dabstep \
+    --arms flat-pinned,structured-mix-flagship \
+    --models "Claude Opus 5" --reps 1 --unsafe-smoke
+```
+
+The performance track needs no API keys and costs nothing. The quality
+track calls real providers, so fill in `.env` (setup writes it from
+`.env.example`) and expect roughly $1-3 per task per arm.
+
+`--gaia` adds the HF-gated research suite, `--coding` prepares the
+container coding suites - Docker, the harness venv, a static Linux
+`lev`, and the task images:
+
+```
+./bench/setup.sh --all
+```
+
+Everything below is detail. The full contract every published number
+must satisfy - freeze tags, no run selection, exact small-sample
+statistics, seeded subsets, and the rest - is
+[`METHODOLOGY.md`](METHODOLOGY.md). The short version:
 
 1. **Deterministic where possible.** Performance runs use a mock
    provider with fixed per-call latency - byte-identical work every
@@ -75,7 +101,7 @@ resumption** (run paused, daemon killed, restarted, `lev resume`).
 
 ## Quality track
 
-Three context arms, run on external suites and compared with exact
+The context arms, run on external suites and compared with exact
 statistics (see [`METHODOLOGY.md`](METHODOLOGY.md) for the full
 design):
 
@@ -83,9 +109,18 @@ design):
 |---|---|
 | `flat-pinned` | one working stage, one sliding conversation window, one pinned model - today's typical setup |
 | `structured-pinned` | the frozen staged blueprint with context regions, the same pinned model |
-| `structured-stagemix` | the same blueprint, its native per-stage model mix |
+| `structured-mix-*` | the same blueprint with a per-stage model mix; the suffix names the mix (`econ`, `sonnet-opus`, `frontier-brain`, `muse-*`) |
 
-Suites: terminal-bench 2.1 and frontier-bench (via their harness's
+The first three are the ablation: one variable each, so a difference is
+attributable. `structured-mix-flagship` is the composed configuration -
+stage-scoped layouts, an adversarial plan critic on a different vendor's
+model, and a cross-vendor stage assignment together. It moves several
+variables at once on purpose and is read *against* the ablation arms,
+never instead of them. `arms.json` is the full list; every mix's
+stage-to-model mapping is written out in `blueprints/mixes.json` rather
+than inferred, because a mix is a claim about which model does which job.
+
+Suites: terminal-bench 2.0 and frontier-bench (via their harness's
 agent interface, `suites/terminalbench/harbor_agent.py`), deep-swe v1.1
 (same adapter under its runner), DABstep's dev split, GAIA validation,
 and a purpose-built log-analysis suite generated deterministically from
@@ -95,29 +130,28 @@ answer hashes revealed at publish time).
 The agents live in `bench/quality/blueprints/`: this repo's own
 benchmark agents (based on the bundled agents, evolved here under
 [`blueprints/AGENTS.md`](bench/quality/blueprints/AGENTS.md)) plus
-generated flat counterparts. `check_pairs.py` enforces the rules that
-make the numbers mean something - one model per stage, nothing
+generated flat counterparts. Variants are generated, never hand-maintained: `make_flat.py`,
+`make_mix.py`, `make_scoped.py` and `make_adversarial.py` derive them
+from the base agents, so an improvement to a base reaches every variant
+that should have it. Two checks enforce the rules that make the numbers
+mean something. `check_pairs.py`: one model per stage, nothing
 human-in-the-loop, no suite or dataset names in agent text, and each
-pair identical in tools, permissions, and total iteration budget so
-only the structure differs.
+pair identical in tools, permissions, and total iteration budget so only
+the structure differs. `check_transforms.py`: no edge summarizes a
+region holding a deliverable, and no edge clears one its destination
+cannot rebuild - a paraphrased figure is not a figure.
 
 ### Running the quality track
 
-Requirements: a leviath install, `python3` with `psutil` and
-`matplotlib`, and API keys in the environment - copy `.env.example` to
-`.env` and fill it in (keys are never written into results; a secret
-scrub refuses to exit clean otherwise). Per suite: nothing extra for
-log analysis and DABstep beyond a one-time dataset fetch; an HF token
-for the gated GAIA download plus a Brave Search key so the research
-agents search the web rather than falling back to Wikipedia; Docker
-plus the suite's runner for the container coding suites.
+`./bench/setup.sh` covers the requirements: `psutil` and `matplotlib`,
+`.env` from `.env.example`, and the one-time dataset fetches (nothing
+downloads implicitly at run time). Keys are never written into results;
+a secret scrub refuses to exit clean otherwise. GAIA additionally needs
+an HF token for its gated download and a Brave Search key, so the
+research agents search the web rather than silently falling back to
+Wikipedia; the container coding suites need Docker.
 
 ```
-# one-time dataset fetches (nothing downloads implicitly at run time)
-python3 bench/quality/suites/loganalysis/datasets.py fetch
-python3 bench/quality/suites/dabstep/datasets.py fetch
-HF_TOKEN=... python3 bench/quality/suites/gaia/datasets.py fetch
-
 # development smoke (offline, free, stamped UNFROZEN-SMOKE)
 LEVMOCK_LATENCY_MS=150 python3 bench/quality/run_quality.py \
     --suite loganalysis --arms flat-pinned,structured-pinned \
@@ -132,11 +166,21 @@ python3 bench/quality/run_quality.py --suite dabstep \
     --budget-usd 50
 ```
 
-Container coding suites run through the adapter instead:
-`LEV_LINUX_BIN=<linux lev> harbor run -d terminal-bench@2.1 --agent
-harbor_agent:LeviathAgent --model <provider/model>` (the same adapter
-file serves deep-swe's runner). `spike_container.py` verifies the
-container mechanics locally against the mock provider first.
+Container coding suites run through the adapter instead of the runner
+above, driven by the harness's own job config:
+
+```
+PYTHONPATH=. LEV_LINUX_BIN=.lev-linux/release/lev \
+    .harness/bin/harbor job start -c bench/quality/suites/terminalbench/job.yaml -y
+```
+
+The `lev` binary that goes into a task container must be **statically
+linked** - a glibc build dies with `rc=127` ("required file not found",
+which is the loader and not the binary) the moment a task image ships a
+different libc. `bench/setup.sh --coding` builds one. The same adapter
+file serves deep-swe's runner with `LEVIATH_ADAPTER_RUNTIME=pier`, and
+`spike_container.py` verifies the container mechanics locally against
+the mock provider before any of it costs money.
 
 Unit tests for graders, cost semantics, statistics, and subsets:
 

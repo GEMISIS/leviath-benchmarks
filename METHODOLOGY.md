@@ -97,7 +97,7 @@ of routing cheap models to cheap stages.
 
 | category | suite | grading |
 |---|---|---|
-| coding | terminal-bench 2.1 (via its harness's agent interface) | deterministic in-container verifiers |
+| coding | terminal-bench 2.0 (via its harness's agent interface) | deterministic in-container verifiers |
 | coding | deep-swe v1.1 | behavioral verifiers in a pristine container |
 | coding (headroom) | frontier-bench v0.1 | deterministic, same agent interface |
 | data analysis | DABstep dev split | upstream scorer, vendored verbatim and sha256-pinned |

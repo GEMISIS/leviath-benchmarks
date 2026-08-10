@@ -1,0 +1,32 @@
+# Terminal-Bench through the Leviath adapter.
+#
+# Run from the repo root, with the static Linux binary named:
+#   PYTHONPATH=. LEV_LINUX_BIN=.lev-linux/release/lev \
+#       .harness/bin/harbor job start -c bench/quality/suites/terminalbench/job.yaml -y
+#
+# `bench/setup.sh --coding` produces both .lev-linux and .tasks.
+#
+# job_name doubles as the results directory. The harness treats an
+# existing directory as a completed job and replays it rather than
+# re-running, so change this (or delete the directory) when you want a
+# fresh measurement - a "run" that finishes in one second and reports
+# the previous run's numbers is otherwise easy to mistake for a result.
+job_name: leviath-terminalbench
+jobs_dir: .harness-jobs
+n_attempts: 1
+n_concurrent_trials: 4
+
+agents:
+  - name: leviath-structured
+    import_path: bench.quality.suites.terminalbench.harbor_agent:LeviathAgent
+    model_name: anthropic/claude-sonnet-5
+    env:
+      # coder-bench for the structured arm; flat-coder for the flat one.
+      LEVIATH_BLUEPRINT: coder-bench
+
+# Two tasks by default: this file is the smoke path, and the point of it
+# is "does the container path work", not "what is the score". Point
+# `datasets` at terminal-bench@2.0 for the full 89 once it does.
+tasks:
+  - path: .tasks/terminal-bench-sample/regex-log
+  - path: .tasks/terminal-bench-sample/fix-code-vulnerability
