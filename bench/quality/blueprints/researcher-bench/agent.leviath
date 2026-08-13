@@ -274,7 +274,7 @@ instead of the report, not a second copy of it.
 # absolute `max_tokens`/`threshold_tokens` guard-rail. Percentages are ceilings.
 [context.regions]
 # The research question - required. Supplied via --task (or the API/ACP task field).
-query          = { kind = "pinned", budget = "1%", required = true, seed = "task", required_message = "State the research question via --task." }
+query          = { kind = "pinned", budget = "1%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 # Optional caller bounds: --scope "peer-reviewed sources since 2020 only".
 scope          = { kind = "pinned", budget = "1%", seed = "scope" }
 # Growing bibliography with credibility notes (curated by the agent).

@@ -69,6 +69,13 @@ provider = "anthropic"
 model = "claude-sonnet-5"
 
 [context.regions]
-task = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+# min_tokens floors survive a small pinned window (the CRS window
+# sweep): a percentage budget that starves the task text kills the run
+# at spawn, which measures the harness rather than the arm.
+task = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 conversation = { kind = "sliding_window", max_items = 400, budget = "91%", strategy = "compact", compact_count = 20 }
 error_report = { kind = "pinned", budget = "2%" }
+# Declared so the per-stage prompt gets its own region instead of being
+# injected into `task` (the first pinned region), where it both churns
+# the cache prefix and competes with the task text for budget.
+stage_instructions = { kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000 }

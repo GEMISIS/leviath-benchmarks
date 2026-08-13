@@ -53,7 +53,7 @@ bash      = "logs"
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.ingest.context.regions]
-task = { kind = "pinned", budget = "4%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "55%" }
 conversation = { kind = "sliding_window", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
@@ -139,7 +139,7 @@ bash      = "scratch"
 # refuses to generate one).
 # Budgets sum to 93% of this stage's window.
 [stages.analyze.context.regions]
-task = { kind = "pinned", budget = "4%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", budget = "2%", summarizable = false }
 findings = { kind = "sliding_window", max_items = 30, budget = "10%", strategy = "bulk", overflow = 10, summarizable = false, required = true }
 logs = { kind = "temporary", budget = "30%" }
@@ -270,7 +270,7 @@ bash      = "scratch"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.analysis_review.context.regions]
-task = { kind = "pinned", budget = "6%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "6%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", budget = "4%", summarizable = false }
 findings = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "35%" }
@@ -368,7 +368,7 @@ read_file = "logs"
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.script.context.regions]
-task = { kind = "pinned", budget = "4%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", max_items = 30, budget = "6%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "28%" }
 scripts = { kind = "compacting", budget = "32%", compact_at = "80%" }
@@ -449,7 +449,7 @@ severity counts must match `severity_index`.
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.report.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", budget = "3%", summarizable = false }
 findings = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "22%" }
@@ -487,7 +487,7 @@ continue with the data available.
 # refuses to generate one).
 # Budgets sum to 92% of this stage's window.
 [stages.error_recovery.context.regions]
-task = { kind = "pinned", budget = "4%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "22%" }
 scripts = { kind = "compacting", budget = "22%", compact_at = "80%" }
@@ -562,7 +562,7 @@ guess.
 # refuses to generate one).
 # Budgets sum to 91% of this stage's window.
 [stages.summary.context.regions]
-task = { kind = "pinned", budget = "8%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task = { kind = "pinned", budget = "8%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", budget = "5%", summarizable = false }
 findings = { kind = "sliding_window", max_items = 30, budget = "35%", strategy = "bulk", overflow = 10, summarizable = false }
 conversation = { kind = "sliding_window", max_items = 30, budget = "40%", strategy = "bulk", overflow = 10 }
@@ -572,7 +572,7 @@ error_report = { kind = "pinned", budget = "3%" }
 
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
-task            = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task            = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index  = { kind = "pinned", budget = "2%", summarizable = false }
 findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 

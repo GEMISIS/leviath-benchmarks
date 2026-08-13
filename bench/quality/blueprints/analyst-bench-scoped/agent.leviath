@@ -58,7 +58,7 @@ bash      = "data_preview"
 # refuses to generate one).
 # Budgets sum to 92% of this stage's window.
 [stages.profile.context.regions]
-task = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", budget = "6%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 data_preview = { kind = "temporary", budget = "55%" }
 conversation = { kind = "sliding_window", max_items = 30, budget = "25%", strategy = "bulk", overflow = 10 }
@@ -159,7 +159,7 @@ bash      = "scratch"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.plan.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", budget = "12%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", budget = "12%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 data_preview = { kind = "temporary", budget = "38%" }
@@ -260,7 +260,7 @@ read_file = "data_preview"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.compute.context.regions]
-task = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", budget = "6%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", budget = "10%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "14%", strategy = "bulk", overflow = 10, summarizable = false }
@@ -372,7 +372,7 @@ read_file = "data_preview"
 # refuses to generate one).
 # Budgets sum to 97% of this stage's window.
 [stages.verify.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 plan = { kind = "pinned", budget = "12%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "18%", strategy = "bulk", overflow = 10, summarizable = false }
 scripts = { kind = "compacting", budget = "14%", compact_at = "80%" }
@@ -447,7 +447,7 @@ read_file = "data_preview"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.error_recovery.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 plan = { kind = "pinned", budget = "10%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "15%", strategy = "bulk", overflow = 10, summarizable = false }
 scripts = { kind = "compacting", budget = "20%", compact_at = "80%" }
@@ -531,7 +531,7 @@ the first one is wrong.
 # refuses to generate one).
 # Budgets sum to 91% of this stage's window.
 [stages.answer.context.regions]
-task = { kind = "pinned", budget = "8%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task = { kind = "pinned", budget = "8%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 plan = { kind = "pinned", budget = "8%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10, summarizable = false }
 answer_draft = { kind = "pinned", budget = "30%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
@@ -551,7 +551,7 @@ error_report = { kind = "pinned", budget = "3%" }
 # block 1 of the prefix on every transition), and pinned regions are
 # declared stable-first so a region that fills late invalidates only what
 # sits behind it.
-task         = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task         = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 # What the data is: written once in profile, read by every later stage.
 data_map     = { kind = "pinned", budget = "3%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.

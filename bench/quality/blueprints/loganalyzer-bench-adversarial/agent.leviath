@@ -462,7 +462,7 @@ guess.
 
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
-task            = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+task            = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index  = { kind = "pinned", budget = "2%", summarizable = false }
 findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 

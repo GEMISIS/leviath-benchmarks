@@ -95,7 +95,7 @@ bash      = "scratch"
 # refuses to generate one).
 # Budgets sum to 96% of this stage's window.
 [stages.discover.context.regions]
-task = { kind = "pinned", budget = "3%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 repo_files = { kind = "pinned", budget = "5%", seed = { command = "git ls-files" } }
 conventions = { kind = "pinned", budget = "4%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 architecture = { kind = "pinned", budget = "4%", seed = { files = ["ARCHITECTURE.md", "DESIGN.md", "docs/ARCHITECTURE.md", "docs/architecture.md", "README.md"] } }
@@ -202,7 +202,7 @@ list_dir  = "codebase"
 # refuses to generate one).
 # Budgets sum to 92% of this stage's window.
 [stages.analyze.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 conventions = { kind = "pinned", budget = "4%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 architecture = { kind = "pinned", budget = "4%", seed = { files = ["ARCHITECTURE.md", "DESIGN.md", "docs/ARCHITECTURE.md", "docs/architecture.md", "README.md"] } }
 plan = { kind = "pinned", budget = "5%", summarizable = false }
@@ -305,7 +305,7 @@ edit_file  = "implementation"
 # refuses to generate one).
 # Budgets sum to 93% of this stage's window.
 [stages.prototype.context.regions]
-task = { kind = "pinned", budget = "3%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 plan = { kind = "pinned", budget = "6%", summarizable = false }
 prototypes = { kind = "pinned", budget = "6%", summarizable = false, required = true }
 stuck_report = { kind = "pinned", budget = "2%" }
@@ -460,7 +460,7 @@ bash      = "scratch"
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.plan_review.context.regions]
-task = { kind = "pinned", budget = "6%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "6%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 conventions = { kind = "pinned", budget = "3%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 architecture = { kind = "pinned", budget = "4%", seed = { files = ["ARCHITECTURE.md", "DESIGN.md", "docs/ARCHITECTURE.md", "docs/architecture.md", "README.md"] } }
 plan = { kind = "pinned", budget = "12%", summarizable = false }
@@ -611,7 +611,7 @@ edit_file  = "implementation"
 # refuses to generate one).
 # Budgets sum to 96% of this stage's window.
 [stages.implement.context.regions]
-task = { kind = "pinned", budget = "2%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 conventions = { kind = "pinned", budget = "3%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 plan = { kind = "pinned", budget = "5%", summarizable = false }
 prototypes = { kind = "pinned", budget = "3%", summarizable = false }
@@ -753,7 +753,7 @@ bash      = "test_results"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.review.context.regions]
-task = { kind = "pinned", budget = "6%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "6%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 conventions = { kind = "pinned", budget = "4%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 plan = { kind = "pinned", budget = "5%", summarizable = false }
 error_report = { kind = "pinned", budget = "3%" }
@@ -842,7 +842,7 @@ bash      = "test_results"
 # refuses to generate one).
 # Budgets sum to 96% of this stage's window.
 [stages.reassess.context.regions]
-task = { kind = "pinned", budget = "5%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 conventions = { kind = "pinned", budget = "3%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 architecture = { kind = "pinned", budget = "3%", seed = { files = ["ARCHITECTURE.md", "DESIGN.md", "docs/ARCHITECTURE.md", "docs/architecture.md", "README.md"] } }
 plan = { kind = "pinned", budget = "8%", summarizable = false }
@@ -923,7 +923,7 @@ read_file = "codebase"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.error_recovery.context.regions]
-task = { kind = "pinned", budget = "4%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 plan = { kind = "pinned", budget = "6%", summarizable = false }
 error_report = { kind = "pinned", budget = "8%" }
 discovery = { kind = "pinned", budget = "4%", required = true, required_message = "Populate `discovery` (context_write) with this project's build system, test runner, layout and conventions before leaving the discover stage." }
@@ -1001,7 +1001,7 @@ why.
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.summary.context.regions]
-task = { kind = "pinned", budget = "10%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task = { kind = "pinned", budget = "10%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 plan = { kind = "pinned", budget = "5%", summarizable = false }
 error_report = { kind = "pinned", budget = "4%" }
 workflow = { kind = "pinned", budget = "3%", required = true, required_message = "Populate `workflow` (context_write) with the tier and the literal BASELINE / VERIFY / DONE WHEN lines before leaving the discover stage." }
@@ -1020,7 +1020,7 @@ conversation = { kind = "sliding_window", max_items = 40, budget = "25%", strate
 # sum past 100% since regions rarely fill at once.
 [context.regions]
 # ── Inputs (pinned, stable, cacheable) ──
-task         = { kind = "pinned", budget = "2%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task         = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 # Deterministic repo scan, run once at spawn - the discover stage starts from
 # facts instead of burning iterations on `ls`. `git ls-files` behaves identically
 # on POSIX and Windows shells; outside a git repo it fails and this is simply

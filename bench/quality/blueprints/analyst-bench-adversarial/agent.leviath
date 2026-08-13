@@ -560,7 +560,7 @@ the first one is wrong.
 # block 1 of the prefix on every transition), and pinned regions are
 # declared stable-first so a region that fills late invalidates only what
 # sits behind it.
-task         = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task         = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 # What the data is: written once in profile, read by every later stage.
 data_map     = { kind = "pinned", budget = "3%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.

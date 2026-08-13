@@ -125,9 +125,11 @@ def check_pair(structured_name: str, flat_name: str) -> list[str]:
     del f_budget, s_output
 
     f_regions = set(f.get("context", {}).get("regions", {}))
-    if f_regions != {"task", "conversation", "error_report"}:
+    expected = {"task", "conversation", "error_report",
+                "stage_instructions"}
+    if f_regions != expected:
         problems.append(f"flat regions {sorted(f_regions)} != "
-                        "[task, conversation, error_report]")
+                        f"{sorted(expected)}")
 
     # An agent's own tools/*.rhai are part of it: a granted tool whose
     # script is missing makes the blueprint invalid, so the flat copy

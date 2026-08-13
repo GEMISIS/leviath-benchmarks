@@ -246,9 +246,16 @@ default_region = "conversation"
 [stages.work.transitions]
 
 {compaction_block}[context.regions]
-task = {{ kind = "pinned", budget = "2%", required = true, seed = "task"{req_msg} }}
+# min_tokens floors survive a small pinned window (the CRS window
+# sweep): a percentage budget that starves the task text kills the run
+# at spawn, which measures the harness rather than the arm.
+task = {{ kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task"{req_msg} }}
 {conversation}
 error_report = {{ kind = "pinned", budget = "2%" }}
+# Declared so the per-stage prompt gets its own region instead of being
+# injected into `task` (the first pinned region), where it both churns
+# the cache prefix and competes with the task text for budget.
+stage_instructions = {{ kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000 }}
 """
 
 

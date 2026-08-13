@@ -841,7 +841,7 @@ why.
 # sum past 100% since regions rarely fill at once.
 [context.regions]
 # ── Inputs (pinned, stable, cacheable) ──
-task         = { kind = "pinned", budget = "2%", required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+task         = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, required_message = "Describe the coding task via --task (or the API/ACP task field)." }
 # Deterministic repo scan, run once at spawn - the discover stage starts from
 # facts instead of burning iterations on `ls`. `git ls-files` behaves identically
 # on POSIX and Windows shells; outside a git repo it fails and this is simply

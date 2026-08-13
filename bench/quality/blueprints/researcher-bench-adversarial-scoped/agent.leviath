@@ -58,7 +58,7 @@ default_region = "raw_findings"
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.gather.context.regions]
-query = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 scope = { kind = "pinned", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", budget = "5%", summarizable = false }
 raw_findings = { kind = "temporary", budget = "56%" }
@@ -138,7 +138,7 @@ default_region = "raw_findings"
 # refuses to generate one).
 # Budgets sum to 96% of this stage's window.
 [stages.analyze.context.regions]
-query = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 scope = { kind = "pinned", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", budget = "6%", summarizable = false }
 format = { kind = "pinned", budget = "2%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
@@ -268,7 +268,7 @@ bash      = "conversation"
 # refuses to generate one).
 # Budgets sum to 97% of this stage's window.
 [stages.claims_review.context.regions]
-query = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 scope = { kind = "pinned", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", budget = "8%", summarizable = false }
 format = { kind = "pinned", budget = "2%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
@@ -360,7 +360,7 @@ Keep it tight and skimmable. Every non-obvious claim must carry a [n] citation.
 # refuses to generate one).
 # Budgets sum to 96% of this stage's window.
 [stages.summarize.context.regions]
-query = { kind = "pinned", budget = "4%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 sources_index = { kind = "pinned", budget = "8%", summarizable = false }
 format = { kind = "pinned", budget = "3%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
 claims = { kind = "sliding_window", max_items = 30, budget = "30%", summarizable = false }
@@ -397,7 +397,7 @@ continue with whatever material is available.
 # refuses to generate one).
 # Budgets sum to 93% of this stage's window.
 [stages.error_recovery.context.regions]
-query = { kind = "pinned", budget = "3%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 sources_index = { kind = "pinned", budget = "5%", summarizable = false }
 raw_findings = { kind = "temporary", budget = "32%" }
 conversation = { kind = "sliding_window", max_items = 30, budget = "45%", strategy = "bulk", overflow = 10 }
@@ -471,7 +471,7 @@ instead of the report, not a second copy of it.
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.summary.context.regions]
-query = { kind = "pinned", budget = "6%", required = true, seed = "task", required_message = "State the research question via --task." }
+query = { kind = "pinned", budget = "6%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 claims = { kind = "sliding_window", max_items = 30, budget = "32%", summarizable = false }
 conversation = { kind = "sliding_window", max_items = 30, budget = "54%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", budget = "3%" }
@@ -483,7 +483,7 @@ error_report = { kind = "pinned", budget = "3%" }
 # absolute `max_tokens`/`threshold_tokens` guard-rail. Percentages are ceilings.
 [context.regions]
 # The research question - required. Supplied via --task (or the API/ACP task field).
-query          = { kind = "pinned", budget = "1%", required = true, seed = "task", required_message = "State the research question via --task." }
+query          = { kind = "pinned", budget = "1%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 # Optional caller bounds: --scope "peer-reviewed sources since 2020 only".
 scope          = { kind = "pinned", budget = "1%", seed = "scope" }
 # Growing bibliography with credibility notes (curated by the agent).
