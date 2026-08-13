@@ -9,7 +9,7 @@
 
 [agent]
 name = "log-analyzer"
-version = "0.2.0"
+version = "0.3.0"
 description = "Analyzes log files - identifies anomalies, trends, and error patterns via a scripted analyze⇄script loop, maintaining a severity-ranked findings index"
 entry_stage = "ingest"
 
@@ -24,7 +24,7 @@ write_file = "ask"
 mode = "autonomous"
 model = { models = [{ provider = "openai", model = "gpt-5.6-luna" }] }
 description = "Read log files, identify format and structure"
-available_tools = ["read_file", "list_dir", "bash", "context_write"]
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 15
 system_prompt = """
 Ingest the log files named in `task`. Determine:
@@ -81,7 +81,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Identify anomalies, trends, and error patterns"
-available_tools = ["read_file", "bash", "context_write", "context_append"]
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 25
 max_revisits = 3
 transition_prompt = """
@@ -172,7 +172,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "openai", model = "gpt-5.6-luna" }] }
 description = "Write and execute scripts to parse, filter, and aggregate log data"
-available_tools = ["read_file", "bash"]
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 20
 max_revisits = 5
 transition_prompt = """
@@ -242,7 +242,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Produce a structured analysis report with findings"
-available_tools = ["write_file", "read_file"]
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 10
 # Generating the final report - don't inject mid-run user messages into it.
 accepts_messages = false
@@ -274,7 +274,7 @@ hint = "The report is written"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Recover from a failed read or script execution"
-available_tools = ["read_file", "bash"]
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 10
 max_revisits = 1
 system_prompt = """
@@ -351,8 +351,8 @@ guess.
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
 task            = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index  = { kind = "pinned", budget = "2%" }
-findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10 }
+severity_index  = { kind = "pinned", budget = "2%", summarizable = false }
+findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 
 logs            = { kind = "temporary",       budget = "32%" }
 scripts         = { kind = "compacting",      budget = "22%", compact_at = "80%" }
@@ -365,3 +365,10 @@ scratch         = { kind = "clearable", budget = "4%" }
 # inference call's error text, or a note that a stage hit its iteration cap.
 # Pinned so it survives the edge transform into the stage that acts on it.
 error_report    = { kind = "pinned", budget = "2%" }
+
+# The per-stage system prompt. Declared, the runtime keeps it at the END of
+# the pinned block run; undeclared, it lands in the first pinned region
+# (`task`) and rewrites the head of the prompt every transition. Working
+# stages also share one available_tools set: the tool array is hashed ahead
+# of the system blocks, so differing sets invalidate the cache prefix.
+stage_instructions = { kind = "pinned", budget = "3%", max_tokens = 4000 }

@@ -1,0 +1,115 @@
+# ─── Stage 2b: Analysis review (adversarial) ──────────────────────────────────
+# A second opinion from a different provider's model, on the analysis only.
+# Inserted between analyze and script: analyze's forward edge to script is
+# redirected through this stage. Its job is to find the reading that makes
+# the analysis wrong - not to redo it, and not to be agreeable.
+[stages.analysis_review]
+mode = "autonomous"
+model = { models = [{ provider = "openai", model = "gpt-5.6-terra" }] }
+description = "Attack the analysis before any scripts are written against it"
+# The same set as every working stage: the tool array is hashed ahead of the
+# system blocks, so a narrower set here would invalidate the cache prefix on
+# entry and again on exit. The narrowness of this stage is its context scope,
+# not its tool list.
+available_tools = ["read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
+max_iterations = 8
+max_revisits = 2
+transition_prompt = """
+Decide what happens next:
+- If the analysis has a defect that would send the scripting effort in the wrong direction, respond with: analyze
+- If the analysis is sound, respond with: script
+"""
+system_prompt = """
+You are reviewing someone else's log analysis before scripts are written
+against it. Assume it is wrong somewhere and go looking, using `findings`,
+`severity_index`, and the log files themselves.
+
+The failures worth your attention, in order:
+1. A hypothesis that mistakes a symptom for its cause - the loudest error
+   taken as the origin when earlier, quieter lines show what actually
+   started the cascade. Scripts built to quantify a symptom will measure
+   it very precisely and still answer the wrong question.
+2. A severity call the log lines do not support: a `critical` with no
+   evidence of impact in the lines cited, or an `info` that the raw lines
+   show recurring at rates that make it a warning or worse.
+3. A pattern claimed from too few lines - a "spike", "trend", or
+   "correlation" resting on two or three occurrences, where the base rate
+   was never checked.
+4. A time window or component filter that would miss the incident:
+   analysis confined to hours or services the log lines themselves show
+   to be the wrong ones.
+
+Check `findings` and `severity_index` against the actual log lines yourself
+(read_file, bash) rather than trusting the analysis's summary of them.
+Recount a claimed count; re-grep a claimed pattern outside the claimed
+window.
+
+Append your verdict to `findings` (context_append) as
+`analysis review = accepted | rejected: <the specific defect>`. Be concrete:
+name the finding and what the log lines say instead. If the analysis is
+sound, say so plainly and let it through - rejecting a sound analysis costs
+a full re-analysis pass.
+
+Count your own rejections in `findings` before rejecting again. If you have
+already sent this analysis back twice, accept it with your remaining
+concerns recorded and let the work proceed: a third rejection spends the
+revisit budget and the run ends with no answer at all, which is worse than
+a flawed one you have documented. Say "accepted under protest" and name
+what you still doubt.
+"""
+
+[stages.analysis_review.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 3000
+default_region = "conversation"
+[stages.analysis_review.tool_routing.overrides]
+read_file = "logs"
+bash      = "scratch"
+
+[stages.analysis_review.transitions.analyze]
+hint = "The analysis has a defect that would make the scripts or the answer wrong"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `findings` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analysis_review.transitions.analyze.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the review as what the logs actually show: quote the log lines that contradict a finding rather than paraphrasing them, and preserve every count and timestamp verbatim."
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.analysis_review.transitions.report]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `findings` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analysis_review.transitions.report.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize only what bears on the report: which findings are verified, which are disputed and why, with every count and timestamp preserved verbatim."
+
+[stages.analysis_review.transitions.script]
+hint = "The analysis is sound - write the scripts"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY
+# stage-specific region, `findings` included. Figures must cross
+# an edge unchanged - only the conversation is safe to summarize.
+[stages.analysis_review.transitions.script.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize what the analysis has settled and what the scripts must now establish: the hypotheses to quantify, the time windows and components to filter on, with every figure verbatim."
+
+[stages.analysis_review.transitions.error_recovery]
+condition = "error"
+transform = "direct"

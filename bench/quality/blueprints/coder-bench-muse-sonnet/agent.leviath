@@ -11,7 +11,7 @@
 
 [agent]
 name = "coder"
-version = "0.2.0"
+version = "0.3.0"
 description = "Multi-stage coding agent - discover, analyze, optionally prototype, implement, and review, with stuck detection and graph-based error recovery"
 entry_stage = "discover"
 
@@ -35,7 +35,7 @@ bash       = "ask"
 mode = "autonomous"
 model = { models = [{ provider = "openrouter", model = "meta/muse-spark-1.2" }] }
 description = "Map the codebase and synthesize a verification workflow"
-available_tools = ["read_file", "list_dir", "bash", "context_write"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 8
 max_revisits = 2
 system_prompt = """
@@ -125,7 +125,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Understand requirements and plan the implementation"
-available_tools = ["read_file", "list_dir"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 15
 # The prototype back-edge makes analyze re-enterable, so it needs a revisit cap.
 max_revisits = 2
@@ -326,7 +326,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "openrouter", model = "meta/muse-spark-1.2" }] }
 description = "Write code according to the plan, verifying continuously"
-available_tools = ["write_file", "read_file", "edit_file", "list_dir", "bash", "context_write"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 50
 max_revisits = 3
 system_prompt = """
@@ -460,7 +460,7 @@ transform = "direct"
 mode = "interactive"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Review the code before finalizing"
-available_tools = ["read_file", "list_dir", "bash"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 10
 max_revisits = 3
 transition_prompt = """
@@ -545,7 +545,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Step back after no progress: diagnose the dead end and re-plan"
-available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 8
 max_revisits = 2
 system_prompt = """
@@ -624,7 +624,7 @@ compact_prompt = "Summarize the conversation so far, preserving every figure ver
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Diagnose and resolve errors encountered during implementation"
-available_tools = ["read_file", "bash", "context_append"]
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
 max_iterations = 10
 max_revisits = 2
 system_prompt = """
@@ -726,11 +726,11 @@ repo_files   = { kind = "pinned", budget = "2%", seed = { command = "git ls-file
 conventions  = { kind = "pinned", budget = "2%", seed = { files = ["CONVENTIONS.md", "CONTRIBUTING.md", "STYLEGUIDE.md", "STYLE.md", ".editorconfig", "rustfmt.toml", ".rustfmt.toml", ".prettierrc", ".eslintrc.json", "ruff.toml", "pyproject.toml"] } }
 # Pre-loaded on startup: architecture / design docs (missing files skipped).
 architecture = { kind = "pinned", budget = "2%", seed = { files = ["ARCHITECTURE.md", "DESIGN.md", "docs/ARCHITECTURE.md", "docs/architecture.md", "README.md"] } }
-plan         = { kind = "pinned", budget = "3%" }
+plan         = { kind = "pinned", budget = "3%", summarizable = false }
 # Verified findings from a `prototype` spike: the assumption, the verdict, and
 # the command that settled it - including what was RULED OUT. Pinned so neither
 # implement nor reassess redoes the spike.
-prototypes   = { kind = "pinned", budget = "3%" }
+prototypes   = { kind = "pinned", budget = "3%", summarizable = false }
 # Written by the RUNTIME when a `stuck` edge fires (issue #106): which threshold
 # tripped and why. Pinned so it survives the edge transform into `reassess`.
 stuck_report = { kind = "pinned", budget = "1%" }
@@ -748,7 +748,7 @@ discovery    = { kind = "pinned", budget = "3%", required = true, required_messa
 workflow     = { kind = "pinned", budget = "2%", required = true, required_message = "Populate `workflow` (context_write) with the tier and the literal BASELINE / VERIFY / DONE WHEN lines before leaving the discover stage." }
 # Pre-change test state, captured by implement before its first edit. Without it
 # a regression is indistinguishable from a pre-existing failure.
-baseline     = { kind = "pinned", budget = "2%" }
+baseline     = { kind = "pinned", budget = "2%", summarizable = false }
 
 # ── Knowledge (non-volatile, survives message eviction; compacts to *_history) ──
 codebase         = { kind = "compacting",      budget = "18%", compact_at = "80%" }
@@ -765,3 +765,10 @@ errors       = { kind = "sliding_window", max_items = 5, budget = "2%" }
 # ── Conversation (bulk eviction for prompt caching) + working memory ──
 conversation = { kind = "sliding_window", max_items = 40, budget = "17%", strategy = "bulk", overflow = 20 }
 scratch      = { kind = "clearable",      budget = "3%" }
+
+# The per-stage system prompt. Declared, the runtime keeps it at the END of
+# the pinned block run; undeclared, it lands in the first pinned region
+# (`task`) and rewrites the head of the prompt every transition. Working
+# stages also share one available_tools set: the tool array is hashed ahead
+# of the system blocks, so differing sets invalidate the cache prefix.
+stage_instructions = { kind = "pinned", budget = "3%", max_tokens = 4000 }
