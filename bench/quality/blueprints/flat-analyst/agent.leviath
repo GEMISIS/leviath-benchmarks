@@ -15,7 +15,7 @@
 
 [agent]
 name = "flat-analyst"
-version = "0.5.0"
+version = "0.6.0"
 description = "Flat-context baseline for data-analyst: identical tools and permissions, one loop, one conversation window"
 entry_stage = "work"
 

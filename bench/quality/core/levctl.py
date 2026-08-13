@@ -40,12 +40,14 @@ class QualityHome:
         """`[model_capabilities]` pinning each model's context window.
 
         Region budgets are percentages of the model's window, so the
-        window silently decides how large every region is. The runtime's
-        own table is incomplete - OpenRouter-fronted models resolve to a
-        conservative 128k while their providers report 1M - so a round
-        that does not pin the window measures region sizes it never
-        chose. Keys are the model id as the provider sees it, without
-        the leading provider segment.
+        window silently decides how large every region is. Since leviath
+        0.3.3 (#360) the runtime primes OpenRouter windows from the
+        provider's /models at daemon start, so this pin is no longer a
+        bug workaround - it is a freeze: the round runs under the window
+        it declared rather than whatever the live lookup returned (or
+        failed to return - the priming has a 10s timeout and often lacks
+        max_output_tokens). Keys are the model id as the provider sees
+        it, without the leading provider segment.
 
         Only models whose declared window differs from what the runtime
         resolves are overridden, and each entry carries all six fields:

@@ -39,7 +39,7 @@
     "max_context_tokens": 1048576,
     "max_output_tokens": 8192
    },
-   "override_reason": "runtime resolves this model to a 128000 window; the provider reports 1048576"
+   "override_reason": "pin for reproducibility: since leviath 0.3.3 (#360) the runtime primes windows from OpenRouter /models at daemon start, but that lookup is live state, can time out (10s), and often omits max_output_tokens - a frozen round pins both instead of measuring whatever the API served that day"
   },
   "Muse Spark 1.2": {
    "id": "openrouter/meta/muse-spark-1.2",
@@ -54,7 +54,7 @@
     "max_context_tokens": 1048576,
     "max_output_tokens": 8192
    },
-   "override_reason": "runtime resolves this model to a 128000 window; the provider reports 1048576"
+   "override_reason": "pin for reproducibility: since leviath 0.3.3 (#360) the runtime primes windows from OpenRouter /models at daemon start, but that lookup is live state, can time out (10s), and often omits max_output_tokens - a frozen round pins both instead of measuring whatever the API served that day"
   },
   "GPT-5.6 Luna": {
    "id": "openai/gpt-5.6-luna",
@@ -149,7 +149,7 @@
    "note": "flagship with the loop stage on the workhorse model."
   }
  ],
- "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is; the runtime's own table is incomplete (OpenRouter-fronted models resolve to 128000 while their providers report 1048576), which would silently shrink every region on those models. Each value here was verified against the provider, and the resolved window is recorded in every round.",
+ "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is. Since 0.3.3 (#360) the runtime primes OpenRouter windows from the provider at daemon start, so the override is no longer a bug workaround - it is a freeze: the round pins the window it measured under rather than inheriting whatever /models returned that day (the priming also frequently lacks max_output_tokens). Each value here was verified against the provider, and the resolved window is recorded in every round.",
  "_arms": "Mixed arms name a generated variant (blueprints/mixes.json): the same agent with one model named per stage. The grid crosses the model in the loop stages, which carry the token spend, with the model in the stages that decide and check, which are few calls over small contexts: econ = economy loops + workhorse thinking, frontier-brain = economy loops + frontier thinking, muse-sonnet / muse-opus = the same with the coding-oriented economy model, sonnet-opus = workhorse loops + frontier thinking.",
  "rate_limits": {
   "anthropic": {

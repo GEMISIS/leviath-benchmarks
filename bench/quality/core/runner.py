@@ -253,7 +253,8 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
         # post-mortem asks, and it cannot be recovered later.
         record["usage_by_stage"] = [
             {k: s.get(k) for k in ("name", "prompt_tokens",
-                                   "completion_tokens", "cached_tokens")}
+                                   "completion_tokens", "cached_tokens",
+                                   "cache_write_tokens")}
             for s in stage_records]
         record["stages_entered"] = [
             s["name"] for s in stage_records

@@ -6,7 +6,11 @@
 mode = "autonomous"
 model = { models = [{ provider = "openai", model = "gpt-5.6-terra" }] }
 description = "Attack the plan before any of it is computed"
-available_tools = ["read_file", "bash", "context_append"]
+# The same set as every working stage: the tool array is hashed ahead of the
+# system blocks, so a narrower set here would invalidate the cache prefix on
+# entry and again on exit. The narrowness of this stage is its context scope,
+# not its tool list.
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
 max_iterations = 8
 max_revisits = 2
 transition_prompt = """

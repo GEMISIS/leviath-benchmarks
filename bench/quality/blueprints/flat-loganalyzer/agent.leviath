@@ -15,7 +15,7 @@
 
 [agent]
 name = "flat-loganalyzer"
-version = "0.2.0"
+version = "0.3.0"
 description = "Flat-context baseline for log-analyzer: identical tools and permissions, one loop, one conversation window"
 entry_stage = "work"
 

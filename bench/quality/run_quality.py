@@ -322,6 +322,11 @@ def main() -> int:
     config_text = (f"{config_text}\n"
                    + QualityHome.concurrency_config(
                        args.concurrency, arms_cfg.get("rate_limits", {})))
+    # Anthropic cache entries default to a 5-minute TTL, which a staged
+    # run outlives between writing a prefix and re-reading it; the hour
+    # TTL costs nothing extra on hits and is part of what a structured
+    # arm is claimed to be able to do. Native Anthropic provider only.
+    config_text += '\n[providers]\nanthropic_cache_ttl = "1h"\n'
     home.install(blueprints_dir, config_text,
                  providers_dir=(Path(args.providers_dir)
                                 if args.providers_dir else None))
