@@ -76,7 +76,13 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
     def run_cell(i: int, cell: tuple) -> None:
         nonlocal spent
         task, arm, rep = cell
-        blueprint, extra_cli = suite.agent_for(arm)
+        # A suite whose tasks map to different agent families (the CRS
+        # runs coder and non-coder tasks in one matrix) resolves the
+        # blueprint per task; every other suite keeps the arm-only form.
+        if hasattr(suite, "agent_for_task"):
+            blueprint, extra_cli = suite.agent_for_task(task, arm)
+        else:
+            blueprint, extra_cli = suite.agent_for(arm)
         # Per-task output spec (lev run --output-format/--output-
         # instructions) is applied to every arm identically, so the
         # answer-shape guidance rides the runtime's own mechanism
@@ -227,6 +233,11 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
             mix_mapping: dict | None = None,
             archived: list[str] | None = None) -> dict:
     usage = _usage_of(meta)
+    # A suite may hand back record-level data blocks alongside its
+    # verdict (the CRS returns the validation summary this way); they
+    # land on the record top level, keeping the runner suite-agnostic.
+    record_fields = (score or {}).pop("record_fields", None) \
+        if isinstance(score, dict) else None
     model_id = arm["model_id"]
     priced = model_id is not None and cost_mod.is_pinned(rates, model_id)
     includes = (rates[model_id]["prompt_includes_cache_read"]
@@ -247,6 +258,8 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
                      if priced else None),
         "score": score,
     })
+    if record_fields:
+        record.update(record_fields)
     if stage_records:
         # Every arm carries its stage ledger, not just the mixed one:
         # which stages a run actually entered is the first question any

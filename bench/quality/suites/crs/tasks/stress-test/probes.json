@@ -1,0 +1,88 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 20,
+      "type": "factual_recall",
+      "question": "What is the exact regex pattern for validating tenant IDs?",
+      "expected": "^tn-(us-east|us-west|eu-central|ap-south)-\\d{4}$",
+      "rubric": "Must include the exact regex with all four valid regions. Partial credit if they get the format right but miss a region or use a generic pattern."
+    },
+    {
+      "after_tool_calls": 35,
+      "type": "factual_recall",
+      "question": "What algorithm does the webhook retry policy use, and how exactly does it calculate sleep time?",
+      "expected": "Decorrelated jitter: sleep = min(backoff_max_ms, random_between(backoff_base_ms, previous_sleep * 3)). Previous_sleep starts at backoff_base_ms.",
+      "rubric": "Must mention 'decorrelated jitter' specifically (not exponential, not full jitter). Must include the formula with the *3 multiplier. Partial credit for naming the algorithm without the formula."
+    },
+    {
+      "after_tool_calls": 50,
+      "type": "constraint_adherence",
+      "question": "What happens when an event arrives for a tenant with status 'migrating'? Be specific about all behaviors.",
+      "expected": "Accept event, process with BOTH old and new pipeline config, compare results, log discrepancies, but use OLD pipeline result. Return 200.",
+      "rubric": "Must mention: (1) process with both configs, (2) compare results, (3) log discrepancies, (4) use OLD result. Missing any of these is partial credit."
+    },
+    {
+      "after_tool_calls": 65,
+      "type": "factual_recall",
+      "question": "What is the exact storage key format for events, and what part of the event_type is used?",
+      "expected": "{tenant_storage_prefix}/{event_category}/{YYYY}/{MM}/{DD}/{HH}/{event_id} — uses event_category (part BEFORE the dot), NOT the full event_type",
+      "rubric": "Must specify that it uses the CATEGORY (before the dot), not the full event_type. Must include the date path segments. Missing the category distinction is a fail."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "factual_recall",
+      "question": "What algorithm is specified for streaming percentile estimation in the metrics system? What is the relative accuracy parameter?",
+      "expected": "DDSketch with relative accuracy 1% (alpha = 0.01). NOT t-digest, NOT reservoir sampling, NOT simple sorting.",
+      "rubric": "Must name DDSketch specifically. Must mention 1% or 0.01 accuracy. If they say t-digest or any other algorithm, score as wrong."
+    },
+    {
+      "after_tool_calls": 95,
+      "type": "constraint_adherence",
+      "question": "For DLQ entries with reason 'storage_error', what are the exact retry delays?",
+      "expected": "5 max retries with delays: 1s, 5s, 25s, 125s, 625s (5x multiplier)",
+      "rubric": "Must get the 5x multiplier pattern correct. Must list all 5 delay values. Getting the multiplier but wrong base is partial credit."
+    },
+    {
+      "after_tool_calls": 110,
+      "type": "factual_recall",
+      "question": "How is the audit log checksum chain constructed? What is used for the first entry vs subsequent entries?",
+      "expected": "First: SHA-256 of 'genesis' + timestamp + action + details. Subsequent: SHA-256 of previous_checksum + timestamp + action + details.",
+      "rubric": "Must mention the 'genesis' seed string for the first entry. Must mention chaining with previous_checksum. Missing 'genesis' is partial credit."
+    },
+    {
+      "after_tool_calls": 125,
+      "type": "factual_recall",
+      "question": "What is the webhook signature format? What is the signature computed over?",
+      "expected": "HMAC-SHA256, header is X-Webhook-Signature: sha256=<hex_digest>, computed over 'timestamp.payload_json' where timestamp is Unix epoch seconds",
+      "rubric": "Must specify HMAC-SHA256, the header name with sha256= prefix, and the exact input format (timestamp.payload_json with Unix epoch). Missing the timestamp format is partial credit."
+    },
+    {
+      "after_tool_calls": 140,
+      "type": "constraint_adherence",
+      "question": "The InventoryHandler has special behavior. What does it do when quantity <= reorder_threshold, and what constraint applies to the generated event?",
+      "expected": "Emits a synthetic notification.created event with channel=email. The synthetic event MUST go through the full pipeline (not bypass validation).",
+      "rubric": "Must mention: (1) notification.created, (2) channel=email, (3) goes through full pipeline. Missing the 'full pipeline' constraint is partial credit."
+    },
+    {
+      "after_tool_calls": 155,
+      "type": "factual_recall",
+      "question": "What are the circuit breaker parameters and what happens in the HALF_OPEN state?",
+      "expected": "Failure threshold: 5 consecutive, recovery timeout: 30 seconds, half-open max probes: 3. In HALF_OPEN: allow up to 3 probe requests. If any fails → back to OPEN. If all 3 succeed → CLOSED.",
+      "rubric": "Must get all three parameters correct (5, 30s, 3). Must describe the HALF_OPEN behavior accurately. Getting the parameters right but wrong behavior is partial credit."
+    },
+    {
+      "after_tool_calls": 170,
+      "type": "factual_recall",
+      "question": "What rate limiting algorithm is used and how do the two components work together?",
+      "expected": "Token bucket + sliding window hybrid. Token bucket for burst (capacity = events_per_second * burst_multiplier, refill = events_per_second). Sliding window log (NOT counter approximation) for sustained rate. Event allowed only if BOTH pass.",
+      "rubric": "Must identify both components (token bucket AND sliding window). Must specify 'sliding window log' not 'counter approximation'. Must mention BOTH must pass. Missing the hybrid requirement is partial credit."
+    },
+    {
+      "after_tool_calls": 185,
+      "type": "constraint_adherence",
+      "question": "What are EuroTech's (tn-eu-central-1337) custom transforms and in what order are transforms applied?",
+      "expected": "Global transforms first (timestamp_normalization, payload_size_tag), then per-tenant: gdpr_pii_redaction (regex email redaction), ip_anonymization (regex IP redaction), eurotech_timestamp_to_utc.",
+      "rubric": "Must list global before per-tenant. Must name the GDPR and IP transforms specifically. Missing the order is partial credit."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 15,
+      "type": "factual_recall",
+      "question": "Per config/alert-thresholds.yaml, what are payment-gateway's p99 latency threshold and its page-worthy error-rate threshold?",
+      "expected": "p99_latency_ms: 450, error_rate_page_pct: 2.0",
+      "rubric": "Must give 450 ms and 2.0%. Quoting the defaults (900 ms / 5.0%) or another service's values is a fail. One of the two values correct is partial credit."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "architecture",
+      "question": "According to docs/topology.md, which services does checkout-api call directly? List them all.",
+      "expected": "payment-gateway, inventory-service, order-service, session-cache",
+      "rubric": "Must list exactly these four. Missing any is partial credit; including edge-gateway, auth-service, or any service checkout-api does not call is a fail."
+    },
+    {
+      "after_tool_calls": 45,
+      "type": "factual_recall",
+      "question": "What does step 4 of the on-call runbook require, exactly?",
+      "expected": "Check changes/config-audit.log: freeze all deploys, then identify every configuration change in the 60 minutes preceding symptom onset for the failing service.",
+      "rubric": "Must mention (1) the config audit log, (2) freezing deploys, and (3) the 60-minute lookback window. Missing the 60-minute window or the deploy freeze is partial credit; describing a different step's content is a fail."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "cross_file",
+      "question": "docs/topology.md lists an owner team for payment-gateway, and config/alert-thresholds.yaml routes its pages to a pager_team. Do the two documents agree, and what team name(s) do they give?",
+      "expected": "They agree: both name payments-platform.",
+      "rubric": "Must state that the two files agree and name payments-platform. Naming a different team, claiming a mismatch, or answering for a different service is a fail."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "factual_recall",
+      "question": "What are the connection-pool utilization thresholds in config/alert-thresholds.yaml, and which one warns versus pages?",
+      "expected": "pool_utilization_warn: 0.85, pool_utilization_page: 0.95",
+      "rubric": "Must give 0.85 for warn and 0.95 for page. Swapping them or giving only one value is partial credit; any other numbers are a fail."
+    },
+    {
+      "after_tool_calls": 100,
+      "type": "constraint_adherence",
+      "question": "Per the runbook, when must an incident be escalated to sev-1, and who is paged?",
+      "expected": "If the edge error rate has not halved within 20 minutes of mitigation, escalate to sev-1 and page the on-call director (step 7).",
+      "rubric": "Must give the 20-minute condition (error rate not halved after mitigation) and the on-call director. Wrong duration or wrong pagee is a fail; giving the condition without the pagee (or vice versa) is partial credit."
+    },
+    {
+      "after_tool_calls": 120,
+      "type": "architecture",
+      "question": "Per the topology document, what is the only service on the path between edge-gateway and payment-gateway?",
+      "expected": "checkout-api — edge-gateway never calls payment-gateway directly; the only path runs through checkout-api.",
+      "rubric": "Must name checkout-api as the sole intermediary. Naming any other service, or claiming edge-gateway calls payment-gateway directly, is a fail."
+    }
+  ]
+}

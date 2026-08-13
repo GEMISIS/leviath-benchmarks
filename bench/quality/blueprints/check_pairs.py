@@ -32,7 +32,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from make_flat import PAIRS, _excluded_tool  # noqa: E402
+from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
 
 
 def load(name: str) -> dict:
@@ -152,11 +152,44 @@ def check_pair(structured_name: str, flat_name: str) -> list[str]:
     return problems
 
 
+def check_compact_variant(flat_name: str, compacting_name: str) -> list[str]:
+    """The strong-baseline invariant: flat and flat-compacting differ in
+    the conversation region's overflow strategy and NOTHING else."""
+    f, c = load(flat_name), load(compacting_name)
+    problems = []
+
+    def masked(doc: dict) -> dict:
+        doc = json_roundtrip(doc)
+        doc["agent"].pop("name", None)
+        doc["agent"].pop("description", None)
+        conv = doc.get("context", {}).get("regions", {}).get("conversation")
+        if isinstance(conv, dict):
+            for key in ("strategy", "overflow", "compact_count"):
+                conv.pop(key, None)
+        return doc
+
+    if masked(f) != masked(c):
+        problems.append("flat and compacting variants differ beyond the "
+                        "conversation overflow strategy (regenerate with "
+                        "make_flat.py)")
+    conv = c.get("context", {}).get("regions", {}).get("conversation", {})
+    if conv.get("strategy") != "compact" or "compact_count" not in conv:
+        problems.append("compacting variant's conversation is not "
+                        f"strategy=compact with a compact_count: {conv}")
+    return problems
+
+
+def json_roundtrip(doc: dict) -> dict:
+    import copy
+    return copy.deepcopy(doc)
+
+
 def variants() -> list[str]:
     """Generated mixes: same shape, one model per stage, still policed."""
+    known = (set(PAIRS) | set(PAIRS.values()) | set(COMPACT_VARIANTS.values()))
     return sorted(d.name for d in HERE.iterdir()
                   if d.is_dir() and (d / "agent.leviath").is_file()
-                  and d.name not in PAIRS and d.name not in PAIRS.values())
+                  and d.name not in known)
 
 
 def main() -> int:
@@ -183,6 +216,24 @@ def main() -> int:
                 print(f"  FAIL {p}")
         else:
             print(f"{structured_name} vs {flat_name}: OK")
+    for structured_name, flat_name in PAIRS.items():
+        compacting_name = COMPACT_VARIANTS[flat_name]
+        if not (HERE / compacting_name / "agent.leviath").is_file():
+            failed = True
+            print(f"{compacting_name}: FAIL missing (regenerate with "
+                  "make_flat.py)")
+            continue
+        problems = (check_policy(compacting_name)
+                    + check_no_leakage(compacting_name)
+                    + check_pair(structured_name, compacting_name)
+                    + check_compact_variant(flat_name, compacting_name))
+        if problems:
+            failed = True
+            print(f"{flat_name} vs {compacting_name}:")
+            for p in problems:
+                print(f"  FAIL {p}")
+        else:
+            print(f"{flat_name} vs {compacting_name}: OK (compacting)")
     return 1 if failed else 0
 
 

@@ -1,0 +1,74 @@
+2026-03-14T04:00:01Z DEBUG [metrics] queue depth 1587 within limits
+2026-03-14T04:00:29Z WARN [metrics] retrying metrics flush (attempt 775)
+2026-03-14T04:01:15Z ERROR [gc] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T04:02:28Z INFO [metrics] cache refresh complete: 711 entries loaded
+2026-03-14T04:03:31Z INFO [cache] cache refresh complete: 4865 entries loaded
+2026-03-14T04:06:02Z DEBUG [metrics] worker w55 idle for 47s
+2026-03-14T04:11:44Z ERROR [http.server] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T04:13:18Z INFO [cache] connection established to billing-worker:8192
+2026-03-14T04:17:24Z INFO [gc] heartbeat ok (epoch 1722)
+2026-03-14T04:17:32Z INFO [metrics] cache refresh complete: 1178 entries loaded
+2026-03-14T04:21:29Z INFO [http.server] heartbeat ok (epoch 2133)
+2026-03-14T04:22:16Z WARN [metrics] thread pool active 3742/64
+2026-03-14T04:23:19Z DEBUG [cache] worker w10 idle for 35s
+2026-03-14T04:23:46Z INFO [startup] cache refresh complete: 2044 entries loaded
+2026-03-14T04:23:59Z INFO [scheduler] request w5 completed status=200 in 376 ms
+2026-03-14T04:25:04Z INFO [metrics] heartbeat ok (epoch 1292)
+2026-03-14T04:26:33Z ERROR [metrics] temporary DNS failure resolving billing-worker (retried ok)
+2026-03-14T04:30:47Z INFO [cache] scheduled job img_prewarm finished in 117s
+2026-03-14T04:33:14Z INFO [http.server] cache refresh complete: 1453 entries loaded
+2026-03-14T04:33:48Z WARN [startup] retrying metrics flush (attempt 4553)
+2026-03-14T04:35:16Z DEBUG [startup] queue depth 1659 within limits
+2026-03-14T04:36:27Z WARN [http.server] slow query 311 ms on table token_sweep
+2026-03-14T04:36:41Z INFO [gc] request w38 completed status=200 in 352 ms
+2026-03-14T04:36:57Z INFO [http.server] heartbeat ok (epoch 2623)
+2026-03-14T04:38:11Z INFO [metrics] request w55 completed status=200 in 726 ms
+2026-03-14T04:40:18Z WARN [metrics] slow query 87 ms on table token_sweep
+2026-03-14T04:41:02Z ERROR [startup] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T04:41:49Z INFO [metrics] request w34 completed status=200 in 854 ms
+2026-03-14T04:42:10Z DEBUG [startup] worker w29 idle for 18s
+2026-03-14T04:43:06Z WARN [http.server] thread pool active 1144/64
+2026-03-14T04:46:51Z INFO [gc] scheduled job img_prewarm finished in 11s
+2026-03-14T04:47:33Z WARN [cache] slow query 135 ms on table orders_rollup
+2026-03-14T04:48:48Z DEBUG [http.server] gc pause 19 ms (young gen)
+2026-03-14T04:49:49Z INFO [metrics] connection established to billing-worker:8159
+2026-03-14T04:51:45Z INFO [startup] scheduled job token_sweep finished in 59s
+2026-03-14T04:55:03Z WARN [http.server] retrying metrics flush (attempt 3416)
+2026-03-14T04:56:11Z DEBUG [gc] gc pause 517 ms (young gen)
+2026-03-14T04:56:13Z INFO [http.server] request w2 completed status=200 in 318 ms
+2026-03-14T04:57:21Z WARN [gc] certificate for billing-worker expires in 3297 days
+2026-03-14T04:57:41Z INFO [gc] scheduled job sku_reindex finished in 99s
+2026-03-14T04:59:15Z INFO [metrics] request w35 completed status=200 in 648 ms
+2026-03-14T04:59:35Z INFO [metrics] cache refresh complete: 2241 entries loaded
+2026-03-14T04:59:51Z INFO [metrics] heartbeat ok (epoch 1124)
+2026-03-14T05:04:08Z WARN [scheduler] thread pool active 3441/64
+2026-03-14T05:05:42Z DEBUG [cache] gc pause 434 ms (young gen)
+2026-03-14T05:05:45Z WARN [scheduler] retrying metrics flush (attempt 3716)
+2026-03-14T05:05:56Z DEBUG [cache] worker w55 idle for 108s
+2026-03-14T05:07:28Z INFO [startup] request w41 completed status=200 in 198 ms
+2026-03-14T05:07:51Z WARN [http.server] retrying metrics flush (attempt 1519)
+2026-03-14T05:14:18Z DEBUG [http.server] worker w34 idle for 93s
+2026-03-14T05:19:01Z INFO [startup] heartbeat ok (epoch 2337)
+2026-03-14T05:19:39Z INFO [http.server] connection established to billing-worker:8193
+2026-03-14T05:23:50Z DEBUG [gc] worker w18 idle for 85s
+2026-03-14T05:24:04Z DEBUG [startup] gc pause 325 ms (young gen)
+2026-03-14T05:28:10Z INFO [metrics] scheduled job sku_reindex finished in 70s
+2026-03-14T05:28:55Z INFO [gc] connection established to billing-worker:8099
+2026-03-14T05:29:44Z WARN [gc] thread pool active 334/64
+2026-03-14T05:30:17Z WARN [gc] slow query 751 ms on table ledger_sync
+2026-03-14T05:31:24Z INFO [cache] request w33 completed status=200 in 489 ms
+2026-03-14T05:33:01Z WARN [gc] slow query 634 ms on table ledger_sync
+2026-03-14T05:33:28Z INFO [gc] scheduled job token_sweep finished in 40s
+2026-03-14T05:39:18Z DEBUG [startup] worker w52 idle for 34s
+2026-03-14T05:41:24Z WARN [scheduler] thread pool active 2417/64
+2026-03-14T05:41:27Z DEBUG [metrics] worker w43 idle for 89s
+2026-03-14T05:42:35Z DEBUG [startup] worker w63 idle for 32s
+2026-03-14T05:46:12Z INFO [metrics] request w3 completed status=200 in 767 ms
+2026-03-14T05:46:20Z INFO [cache] heartbeat ok (epoch 2252)
+2026-03-14T05:46:42Z INFO [cache] scheduled job ledger_sync finished in 90s
+2026-03-14T05:47:15Z INFO [scheduler] connection established to billing-worker:8184
+2026-03-14T05:47:46Z INFO [gc] scheduled job img_prewarm finished in 98s
+2026-03-14T05:51:35Z INFO [http.server] scheduled job sku_reindex finished in 84s
+2026-03-14T05:52:20Z WARN [http.server] retrying metrics flush (attempt 1029)
+2026-03-14T05:53:53Z INFO [startup] connection established to billing-worker:8156
+2026-03-14T05:55:01Z INFO [http.server] cache refresh complete: 2299 entries loaded

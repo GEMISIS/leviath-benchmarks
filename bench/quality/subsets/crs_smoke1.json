@@ -1,0 +1,10 @@
+{
+  "suite": "crs",
+  "seed": 20260814,
+  "n": 1,
+  "universe_sha256": "c536506e89d6563c551c3c07d79fb0fc5ebd7a6ae404c3575d2e6b7ee2d3a486",
+  "excluded": [],
+  "task_ids": [
+    "stress-test"
+  ]
+}

@@ -58,6 +58,24 @@ sha256. Everything needed to say exactly what ran.
 Every run writes a record - failures, timeouts, and budget cap-outs
 included. There is no mechanism for excluding one.
 
+## quality-run-v2 (superset of v1; Context Retention Suite fields)
+
+v2 records carry everything above (with `schema: "quality-run-v2"`) plus
+four optional blocks, written by the CRS suite and the probe-replay
+phase. v1 records stay valid; readers accept both.
+
+| field | meaning |
+|---|---|
+| `validation` | held-out test results for the run's artifact: `{passed, failed, errors, total, failures, suite_hash}`. `suite_hash` is a sha256 manifest of the validation suite that scored it |
+| `retention` | one entry per probe: `{after_tool_calls, at_tool_calls, probe_type, reached, score, grade, hallucinated, read_by, graded_by}`. Probes are replayed post-hoc against the journaled context state (never injected into the live run); a run that died before a depth carries `reached: false` there - recorded, never dropped |
+| `retention_summary` | `{mean_score, n_probes, n_reached, n_hallucinated}`; mean over reached probes only, on the 0..1 accuracy scale. Hallucination is a separate rate and never enters the mean as a negative score |
+| `probe_overhead` | what the measurement itself cost: `{usage, cost_usd, reader_model, grader_model, grader_prompt_sha256, probe_wrapper_sha256}`. **Excluded** from the record's `cost_usd` and from every cost comparison - it is measurement, not agent spend |
+
+CRS artifacts live beside the record under `<record>.artifacts/`:
+`probe_replays/probe_<N>.json` (reconstructed request digest, the fixed
+reader model's full answer, usage) and `probe_<N>.grade.json` (the
+grader transcript), plus `pytest-report.json` for the validation run.
+
 ## quality summary.json
 
 `aggregate.cells`: one entry per (arm, model) with `runs`, `passes`,

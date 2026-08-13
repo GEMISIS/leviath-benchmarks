@@ -40,13 +40,20 @@ GRID = "#e1e0d9"
 BASE = "#c3c2b7"
 
 # Narrative order: today's setup first, the full configuration last.
-ARM_ORDER = ["flat-pinned", "structured-pinned", "structured-stagemix"]
-ARM_COLORS = {"flat-pinned": "#eb6834", "structured-pinned": "#2a78d6",
-              "structured-stagemix": "#1baf7a"}
+ARM_ORDER = ["flat-pinned", "flat-compacting", "structured-pinned",
+             "structured-stagemix", "structured-mix-flagship"]
+ARM_COLORS = {"flat-pinned": "#eb6834", "flat-compacting": "#b45309",
+              "structured-pinned": "#2a78d6",
+              "structured-stagemix": "#1baf7a",
+              "structured-mix-flagship": "#1baf7a"}
 ARM_LABELS = {
     "flat-pinned": "flat context, one model (today's typical setup)",
+    "flat-compacting": "flat context + compaction "
+                       "(production-style baseline)",
     "structured-pinned": "structured context, one model",
     "structured-stagemix": "structured context, mixed models per stage",
+    "structured-mix-flagship": "Leviath flagship (structured regions, "
+                               "cross-vendor stage mix)",
 }
 SMOKE_TAG = "UNFROZEN-SMOKE"
 # Extra mixed arms (structured-mix-<name>) get their own shades of the
@@ -434,6 +441,194 @@ def _has_arms(data: dict, *arms: str) -> bool:
     return all(a in present for a in arms)
 
 
+def _retention_series(runs: list[dict]) -> dict:
+    """Per arm: depth -> {scores: [...], reached: int, total: int,
+    hallucinated: int}. Pools every task's probes at their depths."""
+    arms: dict[str, dict[int, dict]] = {}
+    for r in runs:
+        for e in r.get("retention") or []:
+            depth = e["after_tool_calls"]
+            cell = arms.setdefault(r["arm"], {}).setdefault(
+                depth, {"scores": [], "reached": 0, "total": 0,
+                        "hallucinated": 0})
+            cell["total"] += 1
+            if e.get("reached"):
+                cell["reached"] += 1
+                if isinstance(e.get("score"), (int, float)):
+                    cell["scores"].append(float(e["score"]))
+                if e.get("hallucinated"):
+                    cell["hallucinated"] += 1
+    return arms
+
+
+def render_retention(suites: dict, round_meta: dict, specs: dict,
+                     out_dir: Path):
+    """The CRS headline: probe accuracy vs tool-call depth, per arm.
+
+    Solid line = mean accuracy over reached probes (0..1). Dashed line =
+    hallucination rate. Point labels carry n (reached/total) so
+    survivorship is visible on the chart itself, never hidden in a
+    footnote. Per-task panels first, pooled panel last."""
+    data = suites.get("crs")
+    if not data:
+        return None
+    runs = [r for r in data["runs"] if r.get("retention")]
+    if not runs:
+        return None
+
+    tasks = sorted({r["task_id"] for r in runs})
+    panels = [("all tasks (pooled)", runs)] + [
+        (t, [r for r in runs if r["task_id"] == t]) for t in tasks]
+    ncols = min(2, len(panels))
+    nrows = (len(panels) + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols,
+                             figsize=(7.2 * ncols, 4.6 * nrows),
+                             squeeze=False)
+    fig.patch.set_facecolor(SURFACE)
+
+    for i, (title, panel_runs) in enumerate(panels):
+        ax = axes[i // ncols][i % ncols]
+        style_ax(ax)
+        series = _retention_series(panel_runs)
+        for arm in sorted(series, key=arm_sort_key):
+            depths = sorted(series[arm])
+            xs, ys, hs = [], [], []
+            for d in depths:
+                cell = series[arm][d]
+                if not cell["scores"]:
+                    continue
+                xs.append(d)
+                ys.append(sum(cell["scores"]) / len(cell["scores"]))
+                hs.append(cell["hallucinated"] / max(cell["reached"], 1))
+                if title.startswith("all"):
+                    ax.annotate(f"n={cell['reached']}/{cell['total']}",
+                                (d, ys[-1]), textcoords="offset points",
+                                xytext=(0, -14), fontsize=5.6,
+                                color=MUTED, ha="center")
+            if not xs:
+                continue
+            ax.plot(xs, ys, marker="o", markersize=4, linewidth=1.8,
+                    color=arm_color(arm), label=arm_label(arm))
+            ax.plot(xs, hs, linestyle="--", linewidth=1.0, alpha=0.55,
+                    color=arm_color(arm))
+        ax.set_ylim(-0.04, 1.04)
+        ax.set_title(title, fontsize=10, color=INK)
+        ax.set_xlabel("tool calls", fontsize=8, color=MUTED)
+        ax.set_ylabel("probe accuracy", fontsize=8, color=MUTED)
+        if i == 0:
+            ax.legend(fontsize=7, loc="lower left", frameon=False)
+    for j in range(len(panels), nrows * ncols):
+        axes[j // ncols][j % ncols].axis("off")
+
+    fig.suptitle("Context retention vs task depth "
+                 "(dashed = hallucination rate)",
+                 fontsize=13, color=INK)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    probes_cfg = round_meta.get("probes") or {}
+    fig.text(0.01, 0.024,
+             f"probes replayed post-hoc against journaled context; one "
+             f"fixed reader ({probes_cfg.get('reader_model', '?')}), "
+             f"grader {probes_cfg.get('grader_model', '?')}; probe cost "
+             "excluded from cost charts; unreached probes excluded from "
+             "means and shown in n",
+             fontsize=6.6, color=MUTED, ha="left")
+    fig.tight_layout(rect=(0, 0.045, 1, 0.96))
+    path = out_dir / "retention.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
+def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
+                            out_dir: Path):
+    """Cost per passing run, per arm - cost per run rewards cheap
+    failure; this is the number a buyer pays. Probe overhead excluded
+    (it is measurement)."""
+    data = suites.get("crs")
+    if not data:
+        return None
+    runs = data["runs"]
+    arms: dict[str, dict] = {}
+    for r in runs:
+        cell = arms.setdefault(r["arm"], {"cost": 0.0, "passes": 0,
+                                          "runs": 0, "unpriced": 0})
+        cell["runs"] += 1
+        if isinstance(r.get("cost_usd"), (int, float)):
+            cell["cost"] += r["cost_usd"]
+        else:
+            cell["unpriced"] += 1
+        if r.get("score", {}).get("passed"):
+            cell["passes"] += 1
+    if not arms or not any(c["passes"] for c in arms.values()):
+        return None
+
+    fig, ax = plt.subplots(figsize=(7.4, 4.4))
+    fig.patch.set_facecolor(SURFACE)
+    style_ax(ax)
+    ordered = sorted(arms, key=arm_sort_key)
+    xs = range(len(ordered))
+    for x, arm in zip(xs, ordered):
+        cell = arms[arm]
+        cps = cell["cost"] / cell["passes"] if cell["passes"] else None
+        if cps is None:
+            ax.annotate("no passes", (x, 0.02), ha="center", fontsize=7,
+                        color=MUTED)
+            continue
+        ax.bar(x, cps, width=0.62, color=arm_color(arm))
+        note = f"{cell['passes']}/{cell['runs']} pass"
+        if cell["unpriced"]:
+            note += f", {cell['unpriced']} unpriced"
+        ax.annotate(f"${cps:.2f}\n{note}", (x, cps),
+                    textcoords="offset points", xytext=(0, 4),
+                    ha="center", fontsize=7, color=INK)
+    ax.set_xticks(list(xs))
+    ax.set_xticklabels([arm_label(a) for a in ordered], fontsize=7,
+                       color=INK, wrap=True)
+    ax.set_ylabel("USD per passing run", fontsize=8, color=MUTED)
+    ax.set_title("Cost per successful outcome (agent spend only)",
+                 fontsize=12, color=INK)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    path = out_dir / "cost_per_success.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
+def write_task_table(suites: dict, out_dir: Path):
+    """Machine-readable per-(task, arm) results beside the charts."""
+    data = suites.get("crs")
+    if not data:
+        return None
+    rows: dict[tuple[str, str], dict] = {}
+    for r in data["runs"]:
+        cell = rows.setdefault((r["task_id"], r["arm"]),
+                               {"runs": 0, "passes": 0, "retention": []})
+        cell["runs"] += 1
+        if r.get("score", {}).get("passed"):
+            cell["passes"] += 1
+        mean = (r.get("retention_summary") or {}).get("mean_score")
+        if isinstance(mean, (int, float)):
+            cell["retention"].append(mean)
+    table = [{
+        "task": task, "arm": arm, "runs": cell["runs"],
+        "passes": cell["passes"],
+        "pass_rate": round(cell["passes"] / cell["runs"], 4),
+        "mean_retention": (round(sum(cell["retention"])
+                                 / len(cell["retention"]), 4)
+                           if cell["retention"] else None),
+    } for (task, arm), cell in sorted(rows.items())]
+    if not table:
+        return None
+    path = out_dir / "task_table.json"
+    path.write_text(json.dumps(table, indent=2) + "\n")
+    return path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("results_dir", type=Path)
@@ -456,8 +651,11 @@ def main() -> int:
                                       args.out)
         if path:
             written.append(path)
-    for fn in (render_ablation, render_poster):
-        path = fn(suites, round_meta, specs, args.out)
+    for fn in (render_ablation, render_poster, render_retention,
+               render_cost_per_success, write_task_table):
+        path = fn(suites, round_meta, specs, args.out) \
+            if fn is not write_task_table \
+            else write_task_table(suites, args.out)
         if path:
             written.append(path)
     for path in written:

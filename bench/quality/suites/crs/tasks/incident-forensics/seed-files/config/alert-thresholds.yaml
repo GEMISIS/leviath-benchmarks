@@ -1,0 +1,48 @@
+# Alerting thresholds — Aurora platform (rev 9)
+# Pages route to the owning team's rotation via pager_team.
+defaults:
+  p99_latency_ms: 900
+  error_rate_page_pct: 5.0
+  pool_utilization_warn: 0.85
+  pool_utilization_page: 0.95
+services:
+  edge-gateway:
+    p99_latency_ms: 300
+    error_rate_page_pct: 1.0
+    pager_team: traffic-eng
+  auth-service:
+    p99_latency_ms: 250
+    error_rate_page_pct: 2.0
+    pager_team: identity
+  checkout-api:
+    p99_latency_ms: 800
+    error_rate_page_pct: 2.5
+    pager_team: storefront
+  search-api:
+    p99_latency_ms: 600
+    error_rate_page_pct: 4.0
+    pager_team: discovery
+  payment-gateway:
+    p99_latency_ms: 450
+    error_rate_page_pct: 2.0
+    pager_team: payments-platform
+  inventory-service:
+    p99_latency_ms: 350
+    error_rate_page_pct: 3.0
+    pager_team: supply-chain
+  order-service:
+    p99_latency_ms: 500
+    error_rate_page_pct: 2.5
+    pager_team: storefront
+  session-cache:
+    p99_latency_ms: 40
+    error_rate_page_pct: 1.5
+    pager_team: platform-core
+  notification-service:
+    p99_latency_ms: 1200
+    error_rate_page_pct: 5.0
+    pager_team: comms
+  billing-worker:
+    p99_latency_ms: 2000
+    error_rate_page_pct: 3.0
+    pager_team: payments-platform

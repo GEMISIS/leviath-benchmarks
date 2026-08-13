@@ -1,0 +1,39 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "factual_recall",
+      "question": "What JWT signing algorithm does the specification require?",
+      "expected": "RS256 (RSA with SHA-256)",
+      "rubric": "Must mention RS256 specifically. Just saying 'JWT' or 'RSA' is partial credit. The key files in keys/ directory contain RS256 keys."
+    },
+    {
+      "after_tool_calls": 25,
+      "type": "constraint_adherence",
+      "question": "What is the maximum number of external dependencies allowed beyond the standard library?",
+      "expected": "Only the web framework (Flask), JWT library (PyJWT), and bcrypt - as specified in requirements.txt. No other dependencies.",
+      "rubric": "Agent should recall the constraint about no external dependencies beyond standard library + web framework + JWT library. If they list the specific libraries from requirements.txt, that's correct."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "schema_recall",
+      "question": "What are the valid values for the 'role' field in the users table?",
+      "expected": "'user' or 'admin' - as defined in the schema.sql CHECK constraint",
+      "rubric": "Must mention both 'user' and 'admin'. The schema.sql file has a CHECK constraint: role IN ('user', 'admin')"
+    },
+    {
+      "after_tool_calls": 55,
+      "type": "security_requirement",
+      "question": "What is the password hashing algorithm specified in the requirements?",
+      "expected": "bcrypt - as stated in the requirements and shown in the seed data",
+      "rubric": "Must specifically mention bcrypt. Saying 'hashed' or 'secure hashing' is partial credit."
+    },
+    {
+      "after_tool_calls": 70,
+      "type": "rate_limiting",
+      "question": "What is the rate limit specified for the API?",
+      "expected": "100 requests per minute per IP, using in-memory store",
+      "rubric": "Must mention '100 requests per minute per IP'. Bonus if they mention in-memory store implementation."
+    }
+  ]
+}

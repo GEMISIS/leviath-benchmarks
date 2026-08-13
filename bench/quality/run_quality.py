@@ -92,7 +92,14 @@ def require_result_capable(lev: str) -> None:
             "build, then point --lev at it.")
 # Comparisons are pre-registered: arm a is hypothesized to pass MORE and
 # bill FEWER tokens than arm b.
-COMPARISONS = [("structured-pinned", "flat-pinned")]
+COMPARISONS = [
+    ("structured-pinned", "flat-pinned"),
+    # CRS pre-registered comparisons: the Leviath arm is the composed
+    # flagship (the configuration the runtime actually recommends), read
+    # against the strong flat baseline first and the plain one second.
+    ("structured-mix-flagship", "flat-compacting"),
+    ("flat-compacting", "flat-pinned"),
+]
 
 
 # Roster recency (METHODOLOGY.md): the roster carries models released

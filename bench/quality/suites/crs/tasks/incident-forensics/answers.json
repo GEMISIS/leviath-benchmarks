@@ -1,0 +1,11 @@
+{
+  "seed": 1134,
+  "answers": [
+    "inventory-service",
+    "db.pool.max_connections",
+    "2026-03-14T03:00:53Z",
+    "inventory-service,search-api,checkout-api,edge-gateway",
+    "124",
+    "5"
+  ]
+}

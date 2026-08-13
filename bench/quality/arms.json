@@ -65,6 +65,22 @@
   "mockx": {
    "id": "mockx/sim-1",
    "tier": "smoke"
+  },
+  "Grok 4.6": {
+   "id": "openrouter/x-ai/grok-4.6",
+   "tier": "frontier",
+   "released": "2026-08-12",
+   "context_window": 500000,
+   "capability_override": {
+    "supports_temperature": true,
+    "supports_streaming": true,
+    "supports_tools": true,
+    "supports_system_prompt": true,
+    "max_context_tokens": 500000,
+    "max_output_tokens": 8192
+   },
+   "override_reason": "pin for reproducibility: OpenRouter reports a 500k window and no max_completion_tokens for this model; the round pins both rather than measuring whatever the live lookup serves",
+   "_note": "cross-vendor critic for the CRS flagship: a genuinely different lab attacking the planner's plan. Verify with a capability cell before any counted round."
   }
  },
  "tiers": {
@@ -79,6 +95,13 @@
    "name": "flat-pinned",
    "role": "flat",
    "model": "$sweep"
+  },
+  {
+   "name": "flat-compacting",
+   "role": "flat",
+   "model": "$sweep",
+   "variant": "compacting",
+   "note": "strong flat baseline: the same single window, but it compacts on overflow (summarize-oldest) instead of evicting - what production harnesses actually do. Generated from the flat blueprint by make_flat.py; check_pairs.py asserts the overflow strategy is the only difference."
   },
   {
    "name": "structured-pinned",
@@ -165,5 +188,12 @@
    "tokens_per_minute": 300000
   }
  },
- "_rate_limits": "What each provider account is allowed to sustain, declared here and written into the runtime's config so the daemon paces itself instead of discovering the limit as rejected requests. These are deliberately conservative placeholders: replace each with the tier limits on the account actually being billed before a counted round, since a round that was throttled measures the throttling as much as the agent. The values are frozen with the round and recorded, because what a round promised to stay under is part of what it measured."
+ "_rate_limits": "What each provider account is allowed to sustain, declared here and written into the runtime's config so the daemon paces itself instead of discovering the limit as rejected requests. These are deliberately conservative placeholders: replace each with the tier limits on the account actually being billed before a counted round, since a round that was throttled measures the throttling as much as the agent. The values are frozen with the round and recorded, because what a round promised to stay under is part of what it measured.",
+ "probes": {
+  "reader_model": "Kimi K3",
+  "grader_model": "GPT-5.6 Terra",
+  "replay_temperature": 0,
+  "replay_max_tokens": 1024
+ },
+ "_probes": "Context Retention Suite probe configuration, frozen with the round. Every replay probe - for every arm - is answered by the one reader_model, so the retention curve compares context states rather than the models that produced them; the reader is a third-vendor model no arm uses for its loop stages. The grader_model is a different vendor than the reader. Both are roster labels; ids and rates resolve through the same tables as the arms."
 }

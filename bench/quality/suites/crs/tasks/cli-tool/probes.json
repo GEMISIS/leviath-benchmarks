@@ -1,0 +1,46 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 15,
+      "type": "format_recall",
+      "question": "What are the five valid log levels defined in the log format specification?",
+      "expected": "DEBUG, INFO, WARN, ERROR, FATAL - as specified in log-format.md",
+      "rubric": "Must list all five levels exactly. Order doesn't matter but all must be present."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "constraint_adherence",
+      "question": "Are external dependencies allowed for this project?",
+      "expected": "No - must use only standard library, Python 3.9+",
+      "rubric": "Clear statement that no external dependencies are allowed. Mentioning 'standard library only' gets full credit."
+    },
+    {
+      "after_tool_calls": 45,
+      "type": "config_recall",
+      "question": "What is the default chunk size for streaming mode according to the config example?",
+      "expected": "8192 bytes - as specified in config-example.yaml under streaming.chunk_size",
+      "rubric": "Must mention 8192. Bonus if they reference the config file correctly."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "error_handling",
+      "question": "What exit code should be returned when a log file has parse errors?",
+      "expected": "Exit code 3 - as specified in the error handling requirements",
+      "rubric": "Must specifically say exit code 3. The requirements define: 0=success, 1=usage error, 2=file error, 3=parse error."
+    },
+    {
+      "after_tool_calls": 75,
+      "type": "performance_requirement",
+      "question": "What is the maximum file size the tool must handle, and how should it be processed?",
+      "expected": "Up to 1GB, using streaming (don't load entire file into memory)",
+      "rubric": "Must mention 1GB and streaming/not loading into memory. Both parts needed for full credit."
+    },
+    {
+      "after_tool_calls": 90,
+      "type": "output_format",
+      "question": "When displaying statistics, what percentage format should be used?",
+      "expected": "One decimal place with parentheses, e.g., (18.8%) - as shown in expected-output/stats-example.txt",
+      "rubric": "Should reference the specific format from the example output. Mentioning percentages alone is partial credit."
+    }
+  ]
+}

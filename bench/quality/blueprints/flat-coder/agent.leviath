@@ -12,6 +12,8 @@
 # structured agent, and its window is a percentage of the model's
 # context exactly like the structured regions - the baseline is
 # unstructured, not handicapped. check_pairs.py asserts that.
+# The window evicts oldest-first on overflow - the classic
+# truncating loop.
 
 [agent]
 name = "flat-coder"

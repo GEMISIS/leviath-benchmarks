@@ -1,0 +1,40 @@
+# Error Message Examples
+
+## File Not Found
+```
+Error: File not found: logs/missing.log
+Usage: logviz <command> <file> [options]
+Exit code: 2
+```
+
+## Invalid Log Format
+```
+Error: Failed to parse log file: logs/invalid.log
+Line 45: Invalid timestamp format
+Line 67: Missing level field
+Line 89: Malformed JSON metadata
+Parsed 42 valid lines, 3 malformed lines
+Exit code: 3
+```
+
+## Invalid Command
+```
+Error: Unknown command 'analyze'
+Valid commands: parse, stats, filter, export, tail
+Run 'logviz --help' for usage information
+Exit code: 1
+```
+
+## Invalid Filter Options
+```
+Error: Invalid log level 'TRACE'
+Valid levels: DEBUG, INFO, WARN, ERROR, FATAL
+Exit code: 1
+```
+
+## Permission Denied
+```
+Error: Permission denied: /var/log/system.log
+Cannot read file (requires sudo or different permissions)
+Exit code: 2
+```

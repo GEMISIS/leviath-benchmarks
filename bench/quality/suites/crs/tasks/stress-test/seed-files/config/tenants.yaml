@@ -1,0 +1,103 @@
+tenants:
+  - tenant_id: tn-us-east-0042
+    name: "Acme Corp"
+    tier: premium
+    status: active
+    created_at: "2024-01-15T00:00:00-05:00"
+    allowed_sources:
+      - "web-app"
+      - "mobile-ios"
+      - "mobile-android"
+      - "batch-import"
+    rate_limits:
+      events_per_second: 500
+      events_per_minute: 25000
+      burst_multiplier: 2.5
+    isolation:
+      storage_prefix: "acme"
+      queue_name: "acme-events"
+      encryption_key_id: "kms-key-acme-2024"
+    webhook_url: "https://acme.example.com/webhooks/events"
+    webhook_secret: "whsec_acme_prod_k3y_abc123"
+    webhook_retry_policy:
+      max_retries: 5
+      backoff_base_ms: 1000
+      backoff_max_ms: 60000
+      backoff_algorithm: "decorrelated_jitter"
+
+  - tenant_id: tn-eu-central-1337
+    name: "EuroTech GmbH"
+    tier: enterprise
+    status: active
+    created_at: "2024-02-20T00:00:00+01:00"
+    allowed_sources:
+      - "erp-system"
+      - "iot-gateway"
+      - "api-proxy"
+    rate_limits:
+      events_per_second: 1000
+      events_per_minute: 50000
+      burst_multiplier: 3.0
+    isolation:
+      storage_prefix: "eurotech"
+      queue_name: "eurotech-events"
+      encryption_key_id: "kms-key-eurotech-2024"
+    custom_transforms:
+      - name: "gdpr_pii_redaction"
+        type: "regex_replace"
+        pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b'
+        replacement: "[REDACTED_EMAIL]"
+      - name: "ip_anonymization"
+        type: "regex_replace"
+        pattern: '\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b'
+        replacement: "[REDACTED_IP]"
+    webhook_url: "https://eurotech.example.de/api/events/webhook"
+    webhook_secret: "whsec_eurotech_prod_s3cr3t"
+    webhook_retry_policy:
+      max_retries: 3
+      backoff_base_ms: 2000
+      backoff_max_ms: 30000
+      backoff_algorithm: "decorrelated_jitter"
+
+  - tenant_id: tn-us-west-0099
+    name: "StartupXYZ"
+    tier: free
+    status: active
+    created_at: "2024-03-01T00:00:00-08:00"
+    allowed_sources:
+      - "web-app"
+    rate_limits:
+      events_per_second: 10
+      events_per_minute: 500
+      burst_multiplier: 2.0
+    isolation:
+      storage_prefix: "startupxyz"
+      queue_name: "startupxyz-events"
+      encryption_key_id: "kms-key-startup-2024"
+    webhook_url: null
+    webhook_secret: null
+    webhook_retry_policy: null
+
+  - tenant_id: tn-ap-south-0777
+    name: "SuspendedCorp"
+    tier: standard
+    status: suspended
+    created_at: "2024-01-01T00:00:00+05:30"
+    allowed_sources:
+      - "web-app"
+      - "mobile-android"
+    rate_limits:
+      events_per_second: 100
+      events_per_minute: 5000
+      burst_multiplier: 2.0
+    isolation:
+      storage_prefix: "suspendedcorp"
+      queue_name: "suspended-events"
+      encryption_key_id: "kms-key-suspended-2024"
+    webhook_url: "https://suspended.example.com/hooks"
+    webhook_secret: "whsec_suspended_key"
+    webhook_retry_policy:
+      max_retries: 3
+      backoff_base_ms: 1000
+      backoff_max_ms: 30000
+      backoff_algorithm: "decorrelated_jitter"
