@@ -1,0 +1,10 @@
+{
+  "suite": "dabstep_dev",
+  "seed": 20260812,
+  "n": 1,
+  "universe_sha256": "472568508ef91b562833192dfba7aac7929d8adb94441aeabb15a3262aa8b2c7",
+  "excluded": [],
+  "task_ids": [
+    "dev_1273"
+  ]
+}
