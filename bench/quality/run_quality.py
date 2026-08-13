@@ -297,13 +297,11 @@ def main() -> int:
             if entry.get("tier") == "smoke":
                 continue
             native = entry.get("context_window") or args.window_tokens
-            cap = dict(entry.get("capability_override") or {
-                "supports_temperature": True,
-                "supports_streaming": True,
-                "supports_tools": True,
-                "supports_system_prompt": True,
-                "max_output_tokens": 16384,
-            })
+            # Pin ONLY the window. Overrides apply field-by-field since
+            # #338, so every capability flag stays the runtime's own -
+            # inventing flags here is how a model that refuses
+            # `temperature` gets sent one and 400s every call.
+            cap = dict(entry.get("capability_override") or {})
             cap["max_context_tokens"] = min(native, args.window_tokens)
             entry["capability_override"] = cap
             entry["context_window"] = min(native, args.window_tokens)

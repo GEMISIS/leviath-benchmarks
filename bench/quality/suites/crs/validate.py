@@ -42,6 +42,10 @@ def suite_hash(validation_dir: Path) -> str:
 def run_pytest(task_dir: Path, workdir: Path,
                artifacts_dir: Path) -> dict:
     """The held-out pytest suite against the run's workdir."""
+    # pytest resolves --json-report-file against ITS cwd (the workdir),
+    # not ours - a relative artifacts path silently drops the report
+    # into the workdir and the harness reads nothing.
+    artifacts_dir = Path(artifacts_dir).resolve()
     validation_src = task_dir / "validation"
     if not validation_src.is_dir():
         return {"passed": 0, "failed": 0, "errors": 0, "total": 0,
