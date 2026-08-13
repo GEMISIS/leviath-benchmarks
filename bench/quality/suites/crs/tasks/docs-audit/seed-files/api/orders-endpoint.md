@@ -8,17 +8,19 @@ owner: payments-platform
 
 # DOC-9097: Orders Endpoint
 
-Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records. Configuration for orders endpoint is loaded at service start and refreshed every 37 minutes.
+Support escalations touching orders endpoint are triaged by the payments-platform team within one business day. Consumers should treat undocumented fields as unstable and subject to change without notice. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Overview
 
-Downstream consumers subscribe to orders endpoint events through the platform event bus rather than polling. Rollout is gated on the weekly release train unless an exemption is filed. The behavior in this section was last load-tested at 66 times the average production request rate. Configuration for orders endpoint is loaded at service start and refreshed every 66 minutes.
+Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component. Metrics emitted by orders endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Batch processing for orders endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Behavior
 
-Configuration for orders endpoint is loaded at service start and refreshed every 60 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by orders endpoint is idempotent at the record level, so replayed events cannot create duplicates. Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component. The defaults listed below apply unless overridden per environment.
+Data written by orders endpoint is idempotent at the record level, so replayed events cannot create duplicates. Identifiers used here follow the corpus-wide conventions in the style guide. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Downstream consumers subscribe to orders endpoint events through the platform event bus rather than polling.
 
 ## Details
+
+Capacity for orders endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Batch processing for orders endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Configuration for orders endpoint is loaded at service start and refreshed every 14 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by orders endpoint is idempotent at the record level, so replayed events cannot create duplicates. Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component.
 
 Staging environments mirror production settings for orders endpoint except where data-volume limits make that impractical. Every externally visible change to orders endpoint is announced at least 83 days before it takes effect in production. Historical records for orders endpoint are retained for 21 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component. The defaults listed below apply unless overridden per environment. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
@@ -28,105 +30,107 @@ Support escalations touching orders endpoint are triaged by the payments-platfor
 
 Changes to orders endpoint go through the standard review workflow before release. Rollout is gated on the weekly release train unless an exemption is filed. Metrics emitted by orders endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records.
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Every externally visible change to orders endpoint is announced at least 19 days before it takes effect in production. Requests beyond the configured limit receive a structured error response with a stable error code. Capacity for orders endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
-
 ## Integration
 
-Capacity for orders endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching orders endpoint are triaged by the payments-platform team within one business day. A dry-run mode is available in non-production environments for validating orders endpoint changes before they are applied. Staging environments mirror production settings for orders endpoint except where data-volume limits make that impractical. Rollout is gated on the weekly release train unless an exemption is filed.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Every externally visible change to orders endpoint is announced at least 19 days before it takes effect in production. Requests beyond the configured limit receive a structured error response with a stable error code. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Operational notes
 
-Every externally visible change to orders endpoint is announced at least 88 days before it takes effect in production. Downstream consumers subscribe to orders endpoint events through the platform event bus rather than polling. Consumers should treat undocumented fields as unstable and subject to change without notice. Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation.
+Data written by orders endpoint is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to orders endpoint is announced at least 41 days before it takes effect in production. Capacity for orders endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching orders endpoint are triaged by the payments-platform team within one business day. A dry-run mode is available in non-production environments for validating orders endpoint changes before they are applied.
 
 ## Defaults
 
-- cache lifetime: 1468 seconds
-- event replay window: 1837 hours
-- queue depth alert threshold: 3659
+- event replay window: 1177 hours
+- request timeout: 1874 ms
+- queue depth alert threshold: 790
+- cache lifetime: 2678 seconds
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| connection_limit | 1270 | hot-reloaded on change |
-| sync_interval_s | 7712 | bounded by the platform ceiling |
-| flush_interval_s | 2891 | documented for reference only |
-| page_size | 4262 | documented for reference only |
-| max_concurrency | 2917 | tunable per environment |
-| prefetch_count | 1161 | raised during seasonal peaks |
-| lease_ttl_s | 4019 | tunable per environment |
-| warmup_batch | 8697 | tunable per environment |
-| backoff_base_ms | 7624 | raised during seasonal peaks |
-| shard_count | 6801 | hot-reloaded on change |
-| max_payload_kb | 7802 | requires restart to change |
-| drain_timeout_s | 7646 | raised during seasonal peaks |
-| cooldown_s | 7640 | matches the platform default |
+| shard_count | 3276 | monitored by the owning team |
+| drain_timeout_s | 8892 | tunable per environment |
+| retry_limit | 7025 | tunable per environment |
+| sample_rate_pct | 8078 | documented for reference only |
+| prefetch_count | 4472 | matches the platform default |
+| audit_window_days | 6300 | requires restart to change |
+| max_concurrency | 2281 | matches the platform default |
+| warmup_batch | 3393 | hot-reloaded on change |
+| backoff_base_ms | 7074 | raised during seasonal peaks |
+| queue_depth_limit | 7161 | hot-reloaded on change |
+| flush_interval_s | 151 | requires restart to change |
+| connection_limit | 4614 | bounded by the platform ceiling |
+| max_payload_kb | 970 | tunable per environment |
+| sync_interval_s | 7624 | raised during seasonal peaks |
 
 ## Limits and quotas
 
-- event replay window: 2896 hours
-- request timeout: 2453 ms
-- burst allowance: 851 requests
-- concurrent worker ceiling: 3764
-- maximum payload size: 3495 KB
-- cache lifetime: 494 seconds
-- queue depth alert threshold: 1667
+- request timeout: 2322 ms
+- queue depth alert threshold: 1919
+- maximum batch size: 3487
+- concurrent worker ceiling: 2638
+- cache lifetime: 1839 seconds
+- burst allowance: 1678 requests
+- warm-up period after deploy: 3748 seconds
 
 ## Monitoring
 
-The defaults listed below apply unless overridden per environment. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 49 minutes.
+The behavior in this section was last load-tested at 21 times the average production request rate. Identifiers used here follow the corpus-wide conventions in the style guide. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Data written by orders endpoint is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Rollout
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Earlier drafts of this behavior were consolidated here from the team wiki. The orders endpoint behavior is owned by the payments-platform team and reviewed each quarter. The defaults listed below apply unless overridden per environment.
+Support escalations touching orders endpoint are triaged by the payments-platform team within one business day. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Troubleshooting
 
-The behavior in this section was last load-tested at 73 times the average production request rate. The examples in this document use placeholder data and do not reference real customer records. The orders endpoint behavior is owned by the payments-platform team and reviewed each quarter. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Localization of user-facing strings in orders endpoint is handled by the shared translation pipeline, not by this component. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 49 minutes. The defaults listed below apply unless overridden per environment. Batch processing for orders endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 3.0.7 | 2023-11-14 | clarified defaults |
-| 3.2.5 | 2025-04-17 | expanded rollout notes |
-| 1.4.6 | 2025-09-27 | refreshed examples |
-| 1.0.9 | 2024-03-12 | aligned terminology with the style guide |
-| 1.2.2 | 2024-07-04 | added monitoring guidance |
-| 3.5.6 | 2023-04-12 | expanded rollout notes |
-| 2.1.8 | 2024-10-02 | recorded quota changes |
+| 1.3.9 | 2023-03-24 | clarified defaults |
+| 2.8.7 | 2025-06-02 | clarified defaults |
+| 2.0.6 | 2023-10-05 | recorded quota changes |
+| 3.3.8 | 2023-04-27 | refreshed examples |
+| 2.8.8 | 2024-02-01 | updated escalation contacts |
+| 2.2.5 | 2025-12-08 | expanded rollout notes |
+| 1.2.5 | 2024-02-15 | recorded quota changes |
 
 ## FAQ
 
-**Can the defaults in this document be overridden per environment?**
+**What happens when a request exceeds the documented limits?**
 
-Requests beyond the configured limit receive a structured error response with a stable error code. The behavior in this section was last load-tested at 51 times the average production request rate. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
-
-**Where are the metrics for this area published?**
-
-A dry-run mode is available in non-production environments for validating orders endpoint changes before they are applied. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
-
-**How often does the behavior described here change?**
-
-Staging environments mirror production settings for orders endpoint except where data-volume limits make that impractical. The orders endpoint behavior is owned by the payments-platform team and reviewed each quarter. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 68 minutes.
+Rollout is gated on the weekly release train unless an exemption is filed. Configuration for orders endpoint is loaded at service start and refreshed every 79 minutes. Staging environments mirror production settings for orders endpoint except where data-volume limits make that impractical.
 
 **How far back can historical data for this area be retrieved?**
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 34 minutes. The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code.
+Earlier drafts of this behavior were consolidated here from the team wiki. Every externally visible change to orders endpoint is announced at least 82 days before it takes effect in production. Staging environments mirror production settings for orders endpoint except where data-volume limits make that impractical.
 
-**What happens when a request exceeds the documented limits?**
+**Who should be contacted when the documented defaults look wrong?**
 
-Batch processing for orders endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Historical records for orders endpoint are retained for 67 days and then moved to cold storage by the archival pipeline. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 85 minutes.
+Downstream consumers subscribe to orders endpoint events through the platform event bus rather than polling. The behavior in this section was last load-tested at 21 times the average production request rate. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly.
+
+**Does this area behave differently in staging than in production?**
+
+The examples in this document use placeholder data and do not reference real customer records. Support escalations touching orders endpoint are triaged by the payments-platform team within one business day. Historical records for orders endpoint are retained for 89 days and then moved to cold storage by the archival pipeline.
+
+**Can the defaults in this document be overridden per environment?**
+
+Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Batch processing for orders endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Configuration
 
 ```ini
 [orders-endpoint]
 endpoint = https://internal.meridian.example/v2/orders-endpoint
-timeout_ms = 4857
+timeout_ms = 8942
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-8681: Currencies Endpoint](api/currencies-endpoint.md)
+- [DOC-8010: Secrets Audit](sops/secrets-audit.md)
+- [DOC-8638: Addresses Endpoint](api/addresses-endpoint.md)
+- [DOC-1413: Fulfillments Endpoint](api/fulfillments-endpoint.md)

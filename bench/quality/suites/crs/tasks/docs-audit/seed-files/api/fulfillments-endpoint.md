@@ -8,11 +8,11 @@ owner: storefront
 
 # DOC-1413: Fulfillments Endpoint
 
-Staging environments mirror production settings for fulfillments endpoint except where data-volume limits make that impractical. Earlier drafts of this behavior were consolidated here from the team wiki. Changes to fulfillments endpoint go through the standard review workflow before release.
+Earlier drafts of this behavior were consolidated here from the team wiki. Changes to fulfillments endpoint go through the standard review workflow before release. A dry-run mode is available in non-production environments for validating fulfillments endpoint changes before they are applied.
 
 ## Overview
 
-Support escalations touching fulfillments endpoint are triaged by the storefront team within one business day. Data written by fulfillments endpoint is idempotent at the record level, so replayed events cannot create duplicates. Consumers should treat undocumented fields as unstable and subject to change without notice. Staging environments mirror production settings for fulfillments endpoint except where data-volume limits make that impractical.
+Support escalations touching fulfillments endpoint are triaged by the storefront team within one business day. Data written by fulfillments endpoint is idempotent at the record level, so replayed events cannot create duplicates. Consumers should treat undocumented fields as unstable and subject to change without notice. Staging environments mirror production settings for fulfillments endpoint except where data-volume limits make that impractical. During a decommission, in-flight fulfillment messages are flushed inside the 30-minute drain deadline that precedes consumer detach.
 
 ## Behavior
 

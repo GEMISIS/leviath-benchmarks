@@ -36,7 +36,7 @@ The examples in this document use placeholder data and do not reference real cus
 
 ## Operational notes
 
-A dry-run mode is available in non-production environments for validating bulk ordering changes before they are applied. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for bulk ordering except where data-volume limits make that impractical. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for bulk ordering is loaded at service start and refreshed every 40 minutes.
+A dry-run mode is available in non-production environments for validating bulk ordering changes before they are applied. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for bulk ordering except where data-volume limits make that impractical. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for bulk ordering is loaded at service start and refreshed every 40 minutes. Bulk order screens fetch catalog data in pages capped at 500 records apiece, so large orders paginate rather than growing the request.
 
 ## Defaults
 

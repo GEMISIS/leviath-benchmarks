@@ -26,7 +26,7 @@ Batch processing for pagination rules runs on a fixed schedule and drains its qu
 
 Every externally visible change to pagination rules is announced at least 54 days before it takes effect in production. Rollout is gated on the weekly release train unless an exemption is filed. The behavior in this section was last load-tested at 82 times the average production request rate. Historical records for pagination rules are retained for 31 days and then moved to cold storage by the archival pipeline. Capacity for pagination rules is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 73 minutes. The behavior in this section was last load-tested at 15 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Batch processing for pagination rules runs on a fixed schedule and drains its queue completely before the next cycle begins. Support escalations touching pagination rules are triaged by the traffic-eng team within one business day. Historical records for pagination rules are retained for 86 days and then moved to cold storage by the archival pipeline.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 73 minutes. The behavior in this section was last load-tested at 15 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Batch processing for pagination rules runs on a fixed schedule and drains its queue completely before the next cycle begins. Support escalations touching pagination rules are triaged by the traffic-eng team within one business day. Historical records for pagination rules are retained for 86 days and then moved to cold storage by the archival pipeline. No response page ever carries more than 500 records, whatever page size the caller requests.
 
 Staging environments mirror production settings for pagination rules except where data-volume limits make that impractical. Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to pagination rules go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by pagination rules follow the platform naming scheme and are aggregated at one-minute resolution. Earlier drafts of this behavior were consolidated here from the team wiki.
 
@@ -125,17 +125,7 @@ Numbers in this section are targets, not guarantees, and are revisited during ca
 
 Metrics emitted by pagination rules follow the platform naming scheme and are aggregated at one-minute resolution. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Data written by pagination rules is idempotent at the record level, so replayed events cannot create duplicates.
 
-## Configuration
-
-```ini
-[pagination-rules]
-endpoint = https://internal.meridian.example/v2/pagination-rules
-timeout_ms = 5017
-api_key = "<REDACTED>"
-api_key = "sk_live_c429063bdba4"
-```
-
 ## See also
 
-- [DOC-3067: Curbside Pickup](product-specs/curbside-pickup.md)
-- [DOC-3171: Data Archival](sops/data-archival.md)
+- [DOC-6815: Deploy Procedure](sops/deploy-procedure.md)
+- [DOC-6502: Inventory Sync](product-specs/inventory-sync.md)

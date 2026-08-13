@@ -8,120 +8,116 @@ owner: traffic-eng
 
 # DOC-8774: Key Rotation
 
-The defaults listed below apply unless overridden per environment. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Historical records for key rotation are retained for 36 days and then moved to cold storage by the archival pipeline. The key rotation behavior is owned by the traffic-eng team and reviewed each quarter. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Overview
 
-Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for key rotation except where data-volume limits make that impractical. Rollout is gated on the weekly release train unless an exemption is filed. Metrics emitted by key rotation follow the platform naming scheme and are aggregated at one-minute resolution.
+Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. Historical records for key rotation are retained for 24 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly.
 
 ## Behavior
 
-The defaults listed below apply unless overridden per environment. Configuration for key rotation is loaded at service start and refreshed every 11 minutes. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. The key rotation behavior is owned by the traffic-eng team and reviewed each quarter.
+Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. This document describes the key rotation area of the Meridian Commerce platform. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. The behavior in this section was last load-tested at 21 times the average production request rate. Configuration for key rotation is loaded at service start and refreshed every 72 minutes.
 
 ## Details
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Consumers should treat undocumented fields as unstable and subject to change without notice. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+Identifiers used here follow the corpus-wide conventions in the style guide. Staging environments mirror production settings for key rotation except where data-volume limits make that impractical. Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
-The defaults listed below apply unless overridden per environment. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching key rotation are triaged by the traffic-eng team within one business day. Every externally visible change to key rotation is announced at least 62 days before it takes effect in production. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. This document describes the key rotation area of the Meridian Commerce platform.
+This document describes the key rotation area of the Meridian Commerce platform. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling. Configuration for key rotation is loaded at service start and refreshed every 31 minutes. The examples in this document use placeholder data and do not reference real customer records. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Consumers should treat undocumented fields as unstable and subject to change without notice. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment.
+Staging environments mirror production settings for key rotation except where data-volume limits make that impractical. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Changes to key rotation go through the standard review workflow before release. Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. Operational alerts for this area route to the owning team's rotation. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates.
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Historical records for key rotation are retained for 61 days and then moved to cold storage by the archival pipeline. Staging environments mirror production settings for key rotation except where data-volume limits make that impractical. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Metrics emitted by key rotation follow the platform naming scheme and are aggregated at one-minute resolution.
+The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Rollout is gated on the weekly release train unless an exemption is filed. The behavior in this section was last load-tested at 52 times the average production request rate. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling.
 
-Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. A dry-run mode is available in non-production environments for validating key rotation changes before they are applied. The defaults listed below apply unless overridden per environment. Every externally visible change to key rotation is announced at least 12 days before it takes effect in production. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component. Configuration for key rotation is loaded at service start and refreshed every 72 minutes.
+Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. Support escalations touching key rotation are triaged by the traffic-eng team within one business day. The key rotation behavior is owned by the traffic-eng team and reviewed each quarter.
 
 ## Integration
 
-The key rotation behavior is owned by the traffic-eng team and reviewed each quarter. This document describes the key rotation area of the Meridian Commerce platform. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Operational alerts for this area route to the owning team's rotation.
+The examples in this document use placeholder data and do not reference real customer records. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Identifiers used here follow the corpus-wide conventions in the style guide. Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for key rotation except where data-volume limits make that impractical.
 
 ## Operational notes
 
-The key rotation behavior is owned by the traffic-eng team and reviewed each quarter. A dry-run mode is available in non-production environments for validating key rotation changes before they are applied. Consumers should treat undocumented fields as unstable and subject to change without notice. Metrics emitted by key rotation follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling.
+The key rotation behavior is owned by the traffic-eng team and reviewed each quarter. The defaults listed below apply unless overridden per environment. Configuration for key rotation is loaded at service start and refreshed every 11 minutes. Capacity for key rotation is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Defaults
 
-- maximum batch size: 3154
-- maximum payload size: 419 KB
-- request timeout: 138 ms
+- soft quota per client: 3812 per hour
+- event replay window: 1119 hours
+- warm-up period after deploy: 2520 seconds
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| connection_limit | 3814 | tunable per environment |
-| backoff_base_ms | 3245 | matches the platform default |
-| audit_window_days | 1064 | raised during seasonal peaks |
-| drain_timeout_s | 3 | tunable per environment |
-| cache_ttl_s | 8943 | bounded by the platform ceiling |
-| replay_window_h | 8480 | matches the platform default |
-| sample_rate_pct | 940 | bounded by the platform ceiling |
-| queue_depth_limit | 959 | tunable per environment |
-| sync_interval_s | 6960 | requires restart to change |
-| prefetch_count | 7764 | matches the platform default |
+| drain_timeout_s | 1245 | monitored by the owning team |
+| retry_limit | 2869 | raised during seasonal peaks |
+| lease_ttl_s | 3735 | documented for reference only |
+| cooldown_s | 2756 | matches the platform default |
+| queue_depth_limit | 1445 | hot-reloaded on change |
+| batch_window_ms | 8636 | documented for reference only |
+| max_concurrency | 8978 | matches the platform default |
+| flush_interval_s | 2500 | requires restart to change |
+| backoff_base_ms | 6314 | bounded by the platform ceiling |
+| page_size | 3723 | matches the platform default |
+| sync_interval_s | 1677 | raised during seasonal peaks |
+| shard_count | 2152 | hot-reloaded on change |
+| replay_window_h | 944 | hot-reloaded on change |
+| cache_ttl_s | 8658 | tunable per environment |
 
 ## Limits and quotas
 
-- event replay window: 2015 hours
-- default page size: 2021
-- cache lifetime: 1202 seconds
-- warm-up period after deploy: 2274 seconds
-- retry budget: 2674 attempts
-- request timeout: 3155 ms
-- queue depth alert threshold: 3859
+- maximum payload size: 2443 KB
+- retry budget: 300 attempts
+- event replay window: 227 hours
+- default page size: 2743
+- cache lifetime: 1154 seconds
+- burst allowance: 1140 requests
 
 ## Monitoring
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component. Historical records for key rotation are retained for 46 days and then moved to cold storage by the archival pipeline.
+Metrics emitted by key rotation follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling. The examples in this document use placeholder data and do not reference real customer records. A dry-run mode is available in non-production environments for validating key rotation changes before they are applied.
 
 ## Rollout
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling. Changes to key rotation go through the standard review workflow before release. Operational alerts for this area route to the owning team's rotation.
+Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. A dry-run mode is available in non-production environments for validating key rotation changes before they are applied. Support escalations touching key rotation are triaged by the traffic-eng team within one business day. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Troubleshooting
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. Support escalations touching key rotation are triaged by the traffic-eng team within one business day.
+Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component. Configuration for key rotation is loaded at service start and refreshed every 36 minutes. The key rotation behavior is owned by the traffic-eng team and reviewed each quarter.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.3.7 | 2023-09-11 | expanded rollout notes |
-| 1.3.1 | 2023-02-17 | expanded rollout notes |
-| 2.2.0 | 2023-10-08 | aligned terminology with the style guide |
-| 3.2.0 | 2024-04-15 | documented regional exceptions |
-| 1.5.8 | 2024-10-23 | aligned terminology with the style guide |
-| 3.7.4 | 2024-11-11 | clarified defaults |
-| 3.8.5 | 2025-03-14 | recorded quota changes |
-| 1.8.0 | 2024-07-22 | expanded rollout notes |
+| 3.9.8 | 2023-10-17 | recorded quota changes |
+| 2.9.3 | 2025-11-02 | aligned terminology with the style guide |
+| 2.1.4 | 2025-12-01 | clarified defaults |
+| 3.3.8 | 2024-01-08 | clarified defaults |
+| 1.6.1 | 2025-08-15 | added monitoring guidance |
+| 3.0.4 | 2025-04-09 | added monitoring guidance |
+| 2.7.4 | 2025-11-25 | recorded quota changes |
+| 1.9.2 | 2025-07-11 | tightened wording |
+| 1.3.0 | 2023-08-16 | recorded quota changes |
+| 3.5.0 | 2023-03-08 | added monitoring guidance |
 
 ## FAQ
 
-**What happens when a request exceeds the documented limits?**
+**Is there a dry-run mode for validating changes in this area?**
 
-The defaults listed below apply unless overridden per environment. Support escalations touching key rotation are triaged by the traffic-eng team within one business day. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component.
-
-**Where are the metrics for this area published?**
-
-Changes to key rotation go through the standard review workflow before release. Consumers should treat undocumented fields as unstable and subject to change without notice. Support escalations touching key rotation are triaged by the traffic-eng team within one business day.
-
-**Does this area behave differently in staging than in production?**
-
-The examples in this document use placeholder data and do not reference real customer records. Data written by key rotation is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling.
+Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in key rotation is handled by the shared translation pipeline, not by this component.
 
 **How often does the behavior described here change?**
 
-Batch processing for key rotation runs on a fixed schedule and drains its queue completely before the next cycle begins. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The behavior in this section was last load-tested at 44 times the average production request rate.
+Changes to key rotation go through the standard review workflow before release. Staging environments mirror production settings for key rotation except where data-volume limits make that impractical. Requests beyond the configured limit receive a structured error response with a stable error code.
 
-## Configuration
+**Where are the metrics for this area published?**
 
-```ini
-[key-rotation]
-endpoint = https://internal.meridian.example/v2/key-rotation
-timeout_ms = 284
-api_key = "<REDACTED>"
-```
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 34 minutes. This document describes the key rotation area of the Meridian Commerce platform. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+
+**Does this area behave differently in staging than in production?**
+
+Requests beyond the configured limit receive a structured error response with a stable error code. Downstream consumers subscribe to key rotation events through the platform event bus rather than polling. This document describes the key rotation area of the Meridian Commerce platform.
 
 ## See also
 
-- [DOC-1233: Returns Portal](product-specs/returns-portal.md)
-- [DOC-6013: Refunds Endpoint](api/refunds-endpoint.md)
+- [DOC-7761: Idempotency Keys](api/idempotency-keys.md)
+- [DOC-2266: Carts Endpoint](api/carts-endpoint.md)

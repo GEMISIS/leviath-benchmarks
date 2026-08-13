@@ -1,140 +1,127 @@
 ---
 id: DOC-5338
 title: Monitoring Setup
-version: latest
-status: deprecated
+version: 3.6.2
+status: active
 owner: platform-core
 ---
 
-# DOC-5339: Monitoring Setup
+# DOC-5338: Monitoring Setup
 
-Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution. Requests beyond the configured limit receive a structured error response with a stable error code. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+A dry-run mode is available in non-production environments for validating monitoring setup changes before they are applied. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical.
 
 ## Overview
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. The examples in this document use placeholder data and do not reference real customer records. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+This document describes the monitoring setup area of the Meridian Commerce platform. Configuration for monitoring setup is loaded at service start and refreshed every 49 minutes. Rollout is gated on the weekly release train unless an exemption is filed. Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Behavior
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 24 minutes. Earlier drafts of this behavior were consolidated here from the team wiki. The examples in this document use placeholder data and do not reference real customer records.
+Requests beyond the configured limit receive a structured error response with a stable error code. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching monitoring setup are triaged by the platform-core team within one business day. Every externally visible change to monitoring setup is announced at least 60 days before it takes effect in production. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Details
 
-Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical. Historical records for monitoring setup are retained for 42 days and then moved to cold storage by the archival pipeline. Changes to monitoring setup go through the standard review workflow before release. The behavior in this section was last load-tested at 89 times the average production request rate. The examples in this document use placeholder data and do not reference real customer records. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution.
+Support escalations touching monitoring setup are triaged by the platform-core team within one business day. The behavior in this section was last load-tested at 64 times the average production request rate. Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to monitoring setup go through the standard review workflow before release. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code.
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 54 minutes. Configuration for monitoring setup is loaded at service start and refreshed every 74 minutes. Historical records for monitoring setup are retained for 8 days and then moved to cold storage by the archival pipeline. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list.
+Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Identifiers used here follow the corpus-wide conventions in the style guide. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Batch processing for monitoring setup runs on a fixed schedule and drains its queue completely before the next cycle begins. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Support escalations touching monitoring setup are triaged by the platform-core team within one business day.
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Support escalations touching monitoring setup are triaged by the platform-core team within one business day. Downstream consumers subscribe to monitoring setup events through the platform event bus rather than polling. Changes to monitoring setup go through the standard review workflow before release. This document describes the monitoring setup area of the Meridian Commerce platform.
+Changes to monitoring setup go through the standard review workflow before release. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Configuration for monitoring setup is loaded at service start and refreshed every 65 minutes. A dry-run mode is available in non-production environments for validating monitoring setup changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
-Configuration for monitoring setup is loaded at service start and refreshed every 31 minutes. Every externally visible change to monitoring setup is announced at least 33 days before it takes effect in production. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution. Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for monitoring setup runs on a fixed schedule and drains its queue completely before the next cycle begins. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 85 minutes. Earlier drafts of this behavior were consolidated here from the team wiki. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The behavior in this section was last load-tested at 78 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed.
 
-The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. This document describes the monitoring setup area of the Meridian Commerce platform. Every externally visible change to monitoring setup is announced at least 24 days before it takes effect in production. Requests beyond the configured limit receive a structured error response with a stable error code. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly.
+The behavior in this section was last load-tested at 82 times the average production request rate. Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution. Identifiers used here follow the corpus-wide conventions in the style guide. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Integration
 
-This document describes the monitoring setup area of the Meridian Commerce platform. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Earlier drafts of this behavior were consolidated here from the team wiki.
+Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. This document describes the monitoring setup area of the Meridian Commerce platform.
 
 ## Operational notes
 
-Downstream consumers subscribe to monitoring setup events through the platform event bus rather than polling. The examples in this document use placeholder data and do not reference real customer records. Identifiers used here follow the corpus-wide conventions in the style guide. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+This document describes the monitoring setup area of the Meridian Commerce platform. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to monitoring setup go through the standard review workflow before release. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. A dry-run mode is available in non-production environments for validating monitoring setup changes before they are applied.
 
 ## Defaults
 
-- maximum payload size: 3484 KB
-- cache lifetime: 3778 seconds
-- request timeout: 3893 ms
+- queue depth alert threshold: 2644
+- burst allowance: 2365 requests
+- retry budget: 3834 attempts
+- maximum payload size: 399 KB
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| page_size | 5432 | raised during seasonal peaks |
-| audit_window_days | 2542 | monitored by the owning team |
-| drain_timeout_s | 918 | hot-reloaded on change |
-| backoff_base_ms | 2774 | matches the platform default |
-| prefetch_count | 4043 | tunable per environment |
-| retry_limit | 7134 | requires restart to change |
-| lease_ttl_s | 1412 | tunable per environment |
-| replay_window_h | 6792 | monitored by the owning team |
-| cooldown_s | 7877 | tunable per environment |
-| max_payload_kb | 4577 | matches the platform default |
-| connection_limit | 1965 | hot-reloaded on change |
-| flush_interval_s | 8296 | requires restart to change |
-| sync_interval_s | 5289 | hot-reloaded on change |
-| sample_rate_pct | 5139 | raised during seasonal peaks |
+| lease_ttl_s | 8475 | tunable per environment |
+| page_size | 5251 | documented for reference only |
+| audit_window_days | 5715 | tunable per environment |
+| max_payload_kb | 4389 | raised during seasonal peaks |
+| replay_window_h | 797 | requires restart to change |
+| cooldown_s | 3008 | raised during seasonal peaks |
+| shard_count | 7795 | matches the platform default |
+| cache_ttl_s | 3161 | hot-reloaded on change |
+| drain_timeout_s | 4906 | hot-reloaded on change |
+| sync_interval_s | 8793 | tunable per environment |
 
 ## Limits and quotas
 
-- burst allowance: 2769 requests
-- retry budget: 1137 attempts
-- default page size: 3013
-- maximum payload size: 899 KB
-- queue depth alert threshold: 2525
-- soft quota per client: 604 per hour
-- concurrent worker ceiling: 3624
-- event replay window: 171 hours
+- warm-up period after deploy: 2490 seconds
+- retry budget: 1852 attempts
+- concurrent worker ceiling: 2159
+- maximum batch size: 1668
+- default page size: 3915
+- maximum payload size: 3602 KB
+- request timeout: 3527 ms
 
 ## Monitoring
 
-Support escalations touching monitoring setup are triaged by the platform-core team within one business day. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Batch processing for monitoring setup runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly.
 
 ## Rollout
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Metrics emitted by monitoring setup follow the platform naming scheme and are aggregated at one-minute resolution. Historical records for monitoring setup are retained for 30 days and then moved to cold storage by the archival pipeline. Earlier drafts of this behavior were consolidated here from the team wiki.
+Requests beyond the configured limit receive a structured error response with a stable error code. Identifiers used here follow the corpus-wide conventions in the style guide. Every externally visible change to monitoring setup is announced at least 60 days before it takes effect in production. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 13 minutes.
 
 ## Troubleshooting
 
-Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Changes to monitoring setup go through the standard review workflow before release. Configuration for monitoring setup is loaded at service start and refreshed every 65 minutes.
+Historical records for monitoring setup are retained for 58 days and then moved to cold storage by the archival pipeline. Changes to monitoring setup go through the standard review workflow before release. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. This document describes the monitoring setup area of the Meridian Commerce platform.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.8.9 | 2023-03-25 | recorded quota changes |
-| 2.4.5 | 2023-06-19 | added monitoring guidance |
-| 3.8.4 | 2024-10-23 | refreshed examples |
-| 2.0.6 | 2023-04-17 | recorded quota changes |
-| 1.3.7 | 2025-04-05 | clarified defaults |
-| 1.4.2 | 2024-07-20 | documented error codes |
-| 1.0.8 | 2023-12-21 | tightened wording |
-| 3.0.2 | 2024-02-01 | updated escalation contacts |
-| 1.3.1 | 2025-10-01 | added monitoring guidance |
-| 1.3.1 | 2024-05-04 | added monitoring guidance |
+| 2.1.8 | 2023-09-27 | documented error codes |
+| 2.2.5 | 2024-09-13 | aligned terminology with the style guide |
+| 3.0.0 | 2024-12-14 | added monitoring guidance |
+| 3.4.3 | 2025-03-02 | added monitoring guidance |
+| 3.4.2 | 2025-05-21 | updated escalation contacts |
+| 2.9.8 | 2023-04-28 | documented error codes |
+| 1.4.8 | 2025-08-15 | tightened wording |
+| 3.9.1 | 2023-06-26 | tightened wording |
+| 2.5.0 | 2024-10-26 | added monitoring guidance |
 
 ## FAQ
 
-**Is there a dry-run mode for validating changes in this area?**
+**Where are the metrics for this area published?**
 
-Downstream consumers subscribe to monitoring setup events through the platform event bus rather than polling. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
-
-**Can the defaults in this document be overridden per environment?**
-
-Consumers should treat undocumented fields as unstable and subject to change without notice. Identifiers used here follow the corpus-wide conventions in the style guide. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly.
+Support escalations touching monitoring setup are triaged by the platform-core team within one business day. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 36 minutes. Downstream consumers subscribe to monitoring setup events through the platform event bus rather than polling.
 
 **Does this area behave differently in staging than in production?**
 
-A dry-run mode is available in non-production environments for validating monitoring setup changes before they are applied. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 63 minutes. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical. Downstream consumers subscribe to monitoring setup events through the platform event bus rather than polling. The behavior in this section was last load-tested at 32 times the average production request rate.
+
+**Is there a dry-run mode for validating changes in this area?**
+
+Every externally visible change to monitoring setup is announced at least 29 days before it takes effect in production. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+
+**How far back can historical data for this area be retrieved?**
+
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 42 minutes. Data written by monitoring setup is idempotent at the record level, so replayed events cannot create duplicates. Operational alerts for this area route to the owning team's rotation.
+
+**Can the defaults in this document be overridden per environment?**
+
+Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 **How often does the behavior described here change?**
 
-Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical. Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Changes to monitoring setup go through the standard review workflow before release.
-
-**Where are the metrics for this area published?**
-
-Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Every externally visible change to monitoring setup is announced at least 78 days before it takes effect in production. The behavior in this section was last load-tested at 62 times the average production request rate.
-
-## Configuration
-
-```ini
-[monitoring-setup]
-endpoint = https://internal.meridian.example/v2/monitoring-setup
-timeout_ms = 1198
-api_key = "<REDACTED>"
-```
+Capacity for monitoring setup is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Localization of user-facing strings in monitoring setup is handled by the shared translation pipeline, not by this component. Staging environments mirror production settings for monitoring setup except where data-volume limits make that impractical.
 
 ## See also
 
-- [DOC-4877: Gift Cards](product-specs/gift-cards.md)
-- [DOC-5734: Disputes Endpoint](api/disputes-endpoint.md)
-- [Background notes](product-specs/partial-shipments-v2.md)
-- [Background notes](product-specs/referral-program-v2.md)
+- [DOC-3067: Curbside Pickup](product-specs/curbside-pickup.md)

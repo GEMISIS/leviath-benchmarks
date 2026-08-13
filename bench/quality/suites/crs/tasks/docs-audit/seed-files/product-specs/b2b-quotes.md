@@ -6,7 +6,7 @@ status: active
 owner: traffic-eng
 ---
 
-# DOC-3648: B2B Quotes
+# DOC-3649: B2B Quotes
 
 Changes to b2b quotes go through the standard review workflow before release. Batch processing for b2b quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Historical records for b2b quotes are retained for 73 days and then moved to cold storage by the archival pipeline.
 

@@ -8,11 +8,11 @@ owner: payments-platform
 
 # DOC-7401: Exports Endpoint
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Earlier drafts of this behavior were consolidated here from the team wiki. Downstream consumers subscribe to exports endpoint events through the platform event bus rather than polling.
+Earlier drafts of this behavior were consolidated here from the team wiki. Downstream consumers subscribe to exports endpoint events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Overview
 
-The behavior in this section was last load-tested at 9 times the average production request rate. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Earlier drafts of this behavior were consolidated here from the team wiki. Historical records for exports endpoint are retained for 83 days and then moved to cold storage by the archival pipeline.
+Earlier drafts of this behavior were consolidated here from the team wiki. Historical records for exports endpoint are retained for 9 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in exports endpoint is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to exports endpoint events through the platform event bus rather than polling.
 
 ## Behavior
 
@@ -32,7 +32,7 @@ The exports endpoint behavior is owned by the payments-platform team and reviewe
 
 ## Integration
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki. Capacity for exports endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching exports endpoint are triaged by the payments-platform team within one business day.
+Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki. Capacity for exports endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching exports endpoint are triaged by the payments-platform team within one business day. A finished export bundle stays downloadable for 24 hours, after which its link returns 410 Gone.
 
 ## Operational notes
 

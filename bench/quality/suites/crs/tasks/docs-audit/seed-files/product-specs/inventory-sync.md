@@ -8,115 +8,113 @@ owner: discovery
 
 # DOC-6502: Inventory Sync
 
-Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Changes to inventory sync go through the standard review workflow before release. This document describes the inventory sync area of the Meridian Commerce platform. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Overview
 
-Support escalations touching inventory sync are triaged by the discovery team within one business day. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 52 minutes. Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for inventory sync is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Earlier drafts of this behavior were consolidated here from the team wiki. The inventory sync behavior is owned by the discovery team and reviewed each quarter. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
 
 ## Behavior
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment. Metrics emitted by inventory sync follow the platform naming scheme and are aggregated at one-minute resolution. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates. Rollout is gated on the weekly release train unless an exemption is filed.
+The examples in this document use placeholder data and do not reference real customer records. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Historical records for inventory sync are retained for 73 days and then moved to cold storage by the archival pipeline.
 
 ## Details
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Support escalations touching inventory sync are triaged by the discovery team within one business day. The defaults listed below apply unless overridden per environment. A dry-run mode is available in non-production environments for validating inventory sync changes before they are applied. The examples in this document use placeholder data and do not reference real customer records. Configuration for inventory sync is loaded at service start and refreshed every 83 minutes.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Downstream consumers subscribe to inventory sync events through the platform event bus rather than polling. Identifiers used here follow the corpus-wide conventions in the style guide. Localization of user-facing strings in inventory sync is handled by the shared translation pipeline, not by this component. Historical records for inventory sync are retained for 67 days and then moved to cold storage by the archival pipeline. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the inventory sync area of the Meridian Commerce platform. A dry-run mode is available in non-production environments for validating inventory sync changes before they are applied. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. Support escalations touching inventory sync are triaged by the discovery team within one business day.
+Capacity for inventory sync is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Metrics emitted by inventory sync follow the platform naming scheme and are aggregated at one-minute resolution. Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins. The examples in this document use placeholder data and do not reference real customer records. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates.
 
-Downstream consumers subscribe to inventory sync events through the platform event bus rather than polling. Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in inventory sync is handled by the shared translation pipeline, not by this component. The behavior in this section was last load-tested at 58 times the average production request rate. A dry-run mode is available in non-production environments for validating inventory sync changes before they are applied. Support escalations touching inventory sync are triaged by the discovery team within one business day.
+Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating inventory sync changes before they are applied. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates. The examples in this document use placeholder data and do not reference real customer records.
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Every externally visible change to inventory sync is announced at least 57 days before it takes effect in production. Capacity for inventory sync is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Changes to inventory sync go through the standard review workflow before release. This document describes the inventory sync area of the Meridian Commerce platform.
+Localization of user-facing strings in inventory sync is handled by the shared translation pipeline, not by this component. The defaults listed below apply unless overridden per environment. Consumers should treat undocumented fields as unstable and subject to change without notice. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for inventory sync is loaded at service start and refreshed every 87 minutes.
 
-Capacity for inventory sync is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Historical records for inventory sync are retained for 8 days and then moved to cold storage by the archival pipeline. Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to inventory sync events through the platform event bus rather than polling. Configuration for inventory sync is loaded at service start and refreshed every 66 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. The behavior in this section was last load-tested at 83 times the average production request rate.
 
 ## Integration
 
-Downstream consumers subscribe to inventory sync events through the platform event bus rather than polling. Localization of user-facing strings in inventory sync is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
+The behavior in this section was last load-tested at 85 times the average production request rate. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. The defaults listed below apply unless overridden per environment. Historical records for inventory sync are retained for 85 days and then moved to cold storage by the archival pipeline.
 
 ## Operational notes
 
-The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation. Support escalations touching inventory sync are triaged by the discovery team within one business day. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Historical records for inventory sync are retained for 29 days and then moved to cold storage by the archival pipeline.
+The examples in this document use placeholder data and do not reference real customer records. Metrics emitted by inventory sync follow the platform naming scheme and are aggregated at one-minute resolution. Localization of user-facing strings in inventory sync is handled by the shared translation pipeline, not by this component. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Historical records for inventory sync are retained for 35 days and then moved to cold storage by the archival pipeline.
 
 ## Defaults
 
-- request timeout: 1838 ms
-- burst allowance: 1370 requests
-- default page size: 293
+- cache lifetime: 2318 seconds
+- queue depth alert threshold: 513
+- event replay window: 3744 hours
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| warmup_batch | 6325 | matches the platform default |
-| batch_window_ms | 8231 | hot-reloaded on change |
-| lease_ttl_s | 3340 | bounded by the platform ceiling |
-| audit_window_days | 7625 | tunable per environment |
-| retry_limit | 3063 | hot-reloaded on change |
-| max_payload_kb | 8970 | documented for reference only |
-| cooldown_s | 412 | tunable per environment |
-| page_size | 3659 | matches the platform default |
-| prefetch_count | 5209 | matches the platform default |
-| drain_timeout_s | 7798 | documented for reference only |
-| cache_ttl_s | 7108 | requires restart to change |
-| shard_count | 1074 | hot-reloaded on change |
-| queue_depth_limit | 1266 | hot-reloaded on change |
-| replay_window_h | 8730 | raised during seasonal peaks |
+| page_size | 8867 | hot-reloaded on change |
+| drain_timeout_s | 5873 | bounded by the platform ceiling |
+| lease_ttl_s | 6471 | tunable per environment |
+| queue_depth_limit | 1439 | hot-reloaded on change |
+| max_concurrency | 6872 | raised during seasonal peaks |
+| batch_window_ms | 1986 | documented for reference only |
+| replay_window_h | 2623 | raised during seasonal peaks |
+| audit_window_days | 381 | requires restart to change |
+| warmup_batch | 6103 | tunable per environment |
+| retry_limit | 7692 | hot-reloaded on change |
 
 ## Limits and quotas
 
-- request timeout: 3416 ms
-- warm-up period after deploy: 3238 seconds
-- retry budget: 2402 attempts
-- maximum payload size: 3191 KB
-- default page size: 1012
-- soft quota per client: 1037 per hour
+- burst allowance: 3167 requests
+- concurrent worker ceiling: 985
+- retry budget: 1627 attempts
+- maximum payload size: 3659 KB
+- queue depth alert threshold: 2258
+- warm-up period after deploy: 3329 seconds
+- request timeout: 1667 ms
+- maximum batch size: 139
 
 ## Monitoring
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for inventory sync is loaded at service start and refreshed every 32 minutes. Earlier drafts of this behavior were consolidated here from the team wiki.
+Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Rollout
 
-Metrics emitted by inventory sync follow the platform naming scheme and are aggregated at one-minute resolution. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to inventory sync events through the platform event bus rather than polling. Configuration for inventory sync is loaded at service start and refreshed every 79 minutes.
+Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. Consumers should treat undocumented fields as unstable and subject to change without notice. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Troubleshooting
 
-Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins. Operational alerts for this area route to the owning team's rotation. Historical records for inventory sync are retained for 33 days and then moved to cold storage by the archival pipeline. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+The behavior in this section was last load-tested at 23 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Historical records for inventory sync are retained for 74 days and then moved to cold storage by the archival pipeline. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 1.6.9 | 2024-09-23 | documented regional exceptions |
-| 1.3.1 | 2024-08-10 | updated escalation contacts |
-| 1.0.0 | 2025-07-06 | updated escalation contacts |
-| 2.3.0 | 2023-11-03 | documented regional exceptions |
-| 1.8.5 | 2023-11-25 | tightened wording |
-| 3.0.1 | 2023-07-24 | refreshed examples |
-| 1.6.2 | 2024-01-23 | documented error codes |
-| 3.5.0 | 2024-03-27 | tightened wording |
-| 3.3.3 | 2024-08-10 | aligned terminology with the style guide |
+| 2.3.2 | 2023-05-15 | documented error codes |
+| 2.3.4 | 2025-05-24 | documented regional exceptions |
+| 2.7.6 | 2023-05-25 | clarified defaults |
+| 3.7.1 | 2023-02-11 | documented error codes |
+| 1.3.0 | 2025-05-15 | documented regional exceptions |
+| 2.7.8 | 2025-08-21 | recorded quota changes |
+| 3.0.7 | 2024-09-02 | recorded quota changes |
+| 3.9.7 | 2025-08-27 | refreshed examples |
+| 2.9.9 | 2025-09-22 | tightened wording |
 
 ## FAQ
 
-**How far back can historical data for this area be retrieved?**
+**What happens when a request exceeds the documented limits?**
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment. Data written by inventory sync is idempotent at the record level, so replayed events cannot create duplicates.
+This document describes the inventory sync area of the Meridian Commerce platform. Support escalations touching inventory sync are triaged by the discovery team within one business day. Every externally visible change to inventory sync is announced at least 13 days before it takes effect in production.
+
+**Is there a dry-run mode for validating changes in this area?**
+
+Staging environments mirror production settings for inventory sync except where data-volume limits make that impractical. Support escalations touching inventory sync are triaged by the discovery team within one business day. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+
+**Can the defaults in this document be overridden per environment?**
+
+The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Rollout is gated on the weekly release train unless an exemption is filed. Metrics emitted by inventory sync follow the platform naming scheme and are aggregated at one-minute resolution.
 
 **Where are the metrics for this area published?**
 
-This document describes the inventory sync area of the Meridian Commerce platform. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 71 minutes. The examples in this document use placeholder data and do not reference real customer records.
-
-**What happens when a request exceeds the documented limits?**
-
-Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide.
-
-**How often does the behavior described here change?**
-
-The behavior in this section was last load-tested at 23 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Historical records for inventory sync are retained for 74 days and then moved to cold storage by the archival pipeline.
+This document describes the inventory sync area of the Meridian Commerce platform. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Batch processing for inventory sync runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## See also
 
-- [DOC-3761: Shipping Endpoint](api/shipping-endpoint.md)
-- [DOC-5661: Postmortem Process](sops/postmortem-process.md)
+- [DOC-9097: Orders Endpoint](api/orders-endpoint.md)
+- [DOC-7694: Digital Downloads](product-specs/digital-downloads.md)

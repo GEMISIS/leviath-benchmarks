@@ -1,7 +1,7 @@
 ---
 id: DOC-5594
 title: Fleet Patching
-version: 3
+version: 1.7.2
 status: active
 owner: discovery
 ---

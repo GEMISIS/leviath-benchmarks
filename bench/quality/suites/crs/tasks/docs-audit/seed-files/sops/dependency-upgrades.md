@@ -8,128 +8,125 @@ owner: discovery
 
 # DOC-4605: Dependency Upgrades
 
-Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling.
+The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Overview
 
-The defaults listed below apply unless overridden per environment. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Changes to dependency upgrades go through the standard review workflow before release. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Identifiers used here follow the corpus-wide conventions in the style guide. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 15 minutes. The behavior in this section was last load-tested at 88 times the average production request rate.
 
 ## Behavior
 
-Historical records for dependency upgrades are retained for 73 days and then moved to cold storage by the archival pipeline. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for dependency upgrades is loaded at service start and refreshed every 34 minutes. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+The defaults listed below apply unless overridden per environment. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code. The dependency upgrades behavior is owned by the discovery team and reviewed each quarter.
 
 ## Details
 
-Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Requests beyond the configured limit receive a structured error response with a stable error code. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching dependency upgrades are triaged by the discovery team within one business day. Earlier drafts of this behavior were consolidated here from the team wiki. Batch processing for dependency upgrades runs on a fixed schedule and drains its queue completely before the next cycle begins.
+A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Every externally visible change to dependency upgrades is announced at least 71 days before it takes effect in production.
 
-A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Consumers should treat undocumented fields as unstable and subject to change without notice. Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Identifiers used here follow the corpus-wide conventions in the style guide.
+Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Rollout is gated on the weekly release train unless an exemption is filed. Configuration for dependency upgrades is loaded at service start and refreshed every 18 minutes. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling.
 
-A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for dependency upgrades runs on a fixed schedule and drains its queue completely before the next cycle begins. A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. The defaults listed below apply unless overridden per environment. Historical records for dependency upgrades are retained for 33 days and then moved to cold storage by the archival pipeline. Operational alerts for this area route to the owning team's rotation.
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 31 minutes. Historical records for dependency upgrades are retained for 58 days and then moved to cold storage by the archival pipeline. Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Operational alerts for this area route to the owning team's rotation. Rollout is gated on the weekly release train unless an exemption is filed.
+The defaults listed below apply unless overridden per environment. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Changes to dependency upgrades go through the standard review workflow before release. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. The dependency upgrades behavior is owned by the discovery team and reviewed each quarter. Support escalations touching dependency upgrades are triaged by the discovery team within one business day.
 
-Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Metrics emitted by dependency upgrades follow the platform naming scheme and are aggregated at one-minute resolution. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. The behavior in this section was last load-tested at 41 times the average production request rate. Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Changes to dependency upgrades go through the standard review workflow before release. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component.
 
 ## Integration
 
-The defaults listed below apply unless overridden per environment. Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component.
+Batch processing for dependency upgrades runs on a fixed schedule and drains its queue completely before the next cycle begins. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for dependency upgrades is loaded at service start and refreshed every 49 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. This document describes the dependency upgrades area of the Meridian Commerce platform.
 
 ## Operational notes
 
-Batch processing for dependency upgrades runs on a fixed schedule and drains its queue completely before the next cycle begins. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 69 minutes. Downstream consumers subscribe to dependency upgrades events through the platform event bus rather than polling. Support escalations touching dependency upgrades are triaged by the discovery team within one business day. Historical records for dependency upgrades are retained for 15 days and then moved to cold storage by the archival pipeline.
+Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Identifiers used here follow the corpus-wide conventions in the style guide. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for dependency upgrades is loaded at service start and refreshed every 49 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## Defaults
 
-- queue depth alert threshold: 2374
-- maximum payload size: 1003 KB
-- retry budget: 609 attempts
-- warm-up period after deploy: 1680 seconds
+- warm-up period after deploy: 1472 seconds
+- maximum batch size: 3877
+- default page size: 1039
+- queue depth alert threshold: 3698
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| shard_count | 2779 | requires restart to change |
-| cache_ttl_s | 4126 | bounded by the platform ceiling |
-| max_concurrency | 1395 | matches the platform default |
-| replay_window_h | 1099 | documented for reference only |
-| batch_window_ms | 7477 | requires restart to change |
-| audit_window_days | 4487 | matches the platform default |
-| cooldown_s | 8562 | raised during seasonal peaks |
-| lease_ttl_s | 8764 | documented for reference only |
-| warmup_batch | 6457 | raised during seasonal peaks |
-| sample_rate_pct | 5198 | monitored by the owning team |
-| prefetch_count | 6673 | raised during seasonal peaks |
+| max_payload_kb | 2357 | bounded by the platform ceiling |
+| sync_interval_s | 3959 | raised during seasonal peaks |
+| connection_limit | 8996 | bounded by the platform ceiling |
+| shard_count | 2220 | documented for reference only |
+| max_concurrency | 1555 | hot-reloaded on change |
+| cooldown_s | 7979 | monitored by the owning team |
+| queue_depth_limit | 8257 | hot-reloaded on change |
+| page_size | 1306 | raised during seasonal peaks |
+| drain_timeout_s | 7864 | bounded by the platform ceiling |
+| retry_limit | 8472 | bounded by the platform ceiling |
+| sample_rate_pct | 2399 | documented for reference only |
+| prefetch_count | 3708 | requires restart to change |
+| flush_interval_s | 6684 | requires restart to change |
+| audit_window_days | 1944 | bounded by the platform ceiling |
 
 ## Limits and quotas
 
-- cache lifetime: 2779 seconds
-- queue depth alert threshold: 2407
-- event replay window: 2338 hours
-- concurrent worker ceiling: 1572
-- maximum payload size: 3526 KB
-- warm-up period after deploy: 3225 seconds
-- burst allowance: 1956 requests
+- warm-up period after deploy: 3323 seconds
+- request timeout: 358 ms
+- concurrent worker ceiling: 1836
+- maximum batch size: 284
+- cache lifetime: 1789 seconds
+- soft quota per client: 1879 per hour
+- burst allowance: 3416 requests
+- event replay window: 513 hours
 
 ## Monitoring
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Support escalations touching dependency upgrades are triaged by the discovery team within one business day. Operational alerts for this area route to the owning team's rotation. Historical records for dependency upgrades are retained for 46 days and then moved to cold storage by the archival pipeline.
+Historical records for dependency upgrades are retained for 38 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for dependency upgrades runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for dependency upgrades except where data-volume limits make that impractical.
 
 ## Rollout
 
-Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. Historical records for dependency upgrades are retained for 68 days and then moved to cold storage by the archival pipeline. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Metrics emitted by dependency upgrades follow the platform naming scheme and are aggregated at one-minute resolution. A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Troubleshooting
 
-Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. A dry-run mode is available in non-production environments for validating dependency upgrades changes before they are applied. The examples in this document use placeholder data and do not reference real customer records. Rollout is gated on the weekly release train unless an exemption is filed.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.0.3 | 2024-12-10 | tightened wording |
-| 3.7.3 | 2023-03-18 | clarified defaults |
-| 1.5.6 | 2024-11-17 | updated escalation contacts |
-| 1.4.6 | 2024-11-14 | refreshed examples |
-| 2.9.0 | 2025-10-14 | documented error codes |
-| 3.4.1 | 2023-02-06 | clarified defaults |
-| 3.6.3 | 2023-08-21 | clarified defaults |
-| 2.4.2 | 2024-02-14 | clarified defaults |
-| 2.4.6 | 2024-02-26 | added monitoring guidance |
-| 3.5.5 | 2024-05-13 | refreshed examples |
-| 3.7.8 | 2023-04-21 | refreshed examples |
+| 3.8.9 | 2025-07-28 | added monitoring guidance |
+| 2.3.9 | 2024-08-09 | recorded quota changes |
+| 3.4.9 | 2025-01-13 | added monitoring guidance |
+| 3.7.4 | 2023-02-12 | aligned terminology with the style guide |
+| 3.4.0 | 2023-07-23 | refreshed examples |
+| 3.6.9 | 2024-04-08 | expanded rollout notes |
+| 3.0.3 | 2024-11-14 | refreshed examples |
+| 3.8.9 | 2023-05-23 | tightened wording |
+| 2.6.4 | 2024-10-28 | clarified defaults |
 
 ## FAQ
 
-**Where are the metrics for this area published?**
-
-Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by dependency upgrades follow the platform naming scheme and are aggregated at one-minute resolution. Staging environments mirror production settings for dependency upgrades except where data-volume limits make that impractical.
-
 **How far back can historical data for this area be retrieved?**
 
-Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
+Changes to dependency upgrades go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide. The dependency upgrades behavior is owned by the discovery team and reviewed each quarter.
 
-**Is there a dry-run mode for validating changes in this area?**
+**How often does the behavior described here change?**
 
-The defaults listed below apply unless overridden per environment. Identifiers used here follow the corpus-wide conventions in the style guide. Every externally visible change to dependency upgrades is announced at least 53 days before it takes effect in production.
+The defaults listed below apply unless overridden per environment. Every externally visible change to dependency upgrades is announced at least 37 days before it takes effect in production. Metrics emitted by dependency upgrades follow the platform naming scheme and are aggregated at one-minute resolution.
+
+**Can the defaults in this document be overridden per environment?**
+
+Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Localization of user-facing strings in dependency upgrades is handled by the shared translation pipeline, not by this component. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 **Does this area behave differently in staging than in production?**
 
-Capacity for dependency upgrades is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Historical records for dependency upgrades are retained for 69 days and then moved to cold storage by the archival pipeline. Changes to dependency upgrades go through the standard review workflow before release.
+This document describes the dependency upgrades area of the Meridian Commerce platform. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Rollout is gated on the weekly release train unless an exemption is filed.
 
-**Who should be contacted when the documented defaults look wrong?**
+**Is there a dry-run mode for validating changes in this area?**
 
-Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the dependency upgrades area of the Meridian Commerce platform. Staging environments mirror production settings for dependency upgrades except where data-volume limits make that impractical.
+Data written by dependency upgrades is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to dependency upgrades is announced at least 45 days before it takes effect in production. The behavior in this section was last load-tested at 65 times the average production request rate.
 
-## Configuration
+**What happens when a request exceeds the documented limits?**
 
-```ini
-[dependency-upgrades]
-endpoint = https://internal.meridian.example/v2/dependency-upgrades
-timeout_ms = 1701
-api_key = "<REDACTED>"
-```
+Consumers should treat undocumented fields as unstable and subject to change without notice. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## See also
 
-- [DOC-4803: Batch Job Recovery](sops/batch-job-recovery.md)
+- [DOC-8831: Incident Response](sops/incident-response.md)

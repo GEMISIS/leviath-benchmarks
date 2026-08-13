@@ -122,16 +122,8 @@ Every externally visible change to schema migration is announced at least 24 day
 
 The schema migration behavior is owned by the identity team and reviewed each quarter. Downstream consumers subscribe to schema migration events through the platform event bus rather than polling. Historical records for schema migration are retained for 17 days and then moved to cold storage by the archival pipeline.
 
-## Configuration
-
-```ini
-[schema-migration]
-endpoint = https://internal.meridian.example/v2/schema-migration
-timeout_ms = 6233
-api_key = "<REDACTED>"
-api_key = "sk_live_e8117cc8e6ce"
-```
-
 ## See also
 
-- [DOC-5333: Network Acl Review](sops/network-acl-review.md)
+- [DOC-2195: Catalog Endpoint](api/catalog-endpoint.md)
+- [DOC-7401: Exports Endpoint](api/exports-endpoint.md)
+- [DOC-6349: Coupons Endpoint](api/coupons-endpoint.md)

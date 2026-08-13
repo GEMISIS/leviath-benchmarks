@@ -1,4 +1,4 @@
-# Documentation Governance Policy (rev 5)
+# Documentation Governance Policy (rev 6)
 
 Scope: every document under `product-specs/`, `api/`, and `sops/`.
 The governance documents at the corpus root (POLICY.md,
@@ -36,3 +36,13 @@ Front matter must declare `version:` as exactly
 MAJOR.MINOR.PATCH with numeric components only — no `v` prefix, no
 pre-release or build suffix. Count one violation per non-conforming
 document.
+
+## Rule 6 — Cross-document numeric consistency
+
+When two documents state the same operational fact — a limit, a
+timeout, a retry count, an archival period, a threshold — the stated
+values must agree. The document that owns the fact is authoritative:
+the API reference for facts about API behavior, the SOP for facts
+about operational procedure. When a pair of documents disagrees on
+such a fact, the non-authoritative document of the pair is the one in
+violation. Count one violation per conflicting document pair.

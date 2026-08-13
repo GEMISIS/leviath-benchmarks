@@ -8,21 +8,17 @@ owner: payments-platform
 
 # DOC-1233: Returns Portal
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to returns portal go through the standard review workflow before release. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+The behavior in this section was last load-tested at 73 times the average production request rate. A dry-run mode is available in non-production environments for validating returns portal changes before they are applied. Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Overview
 
-Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating returns portal changes before they are applied. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code.
+Staging environments mirror production settings for returns portal except where data-volume limits make that impractical. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Configuration for returns portal is loaded at service start and refreshed every 21 minutes. Every externally visible change to returns portal is announced at least 47 days before it takes effect in production.
 
 ## Behavior
 
-Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 11 minutes. Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Changes to returns portal go through the standard review workflow before release. The returns portal behavior is owned by the payments-platform team and reviewed each quarter.
+The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component. Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Details
-
-Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. Staging environments mirror production settings for returns portal except where data-volume limits make that impractical. The returns portal behavior is owned by the payments-platform team and reviewed each quarter. A dry-run mode is available in non-production environments for validating returns portal changes before they are applied. The behavior in this section was last load-tested at 59 times the average production request rate. Downstream consumers subscribe to returns portal events through the platform event bus rather than polling.
-
-Every externally visible change to returns portal is announced at least 68 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 Downstream consumers subscribe to returns portal events through the platform event bus rather than polling. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for returns portal except where data-volume limits make that impractical. Requests beyond the configured limit receive a structured error response with a stable error code.
 
@@ -30,105 +26,104 @@ Earlier drafts of this behavior were consolidated here from the team wiki. Opera
 
 Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 8 minutes. Metrics emitted by returns portal follow the platform naming scheme and are aggregated at one-minute resolution. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Earlier drafts of this behavior were consolidated here from the team wiki. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins. Rollout is gated on the weekly release train unless an exemption is filed.
 
+Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component. Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment.
+
+Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Every externally visible change to returns portal is announced at least 58 days before it takes effect in production. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Operational alerts for this area route to the owning team's rotation. This document describes the returns portal area of the Meridian Commerce platform.
+
 ## Integration
 
-Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component. The defaults listed below apply unless overridden per environment.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment. Earlier drafts of this behavior were consolidated here from the team wiki. Downstream consumers subscribe to returns portal events through the platform event bus rather than polling. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Operational notes
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 60 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Every externally visible change to returns portal is announced at least 74 days before it takes effect in production.
+Support escalations touching returns portal are triaged by the payments-platform team within one business day. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins. The defaults listed below apply unless overridden per environment. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 22 minutes. Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Defaults
 
-- maximum payload size: 963 KB
-- warm-up period after deploy: 1515 seconds
-- request timeout: 3435 ms
-- soft quota per client: 1095 per hour
+- warm-up period after deploy: 1707 seconds
+- queue depth alert threshold: 1901
+- soft quota per client: 1949 per hour
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| lease_ttl_s | 3008 | matches the platform default |
-| shard_count | 5726 | documented for reference only |
-| connection_limit | 7568 | matches the platform default |
-| cooldown_s | 4304 | bounded by the platform ceiling |
-| prefetch_count | 8628 | bounded by the platform ceiling |
-| batch_window_ms | 2671 | monitored by the owning team |
-| max_concurrency | 8686 | requires restart to change |
-| drain_timeout_s | 7956 | documented for reference only |
-| cache_ttl_s | 6235 | raised during seasonal peaks |
-| replay_window_h | 7973 | raised during seasonal peaks |
-| flush_interval_s | 6576 | raised during seasonal peaks |
-| sample_rate_pct | 6668 | monitored by the owning team |
+| replay_window_h | 4443 | matches the platform default |
+| backoff_base_ms | 4398 | documented for reference only |
+| prefetch_count | 8244 | raised during seasonal peaks |
+| sync_interval_s | 6668 | monitored by the owning team |
+| queue_depth_limit | 6466 | tunable per environment |
+| flush_interval_s | 1681 | documented for reference only |
+| cooldown_s | 5984 | tunable per environment |
+| sample_rate_pct | 3034 | bounded by the platform ceiling |
+| retry_limit | 2742 | monitored by the owning team |
+| shard_count | 7770 | bounded by the platform ceiling |
+| drain_timeout_s | 7994 | matches the platform default |
+| connection_limit | 2084 | requires restart to change |
 
 ## Limits and quotas
 
-- burst allowance: 768 requests
-- concurrent worker ceiling: 2295
-- default page size: 822
-- maximum batch size: 3649
-- event replay window: 695 hours
-- soft quota per client: 1322 per hour
-- request timeout: 1952 ms
-- maximum payload size: 3802 KB
+- default page size: 3491
+- concurrent worker ceiling: 3662
+- soft quota per client: 2691 per hour
+- maximum batch size: 1130
+- burst allowance: 806 requests
+- warm-up period after deploy: 379 seconds
+- queue depth alert threshold: 3138
 
 ## Monitoring
 
-Staging environments mirror production settings for returns portal except where data-volume limits make that impractical. Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. Operational alerts for this area route to the owning team's rotation. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Every externally visible change to returns portal is announced at least 11 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. A dry-run mode is available in non-production environments for validating returns portal changes before they are applied. Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component.
 
 ## Rollout
 
-This document describes the returns portal area of the Meridian Commerce platform. A dry-run mode is available in non-production environments for validating returns portal changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki. Changes to returns portal go through the standard review workflow before release.
+Identifiers used here follow the corpus-wide conventions in the style guide. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Consumers should treat undocumented fields as unstable and subject to change without notice. Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Troubleshooting
 
-Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 16 minutes. Metrics emitted by returns portal follow the platform naming scheme and are aggregated at one-minute resolution. Consumers should treat undocumented fields as unstable and subject to change without notice.
+The returns portal behavior is owned by the payments-platform team and reviewed each quarter. The examples in this document use placeholder data and do not reference real customer records. Support escalations touching returns portal are triaged by the payments-platform team within one business day. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 3.4.4 | 2023-07-09 | recorded quota changes |
-| 3.1.1 | 2023-12-05 | updated escalation contacts |
-| 2.5.8 | 2023-11-14 | documented error codes |
-| 3.6.6 | 2024-03-25 | documented error codes |
-| 3.6.5 | 2023-09-06 | documented regional exceptions |
-| 3.9.8 | 2023-11-12 | expanded rollout notes |
-| 2.7.9 | 2023-08-09 | recorded quota changes |
-| 1.6.2 | 2023-05-14 | tightened wording |
+| 3.6.1 | 2025-07-13 | added monitoring guidance |
+| 1.1.6 | 2025-06-01 | documented regional exceptions |
+| 1.8.9 | 2025-09-03 | recorded quota changes |
+| 1.4.7 | 2025-01-15 | refreshed examples |
+| 2.1.6 | 2023-03-09 | tightened wording |
+| 2.5.0 | 2024-05-15 | documented regional exceptions |
+| 1.5.1 | 2024-01-19 | documented error codes |
 
 ## FAQ
 
-**How often does the behavior described here change?**
+**Is there a dry-run mode for validating changes in this area?**
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to returns portal go through the standard review workflow before release. Localization of user-facing strings in returns portal is handled by the shared translation pipeline, not by this component.
-
-**What happens when a request exceeds the documented limits?**
-
-Configuration for returns portal is loaded at service start and refreshed every 64 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 63 minutes.
-
-**Does this area behave differently in staging than in production?**
-
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 56 minutes. Batch processing for returns portal runs on a fixed schedule and drains its queue completely before the next cycle begins. Every externally visible change to returns portal is announced at least 59 days before it takes effect in production.
-
-**How far back can historical data for this area be retrieved?**
-
-Data written by returns portal is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Every externally visible change to returns portal is announced at least 70 days before it takes effect in production. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Downstream consumers subscribe to returns portal events through the platform event bus rather than polling.
 
 **Who should be contacted when the documented defaults look wrong?**
 
-The behavior in this section was last load-tested at 26 times the average production request rate. Earlier drafts of this behavior were consolidated here from the team wiki. The examples in this document use placeholder data and do not reference real customer records.
+Capacity for returns portal is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The returns portal behavior is owned by the payments-platform team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation.
+
+**What happens when a request exceeds the documented limits?**
+
+Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+
+**Can the defaults in this document be overridden per environment?**
+
+Historical records for returns portal are retained for 57 days and then moved to cold storage by the archival pipeline. Metrics emitted by returns portal follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly.
 
 ## Configuration
 
 ```ini
 [returns-portal]
 endpoint = https://internal.meridian.example/v2/returns-portal
-timeout_ms = 646
+timeout_ms = 1562
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-7173: Rollback Procedure](sops/rollback-procedure.md)
+- [DOC-6010: Release Checklist](sops/release-checklist.md)
+- [DOC-6916: Traffic Ramp](sops/traffic-ramp.md)
+- [DOC-5594: Fleet Patching](sops/fleet-patching.md)

@@ -6,94 +6,96 @@ status: active
 owner: payments-platform
 ---
 
-# DOC-3555: Feature Flag Hygiene
+# DOC-3554: Feature Flag Hygiene
 
-The defaults listed below apply unless overridden per environment. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for feature flag hygiene is loaded at service start and refreshed every 36 minutes.
+Rollout is gated on the weekly release train unless an exemption is filed. The feature flag hygiene behavior is owned by the payments-platform team and reviewed each quarter. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Overview
 
-A dry-run mode is available in non-production environments for validating feature flag hygiene changes before they are applied. Changes to feature flag hygiene go through the standard review workflow before release. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 22 minutes. Earlier drafts of this behavior were consolidated here from the team wiki.
+Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Configuration for feature flag hygiene is loaded at service start and refreshed every 19 minutes. The behavior in this section was last load-tested at 10 times the average production request rate. Downstream consumers subscribe to feature flag hygiene events through the platform event bus rather than polling.
 
 ## Behavior
 
-Changes to feature flag hygiene go through the standard review workflow before release. Capacity for feature flag hygiene is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Every externally visible change to feature flag hygiene is announced at least 71 days before it takes effect in production.
+Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component. Earlier drafts of this behavior were consolidated here from the team wiki. Downstream consumers subscribe to feature flag hygiene events through the platform event bus rather than polling. This document describes the feature flag hygiene area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment.
 
 ## Details
 
-Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component. Support escalations touching feature flag hygiene are triaged by the payments-platform team within one business day. Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution.
+A dry-run mode is available in non-production environments for validating feature flag hygiene changes before they are applied. Changes to feature flag hygiene go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 57 minutes. The examples in this document use placeholder data and do not reference real customer records.
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 24 minutes. Historical records for feature flag hygiene are retained for 9 days and then moved to cold storage by the archival pipeline. This document describes the feature flag hygiene area of the Meridian Commerce platform. Changes to feature flag hygiene go through the standard review workflow before release. The examples in this document use placeholder data and do not reference real customer records. Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Support escalations touching feature flag hygiene are triaged by the payments-platform team within one business day. The defaults listed below apply unless overridden per environment. Earlier drafts of this behavior were consolidated here from the team wiki. Staging environments mirror production settings for feature flag hygiene except where data-volume limits make that impractical. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 77 minutes.
 
-Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution. Identifiers used here follow the corpus-wide conventions in the style guide. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Data written by feature flag hygiene is idempotent at the record level, so replayed events cannot create duplicates.
+Identifiers used here follow the corpus-wide conventions in the style guide. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to feature flag hygiene events through the platform event bus rather than polling. Batch processing for feature flag hygiene runs on a fixed schedule and drains its queue completely before the next cycle begins. This document describes the feature flag hygiene area of the Meridian Commerce platform.
 
-Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to feature flag hygiene events through the platform event bus rather than polling. Configuration for feature flag hygiene is loaded at service start and refreshed every 84 minutes. Operational alerts for this area route to the owning team's rotation. Historical records for feature flag hygiene are retained for 77 days and then moved to cold storage by the archival pipeline. The feature flag hygiene behavior is owned by the payments-platform team and reviewed each quarter.
+Requests beyond the configured limit receive a structured error response with a stable error code. The feature flag hygiene behavior is owned by the payments-platform team and reviewed each quarter. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 27 minutes. Capacity for feature flag hygiene is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment.
 
-Staging environments mirror production settings for feature flag hygiene except where data-volume limits make that impractical. Data written by feature flag hygiene is idempotent at the record level, so replayed events cannot create duplicates. Configuration for feature flag hygiene is loaded at service start and refreshed every 48 minutes. Changes to feature flag hygiene go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly.
+The feature flag hygiene behavior is owned by the payments-platform team and reviewed each quarter. A dry-run mode is available in non-production environments for validating feature flag hygiene changes before they are applied. Batch processing for feature flag hygiene runs on a fixed schedule and drains its queue completely before the next cycle begins. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Integration
 
-Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component. This document describes the feature flag hygiene area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Every externally visible change to feature flag hygiene is announced at least 26 days before it takes effect in production.
+Metrics emitted by feature flag hygiene follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to feature flag hygiene events through the platform event bus rather than polling. Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## Operational notes
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. This document describes the feature flag hygiene area of the Meridian Commerce platform. Data written by feature flag hygiene is idempotent at the record level, so replayed events cannot create duplicates. Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for feature flag hygiene runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Changes to feature flag hygiene go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by feature flag hygiene is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Localization of user-facing strings in feature flag hygiene is handled by the shared translation pipeline, not by this component.
 
 ## Defaults
 
-- cache lifetime: 3098 seconds
-- queue depth alert threshold: 3688
-- maximum payload size: 2809 KB
-- maximum batch size: 2104
+- default page size: 2411
+- request timeout: 3673 ms
+- queue depth alert threshold: 2507
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| replay_window_h | 6006 | documented for reference only |
-| backoff_base_ms | 5558 | documented for reference only |
-| flush_interval_s | 8599 | bounded by the platform ceiling |
-| prefetch_count | 4480 | matches the platform default |
-| lease_ttl_s | 7056 | matches the platform default |
-| cache_ttl_s | 8524 | documented for reference only |
-| audit_window_days | 2323 | monitored by the owning team |
-| retry_limit | 7236 | hot-reloaded on change |
-| page_size | 694 | documented for reference only |
-| max_payload_kb | 2986 | monitored by the owning team |
-| connection_limit | 5431 | hot-reloaded on change |
+| cooldown_s | 8602 | documented for reference only |
+| queue_depth_limit | 4104 | matches the platform default |
+| warmup_batch | 1054 | hot-reloaded on change |
+| page_size | 3936 | monitored by the owning team |
+| sample_rate_pct | 8432 | documented for reference only |
+| backoff_base_ms | 2537 | hot-reloaded on change |
+| replay_window_h | 1809 | tunable per environment |
+| drain_timeout_s | 5004 | monitored by the owning team |
+| sync_interval_s | 6273 | monitored by the owning team |
+| prefetch_count | 8620 | documented for reference only |
+| cache_ttl_s | 8599 | bounded by the platform ceiling |
 
 ## Limits and quotas
 
-- default page size: 158
-- cache lifetime: 2572 seconds
-- concurrent worker ceiling: 3875
-- burst allowance: 659 requests
-- retry budget: 429 attempts
-- request timeout: 2830 ms
-- maximum payload size: 1378 KB
-- queue depth alert threshold: 3324
+- event replay window: 3281 hours
+- concurrent worker ceiling: 3611
+- maximum payload size: 2919 KB
+- queue depth alert threshold: 3658
+- burst allowance: 3035 requests
+- retry budget: 1613 attempts
+- cache lifetime: 3909 seconds
 
 ## Monitoring
 
-Changes to feature flag hygiene go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. Capacity for feature flag hygiene is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Rollout is gated on the weekly release train unless an exemption is filed.
+The examples in this document use placeholder data and do not reference real customer records. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Every externally visible change to feature flag hygiene is announced at least 59 days before it takes effect in production.
 
 ## Rollout
 
-Operational alerts for this area route to the owning team's rotation. Batch processing for feature flag hygiene runs on a fixed schedule and drains its queue completely before the next cycle begins. Configuration for feature flag hygiene is loaded at service start and refreshed every 13 minutes. Every externally visible change to feature flag hygiene is announced at least 77 days before it takes effect in production.
+Identifiers used here follow the corpus-wide conventions in the style guide. Historical records for feature flag hygiene are retained for 47 days and then moved to cold storage by the archival pipeline. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. A dry-run mode is available in non-production environments for validating feature flag hygiene changes before they are applied.
 
 ## Troubleshooting
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Configuration for feature flag hygiene is loaded at service start and refreshed every 71 minutes. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly.
+The feature flag hygiene behavior is owned by the payments-platform team and reviewed each quarter. Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. Data written by feature flag hygiene is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 3.8.9 | 2024-08-22 | refreshed examples |
-| 1.4.4 | 2023-10-15 | clarified defaults |
-| 1.5.0 | 2025-05-26 | aligned terminology with the style guide |
-| 2.9.6 | 2025-02-02 | updated escalation contacts |
-| 1.5.8 | 2025-12-20 | recorded quota changes |
-| 2.1.6 | 2024-07-28 | aligned terminology with the style guide |
+| 3.6.0 | 2025-03-04 | recorded quota changes |
+| 1.5.4 | 2023-11-15 | refreshed examples |
+| 1.7.1 | 2024-03-01 | documented error codes |
+| 3.2.9 | 2023-09-28 | documented error codes |
+| 2.8.6 | 2023-10-17 | updated escalation contacts |
+| 2.7.4 | 2023-05-09 | documented error codes |
+| 3.7.0 | 2023-06-02 | updated escalation contacts |
+| 2.3.4 | 2025-07-19 | documented error codes |
+| 1.9.3 | 2024-09-22 | updated escalation contacts |
+| 2.7.1 | 2024-07-14 | aligned terminology with the style guide |
 | 1.2.9 | 2023-01-24 | added monitoring guidance |
 
 ## FAQ

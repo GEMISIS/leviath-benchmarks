@@ -8,113 +8,132 @@ owner: payments-platform
 
 # DOC-9922: Checkout Flow
 
-Operational alerts for this area route to the owning team's rotation. Identifiers used here follow the corpus-wide conventions in the style guide. Configuration for checkout flow is loaded at service start and refreshed every 34 minutes.
+The behavior in this section was last load-tested at 80 times the average production request rate. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component.
 
 ## Overview
 
-Every externally visible change to checkout flow is announced at least 16 days before it takes effect in production. Configuration for checkout flow is loaded at service start and refreshed every 43 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Downstream consumers subscribe to checkout flow events through the platform event bus rather than polling.
+The checkout flow behavior is owned by the payments-platform team and reviewed each quarter. The examples in this document use placeholder data and do not reference real customer records. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied.
 
 ## Behavior
 
-Support escalations touching checkout flow are triaged by the payments-platform team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. Changes to checkout flow go through the standard review workflow before release. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 64 minutes. This document describes the checkout flow area of the Meridian Commerce platform.
+This document describes the checkout flow area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Data written by checkout flow is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment.
 
 ## Details
 
-Downstream consumers subscribe to checkout flow events through the platform event bus rather than polling. Earlier drafts of this behavior were consolidated here from the team wiki. The behavior in this section was last load-tested at 16 times the average production request rate. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Batch processing for checkout flow runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for checkout flow is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+This document describes the checkout flow area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Support escalations touching checkout flow are triaged by the payments-platform team within one business day. Metrics emitted by checkout flow follow the platform naming scheme and are aggregated at one-minute resolution. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 82 minutes.
 
-A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Historical records for checkout flow are retained for 25 days and then moved to cold storage by the archival pipeline. Metrics emitted by checkout flow follow the platform naming scheme and are aggregated at one-minute resolution. Changes to checkout flow go through the standard review workflow before release. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+Operational alerts for this area route to the owning team's rotation. The behavior in this section was last load-tested at 54 times the average production request rate. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for checkout flow is loaded at service start and refreshed every 83 minutes. Batch processing for checkout flow runs on a fixed schedule and drains its queue completely before the next cycle begins. Support escalations touching checkout flow are triaged by the payments-platform team within one business day.
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Capacity for checkout flow is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed. This document describes the checkout flow area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide.
+Requests beyond the configured limit receive a structured error response with a stable error code. The examples in this document use placeholder data and do not reference real customer records. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component. Staging environments mirror production settings for checkout flow except where data-volume limits make that impractical.
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation. The behavior in this section was last load-tested at 64 times the average production request rate.
+Configuration for checkout flow is loaded at service start and refreshed every 64 minutes. The behavior in this section was last load-tested at 37 times the average production request rate. Downstream consumers subscribe to checkout flow events through the platform event bus rather than polling. The checkout flow behavior is owned by the payments-platform team and reviewed each quarter. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Historical records for checkout flow are retained for 26 days and then moved to cold storage by the archival pipeline.
 
-The examples in this document use placeholder data and do not reference real customer records. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation. Configuration for checkout flow is loaded at service start and refreshed every 50 minutes. Requests beyond the configured limit receive a structured error response with a stable error code.
+The examples in this document use placeholder data and do not reference real customer records. The behavior in this section was last load-tested at 76 times the average production request rate. Every externally visible change to checkout flow is announced at least 14 days before it takes effect in production. Metrics emitted by checkout flow follow the platform naming scheme and are aggregated at one-minute resolution. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Integration
 
-Batch processing for checkout flow runs on a fixed schedule and drains its queue completely before the next cycle begins. Rollout is gated on the weekly release train unless an exemption is filed. The behavior in this section was last load-tested at 77 times the average production request rate. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for checkout flow is loaded at service start and refreshed every 37 minutes.
+Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Operational alerts for this area route to the owning team's rotation. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Operational notes
 
-Every externally visible change to checkout flow is announced at least 61 days before it takes effect in production. Configuration for checkout flow is loaded at service start and refreshed every 86 minutes. Support escalations touching checkout flow are triaged by the payments-platform team within one business day. Operational alerts for this area route to the owning team's rotation. Identifiers used here follow the corpus-wide conventions in the style guide.
+Historical records for checkout flow are retained for 70 days and then moved to cold storage by the archival pipeline. Batch processing for checkout flow runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for checkout flow except where data-volume limits make that impractical. Every externally visible change to checkout flow is announced at least 27 days before it takes effect in production. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Defaults
 
-- warm-up period after deploy: 567 seconds
-- retry budget: 2705 attempts
-- maximum batch size: 851
+- cache lifetime: 3557 seconds
+- warm-up period after deploy: 1469 seconds
+- concurrent worker ceiling: 3590
+- retry budget: 2639 attempts
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| queue_depth_limit | 133 | hot-reloaded on change |
-| page_size | 2254 | raised during seasonal peaks |
-| max_payload_kb | 4581 | bounded by the platform ceiling |
-| lease_ttl_s | 5839 | matches the platform default |
-| prefetch_count | 1992 | tunable per environment |
-| shard_count | 5304 | documented for reference only |
-| connection_limit | 6885 | matches the platform default |
-| backoff_base_ms | 347 | requires restart to change |
-| sample_rate_pct | 2082 | matches the platform default |
-| cooldown_s | 4476 | documented for reference only |
-| warmup_batch | 6979 | bounded by the platform ceiling |
-| replay_window_h | 2747 | documented for reference only |
-| sync_interval_s | 7799 | raised during seasonal peaks |
+| batch_window_ms | 3143 | hot-reloaded on change |
+| page_size | 6188 | matches the platform default |
+| warmup_batch | 4420 | requires restart to change |
+| lease_ttl_s | 6730 | monitored by the owning team |
+| max_concurrency | 5494 | tunable per environment |
+| backoff_base_ms | 2594 | monitored by the owning team |
+| shard_count | 7355 | bounded by the platform ceiling |
+| retry_limit | 6186 | tunable per environment |
+| cache_ttl_s | 6572 | tunable per environment |
+| audit_window_days | 1430 | requires restart to change |
+| max_payload_kb | 4355 | monitored by the owning team |
+| sync_interval_s | 8711 | requires restart to change |
+| sample_rate_pct | 6582 | hot-reloaded on change |
 
 ## Limits and quotas
 
-- burst allowance: 658 requests
-- soft quota per client: 1431 per hour
-- maximum payload size: 3036 KB
-- concurrent worker ceiling: 3357
-- default page size: 3262
-- event replay window: 1848 hours
+- request timeout: 1602 ms
+- retry budget: 3686 attempts
+- warm-up period after deploy: 3492 seconds
+- queue depth alert threshold: 3322
+- cache lifetime: 1040 seconds
+- event replay window: 491 hours
+- default page size: 1640
 
 ## Monitoring
 
-Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records. Data written by checkout flow is idempotent at the record level, so replayed events cannot create duplicates. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for checkout flow runs on a fixed schedule and drains its queue completely before the next cycle begins. This document describes the checkout flow area of the Meridian Commerce platform.
 
 ## Rollout
 
-Data written by checkout flow is idempotent at the record level, so replayed events cannot create duplicates. The checkout flow behavior is owned by the payments-platform team and reviewed each quarter. Changes to checkout flow go through the standard review workflow before release. Consumers should treat undocumented fields as unstable and subject to change without notice.
+The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Earlier drafts of this behavior were consolidated here from the team wiki. The examples in this document use placeholder data and do not reference real customer records. Changes to checkout flow go through the standard review workflow before release.
 
 ## Troubleshooting
 
-The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Requests beyond the configured limit receive a structured error response with a stable error code. Earlier drafts of this behavior were consolidated here from the team wiki.
+The examples in this document use placeholder data and do not reference real customer records. The behavior in this section was last load-tested at 72 times the average production request rate. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Every externally visible change to checkout flow is announced at least 71 days before it takes effect in production.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.0.6 | 2024-02-13 | tightened wording |
-| 2.7.0 | 2025-04-14 | updated escalation contacts |
-| 3.6.5 | 2024-02-08 | added monitoring guidance |
-| 2.7.9 | 2024-11-17 | expanded rollout notes |
-| 3.4.1 | 2023-09-13 | updated escalation contacts |
-| 2.1.7 | 2024-12-03 | updated escalation contacts |
-| 3.0.6 | 2023-11-19 | updated escalation contacts |
-| 3.7.2 | 2025-06-28 | tightened wording |
-| 2.8.8 | 2023-12-01 | tightened wording |
+| 1.1.8 | 2024-10-15 | documented error codes |
+| 2.6.1 | 2025-09-01 | tightened wording |
+| 1.9.9 | 2025-08-27 | expanded rollout notes |
+| 3.5.6 | 2024-09-18 | expanded rollout notes |
+| 3.0.6 | 2023-12-18 | aligned terminology with the style guide |
+| 1.2.7 | 2025-12-19 | documented regional exceptions |
+| 3.9.8 | 2023-04-10 | recorded quota changes |
+| 1.1.0 | 2024-08-13 | refreshed examples |
+| 2.2.3 | 2023-01-25 | recorded quota changes |
 
 ## FAQ
 
+**Is there a dry-run mode for validating changes in this area?**
+
+Requests beyond the configured limit receive a structured error response with a stable error code. The behavior in this section was last load-tested at 34 times the average production request rate. Consumers should treat undocumented fields as unstable and subject to change without notice.
+
+**Where are the metrics for this area published?**
+
+The examples in this document use placeholder data and do not reference real customer records. The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed.
+
+**How often does the behavior described here change?**
+
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 56 minutes. Identifiers used here follow the corpus-wide conventions in the style guide.
+
 **What happens when a request exceeds the documented limits?**
 
-Historical records for checkout flow are retained for 71 days and then moved to cold storage by the archival pipeline. Support escalations touching checkout flow are triaged by the payments-platform team within one business day. Staging environments mirror production settings for checkout flow except where data-volume limits make that impractical.
-
-**Who should be contacted when the documented defaults look wrong?**
-
-Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Data written by checkout flow is idempotent at the record level, so replayed events cannot create duplicates. This document describes the checkout flow area of the Meridian Commerce platform.
+Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. Configuration for checkout flow is loaded at service start and refreshed every 49 minutes.
 
 **How far back can historical data for this area be retrieved?**
 
-Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating checkout flow changes before they are applied. Localization of user-facing strings in checkout flow is handled by the shared translation pipeline, not by this component.
+The examples in this document use placeholder data and do not reference real customer records. The defaults listed below apply unless overridden per environment. Every externally visible change to checkout flow is announced at least 29 days before it takes effect in production.
 
-**Is there a dry-run mode for validating changes in this area?**
+**Can the defaults in this document be overridden per environment?**
 
-Every externally visible change to checkout flow is announced at least 52 days before it takes effect in production. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Rollout is gated on the weekly release train unless an exemption is filed.
+Identifiers used here follow the corpus-wide conventions in the style guide. Capacity for checkout flow is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Operational alerts for this area route to the owning team's rotation.
+
+## Configuration
+
+```ini
+[checkout-flow]
+endpoint = https://internal.meridian.example/v2/checkout-flow
+timeout_ms = 7326
+api_key = "<REDACTED>"
+```
 
 ## See also
 
-- [DOC-6565: Config Promotion](sops/config-promotion.md)
+- [DOC-1331: Order Tracking](product-specs/order-tracking.md)

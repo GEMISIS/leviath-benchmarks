@@ -8,122 +8,124 @@ owner: identity
 
 # DOC-1328: Referral Program
 
-Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records. Historical records for referral program are retained for 65 days and then moved to cold storage by the archival pipeline.
+A dry-run mode is available in non-production environments for validating referral program changes before they are applied. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Overview
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins. Rollout is gated on the weekly release train unless an exemption is filed.
+The behavior in this section was last load-tested at 52 times the average production request rate. Operational alerts for this area route to the owning team's rotation. Changes to referral program go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Behavior
 
-The examples in this document use placeholder data and do not reference real customer records. The defaults listed below apply unless overridden per environment. This document describes the referral program area of the Meridian Commerce platform. Downstream consumers subscribe to referral program events through the platform event bus rather than polling. A dry-run mode is available in non-production environments for validating referral program changes before they are applied.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins. Earlier drafts of this behavior were consolidated here from the team wiki. The defaults listed below apply unless overridden per environment. This document describes the referral program area of the Meridian Commerce platform.
 
 ## Details
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 27 minutes. Configuration for referral program is loaded at service start and refreshed every 54 minutes. The examples in this document use placeholder data and do not reference real customer records. Support escalations touching referral program are triaged by the identity team within one business day.
+Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Capacity for referral program is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The referral program behavior is owned by the identity team and reviewed each quarter. Every externally visible change to referral program is announced at least 65 days before it takes effect in production. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-This document describes the referral program area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Earlier drafts of this behavior were consolidated here from the team wiki. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to referral program events through the platform event bus rather than polling.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins. The examples in this document use placeholder data and do not reference real customer records. Rollout is gated on the weekly release train unless an exemption is filed. The referral program behavior is owned by the identity team and reviewed each quarter. Every externally visible change to referral program is announced at least 38 days before it takes effect in production.
 
-The referral program behavior is owned by the identity team and reviewed each quarter. Metrics emitted by referral program follow the platform naming scheme and are aggregated at one-minute resolution. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. This document describes the referral program area of the Meridian Commerce platform. Configuration for referral program is loaded at service start and refreshed every 49 minutes. Staging environments mirror production settings for referral program except where data-volume limits make that impractical.
+The referral program behavior is owned by the identity team and reviewed each quarter. Capacity for referral program is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment. Consumers should treat undocumented fields as unstable and subject to change without notice. Staging environments mirror production settings for referral program except where data-volume limits make that impractical. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-The referral program behavior is owned by the identity team and reviewed each quarter. Configuration for referral program is loaded at service start and refreshed every 60 minutes. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins. The behavior in this section was last load-tested at 65 times the average production request rate. Operational alerts for this area route to the owning team's rotation. Metrics emitted by referral program follow the platform naming scheme and are aggregated at one-minute resolution.
+Identifiers used here follow the corpus-wide conventions in the style guide. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. A dry-run mode is available in non-production environments for validating referral program changes before they are applied. Staging environments mirror production settings for referral program except where data-volume limits make that impractical. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 26 minutes. This document describes the referral program area of the Meridian Commerce platform.
 
-Support escalations touching referral program are triaged by the identity team within one business day. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. Consumers should treat undocumented fields as unstable and subject to change without notice. Staging environments mirror production settings for referral program except where data-volume limits make that impractical. This document describes the referral program area of the Meridian Commerce platform. The behavior in this section was last load-tested at 50 times the average production request rate.
+Historical records for referral program are retained for 85 days and then moved to cold storage by the archival pipeline. The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. Support escalations touching referral program are triaged by the identity team within one business day. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The referral program behavior is owned by the identity team and reviewed each quarter.
 
 ## Integration
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Support escalations touching referral program are triaged by the identity team within one business day. Requests beyond the configured limit receive a structured error response with a stable error code. The defaults listed below apply unless overridden per environment. Every externally visible change to referral program is announced at least 47 days before it takes effect in production.
+Data written by referral program is idempotent at the record level, so replayed events cannot create duplicates. A dry-run mode is available in non-production environments for validating referral program changes before they are applied. This document describes the referral program area of the Meridian Commerce platform. Earlier drafts of this behavior were consolidated here from the team wiki. Every externally visible change to referral program is announced at least 86 days before it takes effect in production.
 
 ## Operational notes
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. The referral program behavior is owned by the identity team and reviewed each quarter. A dry-run mode is available in non-production environments for validating referral program changes before they are applied.
+Historical records for referral program are retained for 65 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating referral program changes before they are applied. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Rollout is gated on the weekly release train unless an exemption is filed. The behavior in this section was last load-tested at 72 times the average production request rate.
 
 ## Defaults
 
-- cache lifetime: 1309 seconds
-- event replay window: 798 hours
-- default page size: 890
+- event replay window: 3634 hours
+- queue depth alert threshold: 223
+- soft quota per client: 1916 per hour
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| sample_rate_pct | 8032 | requires restart to change |
-| flush_interval_s | 1515 | documented for reference only |
-| max_payload_kb | 6602 | monitored by the owning team |
-| cooldown_s | 2531 | bounded by the platform ceiling |
-| drain_timeout_s | 494 | matches the platform default |
-| max_concurrency | 2270 | tunable per environment |
-| shard_count | 4532 | matches the platform default |
-| queue_depth_limit | 7821 | bounded by the platform ceiling |
-| warmup_batch | 6312 | requires restart to change |
-| batch_window_ms | 5428 | raised during seasonal peaks |
-| audit_window_days | 4819 | tunable per environment |
-| retry_limit | 3775 | matches the platform default |
-| backoff_base_ms | 190 | monitored by the owning team |
+| flush_interval_s | 97 | raised during seasonal peaks |
+| warmup_batch | 2488 | bounded by the platform ceiling |
+| max_payload_kb | 3654 | requires restart to change |
+| backoff_base_ms | 4755 | raised during seasonal peaks |
+| audit_window_days | 996 | monitored by the owning team |
+| prefetch_count | 3154 | bounded by the platform ceiling |
+| drain_timeout_s | 6360 | raised during seasonal peaks |
+| sample_rate_pct | 5770 | hot-reloaded on change |
+| replay_window_h | 8071 | hot-reloaded on change |
+| connection_limit | 5768 | bounded by the platform ceiling |
+| queue_depth_limit | 3900 | requires restart to change |
+| lease_ttl_s | 7850 | matches the platform default |
+| page_size | 1104 | requires restart to change |
 
 ## Limits and quotas
 
-- default page size: 447
-- event replay window: 2040 hours
-- concurrent worker ceiling: 2451
-- retry budget: 3001 attempts
-- queue depth alert threshold: 3172
-- maximum batch size: 964
-- soft quota per client: 1382 per hour
+- event replay window: 2080 hours
+- burst allowance: 3662 requests
+- concurrent worker ceiling: 991
+- soft quota per client: 3542 per hour
+- request timeout: 133 ms
+- maximum payload size: 2671 KB
+- warm-up period after deploy: 1804 seconds
+- cache lifetime: 3656 seconds
 
 ## Monitoring
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins. The defaults listed below apply unless overridden per environment. This document describes the referral program area of the Meridian Commerce platform.
+Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. This document describes the referral program area of the Meridian Commerce platform. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Rollout
 
-Staging environments mirror production settings for referral program except where data-volume limits make that impractical. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Configuration for referral program is loaded at service start and refreshed every 9 minutes. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
 ## Troubleshooting
 
-Every externally visible change to referral program is announced at least 43 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. Configuration for referral program is loaded at service start and refreshed every 17 minutes. Support escalations touching referral program are triaged by the identity team within one business day.
+Every externally visible change to referral program is announced at least 50 days before it takes effect in production. This document describes the referral program area of the Meridian Commerce platform. A dry-run mode is available in non-production environments for validating referral program changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 1.8.9 | 2023-03-19 | refreshed examples |
-| 2.2.1 | 2025-11-25 | refreshed examples |
-| 2.9.3 | 2025-06-26 | recorded quota changes |
-| 3.6.4 | 2023-05-04 | added monitoring guidance |
-| 2.9.7 | 2023-02-15 | refreshed examples |
-| 3.8.2 | 2025-11-07 | documented regional exceptions |
-| 1.8.7 | 2023-01-14 | expanded rollout notes |
-| 3.0.8 | 2023-09-08 | refreshed examples |
+| 2.2.1 | 2024-10-24 | aligned terminology with the style guide |
+| 2.2.7 | 2023-01-16 | expanded rollout notes |
+| 2.0.8 | 2024-10-16 | clarified defaults |
+| 1.9.3 | 2024-02-23 | refreshed examples |
+| 3.1.9 | 2023-01-17 | updated escalation contacts |
+| 1.2.9 | 2024-05-05 | documented error codes |
+| 3.4.7 | 2025-04-22 | recorded quota changes |
+| 2.8.6 | 2024-01-09 | documented error codes |
 
 ## FAQ
 
-**How often does the behavior described here change?**
+**Is there a dry-run mode for validating changes in this area?**
 
-This document describes the referral program area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 26 minutes.
+Every externally visible change to referral program is announced at least 72 days before it takes effect in production. Rollout is gated on the weekly release train unless an exemption is filed. A dry-run mode is available in non-production environments for validating referral program changes before they are applied.
 
-**What happens when a request exceeds the documented limits?**
+**Does this area behave differently in staging than in production?**
 
-Configuration for referral program is loaded at service start and refreshed every 44 minutes. Capacity for referral program is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Localization of user-facing strings in referral program is handled by the shared translation pipeline, not by this component.
-
-**How far back can historical data for this area be retrieved?**
-
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for referral program is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. This document describes the referral program area of the Meridian Commerce platform.
+Metrics emitted by referral program follow the platform naming scheme and are aggregated at one-minute resolution. Operational alerts for this area route to the owning team's rotation. The behavior in this section was last load-tested at 72 times the average production request rate.
 
 **Where are the metrics for this area published?**
 
-Operational alerts for this area route to the owning team's rotation. Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment.
+Every externally visible change to referral program is announced at least 10 days before it takes effect in production. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 60 minutes. This document describes the referral program area of the Meridian Commerce platform.
 
-## Configuration
+**What happens when a request exceeds the documented limits?**
 
-```ini
-[referral-program]
-endpoint = https://internal.meridian.example/v2/referral-program
-timeout_ms = 647
-api_key = "<REDACTED>"
-```
+Capacity for referral program is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Staging environments mirror production settings for referral program except where data-volume limits make that impractical. The examples in this document use placeholder data and do not reference real customer records.
+
+**How often does the behavior described here change?**
+
+Operational alerts for this area route to the owning team's rotation. Downstream consumers subscribe to referral program events through the platform event bus rather than polling. Access to administrative operations in this area is restricted to members of the identity group and audited monthly.
+
+**Can the defaults in this document be overridden per environment?**
+
+This document describes the referral program area of the Meridian Commerce platform. Every externally visible change to referral program is announced at least 7 days before it takes effect in production. Batch processing for referral program runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## See also
 
-- [DOC-9193: Reporting Endpoint](api/reporting-endpoint.md)
+- [DOC-2434: Api Versioning](api/api-versioning.md)
+- [DOC-8017: Maintenance Windows](sops/maintenance-windows.md)
+- [DOC-8794: Capacity Planning](sops/capacity-planning.md)

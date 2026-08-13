@@ -1,7 +1,7 @@
 ---
 id: DOC-4478
 title: Events Endpoint
-version: 2.3.2
+version: latest
 status: active
 owner: identity
 ---
@@ -26,7 +26,7 @@ Every externally visible change to events endpoint is announced at least 80 days
 
 Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Rollout is gated on the weekly release train unless an exemption is filed. Support escalations touching events endpoint are triaged by the identity team within one business day. Operational alerts for this area route to the owning team's rotation. Metrics emitted by events endpoint follow the platform naming scheme and are aggregated at one-minute resolution.
 
-Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Configuration for events endpoint is loaded at service start and refreshed every 7 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for events endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 31 minutes.
+Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Configuration for events endpoint is loaded at service start and refreshed every 7 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for events endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 31 minutes. Event history lookups are served from live log storage covering the most recent 30 days; older windows require an archive request.
 
 Data written by events endpoint is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for events endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for events endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Staging environments mirror production settings for events endpoint except where data-volume limits make that impractical. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 

@@ -8,126 +8,117 @@ owner: traffic-eng
 
 # DOC-8017: Maintenance Windows
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Every externally visible change to maintenance windows is announced at least 69 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation.
+Every externally visible change to maintenance windows is announced at least 69 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The standing window opens every Tuesday at 02:00 UTC and holds for 60 minutes.
 
 ## Overview
 
-The examples in this document use placeholder data and do not reference real customer records. Every externally visible change to maintenance windows is announced at least 5 days before it takes effect in production. Staging environments mirror production settings for maintenance windows except where data-volume limits make that impractical. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Staging environments mirror production settings for maintenance windows except where data-volume limits make that impractical. Consumers should treat undocumented fields as unstable and subject to change without notice. This document describes the maintenance windows area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment.
 
 ## Behavior
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component.
+Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. Rollout is gated on the weekly release train unless an exemption is filed. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Identifiers used here follow the corpus-wide conventions in the style guide. The behavior in this section was last load-tested at 11 times the average production request rate.
 
 ## Details
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. Configuration for maintenance windows is loaded at service start and refreshed every 73 minutes. The maintenance windows behavior is owned by the traffic-eng team and reviewed each quarter. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+Configuration for maintenance windows is loaded at service start and refreshed every 73 minutes. Downstream consumers subscribe to maintenance windows events through the platform event bus rather than polling. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. A dry-run mode is available in non-production environments for validating maintenance windows changes before they are applied. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
-The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching maintenance windows are triaged by the traffic-eng team within one business day. The examples in this document use placeholder data and do not reference real customer records. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Staging environments mirror production settings for maintenance windows except where data-volume limits make that impractical. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 43 minutes.
+The examples in this document use placeholder data and do not reference real customer records. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Staging environments mirror production settings for maintenance windows except where data-volume limits make that impractical. Support escalations touching maintenance windows are triaged by the traffic-eng team within one business day. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component.
 
-Operational alerts for this area route to the owning team's rotation. Changes to maintenance windows go through the standard review workflow before release. This document describes the maintenance windows area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Downstream consumers subscribe to maintenance windows events through the platform event bus rather than polling.
+Changes to maintenance windows go through the standard review workflow before release. This document describes the maintenance windows area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 77 minutes. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Configuration for maintenance windows is loaded at service start and refreshed every 62 minutes.
 
-Every externally visible change to maintenance windows is announced at least 31 days before it takes effect in production. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The behavior in this section was last load-tested at 30 times the average production request rate.
+Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 77 minutes. The behavior in this section was last load-tested at 30 times the average production request rate. Operational alerts for this area route to the owning team's rotation.
 
-Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. Operational alerts for this area route to the owning team's rotation. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Requests beyond the configured limit receive a structured error response with a stable error code. Metrics emitted by maintenance windows follow the platform naming scheme and are aggregated at one-minute resolution.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Requests beyond the configured limit receive a structured error response with a stable error code. Metrics emitted by maintenance windows follow the platform naming scheme and are aggregated at one-minute resolution. Identifiers used here follow the corpus-wide conventions in the style guide. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 81 minutes.
 
 ## Integration
 
-A dry-run mode is available in non-production environments for validating maintenance windows changes before they are applied. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. Historical records for maintenance windows are retained for 79 days and then moved to cold storage by the archival pipeline. The behavior in this section was last load-tested at 40 times the average production request rate. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+The examples in this document use placeholder data and do not reference real customer records. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Historical records for maintenance windows are retained for 12 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice. This document describes the maintenance windows area of the Meridian Commerce platform.
 
 ## Operational notes
 
-The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice. This document describes the maintenance windows area of the Meridian Commerce platform. Downstream consumers subscribe to maintenance windows events through the platform event bus rather than polling. Historical records for maintenance windows are retained for 35 days and then moved to cold storage by the archival pipeline.
+Every externally visible change to maintenance windows is announced at least 28 days before it takes effect in production. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. The defaults listed below apply unless overridden per environment. Downstream consumers subscribe to maintenance windows events through the platform event bus rather than polling. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Defaults
 
-- request timeout: 3572 ms
-- maximum batch size: 3870
-- retry budget: 2532 attempts
-- soft quota per client: 3523 per hour
+- default page size: 410
+- request timeout: 3420 ms
+- retry budget: 1070 attempts
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| page_size | 3196 | bounded by the platform ceiling |
-| max_payload_kb | 3060 | raised during seasonal peaks |
-| backoff_base_ms | 6459 | bounded by the platform ceiling |
-| batch_window_ms | 6326 | raised during seasonal peaks |
-| sample_rate_pct | 3070 | documented for reference only |
-| connection_limit | 5270 | hot-reloaded on change |
-| retry_limit | 1739 | tunable per environment |
-| sync_interval_s | 7098 | monitored by the owning team |
-| queue_depth_limit | 7142 | hot-reloaded on change |
-| shard_count | 4155 | raised during seasonal peaks |
+| batch_window_ms | 4716 | hot-reloaded on change |
+| lease_ttl_s | 6806 | monitored by the owning team |
+| warmup_batch | 2715 | requires restart to change |
+| sample_rate_pct | 604 | documented for reference only |
+| sync_interval_s | 5911 | documented for reference only |
+| audit_window_days | 2255 | raised during seasonal peaks |
+| replay_window_h | 4183 | matches the platform default |
+| cache_ttl_s | 4492 | raised during seasonal peaks |
+| max_payload_kb | 7159 | bounded by the platform ceiling |
+| cooldown_s | 5326 | hot-reloaded on change |
+| prefetch_count | 8393 | hot-reloaded on change |
+| max_concurrency | 3772 | documented for reference only |
+| drain_timeout_s | 850 | requires restart to change |
+| queue_depth_limit | 5795 | hot-reloaded on change |
 
 ## Limits and quotas
 
-- cache lifetime: 537 seconds
-- event replay window: 952 hours
-- burst allowance: 1588 requests
-- retry budget: 222 attempts
-- soft quota per client: 380 per hour
-- maximum batch size: 2679
-- concurrent worker ceiling: 1458
+- warm-up period after deploy: 894 seconds
+- queue depth alert threshold: 1961
+- request timeout: 3611 ms
+- cache lifetime: 1641 seconds
+- retry budget: 1137 attempts
+- burst allowance: 248 requests
+- maximum batch size: 2999
+- event replay window: 362 hours
 
 ## Monitoring
 
-Data written by maintenance windows is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to maintenance windows events through the platform event bus rather than polling. Identifiers used here follow the corpus-wide conventions in the style guide. Support escalations touching maintenance windows are triaged by the traffic-eng team within one business day.
+Configuration for maintenance windows is loaded at service start and refreshed every 42 minutes. The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating maintenance windows changes before they are applied.
 
 ## Rollout
 
-Historical records for maintenance windows are retained for 34 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating maintenance windows changes before they are applied. The defaults listed below apply unless overridden per environment. Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component.
+Batch processing for maintenance windows runs on a fixed schedule and drains its queue completely before the next cycle begins. Earlier drafts of this behavior were consolidated here from the team wiki. This document describes the maintenance windows area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Troubleshooting
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 16 minutes. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice. The maintenance windows behavior is owned by the traffic-eng team and reviewed each quarter.
+Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for maintenance windows is loaded at service start and refreshed every 13 minutes. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 72 minutes. Capacity for maintenance windows is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.0.9 | 2024-06-01 | expanded rollout notes |
-| 1.2.1 | 2024-06-04 | clarified defaults |
-| 1.8.7 | 2024-08-08 | added monitoring guidance |
-| 1.6.4 | 2023-09-10 | updated escalation contacts |
-| 2.4.0 | 2023-03-09 | added monitoring guidance |
-| 1.9.9 | 2023-10-08 | recorded quota changes |
-| 1.6.7 | 2025-05-05 | updated escalation contacts |
-| 3.6.2 | 2023-07-14 | updated escalation contacts |
-| 3.1.9 | 2023-08-27 | clarified defaults |
+| 2.3.7 | 2023-07-21 | refreshed examples |
+| 1.8.4 | 2025-07-09 | clarified defaults |
+| 1.2.4 | 2024-03-20 | updated escalation contacts |
+| 1.9.3 | 2024-01-13 | added monitoring guidance |
+| 3.4.2 | 2025-12-14 | expanded rollout notes |
+| 1.6.6 | 2025-12-04 | updated escalation contacts |
+| 1.7.0 | 2024-05-22 | expanded rollout notes |
+| 2.5.4 | 2023-03-04 | expanded rollout notes |
+| 2.7.3 | 2024-03-02 | recorded quota changes |
+| 1.3.0 | 2023-12-05 | clarified defaults |
 
 ## FAQ
 
-**Where are the metrics for this area published?**
+**Does this area behave differently in staging than in production?**
 
-Support escalations touching maintenance windows are triaged by the traffic-eng team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. This document describes the maintenance windows area of the Meridian Commerce platform.
-
-**Can the defaults in this document be overridden per environment?**
-
-Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Every externally visible change to maintenance windows is announced at least 28 days before it takes effect in production.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 **Who should be contacted when the documented defaults look wrong?**
 
-The maintenance windows behavior is owned by the traffic-eng team and reviewed each quarter. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to maintenance windows go through the standard review workflow before release.
+Localization of user-facing strings in maintenance windows is handled by the shared translation pipeline, not by this component. Changes to maintenance windows go through the standard review workflow before release. Data written by maintenance windows is idempotent at the record level, so replayed events cannot create duplicates.
 
-**Does this area behave differently in staging than in production?**
+**Where are the metrics for this area published?**
 
-Support escalations touching maintenance windows are triaged by the traffic-eng team within one business day. Requests beyond the configured limit receive a structured error response with a stable error code. This document describes the maintenance windows area of the Meridian Commerce platform.
+Metrics emitted by maintenance windows follow the platform naming scheme and are aggregated at one-minute resolution. Consumers should treat undocumented fields as unstable and subject to change without notice. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 **Is there a dry-run mode for validating changes in this area?**
 
-The defaults listed below apply unless overridden per environment. Historical records for maintenance windows are retained for 46 days and then moved to cold storage by the archival pipeline. Earlier drafts of this behavior were consolidated here from the team wiki.
-
-## Configuration
-
-```ini
-[maintenance-windows]
-endpoint = https://internal.meridian.example/v2/maintenance-windows
-timeout_ms = 508
-api_key = "<REDACTED>"
-```
+The behavior in this section was last load-tested at 11 times the average production request rate. The defaults listed below apply unless overridden per environment. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## See also
 
-- [DOC-6502: Inventory Sync](product-specs/inventory-sync.md)
-- [DOC-8681: Currencies Endpoint](api/currencies-endpoint.md)
+- [DOC-5338: Monitoring Setup](sops/monitoring-setup.md)

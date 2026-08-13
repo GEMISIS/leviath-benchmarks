@@ -8,121 +8,133 @@ owner: traffic-eng
 
 # DOC-9070: Split Payments
 
-The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Changes to split payments go through the standard review workflow before release. This document describes the split payments area of the Meridian Commerce platform.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for split payments runs on a fixed schedule and drains its queue completely before the next cycle begins. The behavior in this section was last load-tested at 14 times the average production request rate.
 
 ## Overview
 
-This document describes the split payments area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Requests beyond the configured limit receive a structured error response with a stable error code. Historical records for split payments are retained for 44 days and then moved to cold storage by the archival pipeline.
+Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 28 minutes. A dry-run mode is available in non-production environments for validating split payments changes before they are applied. The split payments behavior is owned by the traffic-eng team and reviewed each quarter.
 
 ## Behavior
 
-Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. The behavior in this section was last load-tested at 41 times the average production request rate. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki. Batch processing for split payments runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. The split payments behavior is owned by the traffic-eng team and reviewed each quarter. Changes to split payments go through the standard review workflow before release. Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Details
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 76 minutes. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Every externally visible change to split payments is announced at least 28 days before it takes effect in production. Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. A dry-run mode is available in non-production environments for validating split payments changes before they are applied.
+Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to split payments events through the platform event bus rather than polling. The behavior in this section was last load-tested at 55 times the average production request rate. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 25 minutes. Every externally visible change to split payments is announced at least 30 days before it takes effect in production.
 
-Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Support escalations touching split payments are triaged by the traffic-eng team within one business day. Staging environments mirror production settings for split payments except where data-volume limits make that impractical. The split payments behavior is owned by the traffic-eng team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code.
+Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. The examples in this document use placeholder data and do not reference real customer records.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 59 minutes. Batch processing for split payments runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for split payments except where data-volume limits make that impractical.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Rollout is gated on the weekly release train unless an exemption is filed. Configuration for split payments is loaded at service start and refreshed every 50 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The split payments behavior is owned by the traffic-eng team and reviewed each quarter. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 72 minutes.
 
-Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. Support escalations touching split payments are triaged by the traffic-eng team within one business day. Localization of user-facing strings in split payments is handled by the shared translation pipeline, not by this component. Consumers should treat undocumented fields as unstable and subject to change without notice. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Downstream consumers subscribe to split payments events through the platform event bus rather than polling. The behavior in this section was last load-tested at 22 times the average production request rate. Support escalations touching split payments are triaged by the traffic-eng team within one business day. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation.
 
-Every externally visible change to split payments is announced at least 48 days before it takes effect in production. Changes to split payments go through the standard review workflow before release. Operational alerts for this area route to the owning team's rotation. Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating split payments changes before they are applied. This document describes the split payments area of the Meridian Commerce platform.
+Historical records for split payments are retained for 65 days and then moved to cold storage by the archival pipeline. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for split payments is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Every externally visible change to split payments is announced at least 53 days before it takes effect in production. Downstream consumers subscribe to split payments events through the platform event bus rather than polling. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
 ## Integration
 
-The defaults listed below apply unless overridden per environment. A dry-run mode is available in non-production environments for validating split payments changes before they are applied. Batch processing for split payments runs on a fixed schedule and drains its queue completely before the next cycle begins. Operational alerts for this area route to the owning team's rotation. Support escalations touching split payments are triaged by the traffic-eng team within one business day.
+Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Staging environments mirror production settings for split payments except where data-volume limits make that impractical. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Changes to split payments go through the standard review workflow before release. Because a split charge may be retried across several days, note that replay protection lapses once a key is older than 24 hours, and a late retry will charge again.
 
 ## Operational notes
 
-The behavior in this section was last load-tested at 56 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Every externally visible change to split payments is announced at least 54 days before it takes effect in production. Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. Configuration for split payments is loaded at service start and refreshed every 11 minutes.
+Identifiers used here follow the corpus-wide conventions in the style guide. Requests beyond the configured limit receive a structured error response with a stable error code. Historical records for split payments are retained for 44 days and then moved to cold storage by the archival pipeline. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. A dry-run mode is available in non-production environments for validating split payments changes before they are applied.
 
 ## Defaults
 
-- concurrent worker ceiling: 3864
-- queue depth alert threshold: 1361
-- maximum batch size: 3395
+- soft quota per client: 3376 per hour
+- cache lifetime: 1972 seconds
+- concurrent worker ceiling: 3922
+- event replay window: 3707 hours
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| flush_interval_s | 3962 | hot-reloaded on change |
-| prefetch_count | 5231 | requires restart to change |
-| lease_ttl_s | 1687 | documented for reference only |
-| shard_count | 5358 | matches the platform default |
-| batch_window_ms | 8159 | raised during seasonal peaks |
-| backoff_base_ms | 5968 | hot-reloaded on change |
-| sample_rate_pct | 4782 | documented for reference only |
-| connection_limit | 6782 | tunable per environment |
-| retry_limit | 8110 | requires restart to change |
-| cache_ttl_s | 2911 | raised during seasonal peaks |
-| audit_window_days | 8950 | tunable per environment |
-| sync_interval_s | 5585 | matches the platform default |
+| audit_window_days | 2065 | matches the platform default |
+| drain_timeout_s | 6821 | matches the platform default |
+| shard_count | 7848 | hot-reloaded on change |
+| page_size | 4957 | hot-reloaded on change |
+| queue_depth_limit | 5079 | matches the platform default |
+| replay_window_h | 8667 | raised during seasonal peaks |
+| flush_interval_s | 3110 | hot-reloaded on change |
+| batch_window_ms | 7036 | requires restart to change |
+| max_concurrency | 4148 | monitored by the owning team |
+| warmup_batch | 3082 | raised during seasonal peaks |
+| backoff_base_ms | 5817 | monitored by the owning team |
+| sample_rate_pct | 1658 | matches the platform default |
+| prefetch_count | 1447 | bounded by the platform ceiling |
 
 ## Limits and quotas
 
-- concurrent worker ceiling: 1955
-- request timeout: 3378 ms
-- queue depth alert threshold: 3706
-- default page size: 2128
-- cache lifetime: 3563 seconds
-- event replay window: 1328 hours
+- concurrent worker ceiling: 2345
+- default page size: 1328
+- soft quota per client: 3852 per hour
+- request timeout: 936 ms
+- queue depth alert threshold: 2708
+- retry budget: 2007 attempts
 
 ## Monitoring
 
-Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Downstream consumers subscribe to split payments events through the platform event bus rather than polling. The split payments behavior is owned by the traffic-eng team and reviewed each quarter. Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates.
+Operational alerts for this area route to the owning team's rotation. Support escalations touching split payments are triaged by the traffic-eng team within one business day. The split payments behavior is owned by the traffic-eng team and reviewed each quarter. Changes to split payments go through the standard review workflow before release.
 
 ## Rollout
 
-The examples in this document use placeholder data and do not reference real customer records. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+Every externally visible change to split payments is announced at least 26 days before it takes effect in production. Data written by split payments is idempotent at the record level, so replayed events cannot create duplicates. Configuration for split payments is loaded at service start and refreshed every 33 minutes. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Troubleshooting
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. A dry-run mode is available in non-production environments for validating split payments changes before they are applied. Historical records for split payments are retained for 57 days and then moved to cold storage by the archival pipeline. Every externally visible change to split payments is announced at least 65 days before it takes effect in production.
+Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Every externally visible change to split payments is announced at least 49 days before it takes effect in production. Changes to split payments go through the standard review workflow before release.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 3.7.3 | 2025-10-27 | clarified defaults |
-| 1.2.7 | 2024-01-03 | updated escalation contacts |
-| 2.2.8 | 2025-07-27 | aligned terminology with the style guide |
-| 1.9.6 | 2023-03-26 | documented regional exceptions |
-| 3.4.5 | 2025-09-08 | expanded rollout notes |
-| 1.5.4 | 2025-12-16 | expanded rollout notes |
-| 2.2.6 | 2025-09-13 | expanded rollout notes |
+| 3.9.1 | 2024-09-19 | documented error codes |
+| 1.7.6 | 2025-04-06 | recorded quota changes |
+| 1.1.6 | 2024-08-16 | updated escalation contacts |
+| 3.4.9 | 2025-10-12 | expanded rollout notes |
+| 2.9.6 | 2024-01-22 | added monitoring guidance |
+| 3.1.2 | 2024-09-28 | updated escalation contacts |
+| 1.5.7 | 2023-11-27 | expanded rollout notes |
+| 2.9.0 | 2024-05-16 | documented regional exceptions |
+| 2.8.0 | 2024-05-21 | recorded quota changes |
+| 3.4.5 | 2025-10-20 | refreshed examples |
 
 ## FAQ
 
-**Does this area behave differently in staging than in production?**
+**How far back can historical data for this area be retrieved?**
 
-The split payments behavior is owned by the traffic-eng team and reviewed each quarter. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Staging environments mirror production settings for split payments except where data-volume limits make that impractical. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
-**Is there a dry-run mode for validating changes in this area?**
+**What happens when a request exceeds the documented limits?**
 
-Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Configuration for split payments is loaded at service start and refreshed every 82 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+Capacity for split payments is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Every externally visible change to split payments is announced at least 81 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation.
 
-**Who should be contacted when the documented defaults look wrong?**
+**Can the defaults in this document be overridden per environment?**
 
-The defaults listed below apply unless overridden per environment. Every externally visible change to split payments is announced at least 57 days before it takes effect in production. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly.
+Changes to split payments go through the standard review workflow before release. Capacity for split payments is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 **Where are the metrics for this area published?**
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Configuration for split payments is loaded at service start and refreshed every 35 minutes. Historical records for split payments are retained for 6 days and then moved to cold storage by the archival pipeline.
+Changes to split payments go through the standard review workflow before release. Metrics emitted by split payments follow the platform naming scheme and are aggregated at one-minute resolution. Historical records for split payments are retained for 74 days and then moved to cold storage by the archival pipeline.
+
+**Is there a dry-run mode for validating changes in this area?**
+
+Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Downstream consumers subscribe to split payments events through the platform event bus rather than polling.
+
+**Does this area behave differently in staging than in production?**
+
+Downstream consumers subscribe to split payments events through the platform event bus rather than polling. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Configuration
 
 ```ini
 [split-payments]
 endpoint = https://internal.meridian.example/v2/split-payments
-timeout_ms = 1290
+timeout_ms = 5771
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-9193: Reporting Endpoint](api/reporting-endpoint.md)
-- [DOC-5594: Fleet Patching](sops/fleet-patching.md)
-- [DOC-9072: Auth Tokens](api/auth-tokens.md)
+- [DOC-5529: Price Lists Endpoint](api/price-lists-endpoint.md)
+- [DOC-6565: Config Promotion](sops/config-promotion.md)

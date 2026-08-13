@@ -1,124 +1,129 @@
 ---
 id: DOC-6010
 title: Release Checklist
-version: 1.9.0
-status: active
+version: v1.4.0
+status: deprecated
 owner: storefront
 ---
 
-# DOC-6010: Release Checklist
+# DOC-6011: Release Checklist
 
-Historical records for release checklist are retained for 72 days and then moved to cold storage by the archival pipeline. Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution. Staging environments mirror production settings for release checklist except where data-volume limits make that impractical.
+This document describes the release checklist area of the Meridian Commerce platform. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Overview
 
-Operational alerts for this area route to the owning team's rotation. Staging environments mirror production settings for release checklist except where data-volume limits make that impractical. Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Batch processing for release checklist runs on a fixed schedule and drains its queue completely before the next cycle begins.
+The behavior in this section was last load-tested at 73 times the average production request rate. Configuration for release checklist is loaded at service start and refreshed every 38 minutes. Changes to release checklist go through the standard review workflow before release. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## Behavior
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. This document describes the release checklist area of the Meridian Commerce platform. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for release checklist is loaded at service start and refreshed every 26 minutes. The defaults listed below apply unless overridden per environment.
+Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. This document describes the release checklist area of the Meridian Commerce platform. Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Historical records for release checklist are retained for 49 days and then moved to cold storage by the archival pipeline.
 
 ## Details
 
-Changes to release checklist go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. Earlier drafts of this behavior were consolidated here from the team wiki.
+Data written by release checklist is idempotent at the record level, so replayed events cannot create duplicates. Historical records for release checklist are retained for 63 days and then moved to cold storage by the archival pipeline. Staging environments mirror production settings for release checklist except where data-volume limits make that impractical. Support escalations touching release checklist are triaged by the storefront team within one business day. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to release checklist go through the standard review workflow before release. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 7 minutes. Every externally visible change to release checklist is announced at least 54 days before it takes effect in production. Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Staging environments mirror production settings for release checklist except where data-volume limits make that impractical. The examples in this document use placeholder data and do not reference real customer records. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki. Operational alerts for this area route to the owning team's rotation. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 60 minutes.
 
-Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Batch processing for release checklist runs on a fixed schedule and drains its queue completely before the next cycle begins. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. This document describes the release checklist area of the Meridian Commerce platform. Rollout is gated on the weekly release train unless an exemption is filed. Historical records for release checklist are retained for 75 days and then moved to cold storage by the archival pipeline.
+This document describes the release checklist area of the Meridian Commerce platform. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for release checklist is loaded at service start and refreshed every 26 minutes. The defaults listed below apply unless overridden per environment. Support escalations touching release checklist are triaged by the storefront team within one business day. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Support escalations touching release checklist are triaged by the storefront team within one business day. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 43 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly.
+The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. Earlier drafts of this behavior were consolidated here from the team wiki. The release checklist behavior is owned by the storefront team and reviewed each quarter. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
-The release checklist behavior is owned by the storefront team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Historical records for release checklist are retained for 41 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution.
+Changes to release checklist go through the standard review workflow before release. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Every externally visible change to release checklist is announced at least 7 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. Support escalations touching release checklist are triaged by the storefront team within one business day. Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Integration
 
-This document describes the release checklist area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment. Historical records for release checklist are retained for 42 days and then moved to cold storage by the archival pipeline. Support escalations touching release checklist are triaged by the storefront team within one business day. Earlier drafts of this behavior were consolidated here from the team wiki.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. This document describes the release checklist area of the Meridian Commerce platform. Rollout is gated on the weekly release train unless an exemption is filed. Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Historical records for release checklist are retained for 61 days and then moved to cold storage by the archival pipeline.
 
 ## Operational notes
 
-Changes to release checklist go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide. Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list.
+Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to release checklist events through the platform event bus rather than polling. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. Requests beyond the configured limit receive a structured error response with a stable error code. Support escalations touching release checklist are triaged by the storefront team within one business day.
 
 ## Defaults
 
-- event replay window: 3762 hours
-- burst allowance: 2566 requests
-- maximum payload size: 3718 KB
-- request timeout: 2450 ms
+- default page size: 595
+- event replay window: 1765 hours
+- retry budget: 2394 attempts
+- concurrent worker ceiling: 3169
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| cache_ttl_s | 4823 | raised during seasonal peaks |
-| backoff_base_ms | 5863 | tunable per environment |
-| prefetch_count | 8375 | bounded by the platform ceiling |
-| page_size | 4661 | raised during seasonal peaks |
-| connection_limit | 7790 | documented for reference only |
-| retry_limit | 8721 | bounded by the platform ceiling |
-| queue_depth_limit | 1346 | requires restart to change |
-| flush_interval_s | 2172 | monitored by the owning team |
-| max_payload_kb | 5557 | hot-reloaded on change |
-| shard_count | 1556 | bounded by the platform ceiling |
+| audit_window_days | 4772 | documented for reference only |
+| shard_count | 4325 | requires restart to change |
+| connection_limit | 2920 | documented for reference only |
+| backoff_base_ms | 6636 | raised during seasonal peaks |
+| queue_depth_limit | 8102 | requires restart to change |
+| page_size | 5489 | requires restart to change |
+| batch_window_ms | 4303 | documented for reference only |
+| drain_timeout_s | 2497 | tunable per environment |
+| flush_interval_s | 1128 | bounded by the platform ceiling |
+| cooldown_s | 8588 | tunable per environment |
+| replay_window_h | 4671 | requires restart to change |
+| sync_interval_s | 5796 | raised during seasonal peaks |
 
 ## Limits and quotas
 
-- concurrent worker ceiling: 499
-- retry budget: 2047 attempts
-- soft quota per client: 2454 per hour
-- request timeout: 3413 ms
-- event replay window: 2620 hours
-- cache lifetime: 1297 seconds
-- default page size: 1946
+- maximum payload size: 2103 KB
+- cache lifetime: 833 seconds
+- event replay window: 2969 hours
+- warm-up period after deploy: 1175 seconds
+- concurrent worker ceiling: 1153
+- request timeout: 1957 ms
+- default page size: 2694
 
 ## Monitoring
 
-Historical records for release checklist are retained for 89 days and then moved to cold storage by the archival pipeline. Configuration for release checklist is loaded at service start and refreshed every 33 minutes. The behavior in this section was last load-tested at 76 times the average production request rate. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Data written by release checklist is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Rollout
 
-Data written by release checklist is idempotent at the record level, so replayed events cannot create duplicates. Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to release checklist events through the platform event bus rather than polling. Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component.
+Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution. Configuration for release checklist is loaded at service start and refreshed every 28 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Troubleshooting
 
-The behavior in this section was last load-tested at 43 times the average production request rate. Requests beyond the configured limit receive a structured error response with a stable error code. The release checklist behavior is owned by the storefront team and reviewed each quarter. Batch processing for release checklist runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Rollout is gated on the weekly release train unless an exemption is filed. Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution. The defaults listed below apply unless overridden per environment. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
+| 1.7.9 | 2025-06-16 | updated escalation contacts |
+| 1.9.3 | 2025-10-26 | refreshed examples |
+| 1.4.2 | 2025-03-02 | added monitoring guidance |
+| 3.4.4 | 2024-09-28 | tightened wording |
 | 3.9.6 | 2025-11-02 | clarified defaults |
 | 3.5.9 | 2025-09-21 | expanded rollout notes |
 | 1.4.4 | 2024-09-02 | tightened wording |
-| 3.5.6 | 2025-11-03 | refreshed examples |
-| 3.1.6 | 2024-04-21 | expanded rollout notes |
-| 2.0.3 | 2023-07-13 | documented regional exceptions |
-| 3.2.8 | 2023-12-08 | documented regional exceptions |
-| 3.9.4 | 2024-12-28 | clarified defaults |
-| 2.6.8 | 2025-01-07 | aligned terminology with the style guide |
-| 1.4.2 | 2025-03-25 | clarified defaults |
 
 ## FAQ
 
+**Can the defaults in this document be overridden per environment?**
+
+A dry-run mode is available in non-production environments for validating release checklist changes before they are applied. Changes to release checklist go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+
 **What happens when a request exceeds the documented limits?**
 
-Configuration for release checklist is loaded at service start and refreshed every 73 minutes. The examples in this document use placeholder data and do not reference real customer records. The release checklist behavior is owned by the storefront team and reviewed each quarter.
+Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. The behavior in this section was last load-tested at 10 times the average production request rate.
+
+**Is there a dry-run mode for validating changes in this area?**
+
+Data written by release checklist is idempotent at the record level, so replayed events cannot create duplicates. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list.
+
+**How often does the behavior described here change?**
+
+Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. This document describes the release checklist area of the Meridian Commerce platform. The behavior in this section was last load-tested at 81 times the average production request rate.
 
 **Does this area behave differently in staging than in production?**
 
-Historical records for release checklist are retained for 68 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice. Requests beyond the configured limit receive a structured error response with a stable error code.
-
-**Where are the metrics for this area published?**
-
-Localization of user-facing strings in release checklist is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Data written by release checklist is idempotent at the record level, so replayed events cannot create duplicates.
-
-**Who should be contacted when the documented defaults look wrong?**
-
-Downstream consumers subscribe to release checklist events through the platform event bus rather than polling. Batch processing for release checklist runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for release checklist is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Historical records for release checklist are retained for 39 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating release checklist changes before they are applied. Metrics emitted by release checklist follow the platform naming scheme and are aggregated at one-minute resolution.
 
 **How far back can historical data for this area be retrieved?**
 
-Rollout is gated on the weekly release train unless an exemption is filed. Changes to release checklist go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki.
+Every externally visible change to release checklist is announced at least 80 days before it takes effect in production. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly.
 
 ## See also
 
-- [DOC-3686: Rate Limits](api/rate-limits.md)
+- [DOC-4877: Gift Cards](product-specs/gift-cards.md)
+- [Background notes](product-specs/search-personalization-v2.md)
+- [Background notes](product-specs/cart-merge-v2.md)

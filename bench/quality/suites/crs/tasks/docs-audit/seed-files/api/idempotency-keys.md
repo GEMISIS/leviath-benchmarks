@@ -32,7 +32,7 @@ Localization of user-facing strings in idempotency keys is handled by the shared
 
 ## Integration
 
-A dry-run mode is available in non-production environments for validating idempotency keys changes before they are applied. Downstream consumers subscribe to idempotency keys events through the platform event bus rather than polling. The defaults listed below apply unless overridden per environment. Changes to idempotency keys go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki.
+A dry-run mode is available in non-production environments for validating idempotency keys changes before they are applied. Downstream consumers subscribe to idempotency keys events through the platform event bus rather than polling. The defaults listed below apply unless overridden per environment. Changes to idempotency keys go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. An idempotency key is honored for 72 hours from first use; the same key presented later starts a fresh operation.
 
 ## Operational notes
 

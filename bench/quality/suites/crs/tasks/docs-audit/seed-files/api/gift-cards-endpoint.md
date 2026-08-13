@@ -8,7 +8,7 @@ owner: payments-platform
 
 # DOC-1643: Gift Cards Endpoint
 
-Changes to gift cards endpoint go through the standard review workflow before release. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Downstream consumers subscribe to gift cards endpoint events through the platform event bus rather than polling.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Changes to gift cards endpoint go through the standard review workflow before release. Downstream consumers subscribe to gift cards endpoint events through the platform event bus rather than polling.
 
 ## Overview
 

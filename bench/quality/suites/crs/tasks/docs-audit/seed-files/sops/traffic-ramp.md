@@ -8,118 +8,134 @@ owner: identity
 
 # DOC-6916: Traffic Ramp
 
-This document describes the traffic ramp area of the Meridian Commerce platform. Consumers should treat undocumented fields as unstable and subject to change without notice. Every externally visible change to traffic ramp is announced at least 65 days before it takes effect in production.
+Support escalations touching traffic ramp are triaged by the identity team within one business day. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Overview
 
-Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Earlier drafts of this behavior were consolidated here from the team wiki. Staging environments mirror production settings for traffic ramp except where data-volume limits make that impractical.
+This document describes the traffic ramp area of the Meridian Commerce platform. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Behavior
 
-Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to traffic ramp is announced at least 8 days before it takes effect in production. Identifiers used here follow the corpus-wide conventions in the style guide.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Support escalations touching traffic ramp are triaged by the identity team within one business day. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The traffic ramp behavior is owned by the identity team and reviewed each quarter. The defaults listed below apply unless overridden per environment.
 
 ## Details
 
-Historical records for traffic ramp are retained for 32 days and then moved to cold storage by the archival pipeline. Earlier drafts of this behavior were consolidated here from the team wiki. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Staging environments mirror production settings for traffic ramp except where data-volume limits make that impractical. Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 83 minutes. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching traffic ramp are triaged by the identity team within one business day. Changes to traffic ramp go through the standard review workflow before release. Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Earlier drafts of this behavior were consolidated here from the team wiki. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates.
+Rollout is gated on the weekly release train unless an exemption is filed. Configuration for traffic ramp is loaded at service start and refreshed every 48 minutes. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Earlier drafts of this behavior were consolidated here from the team wiki. The behavior in this section was last load-tested at 7 times the average production request rate.
 
-Configuration for traffic ramp is loaded at service start and refreshed every 73 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. The examples in this document use placeholder data and do not reference real customer records. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 35 minutes. A dry-run mode is available in non-production environments for validating traffic ramp changes before they are applied.
+Metrics emitted by traffic ramp follow the platform naming scheme and are aggregated at one-minute resolution. The behavior in this section was last load-tested at 68 times the average production request rate. A dry-run mode is available in non-production environments for validating traffic ramp changes before they are applied. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates. Support escalations touching traffic ramp are triaged by the identity team within one business day. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 37 minutes.
 
-Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 20 minutes. The behavior in this section was last load-tested at 85 times the average production request rate. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates. Downstream consumers subscribe to traffic ramp events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
-Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Historical records for traffic ramp are retained for 15 days and then moved to cold storage by the archival pipeline. Identifiers used here follow the corpus-wide conventions in the style guide. Configuration for traffic ramp is loaded at service start and refreshed every 49 minutes. Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Access to administrative operations in this area is restricted to members of the identity group and audited monthly.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Rollout is gated on the weekly release train unless an exemption is filed. A dry-run mode is available in non-production environments for validating traffic ramp changes before they are applied. Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Downstream consumers subscribe to traffic ramp events through the platform event bus rather than polling. Operational alerts for this area route to the owning team's rotation.
 
 ## Integration
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Staging environments mirror production settings for traffic ramp except where data-volume limits make that impractical. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. Data written by traffic ramp is idempotent at the record level, so replayed events cannot create duplicates. Rollout is gated on the weekly release train unless an exemption is filed.
+A dry-run mode is available in non-production environments for validating traffic ramp changes before they are applied. Configuration for traffic ramp is loaded at service start and refreshed every 26 minutes. The traffic ramp behavior is owned by the identity team and reviewed each quarter. The examples in this document use placeholder data and do not reference real customer records. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 38 minutes.
 
 ## Operational notes
 
-Every externally visible change to traffic ramp is announced at least 11 days before it takes effect in production. Support escalations touching traffic ramp are triaged by the identity team within one business day. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The traffic ramp behavior is owned by the identity team and reviewed each quarter.
+Historical records for traffic ramp are retained for 23 days and then moved to cold storage by the archival pipeline. Metrics emitted by traffic ramp follow the platform naming scheme and are aggregated at one-minute resolution. Support escalations touching traffic ramp are triaged by the identity team within one business day. The traffic ramp behavior is owned by the identity team and reviewed each quarter. Changes to traffic ramp go through the standard review workflow before release.
 
 ## Defaults
 
-- event replay window: 2302 hours
-- maximum batch size: 931
-- cache lifetime: 3841 seconds
-- retry budget: 3074 attempts
+- request timeout: 3692 ms
+- queue depth alert threshold: 1409
+- retry budget: 3628 attempts
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| replay_window_h | 6568 | raised during seasonal peaks |
-| connection_limit | 325 | requires restart to change |
-| batch_window_ms | 8117 | requires restart to change |
-| cooldown_s | 275 | tunable per environment |
-| flush_interval_s | 4188 | raised during seasonal peaks |
-| prefetch_count | 6936 | documented for reference only |
-| audit_window_days | 4092 | matches the platform default |
-| max_payload_kb | 5402 | documented for reference only |
-| queue_depth_limit | 7684 | tunable per environment |
-| drain_timeout_s | 4939 | matches the platform default |
+| connection_limit | 5304 | hot-reloaded on change |
+| page_size | 6986 | tunable per environment |
+| max_concurrency | 1076 | hot-reloaded on change |
+| flush_interval_s | 4352 | tunable per environment |
+| sync_interval_s | 79 | monitored by the owning team |
+| cache_ttl_s | 2972 | bounded by the platform ceiling |
+| batch_window_ms | 7023 | matches the platform default |
+| retry_limit | 6004 | monitored by the owning team |
+| sample_rate_pct | 4535 | tunable per environment |
+| queue_depth_limit | 6384 | matches the platform default |
+| cooldown_s | 3994 | monitored by the owning team |
+| prefetch_count | 7700 | tunable per environment |
+| lease_ttl_s | 1509 | monitored by the owning team |
+| warmup_batch | 5643 | tunable per environment |
 
 ## Limits and quotas
 
-- retry budget: 2724 attempts
-- burst allowance: 475 requests
-- queue depth alert threshold: 252
-- event replay window: 3798 hours
-- concurrent worker ceiling: 3719
-- soft quota per client: 3551 per hour
-- default page size: 1473
+- default page size: 2374
+- concurrent worker ceiling: 3330
+- retry budget: 1499 attempts
+- queue depth alert threshold: 52
+- cache lifetime: 3965 seconds
+- maximum batch size: 3990
 
 ## Monitoring
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by traffic ramp follow the platform naming scheme and are aggregated at one-minute resolution. Support escalations touching traffic ramp are triaged by the identity team within one business day. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Operational alerts for this area route to the owning team's rotation. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. Configuration for traffic ramp is loaded at service start and refreshed every 66 minutes. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Rollout
 
-Changes to traffic ramp go through the standard review workflow before release. Requests beyond the configured limit receive a structured error response with a stable error code. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Every externally visible change to traffic ramp is announced at least 24 days before it takes effect in production.
+Every externally visible change to traffic ramp is announced at least 75 days before it takes effect in production. Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. The examples in this document use placeholder data and do not reference real customer records.
 
 ## Troubleshooting
 
-Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Operational alerts for this area route to the owning team's rotation. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 7 minutes.
+The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. Changes to traffic ramp go through the standard review workflow before release.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.3.2 | 2023-02-18 | recorded quota changes |
-| 2.8.1 | 2025-06-26 | documented regional exceptions |
-| 1.6.0 | 2023-09-06 | refreshed examples |
-| 3.0.0 | 2025-11-20 | recorded quota changes |
-| 1.3.6 | 2025-08-21 | recorded quota changes |
-| 3.5.4 | 2025-01-13 | added monitoring guidance |
-| 1.5.9 | 2024-01-18 | updated escalation contacts |
-| 3.1.5 | 2025-06-02 | documented error codes |
-| 1.3.9 | 2024-05-07 | updated escalation contacts |
-| 2.0.3 | 2023-03-07 | documented regional exceptions |
+| 2.8.5 | 2023-06-23 | tightened wording |
+| 1.6.5 | 2024-07-08 | documented error codes |
+| 2.7.7 | 2024-03-19 | tightened wording |
+| 1.6.8 | 2025-10-07 | documented error codes |
+| 2.2.1 | 2025-01-25 | documented error codes |
+| 3.4.8 | 2023-02-23 | updated escalation contacts |
+| 3.1.0 | 2025-07-05 | refreshed examples |
+| 3.4.7 | 2024-03-17 | updated escalation contacts |
+| 1.1.8 | 2024-03-19 | added monitoring guidance |
 
 ## FAQ
 
-**Who should be contacted when the documented defaults look wrong?**
+**Can the defaults in this document be overridden per environment?**
 
-Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
+The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records.
+
+**How often does the behavior described here change?**
+
+Earlier drafts of this behavior were consolidated here from the team wiki. Historical records for traffic ramp are retained for 40 days and then moved to cold storage by the archival pipeline. This document describes the traffic ramp area of the Meridian Commerce platform.
+
+**Does this area behave differently in staging than in production?**
+
+Capacity for traffic ramp is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Changes to traffic ramp go through the standard review workflow before release.
 
 **What happens when a request exceeds the documented limits?**
 
-Configuration for traffic ramp is loaded at service start and refreshed every 86 minutes. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component. The identity team publishes a quarterly summary of changes in this area to the platform announcements list.
+Metrics emitted by traffic ramp follow the platform naming scheme and are aggregated at one-minute resolution. Historical records for traffic ramp are retained for 77 days and then moved to cold storage by the archival pipeline. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
 **How far back can historical data for this area be retrieved?**
 
-Batch processing for traffic ramp runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. The examples in this document use placeholder data and do not reference real customer records.
+Operational alerts for this area route to the owning team's rotation. The examples in this document use placeholder data and do not reference real customer records. The identity team publishes a quarterly summary of changes in this area to the platform announcements list.
 
-**Can the defaults in this document be overridden per environment?**
+**Where are the metrics for this area published?**
 
-Support escalations touching traffic ramp are triaged by the identity team within one business day. The examples in this document use placeholder data and do not reference real customer records. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Localization of user-facing strings in traffic ramp is handled by the shared translation pipeline, not by this component.
 
-**Is there a dry-run mode for validating changes in this area?**
+## Configuration
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The defaults listed below apply unless overridden per environment.
+```ini
+[traffic-ramp]
+endpoint = https://internal.meridian.example/v2/traffic-ramp
+timeout_ms = 6147
+api_key = "<REDACTED>"
+api_key = "sk_live_3954fca1e797"
+```
 
 ## See also
 
-- [DOC-2195: Catalog Endpoint](api/catalog-endpoint.md)
-- [DOC-5393: Dynamic Bundles](product-specs/dynamic-bundles.md)
+- [DOC-5529: Price Lists Endpoint](api/price-lists-endpoint.md)
+- [DOC-5333: Network Acl Review](sops/network-acl-review.md)
+- [DOC-3251: Back In Stock Alerts](product-specs/back-in-stock-alerts.md)

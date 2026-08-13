@@ -8,126 +8,117 @@ owner: discovery
 
 # DOC-4769: Customers Endpoint
 
-Historical records for customers endpoint are retained for 80 days and then moved to cold storage by the archival pipeline. Changes to customers endpoint go through the standard review workflow before release. The defaults listed below apply unless overridden per environment.
+Metrics emitted by customers endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Batch processing for customers endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 60 minutes.
 
 ## Overview
 
-Batch processing for customers endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
+Data written by customers endpoint is idempotent at the record level, so replayed events cannot create duplicates. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Behavior
 
-Rollout is gated on the weekly release train unless an exemption is filed. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. The behavior in this section was last load-tested at 49 times the average production request rate. Support escalations touching customers endpoint are triaged by the discovery team within one business day.
+Operational alerts for this area route to the owning team's rotation. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. The examples in this document use placeholder data and do not reference real customer records. Historical records for customers endpoint are retained for 80 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating customers endpoint changes before they are applied.
 
 ## Details
 
-The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Earlier drafts of this behavior were consolidated here from the team wiki. This document describes the customers endpoint area of the Meridian Commerce platform. Downstream consumers subscribe to customers endpoint events through the platform event bus rather than polling. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical.
+The defaults listed below apply unless overridden per environment. Historical records for customers endpoint are retained for 73 days and then moved to cold storage by the archival pipeline. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. Batch processing for customers endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code.
 
-Downstream consumers subscribe to customers endpoint events through the platform event bus rather than polling. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Data written by customers endpoint is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to customers endpoint is announced at least 83 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation.
+Rollout is gated on the weekly release train unless an exemption is filed. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. The behavior in this section was last load-tested at 49 times the average production request rate. Support escalations touching customers endpoint are triaged by the discovery team within one business day. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
-A dry-run mode is available in non-production environments for validating customers endpoint changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list.
+This document describes the customers endpoint area of the Meridian Commerce platform. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 78 minutes. Data written by customers endpoint is idempotent at the record level, so replayed events cannot create duplicates. Configuration for customers endpoint is loaded at service start and refreshed every 74 minutes.
 
-Historical records for customers endpoint are retained for 29 days and then moved to cold storage by the archival pipeline. Support escalations touching customers endpoint are triaged by the discovery team within one business day. Earlier drafts of this behavior were consolidated here from the team wiki. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 16 minutes. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Identifiers used here follow the corpus-wide conventions in the style guide.
+Data written by customers endpoint is idempotent at the record level, so replayed events cannot create duplicates. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Every externally visible change to customers endpoint is announced at least 83 days before it takes effect in production. Operational alerts for this area route to the owning team's rotation. Identifiers used here follow the corpus-wide conventions in the style guide. Historical records for customers endpoint are retained for 29 days and then moved to cold storage by the archival pipeline.
 
-Configuration for customers endpoint is loaded at service start and refreshed every 85 minutes. This document describes the customers endpoint area of the Meridian Commerce platform. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 14 minutes.
+Requests beyond the configured limit receive a structured error response with a stable error code. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Downstream consumers subscribe to customers endpoint events through the platform event bus rather than polling. Identifiers used here follow the corpus-wide conventions in the style guide. Data written by customers endpoint is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Integration
 
-Identifiers used here follow the corpus-wide conventions in the style guide. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Operational alerts for this area route to the owning team's rotation. Changes to customers endpoint go through the standard review workflow before release.
+Support escalations touching customers endpoint are triaged by the discovery team within one business day. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Identifiers used here follow the corpus-wide conventions in the style guide. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 43 minutes. Operational alerts for this area route to the owning team's rotation.
 
 ## Operational notes
 
-Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. Localization of user-facing strings in customers endpoint is handled by the shared translation pipeline, not by this component. Configuration for customers endpoint is loaded at service start and refreshed every 44 minutes. Changes to customers endpoint go through the standard review workflow before release.
+Configuration for customers endpoint is loaded at service start and refreshed every 72 minutes. This document describes the customers endpoint area of the Meridian Commerce platform. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 85 minutes. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Defaults
 
-- concurrent worker ceiling: 1850
-- request timeout: 3103 ms
-- queue depth alert threshold: 547
-- soft quota per client: 139 per hour
+- maximum batch size: 3527
+- event replay window: 850 hours
+- request timeout: 360 ms
+- default page size: 3727
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| replay_window_h | 3327 | bounded by the platform ceiling |
-| drain_timeout_s | 1043 | matches the platform default |
-| queue_depth_limit | 1691 | documented for reference only |
-| prefetch_count | 7231 | monitored by the owning team |
-| backoff_base_ms | 5298 | hot-reloaded on change |
-| batch_window_ms | 7821 | hot-reloaded on change |
-| cooldown_s | 4363 | requires restart to change |
-| page_size | 809 | documented for reference only |
-| max_concurrency | 5698 | monitored by the owning team |
-| sync_interval_s | 852 | monitored by the owning team |
-| connection_limit | 6870 | tunable per environment |
+| backoff_base_ms | 2920 | bounded by the platform ceiling |
+| prefetch_count | 5078 | documented for reference only |
+| audit_window_days | 4535 | hot-reloaded on change |
+| replay_window_h | 7596 | monitored by the owning team |
+| connection_limit | 7362 | hot-reloaded on change |
+| drain_timeout_s | 519 | hot-reloaded on change |
+| lease_ttl_s | 8767 | hot-reloaded on change |
+| retry_limit | 8354 | bounded by the platform ceiling |
+| max_concurrency | 3800 | matches the platform default |
+| batch_window_ms | 759 | matches the platform default |
 
 ## Limits and quotas
 
-- event replay window: 1734 hours
-- burst allowance: 3263 requests
-- maximum batch size: 1389
-- warm-up period after deploy: 2575 seconds
-- retry budget: 1230 attempts
-- cache lifetime: 2701 seconds
-- soft quota per client: 1621 per hour
+- maximum payload size: 3009 KB
+- event replay window: 3817 hours
+- retry budget: 2919 attempts
+- concurrent worker ceiling: 432
+- maximum batch size: 2774
+- warm-up period after deploy: 2915 seconds
+- soft quota per client: 1664 per hour
 
 ## Monitoring
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Downstream consumers subscribe to customers endpoint events through the platform event bus rather than polling. Consumers should treat undocumented fields as unstable and subject to change without notice. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
+Every externally visible change to customers endpoint is announced at least 46 days before it takes effect in production. The behavior in this section was last load-tested at 28 times the average production request rate. The examples in this document use placeholder data and do not reference real customer records. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Rollout
 
-The behavior in this section was last load-tested at 88 times the average production request rate. Consumers should treat undocumented fields as unstable and subject to change without notice. Operational alerts for this area route to the owning team's rotation. Historical records for customers endpoint are retained for 21 days and then moved to cold storage by the archival pipeline.
+Historical records for customers endpoint are retained for 89 days and then moved to cold storage by the archival pipeline. The behavior in this section was last load-tested at 39 times the average production request rate. Identifiers used here follow the corpus-wide conventions in the style guide. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Troubleshooting
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Batch processing for customers endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Earlier drafts of this behavior were consolidated here from the team wiki. The customers endpoint behavior is owned by the discovery team and reviewed each quarter. A dry-run mode is available in non-production environments for validating customers endpoint changes before they are applied.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.4.2 | 2024-09-19 | tightened wording |
+| 3.6.1 | 2025-04-19 | tightened wording |
+| 2.4.6 | 2023-05-09 | documented regional exceptions |
+| 3.4.3 | 2025-07-24 | refreshed examples |
+| 1.9.5 | 2023-03-11 | added monitoring guidance |
+| 3.4.0 | 2023-05-09 | added monitoring guidance |
+| 2.2.6 | 2025-10-13 | documented regional exceptions |
 | 3.4.4 | 2025-11-23 | documented regional exceptions |
 | 3.5.9 | 2024-08-12 | expanded rollout notes |
 | 1.5.5 | 2023-03-19 | refreshed examples |
-| 2.6.5 | 2025-02-17 | documented error codes |
-| 1.6.2 | 2024-02-20 | expanded rollout notes |
-| 3.6.3 | 2024-08-09 | documented error codes |
-| 1.5.9 | 2025-01-22 | aligned terminology with the style guide |
-| 3.6.7 | 2024-12-17 | recorded quota changes |
 
 ## FAQ
 
 **How far back can historical data for this area be retrieved?**
 
-A dry-run mode is available in non-production environments for validating customers endpoint changes before they are applied. The examples in this document use placeholder data and do not reference real customer records. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
-
-**What happens when a request exceeds the documented limits?**
-
-Every externally visible change to customers endpoint is announced at least 39 days before it takes effect in production. This document describes the customers endpoint area of the Meridian Commerce platform. Rollout is gated on the weekly release train unless an exemption is filed.
-
-**Who should be contacted when the documented defaults look wrong?**
-
-Historical records for customers endpoint are retained for 32 days and then moved to cold storage by the archival pipeline. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Operational alerts for this area route to the owning team's rotation.
+Configuration for customers endpoint is loaded at service start and refreshed every 51 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 **Can the defaults in this document be overridden per environment?**
 
-Support escalations touching customers endpoint are triaged by the discovery team within one business day. The behavior in this section was last load-tested at 83 times the average production request rate. The examples in this document use placeholder data and do not reference real customer records.
+Metrics emitted by customers endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records.
+
+**Does this area behave differently in staging than in production?**
+
+Localization of user-facing strings in customers endpoint is handled by the shared translation pipeline, not by this component. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Rollout is gated on the weekly release train unless an exemption is filed.
+
+**How often does the behavior described here change?**
+
+The customers endpoint behavior is owned by the discovery team and reviewed each quarter. Earlier drafts of this behavior were consolidated here from the team wiki. Historical records for customers endpoint are retained for 89 days and then moved to cold storage by the archival pipeline.
 
 **Where are the metrics for this area published?**
 
-Changes to customers endpoint go through the standard review workflow before release. Consumers should treat undocumented fields as unstable and subject to change without notice. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
-
-## Configuration
-
-```ini
-[customers-endpoint]
-endpoint = https://internal.meridian.example/v2/customers-endpoint
-timeout_ms = 1215
-api_key = "<REDACTED>"
-```
+The defaults listed below apply unless overridden per environment. Capacity for customers endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Staging environments mirror production settings for customers endpoint except where data-volume limits make that impractical.
 
 ## See also
 
-- [DOC-6546: Dns Cutover](sops/dns-cutover.md)
+- [DOC-7401: Exports Endpoint](api/exports-endpoint.md)
+- [DOC-2266: Carts Endpoint](api/carts-endpoint.md)

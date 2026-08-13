@@ -1,12 +1,13 @@
 ---
 id: DOC-4867
 title: Fraud Screening
-version: 1.7.1
-status: active
+version: 2.1
+status: deprecated
+superseded_by: product-specs/fraud-screening-next.md
 owner: traffic-eng
 ---
 
-# DOC-4867: Fraud Screening
+# DOC-4868: Fraud Screening
 
 The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Metrics emitted by fraud screening follow the platform naming scheme and are aggregated at one-minute resolution. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
@@ -127,3 +128,5 @@ api_key = "<REDACTED>"
 - [DOC-1233: Returns Portal](product-specs/returns-portal.md)
 - [DOC-3171: Data Archival](sops/data-archival.md)
 - [DOC-4315: Wishlist Sharing](product-specs/wishlist-sharing.md)
+- [Background notes](api/pagination-rules-v2.md)
+- [Background notes](sops/maintenance-windows-v2.md)

@@ -22,7 +22,7 @@ Historical records for load testing are retained for 84 days and then moved to c
 
 Clients are expected to implement exponential backoff when a retryable error is returned by this area. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. Historical records for load testing are retained for 24 days and then moved to cold storage by the archival pipeline. The load testing behavior is owned by the comms team and reviewed each quarter. Identifiers used here follow the corpus-wide conventions in the style guide.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by load testing follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Operational alerts for this area route to the owning team's rotation. Clients are expected to implement exponential backoff when a retryable error is returned by this area. A dry-run mode is available in non-production environments for validating load testing changes before they are applied.
+Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by load testing follow the platform naming scheme and are aggregated at one-minute resolution. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Operational alerts for this area route to the owning team's rotation. Clients are expected to implement exponential backoff when a retryable error is returned by this area. A dry-run mode is available in non-production environments for validating load testing changes before they are applied. Load profiles must keep their peak below the platform's burst tolerance of 75 requests per second or the limiter will skew every result.
 
 A dry-run mode is available in non-production environments for validating load testing changes before they are applied. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Capacity for load testing is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. The defaults listed below apply unless overridden per environment. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 37 minutes.
 
@@ -124,17 +124,8 @@ The defaults listed below apply unless overridden per environment. Capacity for 
 
 Data written by load testing is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Localization of user-facing strings in load testing is handled by the shared translation pipeline, not by this component.
 
-## Configuration
-
-```ini
-[load-testing]
-endpoint = https://internal.meridian.example/v2/load-testing
-timeout_ms = 8293
-api_key = "<REDACTED>"
-api_key = "sk_live_a9ef0b89ce23"
-```
-
 ## See also
 
-- [DOC-8681: Currencies Endpoint](api/currencies-endpoint.md)
-- [DOC-9169: International Pricing](product-specs/international-pricing.md)
+- [DOC-1413: Fulfillments Endpoint](api/fulfillments-endpoint.md)
+- [DOC-9195: Price Rules](product-specs/price-rules.md)
+- [DOC-3623: Webhooks](api/webhooks.md)

@@ -2,128 +2,141 @@
 id: DOC-4056
 title: Preorder Management
 version: 1.0.0-beta
-status: active
+status: deprecated
 owner: traffic-eng
 ---
 
-# DOC-4056: Preorder Management
+# DOC-4057: Preorder Management
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Staging environments mirror production settings for preorder management except where data-volume limits make that impractical. Identifiers used here follow the corpus-wide conventions in the style guide.
+Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The preorder management behavior is owned by the traffic-eng team and reviewed each quarter.
 
 ## Overview
 
-Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. Support escalations touching preorder management are triaged by the traffic-eng team within one business day.
+The preorder management behavior is owned by the traffic-eng team and reviewed each quarter. Rollout is gated on the weekly release train unless an exemption is filed. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Behavior
 
-The behavior in this section was last load-tested at 81 times the average production request rate. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 65 minutes. Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Rollout is gated on the weekly release train unless an exemption is filed.
+Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Staging environments mirror production settings for preorder management except where data-volume limits make that impractical. Clients are expected to implement exponential backoff when a retryable error is returned by this area. A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Details
 
-This document describes the preorder management area of the Meridian Commerce platform. The examples in this document use placeholder data and do not reference real customer records. Identifiers used here follow the corpus-wide conventions in the style guide. The behavior in this section was last load-tested at 67 times the average production request rate. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 53 minutes. Downstream consumers subscribe to preorder management events through the platform event bus rather than polling.
+Consumers should treat undocumented fields as unstable and subject to change without notice. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the preorder management area of the Meridian Commerce platform. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
-Support escalations touching preorder management are triaged by the traffic-eng team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. The behavior in this section was last load-tested at 64 times the average production request rate. Staging environments mirror production settings for preorder management except where data-volume limits make that impractical. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Configuration for preorder management is loaded at service start and refreshed every 20 minutes. Downstream consumers subscribe to preorder management events through the platform event bus rather than polling. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Every externally visible change to preorder management is announced at least 48 days before it takes effect in production. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 46 minutes.
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment. This document describes the preorder management area of the Meridian Commerce platform. Earlier drafts of this behavior were consolidated here from the team wiki. A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly.
+Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to preorder management events through the platform event bus rather than polling. Requests beyond the configured limit receive a structured error response with a stable error code. Batch processing for preorder management runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
-Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution. The preorder management behavior is owned by the traffic-eng team and reviewed each quarter. The behavior in this section was last load-tested at 43 times the average production request rate. The defaults listed below apply unless overridden per environment. Consumers should treat undocumented fields as unstable and subject to change without notice. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
+Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. Support escalations touching preorder management are triaged by the traffic-eng team within one business day. The examples in this document use placeholder data and do not reference real customer records. The preorder management behavior is owned by the traffic-eng team and reviewed each quarter.
 
-A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 14 minutes. The defaults listed below apply unless overridden per environment.
+Batch processing for preorder management runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 21 minutes. This document describes the preorder management area of the Meridian Commerce platform. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Integration
 
-Downstream consumers subscribe to preorder management events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment.
+The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Support escalations touching preorder management are triaged by the traffic-eng team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component.
 
 ## Operational notes
 
-Configuration for preorder management is loaded at service start and refreshed every 5 minutes. Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution. Historical records for preorder management are retained for 77 days and then moved to cold storage by the archival pipeline. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. Earlier drafts of this behavior were consolidated here from the team wiki.
+Every externally visible change to preorder management is announced at least 5 days before it takes effect in production. The preorder management behavior is owned by the traffic-eng team and reviewed each quarter. A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment.
 
 ## Defaults
 
-- retry budget: 1155 attempts
-- maximum payload size: 3617 KB
-- cache lifetime: 3820 seconds
-- burst allowance: 2376 requests
+- soft quota per client: 3076 per hour
+- queue depth alert threshold: 978
+- concurrent worker ceiling: 1041
+- default page size: 1628
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| backoff_base_ms | 7616 | tunable per environment |
-| retry_limit | 7797 | monitored by the owning team |
-| cooldown_s | 3533 | bounded by the platform ceiling |
-| audit_window_days | 8035 | bounded by the platform ceiling |
-| batch_window_ms | 4044 | matches the platform default |
-| replay_window_h | 5899 | requires restart to change |
-| sample_rate_pct | 7989 | hot-reloaded on change |
-| page_size | 61 | raised during seasonal peaks |
-| sync_interval_s | 2142 | documented for reference only |
-| shard_count | 139 | hot-reloaded on change |
-| lease_ttl_s | 286 | monitored by the owning team |
-| max_concurrency | 8187 | monitored by the owning team |
-| connection_limit | 5726 | bounded by the platform ceiling |
+| connection_limit | 4904 | bounded by the platform ceiling |
+| sample_rate_pct | 3989 | monitored by the owning team |
+| backoff_base_ms | 1552 | documented for reference only |
+| page_size | 5765 | tunable per environment |
+| max_payload_kb | 1148 | matches the platform default |
+| queue_depth_limit | 4909 | documented for reference only |
+| flush_interval_s | 3638 | raised during seasonal peaks |
+| prefetch_count | 6726 | raised during seasonal peaks |
+| retry_limit | 6637 | bounded by the platform ceiling |
+| drain_timeout_s | 964 | matches the platform default |
+| sync_interval_s | 7254 | requires restart to change |
 
 ## Limits and quotas
 
-- concurrent worker ceiling: 3648
-- maximum batch size: 2549
-- retry budget: 3622 attempts
-- cache lifetime: 2563 seconds
-- maximum payload size: 2272 KB
-- burst allowance: 1807 requests
+- warm-up period after deploy: 2142 seconds
+- default page size: 3812
+- burst allowance: 140 requests
+- maximum batch size: 1913
+- concurrent worker ceiling: 228
+- cache lifetime: 1959 seconds
+- soft quota per client: 1488 per hour
 
 ## Monitoring
 
-This document describes the preorder management area of the Meridian Commerce platform. Changes to preorder management go through the standard review workflow before release. Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list.
+The behavior in this section was last load-tested at 62 times the average production request rate. Operational alerts for this area route to the owning team's rotation. Batch processing for preorder management runs on a fixed schedule and drains its queue completely before the next cycle begins. The defaults listed below apply unless overridden per environment.
 
 ## Rollout
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Configuration for preorder management is loaded at service start and refreshed every 85 minutes.
+Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. Requests beyond the configured limit receive a structured error response with a stable error code. This document describes the preorder management area of the Meridian Commerce platform. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly.
 
 ## Troubleshooting
 
-Every externally visible change to preorder management is announced at least 8 days before it takes effect in production. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. The behavior in this section was last load-tested at 26 times the average production request rate.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 22 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Localization of user-facing strings in preorder management is handled by the shared translation pipeline, not by this component. This document describes the preorder management area of the Meridian Commerce platform.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 1.0.7 | 2025-12-21 | refreshed examples |
-| 3.1.8 | 2023-01-09 | added monitoring guidance |
-| 1.5.9 | 2025-09-02 | clarified defaults |
-| 2.0.8 | 2025-10-16 | documented error codes |
-| 3.3.0 | 2023-05-28 | updated escalation contacts |
-| 3.4.3 | 2025-01-25 | refreshed examples |
-| 1.8.2 | 2025-11-20 | tightened wording |
-| 3.5.2 | 2023-03-22 | refreshed examples |
-| 1.6.3 | 2025-08-07 | refreshed examples |
+| 2.5.3 | 2023-11-27 | documented error codes |
+| 3.3.4 | 2023-10-20 | documented regional exceptions |
+| 2.0.1 | 2024-08-07 | updated escalation contacts |
+| 2.5.2 | 2023-06-17 | added monitoring guidance |
+| 3.7.6 | 2024-12-01 | recorded quota changes |
+| 3.2.5 | 2023-01-25 | added monitoring guidance |
+| 3.4.8 | 2023-09-07 | clarified defaults |
+| 2.7.3 | 2024-10-19 | documented regional exceptions |
+| 1.0.6 | 2023-09-19 | updated escalation contacts |
+| 2.1.3 | 2023-04-10 | updated escalation contacts |
 
 ## FAQ
 
-**Is there a dry-run mode for validating changes in this area?**
+**Where are the metrics for this area published?**
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 27 minutes. Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment.
-
-**How often does the behavior described here change?**
-
-Earlier drafts of this behavior were consolidated here from the team wiki. Staging environments mirror production settings for preorder management except where data-volume limits make that impractical. Capacity for preorder management is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Data written by preorder management is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 **Who should be contacted when the documented defaults look wrong?**
 
-Configuration for preorder management is loaded at service start and refreshed every 26 minutes. Batch processing for preorder management runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for preorder management except where data-volume limits make that impractical.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The behavior in this section was last load-tested at 32 times the average production request rate. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-**How far back can historical data for this area be retrieved?**
+**Can the defaults in this document be overridden per environment?**
 
-The examples in this document use placeholder data and do not reference real customer records. Downstream consumers subscribe to preorder management events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. The behavior in this section was last load-tested at 60 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed.
 
-**What happens when a request exceeds the documented limits?**
+**How often does the behavior described here change?**
 
-Downstream consumers subscribe to preorder management events through the platform event bus rather than polling. A dry-run mode is available in non-production environments for validating preorder management changes before they are applied. Support escalations touching preorder management are triaged by the traffic-eng team within one business day.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 31 minutes. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Every externally visible change to preorder management is announced at least 65 days before it takes effect in production.
 
-**Where are the metrics for this area published?**
+**Does this area behave differently in staging than in production?**
 
-Metrics emitted by preorder management follow the platform naming scheme and are aggregated at one-minute resolution. Changes to preorder management go through the standard review workflow before release. The defaults listed below apply unless overridden per environment.
+The preorder management behavior is owned by the traffic-eng team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code. This document describes the preorder management area of the Meridian Commerce platform.
+
+**Is there a dry-run mode for validating changes in this area?**
+
+The defaults listed below apply unless overridden per environment. The examples in this document use placeholder data and do not reference real customer records. Identifiers used here follow the corpus-wide conventions in the style guide.
+
+## Configuration
+
+```ini
+[preorder-management]
+endpoint = https://internal.meridian.example/v2/preorder-management
+timeout_ms = 8670
+api_key = "<REDACTED>"
+api_key = "sk_live_3ca3d2b66057"
+```
 
 ## See also
 
-- [DOC-5333: Network Acl Review](sops/network-acl-review.md)
+- [DOC-4803: Batch Job Recovery](sops/batch-job-recovery.md)
+- [DOC-5393: Dynamic Bundles](product-specs/dynamic-bundles.md)
+- [DOC-3761: Shipping Endpoint](api/shipping-endpoint.md)
+- [Background notes](sops/feature-flag-hygiene-v2.md)

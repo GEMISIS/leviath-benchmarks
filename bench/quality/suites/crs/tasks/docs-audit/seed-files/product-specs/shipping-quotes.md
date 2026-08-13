@@ -8,122 +8,117 @@ owner: identity
 
 # DOC-3097: Shipping Quotes
 
-Rollout is gated on the weekly release train unless an exemption is filed. Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 79 minutes. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for shipping quotes is loaded at service start and refreshed every 71 minutes.
 
 ## Overview
 
-Every externally visible change to shipping quotes is announced at least 6 days before it takes effect in production. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Identifiers used here follow the corpus-wide conventions in the style guide.
+Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. The behavior in this section was last load-tested at 37 times the average production request rate. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Behavior
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to shipping quotes go through the standard review workflow before release. Rollout is gated on the weekly release train unless an exemption is filed. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 8 minutes. This document describes the shipping quotes area of the Meridian Commerce platform.
+Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Details
 
-Capacity for shipping quotes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Changes to shipping quotes go through the standard review workflow before release. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for shipping quotes is loaded at service start and refreshed every 23 minutes. This document describes the shipping quotes area of the Meridian Commerce platform. Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates.
+Requests beyond the configured limit receive a structured error response with a stable error code. Capacity for shipping quotes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The shipping quotes behavior is owned by the identity team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation. Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
-Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Historical records for shipping quotes are retained for 75 days and then moved to cold storage by the archival pipeline. Metrics emitted by shipping quotes follow the platform naming scheme and are aggregated at one-minute resolution. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. Requests beyond the configured limit receive a structured error response with a stable error code.
+A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. This document describes the shipping quotes area of the Meridian Commerce platform. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. The defaults listed below apply unless overridden per environment.
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 70 minutes. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for shipping quotes is loaded at service start and refreshed every 56 minutes. Historical records for shipping quotes are retained for 55 days and then moved to cold storage by the archival pipeline. This document describes the shipping quotes area of the Meridian Commerce platform.
+This document describes the shipping quotes area of the Meridian Commerce platform. The shipping quotes behavior is owned by the identity team and reviewed each quarter. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 49 minutes. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Downstream consumers subscribe to shipping quotes events through the platform event bus rather than polling.
 
-Historical records for shipping quotes are retained for 73 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice. The behavior in this section was last load-tested at 21 times the average production request rate. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 62 minutes. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide.
+Changes to shipping quotes go through the standard review workflow before release. Metrics emitted by shipping quotes follow the platform naming scheme and are aggregated at one-minute resolution. Every externally visible change to shipping quotes is announced at least 26 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. Operational alerts for this area route to the owning team's rotation. Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates.
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Configuration for shipping quotes is loaded at service start and refreshed every 46 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. The shipping quotes behavior is owned by the identity team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation. Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical.
+The shipping quotes behavior is owned by the identity team and reviewed each quarter. Configuration for shipping quotes is loaded at service start and refreshed every 64 minutes. Consumers should treat undocumented fields as unstable and subject to change without notice. Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## Integration
 
-The shipping quotes behavior is owned by the identity team and reviewed each quarter. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. This document describes the shipping quotes area of the Meridian Commerce platform. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Requests beyond the configured limit receive a structured error response with a stable error code. The shipping quotes behavior is owned by the identity team and reviewed each quarter.
 
 ## Operational notes
 
-Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates. This document describes the shipping quotes area of the Meridian Commerce platform. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Capacity for shipping quotes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Rollout is gated on the weekly release train unless an exemption is filed. Support escalations touching shipping quotes are triaged by the identity team within one business day. The shipping quotes behavior is owned by the identity team and reviewed each quarter.
 
 ## Defaults
 
-- cache lifetime: 1418 seconds
-- soft quota per client: 222 per hour
-- maximum payload size: 3611 KB
+- queue depth alert threshold: 3278
+- request timeout: 3804 ms
+- event replay window: 554 hours
+- burst allowance: 1758 requests
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| cache_ttl_s | 7131 | tunable per environment |
-| audit_window_days | 2018 | raised during seasonal peaks |
-| replay_window_h | 2548 | matches the platform default |
-| sync_interval_s | 4814 | matches the platform default |
-| prefetch_count | 2205 | matches the platform default |
-| page_size | 5637 | raised during seasonal peaks |
-| max_payload_kb | 2259 | tunable per environment |
-| drain_timeout_s | 7328 | hot-reloaded on change |
-| queue_depth_limit | 2338 | matches the platform default |
-| connection_limit | 4930 | tunable per environment |
+| warmup_batch | 3600 | bounded by the platform ceiling |
+| backoff_base_ms | 5179 | matches the platform default |
+| cooldown_s | 7248 | tunable per environment |
+| shard_count | 3626 | raised during seasonal peaks |
+| max_concurrency | 8987 | hot-reloaded on change |
+| connection_limit | 2419 | monitored by the owning team |
+| queue_depth_limit | 2480 | raised during seasonal peaks |
+| lease_ttl_s | 452 | hot-reloaded on change |
+| sync_interval_s | 484 | hot-reloaded on change |
+| max_payload_kb | 7677 | documented for reference only |
+| drain_timeout_s | 459 | raised during seasonal peaks |
+| sample_rate_pct | 5652 | requires restart to change |
+| flush_interval_s | 2630 | requires restart to change |
 
 ## Limits and quotas
 
-- soft quota per client: 1722 per hour
-- cache lifetime: 3278 seconds
-- event replay window: 3804 hours
-- concurrent worker ceiling: 554
-- queue depth alert threshold: 1758
-- maximum batch size: 1675
-- retry budget: 1393 attempts
+- soft quota per client: 573 per hour
+- cache lifetime: 2258 seconds
+- request timeout: 3916 ms
+- maximum batch size: 2302
+- maximum payload size: 2226 KB
+- warm-up period after deploy: 543 seconds
+- burst allowance: 2014 requests
 
 ## Monitoring
 
-The defaults listed below apply unless overridden per environment. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for shipping quotes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Requests beyond the configured limit receive a structured error response with a stable error code. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Metrics emitted by shipping quotes follow the platform naming scheme and are aggregated at one-minute resolution. Downstream consumers subscribe to shipping quotes events through the platform event bus rather than polling.
 
 ## Rollout
 
-The examples in this document use placeholder data and do not reference real customer records. Earlier drafts of this behavior were consolidated here from the team wiki. Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. The identity team publishes a quarterly summary of changes in this area to the platform announcements list.
+Downstream consumers subscribe to shipping quotes events through the platform event bus rather than polling. Changes to shipping quotes go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The shipping quotes behavior is owned by the identity team and reviewed each quarter.
 
 ## Troubleshooting
 
-Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Capacity for shipping quotes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Downstream consumers subscribe to shipping quotes events through the platform event bus rather than polling. Every externally visible change to shipping quotes is announced at least 38 days before it takes effect in production.
+Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 1.2.5 | 2025-03-18 | refreshed examples |
-| 1.8.2 | 2023-12-19 | expanded rollout notes |
-| 2.6.9 | 2023-05-12 | documented regional exceptions |
-| 1.2.1 | 2024-06-10 | expanded rollout notes |
-| 1.2.2 | 2023-03-18 | documented regional exceptions |
-| 3.2.7 | 2023-11-05 | recorded quota changes |
-| 3.4.0 | 2023-07-02 | added monitoring guidance |
-| 2.8.6 | 2024-06-05 | expanded rollout notes |
-| 2.8.2 | 2023-05-19 | recorded quota changes |
-| 1.5.4 | 2025-01-08 | aligned terminology with the style guide |
-| 2.8.3 | 2023-06-09 | refreshed examples |
+| 2.9.5 | 2023-06-21 | refreshed examples |
+| 3.0.3 | 2023-07-18 | aligned terminology with the style guide |
+| 1.5.4 | 2024-03-19 | updated escalation contacts |
+| 3.1.9 | 2023-12-26 | tightened wording |
+| 3.3.1 | 2023-10-17 | tightened wording |
+| 1.8.5 | 2025-10-16 | documented regional exceptions |
+| 3.4.9 | 2023-08-14 | recorded quota changes |
 
 ## FAQ
 
+**Can the defaults in this document be overridden per environment?**
+
+Configuration for shipping quotes is loaded at service start and refreshed every 70 minutes. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 38 minutes. Requests beyond the configured limit receive a structured error response with a stable error code.
+
 **Who should be contacted when the documented defaults look wrong?**
 
-A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Operational alerts for this area route to the owning team's rotation. Metrics emitted by shipping quotes follow the platform naming scheme and are aggregated at one-minute resolution.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Identifiers used here follow the corpus-wide conventions in the style guide. The behavior in this section was last load-tested at 27 times the average production request rate.
 
 **Where are the metrics for this area published?**
 
-Staging environments mirror production settings for shipping quotes except where data-volume limits make that impractical. A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+A dry-run mode is available in non-production environments for validating shipping quotes changes before they are applied. Batch processing for shipping quotes runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code.
 
-**Is there a dry-run mode for validating changes in this area?**
+**How often does the behavior described here change?**
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Downstream consumers subscribe to shipping quotes events through the platform event bus rather than polling. The behavior in this section was last load-tested at 71 times the average production request rate.
+The shipping quotes behavior is owned by the identity team and reviewed each quarter. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 17 minutes.
 
-**What happens when a request exceeds the documented limits?**
+**Does this area behave differently in staging than in production?**
 
-Support escalations touching shipping quotes are triaged by the identity team within one business day. Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in shipping quotes is handled by the shared translation pipeline, not by this component.
-
-## Configuration
-
-```ini
-[shipping-quotes]
-endpoint = https://internal.meridian.example/v2/shipping-quotes
-timeout_ms = 5738
-api_key = "<REDACTED>"
-```
+Data written by shipping quotes is idempotent at the record level, so replayed events cannot create duplicates. The shipping quotes behavior is owned by the identity team and reviewed each quarter. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 86 minutes.
 
 ## See also
 
-- [DOC-5451: Invoices Endpoint](api/invoices-endpoint.md)
+- [DOC-8794: Capacity Planning](sops/capacity-planning.md)

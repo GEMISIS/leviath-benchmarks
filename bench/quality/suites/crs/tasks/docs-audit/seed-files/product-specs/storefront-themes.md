@@ -1,42 +1,43 @@
 ---
 id: DOC-1119
 title: Storefront Themes
-version: 1.9.4
-status: active
+version: 2.1
+status: deprecated
+superseded_by: product-specs/storefront-themes-next.md
 owner: traffic-eng
 ---
 
-# DOC-1119: Storefront Themes
+# DOC-1110: Storefront Themes
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Earlier drafts of this behavior were consolidated here from the team wiki. The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter.
+Staging environments mirror production settings for storefront themes except where data-volume limits make that impractical. Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Overview
 
-Support escalations touching storefront themes are triaged by the traffic-eng team within one business day. Staging environments mirror production settings for storefront themes except where data-volume limits make that impractical. Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component. Data written by storefront themes is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly.
 
 ## Behavior
 
-Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component. Data written by storefront themes is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. A dry-run mode is available in non-production environments for validating storefront themes changes before they are applied.
+Data written by storefront themes is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to storefront themes is announced at least 71 days before it takes effect in production. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to storefront themes go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Details
 
-Changes to storefront themes go through the standard review workflow before release. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for storefront themes except where data-volume limits make that impractical. Configuration for storefront themes is loaded at service start and refreshed every 32 minutes. Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component.
+The behavior in this section was last load-tested at 46 times the average production request rate. Localization of user-facing strings in storefront themes is handled by the shared translation pipeline, not by this component. This document describes the storefront themes area of the Meridian Commerce platform. Batch processing for storefront themes runs on a fixed schedule and drains its queue completely before the next cycle begins. Support escalations touching storefront themes are triaged by the traffic-eng team within one business day. Operational alerts for this area route to the owning team's rotation.
 
-The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Historical records for storefront themes are retained for 80 days and then moved to cold storage by the archival pipeline. Every externally visible change to storefront themes is announced at least 23 days before it takes effect in production. Earlier drafts of this behavior were consolidated here from the team wiki.
+Earlier drafts of this behavior were consolidated here from the team wiki. Access to administrative operations in this area is restricted to members of the traffic-eng group and audited monthly. Capacity for storefront themes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Historical records for storefront themes are retained for 31 days and then moved to cold storage by the archival pipeline.
 
-Configuration for storefront themes is loaded at service start and refreshed every 24 minutes. Downstream consumers subscribe to storefront themes events through the platform event bus rather than polling. Every externally visible change to storefront themes is announced at least 16 days before it takes effect in production. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Operational alerts for this area route to the owning team's rotation. Historical records for storefront themes are retained for 37 days and then moved to cold storage by the archival pipeline.
+Historical records for storefront themes are retained for 81 days and then moved to cold storage by the archival pipeline. Downstream consumers subscribe to storefront themes events through the platform event bus rather than polling. Data written by storefront themes is idempotent at the record level, so replayed events cannot create duplicates. Requests beyond the configured limit receive a structured error response with a stable error code. The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter. Changes to storefront themes go through the standard review workflow before release.
 
-Rollout is gated on the weekly release train unless an exemption is filed. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 7 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Batch processing for storefront themes runs on a fixed schedule and drains its queue completely before the next cycle begins. Historical records for storefront themes are retained for 89 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Historical records for storefront themes are retained for 45 days and then moved to cold storage by the archival pipeline. Consumers should treat undocumented fields as unstable and subject to change without notice. Downstream consumers subscribe to storefront themes events through the platform event bus rather than polling. The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter. This document describes the storefront themes area of the Meridian Commerce platform. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Capacity for storefront themes is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter. Data written by storefront themes is idempotent at the record level, so replayed events cannot create duplicates.
+The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter. The examples in this document use placeholder data and do not reference real customer records. Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. This document describes the storefront themes area of the Meridian Commerce platform.
 
 ## Integration
 
-The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter. Earlier drafts of this behavior were consolidated here from the team wiki. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Operational alerts for this area route to the owning team's rotation. Historical records for storefront themes are retained for 46 days and then moved to cold storage by the archival pipeline.
+Operational alerts for this area route to the owning team's rotation. Historical records for storefront themes are retained for 46 days and then moved to cold storage by the archival pipeline. Staging environments mirror production settings for storefront themes except where data-volume limits make that impractical. Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment.
 
 ## Operational notes
 
-Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. The traffic-eng team publishes a quarterly summary of changes in this area to the platform announcements list. This document describes the storefront themes area of the Meridian Commerce platform. Metrics emitted by storefront themes follow the platform naming scheme and are aggregated at one-minute resolution.
+This document describes the storefront themes area of the Meridian Commerce platform. Metrics emitted by storefront themes follow the platform naming scheme and are aggregated at one-minute resolution. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Every externally visible change to storefront themes is announced at least 80 days before it takes effect in production. The storefront themes behavior is owned by the traffic-eng team and reviewed each quarter.
 
 ## Defaults
 
@@ -123,3 +124,5 @@ Identifiers used here follow the corpus-wide conventions in the style guide. The
 ## See also
 
 - [DOC-5661: Postmortem Process](sops/postmortem-process.md)
+- [Background notes](api/currencies-endpoint-v2.md)
+- [Background notes](product-specs/digital-downloads-v2.md)

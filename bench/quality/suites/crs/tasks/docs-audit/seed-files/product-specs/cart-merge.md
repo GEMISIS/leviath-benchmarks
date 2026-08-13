@@ -8,7 +8,7 @@ owner: storefront
 
 # DOC-1266: Cart Merge
 
-Historical records for cart merge are retained for 57 days and then moved to cold storage by the archival pipeline. Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. Localization of user-facing strings in cart merge is handled by the shared translation pipeline, not by this component.
+Access to administrative operations in this area is restricted to members of the storefront group and audited monthly. Localization of user-facing strings in cart merge is handled by the shared translation pipeline, not by this component. Capacity for cart merge is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Overview
 

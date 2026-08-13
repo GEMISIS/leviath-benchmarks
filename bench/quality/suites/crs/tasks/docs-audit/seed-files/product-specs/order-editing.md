@@ -8,123 +8,122 @@ owner: identity
 
 # DOC-1211: Order Editing
 
-Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. The order editing behavior is owned by the identity team and reviewed each quarter. Every externally visible change to order editing is announced at least 34 days before it takes effect in production.
+The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Every externally visible change to order editing is announced at least 88 days before it takes effect in production. Changes to order editing go through the standard review workflow before release.
 
 ## Overview
 
-Every externally visible change to order editing is announced at least 40 days before it takes effect in production. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. The behavior in this section was last load-tested at 15 times the average production request rate.
+Every externally visible change to order editing is announced at least 61 days before it takes effect in production. Configuration for order editing is loaded at service start and refreshed every 57 minutes. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment.
 
 ## Behavior
 
-The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching order editing are triaged by the identity team within one business day. The defaults listed below apply unless overridden per environment. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. Configuration for order editing is loaded at service start and refreshed every 15 minutes.
+Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment. Changes to order editing go through the standard review workflow before release. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Support escalations touching order editing are triaged by the identity team within one business day.
 
 ## Details
 
-The order editing behavior is owned by the identity team and reviewed each quarter. Staging environments mirror production settings for order editing except where data-volume limits make that impractical. Identifiers used here follow the corpus-wide conventions in the style guide. Earlier drafts of this behavior were consolidated here from the team wiki. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 85 minutes. Operational alerts for this area route to the owning team's rotation.
+This document describes the order editing area of the Meridian Commerce platform. Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins. Changes to order editing go through the standard review workflow before release. The order editing behavior is owned by the identity team and reviewed each quarter. Staging environments mirror production settings for order editing except where data-volume limits make that impractical. Identifiers used here follow the corpus-wide conventions in the style guide.
 
-Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. Historical records for order editing are retained for 78 days and then moved to cold storage by the archival pipeline. Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code.
+Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed.
 
-This document describes the order editing area of the Meridian Commerce platform. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins. Configuration for order editing is loaded at service start and refreshed every 18 minutes. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+Configuration for order editing is loaded at service start and refreshed every 66 minutes. Historical records for order editing are retained for 20 days and then moved to cold storage by the archival pipeline. Changes to order editing go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. This document describes the order editing area of the Meridian Commerce platform. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution.
 
-Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Downstream consumers subscribe to order editing events through the platform event bus rather than polling. Every externally visible change to order editing is announced at least 76 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. The identity team publishes a quarterly summary of changes in this area to the platform announcements list.
+Changes to order editing go through the standard review workflow before release. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 61 minutes. Configuration for order editing is loaded at service start and refreshed every 53 minutes. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. Historical records for order editing are retained for 63 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component.
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Identifiers used here follow the corpus-wide conventions in the style guide. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The behavior in this section was last load-tested at 56 times the average production request rate. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Earlier drafts of this behavior were consolidated here from the team wiki. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. Configuration for order editing is loaded at service start and refreshed every 57 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Integration
 
-This document describes the order editing area of the Meridian Commerce platform. Changes to order editing go through the standard review workflow before release. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component.
+Capacity for order editing is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Support escalations touching order editing are triaged by the identity team within one business day. Staging environments mirror production settings for order editing except where data-volume limits make that impractical. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Changes to order editing go through the standard review workflow before release.
 
 ## Operational notes
 
-The behavior in this section was last load-tested at 68 times the average production request rate. A dry-run mode is available in non-production environments for validating order editing changes before they are applied. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Data written by order editing is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins.
+The defaults listed below apply unless overridden per environment. Identifiers used here follow the corpus-wide conventions in the style guide. Earlier drafts of this behavior were consolidated here from the team wiki. The behavior in this section was last load-tested at 48 times the average production request rate. A dry-run mode is available in non-production environments for validating order editing changes before they are applied.
 
 ## Defaults
 
-- cache lifetime: 42 seconds
+- cache lifetime: 1175 seconds
+- event replay window: 42 hours
 - retry budget: 2367 attempts
 - queue depth alert threshold: 3924
-- event replay window: 1702 hours
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| queue_depth_limit | 1509 | monitored by the owning team |
-| sync_interval_s | 5515 | requires restart to change |
-| page_size | 5036 | requires restart to change |
-| connection_limit | 466 | raised during seasonal peaks |
-| prefetch_count | 182 | monitored by the owning team |
-| shard_count | 5519 | documented for reference only |
-| max_payload_kb | 6897 | tunable per environment |
-| retry_limit | 5978 | hot-reloaded on change |
-| lease_ttl_s | 7002 | bounded by the platform ceiling |
-| sample_rate_pct | 4580 | raised during seasonal peaks |
-| backoff_base_ms | 139 | tunable per environment |
+| backoff_base_ms | 6054 | monitored by the owning team |
+| queue_depth_limit | 1525 | raised during seasonal peaks |
+| sync_interval_s | 8845 | requires restart to change |
+| page_size | 466 | raised during seasonal peaks |
+| connection_limit | 182 | monitored by the owning team |
+| max_payload_kb | 5519 | documented for reference only |
+| drain_timeout_s | 6897 | tunable per environment |
+| audit_window_days | 5978 | hot-reloaded on change |
+| retry_limit | 7002 | bounded by the platform ceiling |
+| flush_interval_s | 4580 | raised during seasonal peaks |
+| sample_rate_pct | 139 | tunable per environment |
+| replay_window_h | 1129 | matches the platform default |
+| warmup_batch | 2075 | matches the platform default |
 
 ## Limits and quotas
 
-- queue depth alert threshold: 2729
-- request timeout: 1770 ms
-- event replay window: 2391 hours
-- burst allowance: 412 requests
-- concurrent worker ceiling: 31
-- warm-up period after deploy: 3458 seconds
+- event replay window: 2428 hours
+- warm-up period after deploy: 1996 seconds
+- request timeout: 638 ms
+- burst allowance: 95 requests
+- maximum batch size: 315
+- default page size: 3365
+- retry budget: 2679 attempts
 
 ## Monitoring
 
-Every externally visible change to order editing is announced at least 7 days before it takes effect in production. Historical records for order editing are retained for 14 days and then moved to cold storage by the archival pipeline. Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code.
+Downstream consumers subscribe to order editing events through the platform event bus rather than polling. The identity team publishes a quarterly summary of changes in this area to the platform announcements list. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Every externally visible change to order editing is announced at least 5 days before it takes effect in production.
 
 ## Rollout
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Every externally visible change to order editing is announced at least 5 days before it takes effect in production. The examples in this document use placeholder data and do not reference real customer records. Configuration for order editing is loaded at service start and refreshed every 46 minutes.
+Support escalations touching order editing are triaged by the identity team within one business day. Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
 ## Troubleshooting
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Downstream consumers subscribe to order editing events through the platform event bus rather than polling. Historical records for order editing are retained for 89 days and then moved to cold storage by the archival pipeline. The behavior in this section was last load-tested at 17 times the average production request rate.
+The examples in this document use placeholder data and do not reference real customer records. A dry-run mode is available in non-production environments for validating order editing changes before they are applied. Configuration for order editing is loaded at service start and refreshed every 18 minutes. Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.7.1 | 2023-01-09 | recorded quota changes |
-| 2.2.6 | 2023-01-25 | recorded quota changes |
-| 3.9.6 | 2023-06-23 | expanded rollout notes |
+| 2.5.4 | 2023-07-07 | clarified defaults |
+| 2.9.9 | 2024-04-12 | expanded rollout notes |
 | 1.6.8 | 2025-10-15 | recorded quota changes |
 | 3.9.6 | 2025-07-16 | updated escalation contacts |
 | 2.0.2 | 2024-02-11 | documented error codes |
 | 3.6.6 | 2023-03-11 | documented regional exceptions |
 | 1.2.2 | 2024-08-01 | expanded rollout notes |
-| 1.5.3 | 2025-11-28 | expanded rollout notes |
-| 2.7.4 | 2025-05-11 | recorded quota changes |
 
 ## FAQ
 
 **Can the defaults in this document be overridden per environment?**
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Support escalations touching order editing are triaged by the identity team within one business day. Earlier drafts of this behavior were consolidated here from the team wiki.
-
-**How far back can historical data for this area be retrieved?**
-
-Downstream consumers subscribe to order editing events through the platform event bus rather than polling. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. Requests beyond the configured limit receive a structured error response with a stable error code.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution. Every externally visible change to order editing is announced at least 40 days before it takes effect in production.
 
 **Who should be contacted when the documented defaults look wrong?**
 
-Access to administrative operations in this area is restricted to members of the identity group and audited monthly. Support escalations touching order editing are triaged by the identity team within one business day. Metrics emitted by order editing follow the platform naming scheme and are aggregated at one-minute resolution.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 30 minutes. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-**Does this area behave differently in staging than in production?**
+**Where are the metrics for this area published?**
 
-Configuration for order editing is loaded at service start and refreshed every 85 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Requests beyond the configured limit receive a structured error response with a stable error code.
+Localization of user-facing strings in order editing is handled by the shared translation pipeline, not by this component. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+
+**How far back can historical data for this area be retrieved?**
+
+Batch processing for order editing runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for order editing except where data-volume limits make that impractical. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Configuration
 
 ```ini
 [order-editing]
 endpoint = https://internal.meridian.example/v2/order-editing
-timeout_ms = 4214
+timeout_ms = 4603
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-2269: Schema Migration](sops/schema-migration.md)
-- [DOC-9072: Auth Tokens](api/auth-tokens.md)
+- [DOC-7173: Rollback Procedure](sops/rollback-procedure.md)

@@ -8,124 +8,113 @@ owner: platform-core
 
 # DOC-3171: Data Archival
 
-Changes to data archival go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide. The behavior in this section was last load-tested at 19 times the average production request rate.
+Data written by data archival is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. Configuration for data archival is loaded at service start and refreshed every 88 minutes.
 
 ## Overview
 
-Support escalations touching data archival are triaged by the platform-core team within one business day. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Earlier drafts of this behavior were consolidated here from the team wiki. Configuration for data archival is loaded at service start and refreshed every 22 minutes.
+Historical records for data archival are retained for 35 days and then moved to cold storage by the archival pipeline. The defaults listed below apply unless overridden per environment. The examples in this document use placeholder data and do not reference real customer records. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Behavior
 
-Historical records for data archival are retained for 10 days and then moved to cold storage by the archival pipeline. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Historical records for data archival are retained for 30 days and then moved to cold storage by the archival pipeline. The examples in this document use placeholder data and do not reference real customer records. This document describes the data archival area of the Meridian Commerce platform. Every externally visible change to data archival is announced at least 41 days before it takes effect in production. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Details
 
-Every externally visible change to data archival is announced at least 51 days before it takes effect in production. Support escalations touching data archival are triaged by the platform-core team within one business day. A dry-run mode is available in non-production environments for validating data archival changes before they are applied. Downstream consumers subscribe to data archival events through the platform event bus rather than polling. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. The examples in this document use placeholder data and do not reference real customer records.
+Data written by data archival is idempotent at the record level, so replayed events cannot create duplicates. Every externally visible change to data archival is announced at least 12 days before it takes effect in production. Earlier drafts of this behavior were consolidated here from the team wiki. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 48 minutes. The behavior in this section was last load-tested at 85 times the average production request rate.
 
-Staging environments mirror production settings for data archival except where data-volume limits make that impractical. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+The defaults listed below apply unless overridden per environment. Support escalations touching data archival are triaged by the platform-core team within one business day. The examples in this document use placeholder data and do not reference real customer records. Consumers should treat undocumented fields as unstable and subject to change without notice. Identifiers used here follow the corpus-wide conventions in the style guide. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly.
 
-Historical records for data archival are retained for 22 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating data archival changes before they are applied. Data written by data archival is idempotent at the record level, so replayed events cannot create duplicates. This document describes the data archival area of the Meridian Commerce platform. Rollout is gated on the weekly release train unless an exemption is filed. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins.
+Downstream consumers subscribe to data archival events through the platform event bus rather than polling. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution. Staging environments mirror production settings for data archival except where data-volume limits make that impractical. Changes to data archival go through the standard review workflow before release. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
-The behavior in this section was last load-tested at 6 times the average production request rate. The data archival behavior is owned by the platform-core team and reviewed each quarter. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution. Capacity for data archival is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Historical records for data archival are retained for 23 days and then moved to cold storage by the archival pipeline.
+Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 78 minutes. Every externally visible change to data archival is announced at least 71 days before it takes effect in production. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Operational alerts for this area route to the owning team's rotation. The data archival behavior is owned by the platform-core team and reviewed each quarter.
 
-This document describes the data archival area of the Meridian Commerce platform. Historical records for data archival are retained for 43 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component. Requests beyond the configured limit receive a structured error response with a stable error code. The data archival behavior is owned by the platform-core team and reviewed each quarter. Rollout is gated on the weekly release train unless an exemption is filed.
+Consumers should treat undocumented fields as unstable and subject to change without notice. The behavior in this section was last load-tested at 34 times the average production request rate. Every externally visible change to data archival is announced at least 37 days before it takes effect in production. Capacity for data archival is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The examples in this document use placeholder data and do not reference real customer records. This document describes the data archival area of the Meridian Commerce platform.
 
 ## Integration
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Configuration for data archival is loaded at service start and refreshed every 23 minutes. Support escalations touching data archival are triaged by the platform-core team within one business day. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Operational notes
 
-Support escalations touching data archival are triaged by the platform-core team within one business day. The defaults listed below apply unless overridden per environment. Every externally visible change to data archival is announced at least 76 days before it takes effect in production. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list.
+Historical records for data archival are retained for 10 days and then moved to cold storage by the archival pipeline. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Defaults
 
-- event replay window: 1263 hours
-- cache lifetime: 3139 seconds
-- default page size: 320
-- burst allowance: 3207 requests
+- event replay window: 1486 hours
+- concurrent worker ceiling: 2822
+- queue depth alert threshold: 1215
+- maximum payload size: 1683 KB
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| shard_count | 5352 | matches the platform default |
-| queue_depth_limit | 3119 | matches the platform default |
-| backoff_base_ms | 6440 | requires restart to change |
-| drain_timeout_s | 5266 | hot-reloaded on change |
-| sample_rate_pct | 8643 | bounded by the platform ceiling |
-| connection_limit | 5640 | tunable per environment |
-| flush_interval_s | 5458 | bounded by the platform ceiling |
-| page_size | 1362 | hot-reloaded on change |
-| replay_window_h | 5317 | hot-reloaded on change |
-| lease_ttl_s | 1259 | matches the platform default |
-| retry_limit | 5568 | documented for reference only |
-| batch_window_ms | 4647 | bounded by the platform ceiling |
-| cache_ttl_s | 5846 | raised during seasonal peaks |
+| prefetch_count | 7111 | hot-reloaded on change |
+| warmup_batch | 447 | raised during seasonal peaks |
+| replay_window_h | 7714 | hot-reloaded on change |
+| cooldown_s | 3432 | monitored by the owning team |
+| shard_count | 4147 | hot-reloaded on change |
+| audit_window_days | 4431 | tunable per environment |
+| batch_window_ms | 172 | requires restart to change |
+| max_concurrency | 71 | bounded by the platform ceiling |
+| sync_interval_s | 2410 | tunable per environment |
+| backoff_base_ms | 2247 | tunable per environment |
+| cache_ttl_s | 4908 | monitored by the owning team |
+| lease_ttl_s | 4906 | matches the platform default |
 
 ## Limits and quotas
 
-- event replay window: 202 hours
-- default page size: 3998
-- retry budget: 2818 attempts
-- soft quota per client: 2728 per hour
-- burst allowance: 476 requests
-- maximum payload size: 3657 KB
-- queue depth alert threshold: 2510
-- concurrent worker ceiling: 274
+- cache lifetime: 505 seconds
+- warm-up period after deploy: 2984 seconds
+- request timeout: 924 ms
+- retry budget: 172 attempts
+- queue depth alert threshold: 2649
+- maximum batch size: 1908
+- concurrent worker ceiling: 2872
 
 ## Monitoring
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 31 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+The defaults listed below apply unless overridden per environment. Every externally visible change to data archival is announced at least 60 days before it takes effect in production. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Rollout
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Staging environments mirror production settings for data archival except where data-volume limits make that impractical.
+Staging environments mirror production settings for data archival except where data-volume limits make that impractical. A dry-run mode is available in non-production environments for validating data archival changes before they are applied. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Support escalations touching data archival are triaged by the platform-core team within one business day. Archival pulls that depend on export bundles must complete within 24 hours of bundle creation, before the download links lapse.
 
 ## Troubleshooting
 
-Configuration for data archival is loaded at service start and refreshed every 75 minutes. Historical records for data archival are retained for 53 days and then moved to cold storage by the archival pipeline. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code.
+Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component. Changes to data archival go through the standard review workflow before release. Capacity for data archival is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.3.0 | 2025-02-05 | refreshed examples |
-| 3.4.3 | 2025-10-06 | updated escalation contacts |
-| 3.0.2 | 2025-05-20 | updated escalation contacts |
-| 1.3.5 | 2024-04-01 | added monitoring guidance |
-| 2.9.6 | 2024-08-11 | documented regional exceptions |
-| 1.9.9 | 2024-07-21 | updated escalation contacts |
-| 3.6.4 | 2024-04-13 | recorded quota changes |
-| 3.6.7 | 2025-09-25 | tightened wording |
+| 2.9.0 | 2024-01-04 | aligned terminology with the style guide |
+| 3.2.5 | 2024-04-16 | tightened wording |
+| 3.1.5 | 2025-03-17 | aligned terminology with the style guide |
+| 2.0.5 | 2023-02-06 | recorded quota changes |
+| 1.1.7 | 2025-06-26 | documented regional exceptions |
+| 3.8.6 | 2025-05-08 | recorded quota changes |
+| 2.0.3 | 2024-10-13 | added monitoring guidance |
+| 2.1.0 | 2025-11-04 | updated escalation contacts |
 
 ## FAQ
 
-**Is there a dry-run mode for validating changes in this area?**
+**Does this area behave differently in staging than in production?**
 
-Batch processing for data archival runs on a fixed schedule and drains its queue completely before the next cycle begins. Every externally visible change to data archival is announced at least 87 days before it takes effect in production. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component.
+Operational alerts for this area route to the owning team's rotation. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution. Configuration for data archival is loaded at service start and refreshed every 22 minutes.
 
-**Who should be contacted when the documented defaults look wrong?**
+**What happens when a request exceeds the documented limits?**
 
-Staging environments mirror production settings for data archival except where data-volume limits make that impractical. Metrics emitted by data archival follow the platform naming scheme and are aggregated at one-minute resolution. Earlier drafts of this behavior were consolidated here from the team wiki.
-
-**Can the defaults in this document be overridden per environment?**
-
-Rollout is gated on the weekly release train unless an exemption is filed. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Operational alerts for this area route to the owning team's rotation.
+Operational alerts for this area route to the owning team's rotation. Staging environments mirror production settings for data archival except where data-volume limits make that impractical. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly.
 
 **How far back can historical data for this area be retrieved?**
 
-Capacity for data archival is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Configuration for data archival is loaded at service start and refreshed every 56 minutes. Localization of user-facing strings in data archival is handled by the shared translation pipeline, not by this component.
+Historical records for data archival are retained for 75 days and then moved to cold storage by the archival pipeline. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code.
 
-## Configuration
+**Is there a dry-run mode for validating changes in this area?**
 
-```ini
-[data-archival]
-endpoint = https://internal.meridian.example/v2/data-archival
-timeout_ms = 2188
-api_key = "<REDACTED>"
-```
+The behavior in this section was last load-tested at 48 times the average production request rate. Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## See also
 
-- [DOC-1647: Returns Endpoint](api/returns-endpoint.md)
+- [DOC-9070: Split Payments](product-specs/split-payments.md)

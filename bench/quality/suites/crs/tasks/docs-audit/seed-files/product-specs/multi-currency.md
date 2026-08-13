@@ -8,19 +8,19 @@ owner: storefront
 
 # DOC-1417: Multi Currency
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Every externally visible change to multi currency is announced at least 32 days before it takes effect in production. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates.
+Every externally visible change to multi currency is announced at least 32 days before it takes effect in production. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for multi currency runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Overview
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Changes to multi currency go through the standard review workflow before release. A dry-run mode is available in non-production environments for validating multi currency changes before they are applied. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates.
+Changes to multi currency go through the standard review workflow before release. A dry-run mode is available in non-production environments for validating multi currency changes before they are applied. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. Metrics emitted by multi currency follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Behavior
 
-The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Changes to multi currency go through the standard review workflow before release. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 65 minutes.
+Changes to multi currency go through the standard review workflow before release. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 65 minutes. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Details
 
-A dry-run mode is available in non-production environments for validating multi currency changes before they are applied. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Metrics emitted by multi currency follow the platform naming scheme and are aggregated at one-minute resolution. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. The behavior in this section was last load-tested at 76 times the average production request rate. Configuration for multi currency is loaded at service start and refreshed every 20 minutes.
+The examples in this document use placeholder data and do not reference real customer records. The storefront team publishes a quarterly summary of changes in this area to the platform announcements list. Metrics emitted by multi currency follow the platform naming scheme and are aggregated at one-minute resolution. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. The behavior in this section was last load-tested at 76 times the average production request rate. Configuration for multi currency is loaded at service start and refreshed every 20 minutes.
 
 Downstream consumers subscribe to multi currency events through the platform event bus rather than polling. Consumers should treat undocumented fields as unstable and subject to change without notice. Historical records for multi currency are retained for 56 days and then moved to cold storage by the archival pipeline. Data written by multi currency is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment. Batch processing for multi currency runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
@@ -125,17 +125,8 @@ Consumers should treat undocumented fields as unstable and subject to change wit
 
 The multi currency behavior is owned by the storefront team and reviewed each quarter. Downstream consumers subscribe to multi currency events through the platform event bus rather than polling. The defaults listed below apply unless overridden per environment.
 
-## Configuration
-
-```ini
-[multi-currency]
-endpoint = https://internal.meridian.example/v2/multi-currency
-timeout_ms = 1857
-api_key = "<REDACTED>"
-api_key = "sk_live_f8cc89688617"
-```
-
 ## See also
 
-- [DOC-1233: Returns Portal](product-specs/returns-portal.md)
-- [DOC-7550: Payouts Endpoint](api/payouts-endpoint.md)
+- [DOC-1413: Fulfillments Endpoint](api/fulfillments-endpoint.md)
+- [DOC-9922: Checkout Flow](product-specs/checkout-flow.md)
+- [DOC-9195: Price Rules](product-specs/price-rules.md)

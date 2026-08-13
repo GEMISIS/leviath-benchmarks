@@ -3,13 +3,23 @@
 
 One hundred twenty interlinked markdown documents (product specs, API
 references, SOPs) plus the governance documents that judge them:
-POLICY.md (five numbered rules) and style-guide.md. The generator injects an exact set
+POLICY.md (six numbered rules) and style-guide.md. The generator injects an exact set
 of rule violations - identifier mismatches, broken cross-references,
 deprecations without a successor, plaintext credential examples,
-malformed versions - and computes the answer key from what it
+malformed versions, cross-document numeric conflicts - and computes
+the answer key from what it
 injected; a self-test then re-audits the emitted files from scratch
-with an independent implementation of the five rules, so the corpus
+with an independent implementation of the six rules, so the corpus
 provably supports the key.
+
+Rule 6 (cross-document numeric consistency) is the semantic rule: a
+registry of shared facts plants the same operational number in two
+documents with deliberately different phrasing - the connection
+between the two statements is topical, not lexical, so no pattern
+over the corpus pairs them; an auditor has to read both documents and
+recognise they describe the same fact. Most pairs agree; a seeded
+subset conflicts, and the non-authoritative document of a conflicting
+pair carries the violation.
 
 Hard constraints:
 
@@ -40,7 +50,7 @@ from pathlib import Path
 
 DEFAULT_SEED = 3319
 
-RULES = ["R1", "R2", "R3", "R4", "R5"]
+RULES = ["R1", "R2", "R3", "R4", "R5", "R6"]
 SINGLETON_RULES = {"R1", "R3", "R5"}  # at most one per document
 
 EXEMPT = {"POLICY.md", "style-guide.md", "INDEX.md"}
@@ -98,7 +108,7 @@ TOPICS = {
 }
 
 POLICY_MD = """\
-# Documentation Governance Policy (rev 5)
+# Documentation Governance Policy (rev 6)
 
 Scope: every document under `product-specs/`, `api/`, and `sops/`.
 The governance documents at the corpus root (POLICY.md,
@@ -136,6 +146,16 @@ Front matter must declare `version:` as exactly
 MAJOR.MINOR.PATCH with numeric components only — no `v` prefix, no
 pre-release or build suffix. Count one violation per non-conforming
 document.
+
+## Rule 6 — Cross-document numeric consistency
+
+When two documents state the same operational fact — a limit, a
+timeout, a retry count, an archival period, a threshold — the stated
+values must agree. The document that owns the fact is authoritative:
+the API reference for facts about API behavior, the SOP for facts
+about operational procedure. When a pair of documents disagrees on
+such a fact, the non-authoritative document of the pair is the one in
+violation. Count one violation per conflicting document pair.
 """
 
 STYLE_GUIDE_MD = """\
@@ -295,6 +315,220 @@ BAD_VERSIONS = ["2.1", "v1.4.0", "1.0.0-beta", "latest", "3"]
 
 CRED_WORDS = ["copper", "violet", "meadow", "harbor", "lantern"]
 
+# ---------------------------------------------------------------------
+# Rule 6 fact registry. Each entry plants one operational fact in two
+# documents: `auth` (the owning API reference or SOP) states it in one
+# phrasing, `ref` restates it in a deliberately different one. The two
+# sentences share nothing lexical beyond the number itself, and the
+# corpus teems with unrelated numbers in the same units, so pairing
+# them requires reading both documents, not pattern-matching. The
+# `*_re` patterns are anchored on phrases unique to their own template;
+# the self-test asserts each matches exactly once in the whole corpus.
+# All 28 documents are distinct, so no document carries more than one
+# fact sentence.
+# ---------------------------------------------------------------------
+
+FACTS = [
+    {
+        "key": "session-expiry",
+        "auth": "api/auth-tokens.md",
+        "ref": "product-specs/abandoned-cart-recovery.md",
+        "pool": [30, 45, 60, 90, 120],
+        "auth_tmpl": "Interactive sessions are invalidated {v} minutes "
+                     "after issuance, and no refresh call extends that "
+                     "ceiling.",
+        "ref_tmpl": "A cart is considered abandoned only after its "
+                    "owning session has ended at the {v}-minute mark, "
+                    "so recovery messages never race a live shopper.",
+        "auth_re": r"invalidated (\d+) minutes after issuance",
+        "ref_re": r"session has ended at the (\d+)-minute mark",
+    },
+    {
+        "key": "webhook-retries",
+        "auth": "api/webhook-retries.md",
+        "ref": "product-specs/back-in-stock-alerts.md",
+        "pool": [3, 4, 5, 6, 8],
+        "auth_tmpl": "A failing delivery is attempted {v} times in "
+                     "total before the receiving endpoint is marked "
+                     "unhealthy and paused.",
+        "ref_tmpl": "Alert notifications ride the platform webhook "
+                    "channel, and an alert is dropped for good once "
+                    "that channel has exhausted its {v} delivery "
+                    "attempts.",
+        "auth_re": r"attempted (\d+) times in total before the "
+                   r"receiving endpoint",
+        "ref_re": r"exhausted its (\d+) delivery attempts",
+    },
+    {
+        "key": "export-link-life",
+        "auth": "api/exports-endpoint.md",
+        "ref": "sops/data-archival.md",
+        "pool": [24, 48, 72, 96],
+        "auth_tmpl": "A finished export bundle stays downloadable for "
+                     "{v} hours, after which its link returns 410 "
+                     "Gone.",
+        "ref_tmpl": "Archival pulls that depend on export bundles must "
+                    "complete within {v} hours of bundle creation, "
+                    "before the download links lapse.",
+        "auth_re": r"stays downloadable for (\d+) hours",
+        "ref_re": r"complete within (\d+) hours of bundle creation",
+    },
+    {
+        "key": "burst-limit",
+        "auth": "api/rate-limits.md",
+        "ref": "sops/load-testing.md",
+        "pool": [50, 75, 100, 150, 200],
+        "auth_tmpl": "Above the sustained rate, bursts are tolerated "
+                     "up to {v} requests in any single second.",
+        "ref_tmpl": "Load profiles must keep their peak below the "
+                    "platform's burst tolerance of {v} requests per "
+                    "second or the limiter will skew every result.",
+        "auth_re": r"tolerated up to (\d+) requests in any single "
+                   r"second",
+        "ref_re": r"burst tolerance of (\d+) requests per second",
+    },
+    {
+        "key": "idempotency-window",
+        "auth": "api/idempotency-keys.md",
+        "ref": "product-specs/split-payments.md",
+        "pool": [24, 48, 72],
+        "auth_tmpl": "An idempotency key is honored for {v} hours from "
+                     "first use; the same key presented later starts a "
+                     "fresh operation.",
+        "ref_tmpl": "Because a split charge may be retried across "
+                    "several days, note that replay protection lapses "
+                    "once a key is older than {v} hours, and a late "
+                    "retry will charge again.",
+        "auth_re": r"honored for (\d+) hours from first use",
+        "ref_re": r"lapses once a key is older than (\d+) hours",
+    },
+    {
+        "key": "page-cap",
+        "auth": "api/pagination-rules.md",
+        "ref": "product-specs/bulk-ordering.md",
+        "pool": [100, 200, 250, 500],
+        "auth_tmpl": "No response page ever carries more than {v} "
+                     "records, whatever page size the caller requests.",
+        "ref_tmpl": "Bulk order screens fetch catalog data in pages "
+                    "capped at {v} records apiece, so large orders "
+                    "paginate rather than growing the request.",
+        "auth_re": r"carries more than (\d+) records",
+        "ref_re": r"pages capped at (\d+) records apiece",
+    },
+    {
+        "key": "sandbox-reset",
+        "auth": "api/sandbox-environment.md",
+        "ref": "sops/staging-refresh.md",
+        "pool": [7, 14, 21, 30],
+        "auth_tmpl": "The sandbox is wiped and reseeded on a fixed "
+                     "{v}-day calendar cycle.",
+        "ref_tmpl": "Staging fixtures must be scriptable because the "
+                    "vendor sandbox they mirror is reset every {v} "
+                    "days.",
+        "auth_re": r"reseeded on a fixed (\d+)-day calendar cycle",
+        "ref_re": r"sandbox they mirror is reset every (\d+) days",
+    },
+    {
+        "key": "payout-settlement",
+        "auth": "api/payouts-endpoint.md",
+        "ref": "product-specs/marketplace-onboarding.md",
+        "pool": [2, 3, 5, 7],
+        "auth_tmpl": "An approved payout settles to the merchant "
+                     "account within {v} business days of approval.",
+        "ref_tmpl": "Onboarding materials tell new sellers to expect "
+                    "their first funds after {v} business days, in "
+                    "line with platform settlement.",
+        "auth_re": r"settles to the merchant account within (\d+) "
+                   r"business days",
+        "ref_re": r"first funds after (\d+) business days",
+    },
+    {
+        "key": "log-window",
+        "auth": "sops/log-shipping.md",
+        "ref": "api/events-endpoint.md",
+        "pool": [30, 45, 60, 90],
+        "auth_tmpl": "Shipped log entries remain queryable in the "
+                     "primary store for {v} days before rolling into "
+                     "cold archives.",
+        "ref_tmpl": "Event history lookups are served from live log "
+                    "storage covering the most recent {v} days; older "
+                    "windows require an archive request.",
+        "auth_re": r"queryable in the primary store for (\d+) days",
+        "ref_re": r"live log storage covering the most recent (\d+) "
+                  r"days",
+    },
+    {
+        "key": "page-ack-sla",
+        "auth": "sops/incident-response.md",
+        "ref": "api/notifications-endpoint.md",
+        "pool": [5, 10, 15, 20],
+        "auth_tmpl": "A paged responder must acknowledge within {v} "
+                     "minutes; an unanswered page escalates to the "
+                     "secondary automatically.",
+        "ref_tmpl": "Paging pushes sent through this channel escalate "
+                    "to the secondary responder when {v} minutes pass "
+                    "without an acknowledgement.",
+        "auth_re": r"acknowledge within (\d+) minutes",
+        "ref_re": r"when (\d+) minutes pass without an acknowledgement",
+    },
+    {
+        "key": "snapshot-cadence",
+        "auth": "sops/database-backup.md",
+        "ref": "api/batch-operations.md",
+        "pool": [4, 6, 8, 12, 24],
+        "auth_tmpl": "A full snapshot is taken every {v} hours and "
+                     "verified by an automated restore into a scratch "
+                     "cluster.",
+        "ref_tmpl": "A replay after restore may resubmit up to {v} "
+                    "hours of operations — the worst-case gap between "
+                    "database snapshots.",
+        "auth_re": r"full snapshot is taken every (\d+) hours",
+        "ref_re": r"resubmit up to (\d+) hours of operations",
+    },
+    {
+        "key": "maintenance-window",
+        "auth": "sops/maintenance-windows.md",
+        "ref": "api/api-versioning.md",
+        "pool": [30, 45, 60, 90],
+        "auth_tmpl": "The standing window opens every Tuesday at 02:00 "
+                     "UTC and holds for {v} minutes.",
+        "ref_tmpl": "A version cutover is executed inside the standing "
+                    "Tuesday window, whose {v}-minute span bounds how "
+                    "long old and new formats overlap.",
+        "auth_re": r"02:00 UTC and holds for (\d+) minutes",
+        "ref_re": r"whose (\d+)-minute span",
+    },
+    {
+        "key": "cert-lead",
+        "auth": "sops/certificate-renewal.md",
+        "ref": "api/webhooks.md",
+        "pool": [14, 21, 30, 45],
+        "auth_tmpl": "The renewal pipeline replaces every certificate "
+                     "{v} days ahead of its expiry date.",
+        "ref_tmpl": "Consumers that pin our TLS certificates should "
+                    "plan around rotation happening {v} days before "
+                    "any published expiry.",
+        "auth_re": r"replaces every certificate (\d+) days ahead",
+        "ref_re": r"rotation happening (\d+) days before",
+    },
+    {
+        "key": "drain-deadline",
+        "auth": "sops/queue-drain-procedure.md",
+        "ref": "api/fulfillments-endpoint.md",
+        "pool": [10, 15, 20, 30],
+        "auth_tmpl": "A retiring queue must be fully drained within "
+                     "{v} minutes before its consumers are detached.",
+        "ref_tmpl": "During a decommission, in-flight fulfillment "
+                    "messages are flushed inside the {v}-minute drain "
+                    "deadline that precedes consumer detach.",
+        "auth_re": r"fully drained within (\d+) minutes",
+        "ref_re": r"inside the (\d+)-minute drain deadline",
+    },
+]
+
+_FACT_DOCS = [f["auth"] for f in FACTS] + [f["ref"] for f in FACTS]
+assert len(set(_FACT_DOCS)) == len(_FACT_DOCS), "fact docs must be distinct"
+
 
 def slug_of(topic: str) -> str:
     return topic.replace(" ", "-")
@@ -349,7 +583,7 @@ def _allocate(rng: random.Random, paths: list[str],
 # ---------------------------------------------------------------------
 
 
-def build(seed: int) -> tuple[dict[str, str], list[str]]:
+def build(seed: int) -> tuple[dict[str, str], list[str], list[dict]]:
     rng = random.Random(seed)
 
     # --- doc skeletons ----------------------------------------------
@@ -379,12 +613,44 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
         d["superseded_by"] = rng.choice(
             [p for p in paths if p != d["path"]])
 
+    # --- Rule 6 fact pairs ------------------------------------------
+    # Every registry fact is planted in both of its documents; a seeded
+    # subset conflicts (the referencing doc holds a plausible stale or
+    # mis-scaled value), the rest agree. The manifest records the
+    # ground truth for the self-test's independent re-derivation.
+    r6_budget = rng.randrange(4, 7)
+    conflict_keys = set(rng.sample([f["key"] for f in FACTS], r6_budget))
+    fact_sentences: dict[str, list[str]] = {}
+    manifest: list[dict] = []
+    for f in FACTS:
+        assert f["auth"] in by_path and f["ref"] in by_path, f["key"]
+        auth_value = rng.choice(f["pool"])
+        if f["key"] in conflict_keys:
+            ref_value = rng.choice(
+                [v for v in f["pool"] if v != auth_value])
+        else:
+            ref_value = auth_value
+        fact_sentences.setdefault(f["auth"], []).append(
+            f["auth_tmpl"].format(v=auth_value))
+        fact_sentences.setdefault(f["ref"], []).append(
+            f["ref_tmpl"].format(v=ref_value))
+        manifest.append({
+            "key": f["key"], "auth": f["auth"], "ref": f["ref"],
+            "auth_value": auth_value, "ref_value": ref_value,
+            "conflict": f["key"] in conflict_keys})
+
     # --- violations --------------------------------------------------
     budgets = {"R1": rng.randrange(5, 9), "R2": rng.randrange(8, 13),
                "R3": rng.randrange(3, 6), "R4": rng.randrange(5, 9),
                "R5": rng.randrange(5, 9)}
+    # Conflicting referencing docs already carry their one R6
+    # violation, so they are kept out of the R1-R5 allocation pool:
+    # that preserves the >=3 offender vs <=1 field separation with R6
+    # counting toward the totals.
+    excluded = {d["path"] for d in dep_ok} | {
+        m["ref"] for m in manifest if m["conflict"]}
     assign, offenders = _allocate(
-        rng, [p for p in paths if by_path[p] not in dep_ok], budgets)
+        rng, [p for p in paths if p not in excluded], budgets)
     for p in paths:
         d = by_path[p]
         rules = assign.get(p, [])
@@ -405,7 +671,8 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
         "style-guide.md": STYLE_GUIDE_MD,
     }
     for d in docs:
-        corpus[d["path"]] = _render_doc(rng, d, by_path, paths)
+        corpus[d["path"]] = _render_doc(
+            rng, d, by_path, paths, fact_sentences.get(d["path"], []))
 
     index_lines = ["# Documentation Index", "",
                    "Every content document, by section. Governance "
@@ -422,16 +689,26 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     corpus["INDEX.md"] = "\n".join(index_lines).rstrip("\n") + "\n"
 
     # --- answers from the injected ground truth ---------------------
+    # R6 violations count toward the offender totals, attributed to the
+    # non-authoritative (referencing) document of each conflicting pair.
     totals = {p: len(assign.get(p, [])) for p in paths}
+    for m in manifest:
+        if m["conflict"]:
+            totals[m["ref"]] += 1
     worst = sorted(paths, key=lambda p: (-totals[p], p))[:5]
     assert set(worst) == set(offenders), "offender separation broken"
-    answers = [str(budgets[r]) for r in RULES] + \
-        [",".join(sorted(offenders))]
-    return corpus, answers
+    for p in paths:
+        if p in set(offenders):
+            assert totals[p] >= 3, "offender under-filled with R6"
+        else:
+            assert totals[p] <= 1, "non-offender over-filled with R6"
+    answers = [str(budgets[r]) for r in RULES[:5]] + \
+        [str(r6_budget)] + [",".join(sorted(offenders))]
+    return corpus, answers, manifest
 
 
 def _render_doc(rng: random.Random, d: dict, by_path: dict,
-                paths: list[str]) -> str:
+                paths: list[str], fact_sentences: list[str]) -> str:
     rules = d["viol"]
     h1_id = d["id"]
     if "R1" in rules:
@@ -452,28 +729,36 @@ def _render_doc(rng: random.Random, d: dict, by_path: dict,
             for s in rng.sample(SENTENCES, k))
 
     body = [f"# {h1_id}: {d['title']}", ""]
-    body.append(paragraph(3))
+    # Indices of prose paragraphs that can absorb a Rule 6 fact
+    # sentence; the slot is chosen per sentence so placement varies.
+    prose_idx: list[int] = []
+
+    def add_para(k: int) -> None:
+        prose_idx.append(len(body))
+        body.append(paragraph(k))
+
+    add_para(3)
     body.append("")
     body.append("## Overview")
     body.append("")
-    body.append(paragraph(4))
+    add_para(4)
     body.append("")
     body.append("## Behavior")
     body.append("")
-    body.append(paragraph(5))
+    add_para(5)
     body.append("")
     body.append("## Details")
     body.append("")
     for _ in range(5):
-        body.append(paragraph(6))
+        add_para(6)
         body.append("")
     body.append("## Integration")
     body.append("")
-    body.append(paragraph(5))
+    add_para(5)
     body.append("")
     body.append("## Operational notes")
     body.append("")
-    body.append(paragraph(5))
+    add_para(5)
     body.append("")
     body.append("## Defaults")
     body.append("")
@@ -495,15 +780,15 @@ def _render_doc(rng: random.Random, d: dict, by_path: dict,
     body.append("")
     body.append("## Monitoring")
     body.append("")
-    body.append(paragraph(4))
+    add_para(4)
     body.append("")
     body.append("## Rollout")
     body.append("")
-    body.append(paragraph(4))
+    add_para(4)
     body.append("")
     body.append("## Troubleshooting")
     body.append("")
-    body.append(paragraph(4))
+    add_para(4)
     body.append("")
     body.append("## Change history")
     body.append("")
@@ -562,6 +847,12 @@ def _render_doc(rng: random.Random, d: dict, by_path: dict,
         assert broken not in by_path
         body.append(f"- [Background notes]({broken})")
     body.append("")
+
+    # Weave any Rule 6 fact sentences into ordinary prose paragraphs
+    # so they read as part of the document, not as a marked section.
+    for sentence in fact_sentences:
+        body[rng.choice(prose_idx)] += " " + sentence
+
     return "\n".join(front + body).rstrip("\n") + "\n"
 
 
@@ -588,7 +879,24 @@ def _front_matter(text: str) -> dict[str, str]:
     return fm
 
 
-def derive_answers(corpus: dict[str, str]) -> list[str]:
+def _extract_fact(corpus: dict[str, str], pattern: str,
+                  want_path: str) -> int:
+    """The pattern's single corpus-wide match, which must sit in
+    want_path — anything else means a template collided with prose or
+    a fact sentence went missing, and the corpus cannot be trusted."""
+    rx = re.compile(pattern)
+    hits = [(path, int(m.group(1)))
+            for path, text in sorted(corpus.items())
+            for m in rx.finditer(text)]
+    if len(hits) != 1 or hits[0][0] != want_path:
+        raise SystemExit(
+            f"self-test FAILED: fact pattern {pattern!r} matched "
+            f"{hits!r}; expected exactly one match in {want_path}")
+    return hits[0][1]
+
+
+def derive_answers(corpus: dict[str, str],
+                   manifest: list[dict]) -> list[str]:
     counts = {r: 0 for r in RULES}
     totals: dict[str, int] = {}
     for path in sorted(corpus):
@@ -631,12 +939,38 @@ def derive_answers(corpus: dict[str, str]) -> list[str]:
 
         totals[path] = n
 
+    # Rule 6: re-read both statements of every registry fact from the
+    # emitted documents and let the extracted values, not the
+    # generator's bookkeeping, decide which pairs conflict. The
+    # manifest supplies only the expected locations and values to
+    # verify against; a missing sentence, a moved sentence, a wrong
+    # value, or an unexpected extra match all fail loudly.
+    spec_by_key = {f["key"]: f for f in FACTS}
+    for m in manifest:
+        spec = spec_by_key[m["key"]]
+        auth_value = _extract_fact(corpus, spec["auth_re"], m["auth"])
+        ref_value = _extract_fact(corpus, spec["ref_re"], m["ref"])
+        if auth_value != m["auth_value"] or ref_value != m["ref_value"]:
+            raise SystemExit(
+                f"self-test FAILED: fact {m['key']!r} emitted "
+                f"({auth_value}, {ref_value}), manifest says "
+                f"({m['auth_value']}, {m['ref_value']})")
+        conflict = auth_value != ref_value
+        if conflict != m["conflict"]:
+            raise SystemExit(
+                f"self-test FAILED: fact {m['key']!r} conflict state "
+                f"{conflict} does not match manifest {m['conflict']}")
+        if conflict:
+            counts["R6"] += 1
+            totals[m["ref"]] += 1
+
     worst = sorted(totals, key=lambda p: (-totals[p], p))[:5]
     return [str(counts[r]) for r in RULES] + [",".join(sorted(worst))]
 
 
-def self_test(corpus: dict[str, str], answers: list[str]) -> None:
-    derived = derive_answers(corpus)
+def self_test(corpus: dict[str, str], answers: list[str],
+              manifest: list[dict]) -> None:
+    derived = derive_answers(corpus, manifest)
     if derived != answers:
         for i, (d, a) in enumerate(zip(derived, answers)):
             if d != a:
@@ -668,8 +1002,8 @@ def _tree(root: Path) -> dict[str, bytes]:
 
 
 def run_check(task_dir: Path, seed: int) -> int:
-    corpus, answers = build(seed)
-    self_test(corpus, answers)
+    corpus, answers, manifest = build(seed)
+    self_test(corpus, answers, manifest)
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp)
         write_out(tmp_dir, corpus, answers, seed)
@@ -704,14 +1038,14 @@ def main() -> int:
     task_dir = Path(args.out)
     if args.check:
         return run_check(task_dir, args.seed)
-    corpus, answers = build(args.seed)
-    self_test(corpus, answers)
+    corpus, answers, manifest = build(args.seed)
+    self_test(corpus, answers, manifest)
     write_out(task_dir, corpus, answers, args.seed)
     total = sum(len(t.encode()) for t in corpus.values())
     print(f"seed {args.seed}: {len(corpus)} files, "
           f"{total / 1024:.0f} KiB")
-    print(f"  rule counts R1..R5: {', '.join(answers[:5])}")
-    print(f"  worst offenders: {answers[5]}")
+    print(f"  rule counts R1..R6: {', '.join(answers[:6])}")
+    print(f"  worst offenders: {answers[6]}")
     print("self-test OK: all answers re-derived from the emitted corpus")
     return 0
 

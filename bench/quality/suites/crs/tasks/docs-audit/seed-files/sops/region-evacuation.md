@@ -8,7 +8,7 @@ owner: payments-platform
 
 # DOC-9807: Region Evacuation
 
-Batch processing for region evacuation runs on a fixed schedule and drains its queue completely before the next cycle begins. Requests beyond the configured limit receive a structured error response with a stable error code. Identifiers used here follow the corpus-wide conventions in the style guide.
+Requests beyond the configured limit receive a structured error response with a stable error code. Identifiers used here follow the corpus-wide conventions in the style guide. Data written by region evacuation is idempotent at the record level, so replayed events cannot create duplicates.
 
 ## Overview
 

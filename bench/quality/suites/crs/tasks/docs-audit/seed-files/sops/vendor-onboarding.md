@@ -8,112 +8,113 @@ owner: comms
 
 # DOC-7865: Vendor Onboarding
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Historical records for vendor onboarding are retained for 23 days and then moved to cold storage by the archival pipeline. Rollout is gated on the weekly release train unless an exemption is filed.
+Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Identifiers used here follow the corpus-wide conventions in the style guide. The comms team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## Overview
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 70 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The defaults listed below apply unless overridden per environment. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Configuration for vendor onboarding is loaded at service start and refreshed every 26 minutes. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 ## Behavior
 
-Identifiers used here follow the corpus-wide conventions in the style guide. The vendor onboarding behavior is owned by the comms team and reviewed each quarter. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. Historical records for vendor onboarding are retained for 29 days and then moved to cold storage by the archival pipeline.
+Batch processing for vendor onboarding runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Earlier drafts of this behavior were consolidated here from the team wiki. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 41 minutes. The behavior in this section was last load-tested at 6 times the average production request rate.
 
 ## Details
 
-Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Operational alerts for this area route to the owning team's rotation. Support escalations touching vendor onboarding are triaged by the comms team within one business day. Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. The examples in this document use placeholder data and do not reference real customer records. The behavior in this section was last load-tested at 59 times the average production request rate.
+Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to vendor onboarding events through the platform event bus rather than polling. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 72 minutes. The comms team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
-Configuration for vendor onboarding is loaded at service start and refreshed every 83 minutes. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Support escalations touching vendor onboarding are triaged by the comms team within one business day. Every externally visible change to vendor onboarding is announced at least 63 days before it takes effect in production. Consumers should treat undocumented fields as unstable and subject to change without notice. Identifiers used here follow the corpus-wide conventions in the style guide.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Every externally visible change to vendor onboarding is announced at least 72 days before it takes effect in production. Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating vendor onboarding changes before they are applied. Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. Operational alerts for this area route to the owning team's rotation.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Support escalations touching vendor onboarding are triaged by the comms team within one business day. Earlier drafts of this behavior were consolidated here from the team wiki. Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment. Configuration for vendor onboarding is loaded at service start and refreshed every 55 minutes.
+The behavior in this section was last load-tested at 16 times the average production request rate. Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records. Support escalations touching vendor onboarding are triaged by the comms team within one business day. Downstream consumers subscribe to vendor onboarding events through the platform event bus rather than polling. Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical.
 
-Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Changes to vendor onboarding go through the standard review workflow before release. The examples in this document use placeholder data and do not reference real customer records. Downstream consumers subscribe to vendor onboarding events through the platform event bus rather than polling. The defaults listed below apply unless overridden per environment.
+Clients are expected to implement exponential backoff when a retryable error is returned by this area. Every externally visible change to vendor onboarding is announced at least 45 days before it takes effect in production. Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. Earlier drafts of this behavior were consolidated here from the team wiki. Historical records for vendor onboarding are retained for 9 days and then moved to cold storage by the archival pipeline. The comms team publishes a quarterly summary of changes in this area to the platform announcements list.
 
-Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating vendor onboarding changes before they are applied. Historical records for vendor onboarding are retained for 19 days and then moved to cold storage by the archival pipeline. Changes to vendor onboarding go through the standard review workflow before release. The comms team publishes a quarterly summary of changes in this area to the platform announcements list.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The behavior in this section was last load-tested at 35 times the average production request rate. Configuration for vendor onboarding is loaded at service start and refreshed every 65 minutes.
 
 ## Integration
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Historical records for vendor onboarding are retained for 12 days and then moved to cold storage by the archival pipeline. Metrics emitted by vendor onboarding follow the platform naming scheme and are aggregated at one-minute resolution. Configuration for vendor onboarding is loaded at service start and refreshed every 39 minutes.
+Identifiers used here follow the corpus-wide conventions in the style guide. Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Support escalations touching vendor onboarding are triaged by the comms team within one business day. Metrics emitted by vendor onboarding follow the platform naming scheme and are aggregated at one-minute resolution. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Operational notes
 
-This document describes the vendor onboarding area of the Meridian Commerce platform. Every externally visible change to vendor onboarding is announced at least 74 days before it takes effect in production. Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. The defaults listed below apply unless overridden per environment. The vendor onboarding behavior is owned by the comms team and reviewed each quarter.
+Changes to vendor onboarding go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. This document describes the vendor onboarding area of the Meridian Commerce platform. Batch processing for vendor onboarding runs on a fixed schedule and drains its queue completely before the next cycle begins. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Defaults
 
-- burst allowance: 1995 requests
-- warm-up period after deploy: 746 seconds
-- soft quota per client: 437 per hour
+- maximum batch size: 654
+- queue depth alert threshold: 2566
+- warm-up period after deploy: 2466 seconds
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| flush_interval_s | 7352 | matches the platform default |
-| connection_limit | 8591 | documented for reference only |
-| drain_timeout_s | 5573 | raised during seasonal peaks |
-| cache_ttl_s | 717 | requires restart to change |
-| cooldown_s | 4052 | requires restart to change |
-| audit_window_days | 8349 | documented for reference only |
-| sample_rate_pct | 5723 | requires restart to change |
-| queue_depth_limit | 3520 | monitored by the owning team |
-| prefetch_count | 6817 | tunable per environment |
-| max_concurrency | 7515 | documented for reference only |
-| max_payload_kb | 3006 | requires restart to change |
-| warmup_batch | 2223 | hot-reloaded on change |
-| sync_interval_s | 2427 | monitored by the owning team |
+| audit_window_days | 8342 | hot-reloaded on change |
+| warmup_batch | 731 | monitored by the owning team |
+| sample_rate_pct | 3104 | raised during seasonal peaks |
+| max_concurrency | 3726 | bounded by the platform ceiling |
+| connection_limit | 8720 | bounded by the platform ceiling |
+| cooldown_s | 7149 | bounded by the platform ceiling |
+| cache_ttl_s | 560 | bounded by the platform ceiling |
+| queue_depth_limit | 748 | documented for reference only |
+| replay_window_h | 2040 | matches the platform default |
+| batch_window_ms | 4330 | hot-reloaded on change |
+| max_payload_kb | 3615 | tunable per environment |
+| drain_timeout_s | 7485 | raised during seasonal peaks |
+| flush_interval_s | 246 | hot-reloaded on change |
 
 ## Limits and quotas
 
-- burst allowance: 1282 requests
-- warm-up period after deploy: 3769 seconds
-- retry budget: 2228 attempts
-- maximum payload size: 694 KB
-- default page size: 2961
-- cache lifetime: 368 seconds
+- soft quota per client: 1516 per hour
+- retry budget: 3540 attempts
+- concurrent worker ceiling: 1198
+- maximum batch size: 1640
+- maximum payload size: 2181 KB
+- event replay window: 2561 hours
+- burst allowance: 3727 requests
+- warm-up period after deploy: 377 seconds
 
 ## Monitoring
 
-Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
+Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. The defaults listed below apply unless overridden per environment. Batch processing for vendor onboarding runs on a fixed schedule and drains its queue completely before the next cycle begins. Every externally visible change to vendor onboarding is announced at least 15 days before it takes effect in production.
 
 ## Rollout
 
-Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. The vendor onboarding behavior is owned by the comms team and reviewed each quarter. Earlier drafts of this behavior were consolidated here from the team wiki. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating vendor onboarding changes before they are applied. Historical records for vendor onboarding are retained for 35 days and then moved to cold storage by the archival pipeline.
 
 ## Troubleshooting
 
-Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. A dry-run mode is available in non-production environments for validating vendor onboarding changes before they are applied. Access to administrative operations in this area is restricted to members of the comms group and audited monthly.
+Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. The examples in this document use placeholder data and do not reference real customer records. Configuration for vendor onboarding is loaded at service start and refreshed every 57 minutes. Changes to vendor onboarding go through the standard review workflow before release.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 1.5.0 | 2023-03-20 | clarified defaults |
-| 1.1.3 | 2025-12-18 | added monitoring guidance |
-| 1.7.0 | 2023-11-15 | refreshed examples |
-| 1.6.2 | 2024-06-15 | clarified defaults |
-| 2.7.6 | 2023-06-19 | tightened wording |
-| 1.7.4 | 2024-01-05 | updated escalation contacts |
-| 3.5.6 | 2023-07-08 | expanded rollout notes |
+| 1.4.0 | 2023-05-01 | added monitoring guidance |
+| 1.0.9 | 2025-09-01 | documented regional exceptions |
+| 1.6.8 | 2024-08-06 | documented error codes |
+| 2.5.4 | 2025-02-16 | documented regional exceptions |
+| 2.2.8 | 2024-11-28 | documented regional exceptions |
+| 3.6.7 | 2024-09-14 | recorded quota changes |
+| 2.9.9 | 2025-01-26 | documented error codes |
 
 ## FAQ
 
+**Who should be contacted when the documented defaults look wrong?**
+
+Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component. Historical records for vendor onboarding are retained for 81 days and then moved to cold storage by the archival pipeline. Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+
+**Where are the metrics for this area published?**
+
+Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+
 **What happens when a request exceeds the documented limits?**
 
-Batch processing for vendor onboarding runs on a fixed schedule and drains its queue completely before the next cycle begins. This document describes the vendor onboarding area of the Meridian Commerce platform. Capacity for vendor onboarding is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Every externally visible change to vendor onboarding is announced at least 28 days before it takes effect in production. Metrics emitted by vendor onboarding follow the platform naming scheme and are aggregated at one-minute resolution. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
 **Does this area behave differently in staging than in production?**
 
-The defaults listed below apply unless overridden per environment. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Downstream consumers subscribe to vendor onboarding events through the platform event bus rather than polling.
-
-**How often does the behavior described here change?**
-
-Configuration for vendor onboarding is loaded at service start and refreshed every 16 minutes. Historical records for vendor onboarding are retained for 25 days and then moved to cold storage by the archival pipeline. The vendor onboarding behavior is owned by the comms team and reviewed each quarter.
-
-**Can the defaults in this document be overridden per environment?**
-
-Access to administrative operations in this area is restricted to members of the comms group and audited monthly. Staging environments mirror production settings for vendor onboarding except where data-volume limits make that impractical. Localization of user-facing strings in vendor onboarding is handled by the shared translation pipeline, not by this component.
+The behavior in this section was last load-tested at 84 times the average production request rate. Downstream consumers subscribe to vendor onboarding events through the platform event bus rather than polling. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## See also
 
-- [DOC-2434: Api Versioning](api/api-versioning.md)
-- [DOC-2799: Subscriptions Endpoint](api/subscriptions-endpoint.md)
+- [DOC-8638: Addresses Endpoint](api/addresses-endpoint.md)

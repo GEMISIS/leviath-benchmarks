@@ -9,129 +9,121 @@ owner: payments-platform
 
 # DOC-7518: Promotions Endpoint
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 81 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. A dry-run mode is available in non-production environments for validating promotions endpoint changes before they are applied.
+Requests beyond the configured limit receive a structured error response with a stable error code. Metrics emitted by promotions endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Historical records for promotions endpoint are retained for 43 days and then moved to cold storage by the archival pipeline.
 
 ## Overview
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. The behavior in this section was last load-tested at 55 times the average production request rate. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+Configuration for promotions endpoint is loaded at service start and refreshed every 71 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Historical records for promotions endpoint are retained for 83 days and then moved to cold storage by the archival pipeline.
 
 ## Behavior
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Requests beyond the configured limit receive a structured error response with a stable error code. The behavior in this section was last load-tested at 37 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed.
+The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter. Rollout is gated on the weekly release train unless an exemption is filed. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for promotions endpoint except where data-volume limits make that impractical. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Details
 
-Localization of user-facing strings in promotions endpoint is handled by the shared translation pipeline, not by this component. The behavior in this section was last load-tested at 17 times the average production request rate. A dry-run mode is available in non-production environments for validating promotions endpoint changes before they are applied. Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Staging environments mirror production settings for promotions endpoint except where data-volume limits make that impractical.
+The defaults listed below apply unless overridden per environment. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Consumers should treat undocumented fields as unstable and subject to change without notice. The behavior in this section was last load-tested at 89 times the average production request rate. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for promotions endpoint is loaded at service start and refreshed every 75 minutes.
 
-Localization of user-facing strings in promotions endpoint is handled by the shared translation pipeline, not by this component. Batch processing for promotions endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Rollout is gated on the weekly release train unless an exemption is filed. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 55 minutes. The behavior in this section was last load-tested at 13 times the average production request rate. Requests beyond the configured limit receive a structured error response with a stable error code. Capacity for promotions endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
-The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter. Earlier drafts of this behavior were consolidated here from the team wiki. The behavior in this section was last load-tested at 44 times the average production request rate. Configuration for promotions endpoint is loaded at service start and refreshed every 29 minutes. Every externally visible change to promotions endpoint is announced at least 42 days before it takes effect in production. Batch processing for promotions endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins.
+The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Requests beyond the configured limit receive a structured error response with a stable error code. The behavior in this section was last load-tested at 8 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 42 minutes. The defaults listed below apply unless overridden per environment. The behavior in this section was last load-tested at 11 times the average production request rate. Every externally visible change to promotions endpoint is announced at least 25 days before it takes effect in production. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Staging environments mirror production settings for promotions endpoint except where data-volume limits make that impractical. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Configuration for promotions endpoint is loaded at service start and refreshed every 54 minutes. Historical records for promotions endpoint are retained for 83 days and then moved to cold storage by the archival pipeline. A dry-run mode is available in non-production environments for validating promotions endpoint changes before they are applied. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Changes to promotions endpoint go through the standard review workflow before release. The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter. Historical records for promotions endpoint are retained for 55 days and then moved to cold storage by the archival pipeline. The behavior in this section was last load-tested at 35 times the average production request rate. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 63 minutes.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 22 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Data written by promotions endpoint is idempotent at the record level, so replayed events cannot create duplicates. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Downstream consumers subscribe to promotions endpoint events through the platform event bus rather than polling.
 
 ## Integration
 
-The behavior in this section was last load-tested at 68 times the average production request rate. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code. Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Rollout is gated on the weekly release train unless an exemption is filed.
+Batch processing for promotions endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter. Downstream consumers subscribe to promotions endpoint events through the platform event bus rather than polling. Every externally visible change to promotions endpoint is announced at least 51 days before it takes effect in production. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Operational notes
 
-This document describes the promotions endpoint area of the Meridian Commerce platform. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Consumers should treat undocumented fields as unstable and subject to change without notice. Access to administrative operations in this area is restricted to members of the payments-platform group and audited monthly. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 14 minutes.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 42 minutes. The behavior in this section was last load-tested at 89 times the average production request rate. Every externally visible change to promotions endpoint is announced at least 11 days before it takes effect in production. Consumers should treat undocumented fields as unstable and subject to change without notice. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Defaults
 
-- warm-up period after deploy: 3142 seconds
-- cache lifetime: 2409 seconds
-- retry budget: 1356 attempts
-- concurrent worker ceiling: 2670
+- default page size: 1584
+- maximum payload size: 1480 KB
+- maximum batch size: 820
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| cache_ttl_s | 3843 | requires restart to change |
-| max_concurrency | 5156 | tunable per environment |
-| warmup_batch | 3770 | bounded by the platform ceiling |
-| lease_ttl_s | 4419 | requires restart to change |
-| flush_interval_s | 2268 | requires restart to change |
-| sync_interval_s | 2429 | monitored by the owning team |
-| prefetch_count | 8951 | matches the platform default |
-| queue_depth_limit | 240 | raised during seasonal peaks |
-| max_payload_kb | 795 | matches the platform default |
-| sample_rate_pct | 6741 | documented for reference only |
-| drain_timeout_s | 2343 | monitored by the owning team |
+| backoff_base_ms | 4266 | tunable per environment |
+| audit_window_days | 7448 | documented for reference only |
+| warmup_batch | 339 | requires restart to change |
+| max_payload_kb | 5058 | raised during seasonal peaks |
+| connection_limit | 3383 | raised during seasonal peaks |
+| replay_window_h | 5385 | hot-reloaded on change |
+| flush_interval_s | 1203 | documented for reference only |
+| queue_depth_limit | 5163 | documented for reference only |
+| shard_count | 5879 | documented for reference only |
+| sample_rate_pct | 5948 | raised during seasonal peaks |
+| retry_limit | 8656 | bounded by the platform ceiling |
+| page_size | 1143 | monitored by the owning team |
+| sync_interval_s | 35 | bounded by the platform ceiling |
 
 ## Limits and quotas
 
-- warm-up period after deploy: 1118 seconds
-- maximum payload size: 1558 KB
-- maximum batch size: 735
-- default page size: 791
-- retry budget: 2335 attempts
-- event replay window: 980 hours
+- retry budget: 617 attempts
+- cache lifetime: 2179 seconds
+- maximum batch size: 2888
+- request timeout: 2776 ms
+- maximum payload size: 2463 KB
+- concurrent worker ceiling: 1472
+- soft quota per client: 2247 per hour
+- burst allowance: 2852 requests
 
 ## Monitoring
 
-Changes to promotions endpoint go through the standard review workflow before release. Identifiers used here follow the corpus-wide conventions in the style guide. Downstream consumers subscribe to promotions endpoint events through the platform event bus rather than polling. The defaults listed below apply unless overridden per environment.
+The behavior in this section was last load-tested at 38 times the average production request rate. Every externally visible change to promotions endpoint is announced at least 11 days before it takes effect in production. This document describes the promotions endpoint area of the Meridian Commerce platform. Localization of user-facing strings in promotions endpoint is handled by the shared translation pipeline, not by this component.
 
 ## Rollout
 
-The defaults listed below apply unless overridden per environment. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list. Every externally visible change to promotions endpoint is announced at least 44 days before it takes effect in production. The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Capacity for promotions endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Troubleshooting
 
-A dry-run mode is available in non-production environments for validating promotions endpoint changes before they are applied. The behavior in this section was last load-tested at 50 times the average production request rate. Data written by promotions endpoint is idempotent at the record level, so replayed events cannot create duplicates. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
+Localization of user-facing strings in promotions endpoint is handled by the shared translation pipeline, not by this component. The promotions endpoint behavior is owned by the payments-platform team and reviewed each quarter. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Metrics emitted by promotions endpoint follow the platform naming scheme and are aggregated at one-minute resolution.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 3.8.6 | 2025-04-11 | updated escalation contacts |
-| 2.5.7 | 2023-05-23 | added monitoring guidance |
-| 3.4.4 | 2023-06-18 | documented error codes |
-| 1.7.4 | 2025-05-01 | clarified defaults |
-| 3.7.1 | 2024-07-01 | added monitoring guidance |
-| 3.4.2 | 2023-10-06 | refreshed examples |
-| 2.6.0 | 2024-12-14 | documented regional exceptions |
+| 1.3.9 | 2023-02-06 | aligned terminology with the style guide |
+| 1.1.1 | 2024-04-13 | added monitoring guidance |
+| 1.0.2 | 2024-05-22 | updated escalation contacts |
+| 2.5.8 | 2024-02-21 | documented regional exceptions |
+| 2.3.5 | 2025-05-12 | added monitoring guidance |
+| 1.4.7 | 2025-12-09 | refreshed examples |
+| 1.5.8 | 2023-01-28 | added monitoring guidance |
+| 2.4.0 | 2023-11-15 | documented error codes |
+| 2.6.0 | 2024-11-09 | expanded rollout notes |
+| 1.9.2 | 2024-05-14 | clarified defaults |
 
 ## FAQ
 
-**How often does the behavior described here change?**
+**How far back can historical data for this area be retrieved?**
 
-The examples in this document use placeholder data and do not reference real customer records. Data written by promotions endpoint is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment.
-
-**What happens when a request exceeds the documented limits?**
-
-Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for promotions endpoint is loaded at service start and refreshed every 27 minutes.
+Batch processing for promotions endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. The behavior in this section was last load-tested at 53 times the average production request rate. Localization of user-facing strings in promotions endpoint is handled by the shared translation pipeline, not by this component.
 
 **Can the defaults in this document be overridden per environment?**
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 17 minutes. Downstream consumers subscribe to promotions endpoint events through the platform event bus rather than polling. Earlier drafts of this behavior were consolidated here from the team wiki.
+The examples in this document use placeholder data and do not reference real customer records. Data written by promotions endpoint is idempotent at the record level, so replayed events cannot create duplicates. The defaults listed below apply unless overridden per environment.
 
 **Where are the metrics for this area published?**
 
-Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
-
-**How far back can historical data for this area be retrieved?**
-
-Staging environments mirror production settings for promotions endpoint except where data-volume limits make that impractical. This document describes the promotions endpoint area of the Meridian Commerce platform. Every externally visible change to promotions endpoint is announced at least 63 days before it takes effect in production.
+Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for promotions endpoint is loaded at service start and refreshed every 27 minutes.
 
 **Is there a dry-run mode for validating changes in this area?**
 
-Rollout is gated on the weekly release train unless an exemption is filed. Support escalations touching promotions endpoint are triaged by the payments-platform team within one business day. Operational alerts for this area route to the owning team's rotation.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 17 minutes. Downstream consumers subscribe to promotions endpoint events through the platform event bus rather than polling. Earlier drafts of this behavior were consolidated here from the team wiki.
 
-## Configuration
+**How often does the behavior described here change?**
 
-```ini
-[promotions-endpoint]
-endpoint = https://internal.meridian.example/v2/promotions-endpoint
-timeout_ms = 5548
-api_key = "<REDACTED>"
-```
+Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment. The payments-platform team publishes a quarterly summary of changes in this area to the platform announcements list.
 
 ## See also
 
-- [DOC-4056: Preorder Management](product-specs/preorder-management.md)
-- [DOC-8481: Queue Drain Procedure](sops/queue-drain-procedure.md)
-- [DOC-3601: On-Call Handbook](sops/on-call-handbook.md)
+- [DOC-3554: Feature Flag Hygiene](sops/feature-flag-hygiene.md)
+- [DOC-7657: Customer Segments](product-specs/customer-segments.md)

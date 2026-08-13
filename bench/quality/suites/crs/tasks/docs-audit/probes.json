@@ -43,6 +43,13 @@
       "rubric": "Must say root-relative, that a violation is an unresolvable .md target, and that counting is per occurrence (not per document). Saying links are relative to the linking document, or counting per document, is a fail; omitting the counting unit is partial credit."
     },
     {
+      "after_tool_calls": 120,
+      "type": "cross_file",
+      "question": "Per POLICY.md, when two documents state the same operational fact but give different values, which document governs, and what is the counting unit for such conflicts?",
+      "expected": "The document that owns the fact is authoritative - the API reference for facts about API behavior, the SOP for facts about operational procedure - and the non-authoritative document of the pair is the one in violation; one violation is counted per conflicting document pair.",
+      "rubric": "Must give the ownership-based authority rule (the API reference governs API facts, the SOP governs operational facts) and per-conflicting-pair counting. Saying the newer, longer, or higher-versioned document wins, or that both documents are in violation, is a fail; naming only one of the two ownership cases or omitting the counting unit is partial credit."
+    },
+    {
       "after_tool_calls": 135,
       "type": "factual_recall",
       "question": "Per style-guide.md, which section do links between documents belong in, and what block type do configuration examples use?",

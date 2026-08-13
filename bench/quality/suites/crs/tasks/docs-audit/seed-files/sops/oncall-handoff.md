@@ -8,35 +8,35 @@ owner: platform-core
 
 # DOC-6887: Oncall Handoff
 
-Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Rollout is gated on the weekly release train unless an exemption is filed. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list.
+Support escalations touching oncall handoff are triaged by the platform-core team within one business day. Capacity for oncall handoff is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Overview
 
-Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Consumers should treat undocumented fields as unstable and subject to change without notice. The examples in this document use placeholder data and do not reference real customer records. Metrics emitted by oncall handoff follow the platform naming scheme and are aggregated at one-minute resolution.
+Changes to oncall handoff go through the standard review workflow before release. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Identifiers used here follow the corpus-wide conventions in the style guide. Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins.
 
 ## Behavior
 
-Earlier drafts of this behavior were consolidated here from the team wiki. A dry-run mode is available in non-production environments for validating oncall handoff changes before they are applied. Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list.
+The examples in this document use placeholder data and do not reference real customer records. Changes to oncall handoff go through the standard review workflow before release. Support escalations touching oncall handoff are triaged by the platform-core team within one business day. Historical records for oncall handoff are retained for 56 days and then moved to cold storage by the archival pipeline. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Details
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Identifiers used here follow the corpus-wide conventions in the style guide. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 28 minutes. A dry-run mode is available in non-production environments for validating oncall handoff changes before they are applied. Historical records for oncall handoff are retained for 75 days and then moved to cold storage by the archival pipeline.
+Rollout is gated on the weekly release train unless an exemption is filed. The platform-core team publishes a quarterly summary of changes in this area to the platform announcements list. Downstream consumers subscribe to oncall handoff events through the platform event bus rather than polling. Configuration for oncall handoff is loaded at service start and refreshed every 78 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
-The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Consumers should treat undocumented fields as unstable and subject to change without notice. Localization of user-facing strings in oncall handoff is handled by the shared translation pipeline, not by this component. Metrics emitted by oncall handoff follow the platform naming scheme and are aggregated at one-minute resolution.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Identifiers used here follow the corpus-wide conventions in the style guide. Localization of user-facing strings in oncall handoff is handled by the shared translation pipeline, not by this component. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical.
 
-Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical. Data written by oncall handoff is idempotent at the record level, so replayed events cannot create duplicates. Operational alerts for this area route to the owning team's rotation. Historical records for oncall handoff are retained for 34 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in oncall handoff is handled by the shared translation pipeline, not by this component.
+Configuration for oncall handoff is loaded at service start and refreshed every 31 minutes. This document describes the oncall handoff area of the Meridian Commerce platform. Localization of user-facing strings in oncall handoff is handled by the shared translation pipeline, not by this component. Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Access to administrative operations in this area is restricted to members of the platform-core group and audited monthly. Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical.
 
-Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Support escalations touching oncall handoff are triaged by the platform-core team within one business day. Consumers should treat undocumented fields as unstable and subject to change without notice. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+The defaults listed below apply unless overridden per environment. Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 66 minutes. Support escalations touching oncall handoff are triaged by the platform-core team within one business day. Consumers should treat undocumented fields as unstable and subject to change without notice. Operational alerts for this area route to the owning team's rotation.
 
-Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical. Rollout is gated on the weekly release train unless an exemption is filed. Localization of user-facing strings in oncall handoff is handled by the shared translation pipeline, not by this component. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. A dry-run mode is available in non-production environments for validating oncall handoff changes before they are applied. Identifiers used here follow the corpus-wide conventions in the style guide.
+Configuration for oncall handoff is loaded at service start and refreshed every 48 minutes. Support escalations touching oncall handoff are triaged by the platform-core team within one business day. Data written by oncall handoff is idempotent at the record level, so replayed events cannot create duplicates. Batch processing for oncall handoff runs on a fixed schedule and drains its queue completely before the next cycle begins. Staging environments mirror production settings for oncall handoff except where data-volume limits make that impractical. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Integration
 
-Historical records for oncall handoff are retained for 68 days and then moved to cold storage by the archival pipeline. The examples in this document use placeholder data and do not reference real customer records. Capacity for oncall handoff is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Downstream consumers subscribe to oncall handoff events through the platform event bus rather than polling. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline.
+This document describes the oncall handoff area of the Meridian Commerce platform. Changes to oncall handoff go through the standard review workflow before release. Historical records for oncall handoff are retained for 37 days and then moved to cold storage by the archival pipeline. The examples in this document use placeholder data and do not reference real customer records. Capacity for oncall handoff is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
 
 ## Operational notes
 
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 37 minutes. This document describes the oncall handoff area of the Meridian Commerce platform. The examples in this document use placeholder data and do not reference real customer records. Every externally visible change to oncall handoff is announced at least 43 days before it takes effect in production.
+This document describes the oncall handoff area of the Meridian Commerce platform. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 19 minutes. The examples in this document use placeholder data and do not reference real customer records. Every externally visible change to oncall handoff is announced at least 43 days before it takes effect in production.
 
 ## Defaults
 
@@ -122,6 +122,18 @@ Changes to oncall handoff go through the standard review workflow before release
 
 The behavior in this section was last load-tested at 25 times the average production request rate. Rollout is gated on the weekly release train unless an exemption is filed. Changes to oncall handoff go through the standard review workflow before release.
 
+## Configuration
+
+```ini
+[oncall-handoff]
+endpoint = https://internal.meridian.example/v2/oncall-handoff
+timeout_ms = 4249
+api_key = "<REDACTED>"
+api_key = "sk_live_bcfbb90dcd93"
+```
+
 ## See also
 
-- [DOC-4803: Batch Job Recovery](sops/batch-job-recovery.md)
+- [DOC-4605: Dependency Upgrades](sops/dependency-upgrades.md)
+- [DOC-1542: Batch Operations](api/batch-operations.md)
+- [DOC-8582: Abandoned Cart Recovery](product-specs/abandoned-cart-recovery.md)

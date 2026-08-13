@@ -130,9 +130,8 @@ The defaults listed below apply unless overridden per environment. Clients are e
 ```ini
 [currencies-endpoint]
 endpoint = https://internal.meridian.example/v2/currencies-endpoint
-timeout_ms = 2639
+timeout_ms = 3714
 api_key = "<REDACTED>"
-api_key = "sk_live_6dd5f5881f19"
 ```
 
 ## See also

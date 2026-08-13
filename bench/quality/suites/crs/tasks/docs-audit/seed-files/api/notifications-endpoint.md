@@ -8,122 +8,127 @@ owner: discovery
 
 # DOC-8879: Notifications Endpoint
 
-Batch processing for notifications endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. The defaults listed below apply unless overridden per environment. This document describes the notifications endpoint area of the Meridian Commerce platform.
+Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 39 minutes. Staging environments mirror production settings for notifications endpoint except where data-volume limits make that impractical. This document describes the notifications endpoint area of the Meridian Commerce platform.
 
 ## Overview
 
-The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records.
+Rollout is gated on the weekly release train unless an exemption is filed. Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Earlier drafts of this behavior were consolidated here from the team wiki. The notifications endpoint behavior is owned by the discovery team and reviewed each quarter.
 
 ## Behavior
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. The notifications endpoint behavior is owned by the discovery team and reviewed each quarter. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. This document describes the notifications endpoint area of the Meridian Commerce platform. Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. Historical records for notifications endpoint are retained for 58 days and then moved to cold storage by the archival pipeline.
 
 ## Details
 
-Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Requests beyond the configured limit receive a structured error response with a stable error code. Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Staging environments mirror production settings for notifications endpoint except where data-volume limits make that impractical. Every externally visible change to notifications endpoint is announced at least 39 days before it takes effect in production.
+Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Consumers should treat undocumented fields as unstable and subject to change without notice. Data written by notifications endpoint is idempotent at the record level, so replayed events cannot create duplicates.
 
-The behavior in this section was last load-tested at 71 times the average production request rate. Operational alerts for this area route to the owning team's rotation. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Operational alerts for this area route to the owning team's rotation. Downstream consumers subscribe to notifications endpoint events through the platform event bus rather than polling. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied. Configuration for notifications endpoint is loaded at service start and refreshed every 66 minutes. Clients are expected to implement exponential backoff when a retryable error is returned by this area. Data written by notifications endpoint is idempotent at the record level, so replayed events cannot create duplicates.
 
-Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. The examples in this document use placeholder data and do not reference real customer records. Support escalations touching notifications endpoint are triaged by the discovery team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. Every externally visible change to notifications endpoint is announced at least 57 days before it takes effect in production.
+Requests beyond the configured limit receive a structured error response with a stable error code. The behavior in this section was last load-tested at 28 times the average production request rate. The defaults listed below apply unless overridden per environment. Data written by notifications endpoint is idempotent at the record level, so replayed events cannot create duplicates. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list.
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Metrics emitted by notifications endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Operational alerts for this area route to the owning team's rotation. Every externally visible change to notifications endpoint is announced at least 5 days before it takes effect in production. This document describes the notifications endpoint area of the Meridian Commerce platform. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
+Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. The notifications endpoint behavior is owned by the discovery team and reviewed each quarter. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied. The defaults listed below apply unless overridden per environment.
 
-Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 26 minutes. Historical records for notifications endpoint are retained for 87 days and then moved to cold storage by the archival pipeline. Localization of user-facing strings in notifications endpoint is handled by the shared translation pipeline, not by this component. The examples in this document use placeholder data and do not reference real customer records. Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki.
+Requests beyond the configured limit receive a structured error response with a stable error code. The examples in this document use placeholder data and do not reference real customer records. Staging environments mirror production settings for notifications endpoint except where data-volume limits make that impractical. Every externally visible change to notifications endpoint is announced at least 39 days before it takes effect in production. Identifiers used here follow the corpus-wide conventions in the style guide. Clients are expected to implement exponential backoff when a retryable error is returned by this area.
 
 ## Integration
 
-Localization of user-facing strings in notifications endpoint is handled by the shared translation pipeline, not by this component. Downstream consumers subscribe to notifications endpoint events through the platform event bus rather than polling. This document describes the notifications endpoint area of the Meridian Commerce platform. Historical records for notifications endpoint are retained for 76 days and then moved to cold storage by the archival pipeline. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list.
+The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 9 minutes. Staging environments mirror production settings for notifications endpoint except where data-volume limits make that impractical. Paging pushes sent through this channel escalate to the secondary responder when 5 minutes pass without an acknowledgement.
 
 ## Operational notes
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Clients are expected to implement exponential backoff when a retryable error is returned by this area. The behavior in this section was last load-tested at 16 times the average production request rate. Downstream consumers subscribe to notifications endpoint events through the platform event bus rather than polling. Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks.
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Support escalations touching notifications endpoint are triaged by the discovery team within one business day. Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. Every externally visible change to notifications endpoint is announced at least 80 days before it takes effect in production.
 
 ## Defaults
 
-- queue depth alert threshold: 704
-- request timeout: 3120 ms
-- default page size: 270
+- request timeout: 130 ms
+- concurrent worker ceiling: 3798
+- retry budget: 2204 attempts
+- queue depth alert threshold: 1865
 
 ## Parameters
 
 | parameter | default | notes |
 |---|---|---|
-| cooldown_s | 3851 | tunable per environment |
-| connection_limit | 4403 | tunable per environment |
-| drain_timeout_s | 7970 | raised during seasonal peaks |
-| flush_interval_s | 5330 | matches the platform default |
-| max_concurrency | 6336 | requires restart to change |
-| queue_depth_limit | 7260 | tunable per environment |
-| warmup_batch | 5260 | bounded by the platform ceiling |
-| sample_rate_pct | 8857 | bounded by the platform ceiling |
-| page_size | 4067 | monitored by the owning team |
-| retry_limit | 3353 | matches the platform default |
-| prefetch_count | 7590 | bounded by the platform ceiling |
-| batch_window_ms | 8019 | matches the platform default |
+| cache_ttl_s | 457 | documented for reference only |
+| page_size | 4328 | monitored by the owning team |
+| batch_window_ms | 7148 | raised during seasonal peaks |
+| flush_interval_s | 2632 | requires restart to change |
+| connection_limit | 4754 | requires restart to change |
+| audit_window_days | 1670 | monitored by the owning team |
+| queue_depth_limit | 1814 | matches the platform default |
+| replay_window_h | 2883 | tunable per environment |
+| prefetch_count | 2780 | requires restart to change |
+| warmup_batch | 4306 | matches the platform default |
+| drain_timeout_s | 4983 | monitored by the owning team |
+| shard_count | 6869 | monitored by the owning team |
+| sync_interval_s | 8824 | tunable per environment |
+| backoff_base_ms | 1625 | tunable per environment |
 
 ## Limits and quotas
 
-- warm-up period after deploy: 2016 seconds
-- cache lifetime: 3289 seconds
-- burst allowance: 2705 requests
-- soft quota per client: 2880 per hour
-- maximum batch size: 494
-- event replay window: 790 hours
-- default page size: 2139
-- retry budget: 2135 attempts
+- concurrent worker ceiling: 2594
+- event replay window: 3105 hours
+- retry budget: 2002 attempts
+- default page size: 1095
+- cache lifetime: 1342 seconds
+- warm-up period after deploy: 2979 seconds
 
 ## Monitoring
 
-This document describes the notifications endpoint area of the Meridian Commerce platform. Configuration for notifications endpoint is loaded at service start and refreshed every 85 minutes. Localization of user-facing strings in notifications endpoint is handled by the shared translation pipeline, not by this component. Support escalations touching notifications endpoint are triaged by the discovery team within one business day.
+Batch processing for notifications endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. Configuration for notifications endpoint is loaded at service start and refreshed every 46 minutes. Every externally visible change to notifications endpoint is announced at least 86 days before it takes effect in production.
 
 ## Rollout
 
-Changes to notifications endpoint go through the standard review workflow before release. Rollout is gated on the weekly release train unless an exemption is filed. Downstream consumers subscribe to notifications endpoint events through the platform event bus rather than polling. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 63 minutes.
+The defaults listed below apply unless overridden per environment. Metrics emitted by notifications endpoint follow the platform naming scheme and are aggregated at one-minute resolution. Data written by notifications endpoint is idempotent at the record level, so replayed events cannot create duplicates. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly.
 
 ## Troubleshooting
 
-The notifications endpoint behavior is owned by the discovery team and reviewed each quarter. Localization of user-facing strings in notifications endpoint is handled by the shared translation pipeline, not by this component. Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Data written by notifications endpoint is idempotent at the record level, so replayed events cannot create duplicates.
+Support escalations touching notifications endpoint are triaged by the discovery team within one business day. Historical records for notifications endpoint are retained for 34 days and then moved to cold storage by the archival pipeline. Operational alerts for this area route to the owning team's rotation. Every externally visible change to notifications endpoint is announced at least 66 days before it takes effect in production.
 
 ## Change history
 
 | version | date | change |
 |---|---|---|
-| 2.3.7 | 2024-01-19 | updated escalation contacts |
-| 3.5.7 | 2024-05-27 | added monitoring guidance |
-| 2.5.5 | 2024-06-03 | aligned terminology with the style guide |
-| 2.9.2 | 2024-12-18 | recorded quota changes |
-| 1.9.7 | 2024-10-11 | recorded quota changes |
-| 1.2.4 | 2025-08-17 | updated escalation contacts |
-| 1.7.0 | 2025-04-03 | expanded rollout notes |
-| 2.5.2 | 2023-09-02 | clarified defaults |
-| 1.0.1 | 2024-11-27 | clarified defaults |
+| 2.6.5 | 2025-02-24 | documented error codes |
+| 2.7.1 | 2023-09-17 | clarified defaults |
+| 1.0.1 | 2025-06-03 | refreshed examples |
+| 2.4.9 | 2024-01-25 | tightened wording |
+| 3.9.3 | 2023-06-11 | aligned terminology with the style guide |
+| 2.5.0 | 2025-10-18 | recorded quota changes |
+| 2.7.4 | 2024-08-11 | recorded quota changes |
+| 2.5.1 | 2023-06-19 | expanded rollout notes |
+| 2.8.5 | 2023-10-15 | refreshed examples |
+| 3.5.5 | 2023-03-28 | refreshed examples |
+| 3.7.8 | 2025-10-05 | added monitoring guidance |
 
 ## FAQ
 
-**Where are the metrics for this area published?**
+**What happens when a request exceeds the documented limits?**
 
-This document describes the notifications endpoint area of the Meridian Commerce platform. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. The defaults listed below apply unless overridden per environment.
-
-**Can the defaults in this document be overridden per environment?**
-
-Clients are expected to implement exponential backoff when a retryable error is returned by this area. Localization of user-facing strings in notifications endpoint is handled by the shared translation pipeline, not by this component. The behavior in this section was last load-tested at 24 times the average production request rate.
-
-**Who should be contacted when the documented defaults look wrong?**
-
-Configuration for notifications endpoint is loaded at service start and refreshed every 50 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. The examples in this document use placeholder data and do not reference real customer records.
-
-**Is there a dry-run mode for validating changes in this area?**
-
-Staging environments mirror production settings for notifications endpoint except where data-volume limits make that impractical. Downstream consumers subscribe to notifications endpoint events through the platform event bus rather than polling. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied.
-
-**How far back can historical data for this area be retrieved?**
-
-Batch processing for notifications endpoint runs on a fixed schedule and drains its queue completely before the next cycle begins. Configuration for notifications endpoint is loaded at service start and refreshed every 19 minutes. Earlier drafts of this behavior were consolidated here from the team wiki.
+Every externally visible change to notifications endpoint is announced at least 25 days before it takes effect in production. Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 **How often does the behavior described here change?**
 
-The notifications endpoint behavior is owned by the discovery team and reviewed each quarter. The discovery team publishes a quarterly summary of changes in this area to the platform announcements list. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied.
+The notifications endpoint behavior is owned by the discovery team and reviewed each quarter. The behavior in this section was last load-tested at 7 times the average production request rate. This document describes the notifications endpoint area of the Meridian Commerce platform.
+
+**Can the defaults in this document be overridden per environment?**
+
+Behavior described here applies uniformly across all storefront regions unless a regional exception is called out inline. Failures in this area degrade gracefully: reads fall back to the last known good snapshot for up to 42 minutes. A dry-run mode is available in non-production environments for validating notifications endpoint changes before they are applied.
+
+**Who should be contacted when the documented defaults look wrong?**
+
+Capacity for notifications endpoint is reviewed during the monthly planning cycle and adjusted ahead of seasonal peaks. Access to administrative operations in this area is restricted to members of the discovery group and audited monthly. Historical records for notifications endpoint are retained for 8 days and then moved to cold storage by the archival pipeline.
+
+## Configuration
+
+```ini
+[notifications-endpoint]
+endpoint = https://internal.meridian.example/v2/notifications-endpoint
+timeout_ms = 2951
+api_key = "<REDACTED>"
+```
 
 ## See also
 
-- [DOC-8977: Inventory Endpoint](api/inventory-endpoint.md)
+- [DOC-6815: Deploy Procedure](sops/deploy-procedure.md)
+- [DOC-1542: Batch Operations](api/batch-operations.md)
