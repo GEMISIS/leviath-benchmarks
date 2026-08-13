@@ -219,8 +219,16 @@ def _call_openai_style(provider: str, model: str, system_blocks: list[dict],
         msgs += flatten_messages(messages)
     else:
         msgs = _to_openai_messages(system_blocks, messages)
-    payload = {"model": model, "messages": msgs,
-               "temperature": temperature, "max_tokens": max_tokens}
+    payload = {"model": model, "messages": msgs}
+    # OpenAI's current models reject `max_tokens` in favor of
+    # `max_completion_tokens`, and their reasoning models refuse any
+    # temperature but the default - so that provider gets neither knob.
+    # OpenRouter still speaks the classic names.
+    if provider == "openai":
+        payload["max_completion_tokens"] = max_tokens
+    else:
+        payload["max_tokens"] = max_tokens
+        payload["temperature"] = temperature
     if encoding == "typed" and tool_names:
         payload["tools"] = _stub_tools_openai(tool_names)
     out = _http_json(url, {"Authorization": f"Bearer {key}"},

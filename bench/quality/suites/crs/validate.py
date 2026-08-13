@@ -73,10 +73,14 @@ def run_pytest(task_dir: Path, workdir: Path,
             subprocess.run([str(py), "-m", "pip", "install", "-q", "-r",
                             str(workdir_reqs)],
                            capture_output=True, timeout=VENV_TIMEOUT_SECS)
-        subprocess.run(
+        proc = subprocess.run(
             [str(py), "-m", "pytest", str(validation), "--tb=line",
              "--json-report", f"--json-report-file={report_path}"],
             cwd=workdir, capture_output=True, timeout=PYTEST_TIMEOUT_SECS)
+        # pytest's own words, kept beside the report: when the JSON is
+        # missing or empty, this log is the diagnosis.
+        (artifacts_dir / "pytest-output.txt").write_bytes(
+            proc.stdout + b"\n--- stderr ---\n" + proc.stderr)
     except subprocess.TimeoutExpired as exc:
         return {"passed": 0, "failed": 0, "errors": 1, "total": 1,
                 "failures": [f"timeout: {exc.cmd[0]}"],
