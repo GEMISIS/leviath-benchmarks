@@ -32,28 +32,38 @@ import sys
 import tempfile
 from pathlib import Path
 
-DEFAULT_SEED = 1134
+DEFAULT_SEED = 1142
 DAY = "2026-03-14"
 
 SERVICES = [
-    "edge-gateway", "auth-service", "checkout-api", "search-api",
-    "payment-gateway", "inventory-service", "order-service",
-    "session-cache", "notification-service", "billing-worker",
+    "edge-gateway", "auth-service", "cart-api", "checkout-api",
+    "search-api", "recommendation-api", "payment-gateway",
+    "inventory-service", "order-service", "pricing-service",
+    "session-cache", "fraud-detector", "shipping-service",
+    "notification-service", "billing-worker",
 ]
 
 # Static call graph. Kept in exact agreement with docs/topology.md
 # below; the cascade (who logs upstream failures when the root-cause
 # service degrades) is derived from this map, never hand-listed.
 CALLS = {
-    "edge-gateway": ["auth-service", "checkout-api", "search-api"],
+    "edge-gateway": ["auth-service", "cart-api", "checkout-api",
+                     "search-api"],
     "auth-service": ["session-cache"],
+    "cart-api": ["session-cache", "pricing-service",
+                 "inventory-service"],
     "checkout-api": ["payment-gateway", "inventory-service",
                      "order-service", "session-cache"],
-    "search-api": ["inventory-service"],
-    "payment-gateway": ["billing-worker"],
-    "order-service": ["notification-service", "billing-worker"],
+    "search-api": ["inventory-service", "recommendation-api"],
+    "recommendation-api": ["inventory-service"],
+    "payment-gateway": ["billing-worker", "fraud-detector"],
+    "order-service": ["notification-service", "billing-worker",
+                      "shipping-service"],
     "inventory-service": [],
+    "pricing-service": [],
     "session-cache": [],
+    "fraud-detector": [],
+    "shipping-service": [],
     "notification-service": [],
     "billing-worker": [],
 }
@@ -68,7 +78,7 @@ MODES = {
     "pool": {
         "key": "db.pool.max_connections", "old": "120", "new": "15",
         "roots": ["payment-gateway", "inventory-service",
-                  "order-service", "session-cache"],
+                  "order-service", "session-cache", "pricing-service"],
         "marker": "connection pool exhausted",
         "mitigation": "emergency pool override",
     },
@@ -81,9 +91,11 @@ MODES = {
 }
 
 # Log rotation is by fixed two-hour windows; suffix "" is the current
-# file. T0 is always drawn from 02:10-03:20 so the incident lives in
-# the .1 file - an agent that only reads the current file misses it.
-WINDOWS = [(0, 7200, ".2"), (7200, 14400, ".1"), (14400, 21600, "")]
+# file. T0 is always drawn from 04:10-05:20 so the incident lives in
+# the .3 file, three rotations back - an agent that only reads the
+# current file (or even the two most recent rotations) misses it.
+WINDOWS = [(0, 7200, ".5"), (7200, 14400, ".4"), (14400, 21600, ".3"),
+           (21600, 28800, ".2"), (28800, 36000, ".1"), (36000, 43200, "")]
 
 IMPACT_WINDOW_SECS = 900
 
@@ -92,25 +104,31 @@ IMPACT_WINDOW_SECS = 900
 # ---------------------------------------------------------------------
 
 TOPOLOGY_MD = """\
-# Aurora Platform — Service Topology (rev 14)
+# Aurora Platform — Service Topology (rev 15)
 
 Customer traffic enters at edge-gateway, which authenticates via
-auth-service and fans out to checkout-api and search-api. The only
-path from edge-gateway to payment-gateway runs through checkout-api;
-edge-gateway never calls payment-gateway, inventory-service,
-order-service, session-cache, notification-service, or billing-worker
-directly.
+auth-service and fans out to cart-api, checkout-api, and search-api.
+The only path from edge-gateway to payment-gateway runs through
+checkout-api; edge-gateway never calls payment-gateway, cart-api's or
+search-api's downstreams, inventory-service, order-service,
+pricing-service, recommendation-api, session-cache, fraud-detector,
+shipping-service, notification-service, or billing-worker directly.
 
 | service | owner team | port | direct dependencies |
 |---|---|---|---|
-| edge-gateway | traffic-eng | 8080 | auth-service, checkout-api, search-api |
+| edge-gateway | traffic-eng | 8080 | auth-service, cart-api, checkout-api, search-api |
 | auth-service | identity | 8091 | session-cache |
+| cart-api | storefront | 8095 | session-cache, pricing-service, inventory-service |
 | checkout-api | storefront | 8100 | payment-gateway, inventory-service, order-service, session-cache |
-| search-api | discovery | 8110 | inventory-service |
-| payment-gateway | payments-platform | 8120 | billing-worker |
+| search-api | discovery | 8110 | inventory-service, recommendation-api |
+| recommendation-api | discovery | 8115 | inventory-service |
+| payment-gateway | payments-platform | 8120 | billing-worker, fraud-detector |
 | inventory-service | supply-chain | 8130 | (none) |
-| order-service | storefront | 8140 | notification-service, billing-worker |
+| order-service | storefront | 8140 | notification-service, billing-worker, shipping-service |
+| pricing-service | pricing-eng | 8145 | (none) |
 | session-cache | platform-core | 8150 | (none) |
+| fraud-detector | risk-eng | 8125 | (none) |
+| shipping-service | fulfillment | 8155 | (none) |
 | notification-service | comms | 8160 | (none) |
 | billing-worker | payments-platform | 8170 | (none) |
 
@@ -123,11 +141,12 @@ Notes:
 - All configuration changes, for every service, are recorded centrally
   in changes/config-audit.log by the deploy tooling.
 - Log rotation: app.log is the current file, app.log.1 the previous
-  two-hour window, app.log.2 the one before that.
+  two-hour window, and so on back through app.log.5, the oldest
+  retained window.
 """
 
 ALERT_THRESHOLDS_YAML = """\
-# Alerting thresholds — Aurora platform (rev 9)
+# Alerting thresholds — Aurora platform (rev 10)
 # Pages route to the owning team's rotation via pager_team.
 defaults:
   p99_latency_ms: 900
@@ -143,12 +162,20 @@ services:
     p99_latency_ms: 250
     error_rate_page_pct: 2.0
     pager_team: identity
+  cart-api:
+    p99_latency_ms: 400
+    error_rate_page_pct: 2.5
+    pager_team: storefront
   checkout-api:
     p99_latency_ms: 800
     error_rate_page_pct: 2.5
     pager_team: storefront
   search-api:
     p99_latency_ms: 600
+    error_rate_page_pct: 4.0
+    pager_team: discovery
+  recommendation-api:
+    p99_latency_ms: 700
     error_rate_page_pct: 4.0
     pager_team: discovery
   payment-gateway:
@@ -163,10 +190,22 @@ services:
     p99_latency_ms: 500
     error_rate_page_pct: 2.5
     pager_team: storefront
+  pricing-service:
+    p99_latency_ms: 150
+    error_rate_page_pct: 2.0
+    pager_team: pricing-eng
   session-cache:
     p99_latency_ms: 40
     error_rate_page_pct: 1.5
     pager_team: platform-core
+  fraud-detector:
+    p99_latency_ms: 600
+    error_rate_page_pct: 2.0
+    pager_team: risk-eng
+  shipping-service:
+    p99_latency_ms: 900
+    error_rate_page_pct: 3.0
+    pager_team: fulfillment
   notification-service:
     p99_latency_ms: 1200
     error_rate_page_pct: 5.0
@@ -236,6 +275,7 @@ NOISE_JOBS = ["ledger_sync", "sku_reindex", "email_digest",
 
 EDGE_PATHS = ["/api/checkout", "/api/cart", "/api/session",
               "/api/search", "/api/orders", "/api/products",
+              "/api/recommendations", "/api/shipping-quote",
               "/api/account", "/healthz"]
 EDGE_METHODS = ["GET", "GET", "GET", "POST", "POST", "PUT"]
 EDGE_OK_STATUSES = [200, 200, 200, 200, 200, 201, 204, 301, 404]
@@ -293,7 +333,7 @@ def _noise_line(rng: random.Random, svc: str) -> str:
 
 def _access_line(rng: random.Random, status: int, slow: bool) -> str:
     method = rng.choice(EDGE_METHODS)
-    path = rng.choice(EDGE_PATHS[:7] if status >= 400 else EDGE_PATHS)
+    path = rng.choice(EDGE_PATHS[:9] if status >= 400 else EDGE_PATHS)
     ms = rng.randrange(1400, 5200) if slow else rng.randrange(8, 420)
     rid = f"req-{rng.randrange(16**6):06x}"
     return f"{method} {path} {status} {ms}ms {rid}"
@@ -307,7 +347,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     mode_name = rng.choice(sorted(MODES))
     mode = MODES[mode_name]
     root = rng.choice(mode["roots"])
-    t0 = rng.randrange(2 * 3600 + 600, 3 * 3600 + 1200)
+    t0 = rng.randrange(4 * 3600 + 600, 5 * 3600 + 1200)
     onset = t0 + rng.randrange(20, 61)
 
     caller_order = callers_of(root)
@@ -335,7 +375,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
         if svc == "edge-gateway":
             continue
         for lo, hi, _ in WINDOWS:
-            for _ in range(rng.randrange(66, 90)):
+            for _ in range(rng.randrange(480, 560)):
                 emit(svc, rng.randrange(lo, hi), _noise_line(rng, svc))
 
     # Edge access-log noise, with a low background 5xx rate that the
@@ -343,7 +383,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     # window", not "5xx we injected", and both derivations count the
     # same emitted lines.
     for lo, hi, _ in WINDOWS:
-        for _ in range(rng.randrange(240, 300)):
+        for _ in range(rng.randrange(1250, 1450)):
             t = rng.randrange(lo, hi)
             if rng.random() < BACKGROUND_5XX_PCT / 100.0:
                 status = rng.choice([500, 502])
@@ -407,8 +447,8 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     # --- central config audit log -----------------------------------
     audit: list[tuple[int, str]] = []
     noise_changes = 0
-    while noise_changes < rng.randrange(10, 15):
-        t = rng.randrange(600, 20400)
+    while noise_changes < rng.randrange(30, 42):
+        t = rng.randrange(600, 42000)
         svc = rng.choice(SERVICES)
         # Nothing near the culprit for the root service: the audit
         # answer is "latest change to the root service before onset",

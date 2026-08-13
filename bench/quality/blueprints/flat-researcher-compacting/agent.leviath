@@ -19,7 +19,7 @@
 
 [agent]
 name = "flat-researcher-compacting"
-version = "0.3.0"
+version = "0.4.0"
 description = "Strong flat baseline for researcher: identical to flat-researcher except the window compacts on overflow instead of evicting"
 entry_stage = "work"
 
@@ -36,7 +36,7 @@ mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Do the whole task and answer, in one loop"
 available_tools = ["bash", "list_dir", "read_file", "web_fetch", "web_search", "write_file"]
-max_iterations = 51
+max_iterations = 75
 system_prompt = """
 Complete the research task described in `task`.
 

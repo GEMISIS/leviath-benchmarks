@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the records-reconciliation corpus.
 
-Eighteen monthly transaction files, a master ledger mirroring them, an
+Thirty-six monthly transaction files, a master ledger mirroring them, an
 account registry, and a fee schedule. The generator injects an exact
 set of discrepancies - duplicated transaction ids, fees computed at the
 wrong tier, transactions against unregistered accounts, and exactly one
@@ -40,8 +40,8 @@ from pathlib import Path
 
 DEFAULT_SEED = 2207
 
-MONTHS = [f"2024-{m:02d}" for m in range(7, 13)] + \
-         [f"2025-{m:02d}" for m in range(1, 13)]
+MONTHS = [f"{y}-{m:02d}" for y in (2023, 2024, 2025)
+          for m in range(1, 13)]
 
 TIERS = ["standard", "plus", "enterprise"]
 TYPES = ["payment", "refund", "transfer"]
@@ -62,7 +62,7 @@ FEES = {
 }
 
 FEE_SCHEDULE_MD = """\
-# Fee Schedule — Meridian Payments (effective 2024-07-01)
+# Fee Schedule — Meridian Payments (effective 2023-01-01)
 
 All amounts are USD with exactly two decimal places. Percentage fees
 are computed on the gross amount and rounded half away from zero to
@@ -149,7 +149,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     accounts: dict[str, str] = {}  # id -> tier
     registry_rows = []
     used_names: set[str] = set()
-    for i in range(40):
+    for i in range(130):
         acct = f"ACC-{1001 + i}"
         while True:
             name = (f"{rng.choice(FIRST_WORDS)} "
@@ -159,7 +159,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
                 break
         tier = rng.choices(TIERS, weights=[5, 3, 2], k=1)[0]
         status = "closed" if rng.random() < 0.1 else "active"
-        opened = (f"{rng.randrange(2019, 2024)}-"
+        opened = (f"{rng.randrange(2018, 2023)}-"
                   f"{rng.randrange(1, 13):02d}-{rng.randrange(1, 29):02d}")
         accounts[acct] = tier
         registry_rows.append(f"{acct},{name},{tier},{status},{opened}")
@@ -193,7 +193,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
 
     txns: list[dict] = []
     for month_i in range(len(MONTHS)):
-        for _ in range(rng.randrange(60, 86)):
+        for _ in range(rng.randrange(500, 590)):
             acct = rng.choice(account_ids)
             txns.append(make_row(month_i, acct, accounts[acct]))
 
@@ -204,7 +204,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     # the one-cent rounding violation.
     eligible = [t for t in txns if t["type"] != "refund"
                 and t["gross"] >= 2000]
-    n_fee = rng.randrange(4, 8)
+    n_fee = rng.randrange(7, 12)
     fee_wrong = rng.sample(eligible, n_fee)
     for t in fee_wrong:
         correct = t["fee"]
@@ -232,7 +232,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     txns.append(rounding_txn)
 
     # Orphaned accounts: valid-looking ids the registry never issued.
-    n_orph = rng.randrange(2, 6)
+    n_orph = rng.randrange(4, 8)
     orphans = []
     orphan_ids = rng.sample(range(9700, 9800), n_orph)
     for oid in orphan_ids:
@@ -250,7 +250,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
         {t["id"] for t in orphans}
     dup_eligible = [t for t in txns if t["id"] not in tainted
                     and t["month"] < len(MONTHS) - 2]
-    n_dup = rng.randrange(3, 7)
+    n_dup = rng.randrange(5, 10)
     dup_sources = rng.sample(dup_eligible, n_dup)
     duplicates = []
     for src in dup_sources:

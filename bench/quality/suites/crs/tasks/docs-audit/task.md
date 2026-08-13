@@ -18,9 +18,9 @@ need their exact wording throughout.
 ## The corpus
 
 - `INDEX.md` — the entry point, listing every content document.
-- `product-specs/`, `api/`, `sops/` — the forty content documents in
-  scope. The governance documents at the corpus root are exempt, as
-  the policy states.
+- `product-specs/`, `api/`, `sops/` — the one hundred twenty content
+  documents in scope. The governance documents at the corpus root are
+  exempt, as the policy states.
 
 Audit every content document against all five rules. Apply each rule's
 own counting unit: Rules 1, 3, and 5 count non-conforming documents;

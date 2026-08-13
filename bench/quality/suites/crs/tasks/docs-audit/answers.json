@@ -1,11 +1,11 @@
 {
   "seed": 3319,
   "answers": [
+    "7",
+    "10",
     "5",
-    "6",
-    "4",
-    "5",
-    "5",
-    "api/auth-tokens.md,api/customers-endpoint.md,api/reporting-endpoint.md,product-specs/checkout-flow.md,product-specs/storefront-themes.md"
+    "8",
+    "8",
+    "api/auth-tokens.md,api/payouts-endpoint.md,api/returns-endpoint.md,api/sandbox-environment.md,sops/monitoring-setup.md"
   ]
 }

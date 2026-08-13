@@ -19,7 +19,7 @@
 
 [agent]
 name = "flat-loganalyzer-compacting"
-version = "0.3.0"
+version = "0.4.0"
 description = "Strong flat baseline for log-analyzer: identical to flat-loganalyzer except the window compacts on overflow instead of evicting"
 entry_stage = "work"
 
@@ -34,7 +34,7 @@ mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Do the whole task and answer, in one loop"
 available_tools = ["bash", "list_dir", "read_file", "write_file"]
-max_iterations = 85
+max_iterations = 115
 system_prompt = """
 Analyze the log file(s) named in `task` and answer the question asked.
 

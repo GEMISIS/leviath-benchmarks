@@ -19,7 +19,7 @@
 
 [agent]
 name = "flat-analyst-compacting"
-version = "0.6.0"
+version = "0.7.0"
 description = "Strong flat baseline for data-analyst: identical to flat-analyst except the window compacts on overflow instead of evicting"
 entry_stage = "work"
 
@@ -33,7 +33,7 @@ mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Do the whole task and answer, in one loop"
 available_tools = ["bash", "list_dir", "read_file"]
-max_iterations = 74
+max_iterations = 94
 system_prompt = """
 Complete the data-analysis task described in `task`.
 

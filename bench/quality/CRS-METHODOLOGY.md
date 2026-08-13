@@ -22,15 +22,46 @@ are this runtime, running published blueprints.
 
 ## What is measured
 
-1. **Retention** (headline): the probability that a fact read early in
-   the run is still recoverable from the agent's context at tool-call
-   depth N. Plotted as probe accuracy vs depth, per arm.
-2. **Task outcome**: held-out verification of the artifact the run
+1. **Retention** (co-headline): the probability that a fact read early
+   in the run is still recoverable from the agent's context at
+   tool-call depth N. Plotted as probe accuracy vs depth, per arm and
+   per window tier.
+2. **Cost at depth** (co-headline): cumulative billed tokens vs
+   tool-call depth, from each run's own journal. A large-window flat
+   loop can forget nothing and still pay for everything it carries on
+   every call — this curve is where that shows.
+3. **Task outcome**: held-out verification of the artifact the run
    produced (pytest suites for coding tasks, exact answer keys for
    non-coding tasks).
-3. **Cost per successful outcome**: total arm spend divided by passing
+4. **Cost per successful outcome**: total arm spend divided by passing
    runs. Cost per run rewards cheap failure; cost per success is the
    number a buyer actually pays.
+
+## The window sweep
+
+The context window is a **declared independent variable**, exactly as
+the performance track treats pool width: the same tasks and arms run at
+window tiers (128k / 400k / 1M, the model's real maximum always
+included), pinned per invocation via the runtime's capability override
+(`run_quality.py --window-tokens N`, recorded in `round.json` and every
+record). Region budgets are percentages of the window on both sides of
+the comparison, so every arm shrinks proportionally — the same agent
+under a smaller deployment.
+
+Why sweep rather than pick one window: at a frontier model's full 1M
+window, eviction never starts on tasks under a few hundred tool calls,
+and retention differences cannot exist — our own first smoke showed
+exactly that (every arm at 1.0). The smaller tiers are not a handicap;
+they are the deployments most agents actually run under: open-weight
+and local models, economy tiers, and any setup that caps context for
+cost. The sweep shows *where* context management starts to matter as a
+function of the window, instead of asserting that it always does.
+
+Pricing note, disclosed rather than hidden: several providers bill a
+premium tier above ~200k prompt tokens (xAI doubles rates; Anthropic
+has a long-context tier). `rates.json` pins base-tier rates and says
+so; large-window cells therefore *understate* flat-at-depth costs, an
+error that favors the baseline, not the runtime.
 
 ```mermaid
 flowchart LR
@@ -185,16 +216,18 @@ ones:
 
 ## The caching tradeoff, documented rather than hidden
 
-Structured context currently pays a real caching penalty on Anthropic
-models: region mutations rewrite the provider-visible prefix, so a
-structured run re-bills context as cache *writes* that a flat run reads
-back at a tenth the price (measured in this repo's 2026-08-13 round: an
-arm whose bill was 84% cache writes; hit rate 0.15 vs 0.62 flat). Root
-cause and proposed fixes are filed as
-[leviath#418](https://github.com/GEMISIS/leviath/issues/418); the
-measured projection is cost parity once fixed. Until it lands, CRS cost
-tables carry the penalty openly — cost-per-success is reported with it
-included, because that is what a user pays today.
+Structured context paid a real caching penalty on Anthropic models
+through lev 0.3.6: region mutations rewrote the provider-visible
+prefix, so a structured run re-billed context as cache *writes* that a
+flat run reads back at a tenth the price (measured in this repo's
+2026-08-13 round: an arm whose bill was 84% cache writes; hit rate 0.15
+vs 0.62 flat). Filed with that data as
+[leviath#418](https://github.com/GEMISIS/leviath/issues/418) and
+**fixed in 0.3.7** ("split the volatile cache run"); the first post-fix
+smoke measured the long structured run at 0.43 hit rate (from 0.16)
+against flat's 0.90. Rounds state the runtime version they measured,
+and the remaining gap stays in the published cost tables — this section
+exists so the number is explained, never hidden.
 
 ## What this suite does NOT claim
 

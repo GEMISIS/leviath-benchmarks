@@ -106,6 +106,8 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
             "rates_sha256": rates_sha,
             "concurrency": concurrency,
         }
+        if arm.get("window_tokens"):
+            base["window_tokens"] = arm["window_tokens"]
 
         with lock:
             over_budget = budget_usd is not None and spent >= budget_usd

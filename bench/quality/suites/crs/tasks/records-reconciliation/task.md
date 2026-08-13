@@ -1,7 +1,7 @@
-# Task: Ledger Reconciliation — Meridian Payments, FY2024-H2/FY2025
+# Task: Ledger Reconciliation — Meridian Payments, FY2023–FY2025
 
 You are the reconciliation analyst for Meridian Payments. The books
-for July 2024 through December 2025 must be certified, and the raw
+for January 2023 through December 2025 must be certified, and the raw
 records contain errors. Find every discrepancy, classify it, and
 compute the correction the ledger needs.
 
@@ -20,7 +20,7 @@ audit rules come from them and you will need them throughout.
 
 ## The records
 
-- `transactions/2024-07.csv` … `transactions/2025-12.csv` — eighteen
+- `transactions/2023-01.csv` … `transactions/2025-12.csv` — thirty-six
   monthly transaction files.
 - `ledger/master-ledger.csv` — one posting per transaction row, in
   file order, as described in the format document.

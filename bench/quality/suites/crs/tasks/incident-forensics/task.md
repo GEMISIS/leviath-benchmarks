@@ -19,11 +19,13 @@ them completely before opening any log file.
 
 ## The evidence
 
-- `logs/<service>/app.log`, `app.log.1`, `app.log.2` — rotated
-  application logs for nine services (`.2` is the oldest window, the
-  bare file the newest; each file covers two hours, 00:00–06:00 total).
-- `logs/edge-gateway/access.log{,.1,.2}` — the edge tier's access log,
-  one line per request: `timestamp method path status latency request-id`.
+- `logs/<service>/app.log`, `app.log.1` … `app.log.5` — rotated
+  application logs for fourteen services (`.5` is the oldest window,
+  the bare file the newest; each file covers two hours, 00:00–12:00
+  total).
+- `logs/edge-gateway/access.log{,.1,...,.5}` — the edge tier's access
+  log, one line per request:
+  `timestamp method path status latency request-id`.
 - `changes/config-audit.log` — every configuration change pushed to any
   service that day, one line each, timestamped.
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Generate the docs-audit corpus.
 
-Forty interlinked markdown documents (product specs, API references,
-SOPs) plus the governance documents that judge them: POLICY.md (five
-numbered rules) and style-guide.md. The generator injects an exact set
+One hundred twenty interlinked markdown documents (product specs, API
+references, SOPs) plus the governance documents that judge them:
+POLICY.md (five numbered rules) and style-guide.md. The generator injects an exact set
 of rule violations - identifier mismatches, broken cross-references,
 deprecations without a successor, plaintext credential examples,
 malformed versions - and computes the answer key from what it
@@ -51,19 +51,50 @@ TOPICS = {
         "inventory sync", "order tracking", "price rules",
         "tax engine", "shipping quotes", "returns portal",
         "wishlist sharing", "promotions engine",
-        "subscription billing", "storefront themes"],
+        "subscription billing", "storefront themes",
+        "abandoned cart recovery", "address book", "b2b quotes",
+        "bulk ordering", "cart merge", "curbside pickup",
+        "customer segments", "digital downloads", "dynamic bundles",
+        "fraud screening", "fulfillment routing", "in-store pickup",
+        "international pricing", "marketplace onboarding",
+        "multi currency", "order editing", "partial shipments",
+        "preorder management", "product reviews", "referral program",
+        "saved payment methods", "search personalization",
+        "size recommendations", "store credit",
+        "back in stock alerts", "split payments", "vendor dropship"],
     "api": [
         "auth tokens", "rate limits", "webhooks", "orders endpoint",
         "customers endpoint", "payments endpoint", "refunds endpoint",
         "catalog endpoint", "search endpoint", "inventory endpoint",
         "shipping endpoint", "reporting endpoint", "errors reference",
-        "pagination rules"],
+        "pagination rules",
+        "addresses endpoint", "batch operations", "carts endpoint",
+        "checkout sessions", "coupons endpoint", "currencies endpoint",
+        "disputes endpoint", "events endpoint", "exports endpoint",
+        "fulfillments endpoint", "gift cards endpoint",
+        "idempotency keys", "invoices endpoint",
+        "memberships endpoint", "notifications endpoint",
+        "payouts endpoint", "price lists endpoint",
+        "products endpoint", "promotions endpoint", "returns endpoint",
+        "reviews endpoint", "sandbox environment",
+        "subscriptions endpoint", "tax rates endpoint",
+        "api versioning", "webhook retries"],
     "sops": [
         "deploy procedure", "rollback procedure", "incident response",
         "on-call handbook", "database backup", "key rotation",
         "access review", "release checklist", "capacity planning",
         "monitoring setup", "data archival", "certificate renewal",
-        "vendor onboarding"],
+        "vendor onboarding",
+        "alert triage", "batch job recovery", "cdn failover",
+        "change management", "chaos drills", "config promotion",
+        "data restore drill", "database failover",
+        "dependency upgrades", "disaster recovery", "dns cutover",
+        "feature flag hygiene", "fleet patching", "load testing",
+        "log shipping", "maintenance windows", "network acl review",
+        "oncall handoff", "postmortem process",
+        "queue drain procedure", "region evacuation",
+        "schema migration", "secrets audit", "security scanning",
+        "service decommission", "staging refresh", "traffic ramp"],
 }
 
 POLICY_MD = """\
@@ -170,6 +201,42 @@ SENTENCES = [
     "revisited during capacity planning.",
     "Earlier drafts of this behavior were consolidated here from the "
     "team wiki.",
+    "The {owner} team publishes a quarterly summary of changes in "
+    "this area to the platform announcements list.",
+    "Behavior described here applies uniformly across all storefront "
+    "regions unless a regional exception is called out inline.",
+    "Every externally visible change to {topic} is announced at least "
+    "{n} days before it takes effect in production.",
+    "Batch processing for {topic} runs on a fixed schedule and drains "
+    "its queue completely before the next cycle begins.",
+    "Staging environments mirror production settings for {topic} "
+    "except where data-volume limits make that impractical.",
+    "Access to administrative operations in this area is restricted "
+    "to members of the {owner} group and audited monthly.",
+    "Historical records for {topic} are retained for {n} days and "
+    "then moved to cold storage by the archival pipeline.",
+    "Clients are expected to implement exponential backoff when a "
+    "retryable error is returned by this area.",
+    "Metrics emitted by {topic} follow the platform naming scheme "
+    "and are aggregated at one-minute resolution.",
+    "A dry-run mode is available in non-production environments for "
+    "validating {topic} changes before they are applied.",
+    "Support escalations touching {topic} are triaged by the {owner} "
+    "team within one business day.",
+    "The behavior in this section was last load-tested at {n} times "
+    "the average production request rate.",
+    "Localization of user-facing strings in {topic} is handled by "
+    "the shared translation pipeline, not by this component.",
+    "Data written by {topic} is idempotent at the record level, so "
+    "replayed events cannot create duplicates.",
+    "Downstream consumers subscribe to {topic} events through the "
+    "platform event bus rather than polling.",
+    "Capacity for {topic} is reviewed during the monthly planning "
+    "cycle and adjusted ahead of seasonal peaks.",
+    "Failures in this area degrade gracefully: reads fall back to "
+    "the last known good snapshot for up to {n} minutes.",
+    "The examples in this document use placeholder data and do not "
+    "reference real customer records.",
 ]
 
 BULLETS = [
@@ -179,6 +246,46 @@ BULLETS = [
     "retry budget: {n} attempts",
     "cache lifetime: {n} seconds",
     "soft quota per client: {n} per hour",
+    "burst allowance: {n} requests",
+    "queue depth alert threshold: {n}",
+    "warm-up period after deploy: {n} seconds",
+    "maximum payload size: {n} KB",
+    "concurrent worker ceiling: {n}",
+    "event replay window: {n} hours",
+]
+
+PARAM_NAMES = [
+    "page_size", "retry_limit", "cache_ttl_s", "batch_window_ms",
+    "max_payload_kb", "queue_depth_limit", "sync_interval_s",
+    "backoff_base_ms", "sample_rate_pct", "connection_limit",
+    "warmup_batch", "flush_interval_s", "lease_ttl_s",
+    "max_concurrency", "audit_window_days", "cooldown_s",
+    "prefetch_count", "drain_timeout_s", "shard_count",
+    "replay_window_h"]
+
+PARAM_NOTES = [
+    "tunable per environment", "requires restart to change",
+    "hot-reloaded on change", "bounded by the platform ceiling",
+    "raised during seasonal peaks", "monitored by the owning team",
+    "documented for reference only", "matches the platform default"]
+
+CHANGE_NOTES = [
+    "clarified defaults", "documented error codes",
+    "expanded rollout notes",
+    "aligned terminology with the style guide",
+    "refreshed examples", "recorded quota changes",
+    "tightened wording", "added monitoring guidance",
+    "documented regional exceptions", "updated escalation contacts"]
+
+FAQ_ITEMS = [
+    "How often does the behavior described here change?",
+    "Who should be contacted when the documented defaults look wrong?",
+    "Does this area behave differently in staging than in production?",
+    "What happens when a request exceeds the documented limits?",
+    "Where are the metrics for this area published?",
+    "Can the defaults in this document be overridden per environment?",
+    "How far back can historical data for this area be retrieved?",
+    "Is there a dry-run mode for validating changes in this area?",
 ]
 
 OWNERS = ["platform-core", "storefront", "payments-platform",
@@ -247,7 +354,7 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
 
     # --- doc skeletons ----------------------------------------------
     docs: list[dict] = []
-    ids = rng.sample(range(1000, 10000), 40)
+    ids = rng.sample(range(1000, 10000), 120)
     i = 0
     for section in ("product-specs", "api", "sops"):
         for topic in TOPICS[section]:
@@ -265,17 +372,17 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     by_path = {d["path"]: d for d in docs}
     paths = [d["path"] for d in docs]
 
-    # Two legitimately deprecated docs exercise Rule 3's happy path.
-    dep_ok = rng.sample(docs, 2)
+    # Legitimately deprecated docs exercise Rule 3's happy path.
+    dep_ok = rng.sample(docs, 5)
     for d in dep_ok:
         d["status"] = "deprecated"
         d["superseded_by"] = rng.choice(
             [p for p in paths if p != d["path"]])
 
     # --- violations --------------------------------------------------
-    budgets = {"R1": rng.randrange(3, 7), "R2": rng.randrange(5, 10),
-               "R3": rng.randrange(2, 5), "R4": rng.randrange(3, 6),
-               "R5": rng.randrange(3, 7)}
+    budgets = {"R1": rng.randrange(5, 9), "R2": rng.randrange(8, 13),
+               "R3": rng.randrange(3, 6), "R4": rng.randrange(5, 9),
+               "R5": rng.randrange(5, 9)}
     assign, offenders = _allocate(
         rng, [p for p in paths if by_path[p] not in dep_ok], budgets)
     for p in paths:
@@ -338,31 +445,84 @@ def _render_doc(rng: random.Random, d: dict, by_path: dict,
         front.append(f"superseded_by: {d['superseded_by']}")
     front += [f"owner: {d['owner']}", "---", ""]
 
+    def paragraph(k: int) -> str:
+        return " ".join(
+            s.format(topic=d["topic"], owner=d["owner"],
+                     n=rng.randrange(5, 90))
+            for s in rng.sample(SENTENCES, k))
+
     body = [f"# {h1_id}: {d['title']}", ""]
-    intro = rng.sample(SENTENCES, 3)
-    body.append(" ".join(
-        s.format(topic=d["topic"], owner=d["owner"],
-                 n=rng.randrange(5, 90)) for s in intro))
+    body.append(paragraph(3))
     body.append("")
     body.append("## Overview")
     body.append("")
-    body.append(" ".join(
-        s.format(topic=d["topic"], owner=d["owner"],
-                 n=rng.randrange(5, 90))
-        for s in rng.sample(SENTENCES, 4)))
+    body.append(paragraph(4))
     body.append("")
     body.append("## Behavior")
     body.append("")
-    body.append(" ".join(
-        s.format(topic=d["topic"], owner=d["owner"],
-                 n=rng.randrange(5, 90))
-        for s in rng.sample(SENTENCES, 5)))
+    body.append(paragraph(5))
+    body.append("")
+    body.append("## Details")
+    body.append("")
+    for _ in range(5):
+        body.append(paragraph(6))
+        body.append("")
+    body.append("## Integration")
+    body.append("")
+    body.append(paragraph(5))
+    body.append("")
+    body.append("## Operational notes")
+    body.append("")
+    body.append(paragraph(5))
     body.append("")
     body.append("## Defaults")
     body.append("")
     for b in rng.sample(BULLETS, rng.randrange(3, 5)):
         body.append("- " + b.format(n=rng.randrange(10, 4000)))
     body.append("")
+    body.append("## Parameters")
+    body.append("")
+    body.append("| parameter | default | notes |")
+    body.append("|---|---|---|")
+    for name in rng.sample(PARAM_NAMES, rng.randrange(10, 15)):
+        body.append(f"| {name} | {rng.randrange(1, 9000)} | "
+                    f"{rng.choice(PARAM_NOTES)} |")
+    body.append("")
+    body.append("## Limits and quotas")
+    body.append("")
+    for b in rng.sample(BULLETS, rng.randrange(6, 9)):
+        body.append("- " + b.format(n=rng.randrange(10, 4000)))
+    body.append("")
+    body.append("## Monitoring")
+    body.append("")
+    body.append(paragraph(4))
+    body.append("")
+    body.append("## Rollout")
+    body.append("")
+    body.append(paragraph(4))
+    body.append("")
+    body.append("## Troubleshooting")
+    body.append("")
+    body.append(paragraph(4))
+    body.append("")
+    body.append("## Change history")
+    body.append("")
+    body.append("| version | date | change |")
+    body.append("|---|---|---|")
+    for _ in range(rng.randrange(7, 12)):
+        ver = (f"{rng.randrange(1, 4)}.{rng.randrange(0, 10)}."
+               f"{rng.randrange(0, 10)}")
+        date = (f"{rng.randrange(2023, 2026)}-"
+                f"{rng.randrange(1, 13):02d}-{rng.randrange(1, 29):02d}")
+        body.append(f"| {ver} | {date} | {rng.choice(CHANGE_NOTES)} |")
+    body.append("")
+    body.append("## FAQ")
+    body.append("")
+    for q in rng.sample(FAQ_ITEMS, rng.randrange(4, 7)):
+        body.append(f"**{q}**")
+        body.append("")
+        body.append(paragraph(3))
+        body.append("")
 
     # Configuration example. Docs assigned Rule 4 violations show
     # plaintext credentials here; everyone else uses the placeholder.

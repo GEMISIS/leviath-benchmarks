@@ -441,14 +441,38 @@ def _has_arms(data: dict, *arms: str) -> bool:
     return all(a in present for a in arms)
 
 
+_WINDOW_STYLES = {None: "-"}  # windows discovered per round get dashes
+
+
+def _series_key(r: dict) -> tuple[str, int | None]:
+    """(arm, window_tokens): the window sweep makes the window part of
+    a series' identity - two tiers of one arm never merge."""
+    return (r["arm"], r.get("window_tokens"))
+
+
+def _series_label(arm: str, window: int | None) -> str:
+    label = arm_label(arm)
+    return f"{label} @{window // 1000}k" if window else label
+
+
+def _window_style(window: int | None, windows: list) -> str:
+    """Solid = largest window in the round; dashes shorten as the
+    window shrinks. Color stays the arm's identity."""
+    styles = ["-", (0, (5, 2)), (0, (2, 2)), (0, (1, 1.5))]
+    ordered = sorted((w for w in windows if w), reverse=True)
+    if window is None or window not in ordered:
+        return "-"
+    return styles[min(ordered.index(window), len(styles) - 1)]
+
+
 def _retention_series(runs: list[dict]) -> dict:
-    """Per arm: depth -> {scores: [...], reached: int, total: int,
-    hallucinated: int}. Pools every task's probes at their depths."""
-    arms: dict[str, dict[int, dict]] = {}
+    """Per (arm, window): depth -> {scores, reached, total,
+    hallucinated}. Pools every task's probes at their depths."""
+    series: dict[tuple, dict[int, dict]] = {}
     for r in runs:
         for e in r.get("retention") or []:
             depth = e["after_tool_calls"]
-            cell = arms.setdefault(r["arm"], {}).setdefault(
+            cell = series.setdefault(_series_key(r), {}).setdefault(
                 depth, {"scores": [], "reached": 0, "total": 0,
                         "hallucinated": 0})
             cell["total"] += 1
@@ -458,7 +482,7 @@ def _retention_series(runs: list[dict]) -> dict:
                     cell["scores"].append(float(e["score"]))
                 if e.get("hallucinated"):
                     cell["hallucinated"] += 1
-    return arms
+    return series
 
 
 def render_retention(suites: dict, round_meta: dict, specs: dict,
@@ -486,15 +510,19 @@ def render_retention(suites: dict, round_meta: dict, specs: dict,
                              squeeze=False)
     fig.patch.set_facecolor(SURFACE)
 
+    windows = sorted({r.get("window_tokens") for r in runs},
+                     key=lambda w: (w is None, -(w or 0)))
     for i, (title, panel_runs) in enumerate(panels):
         ax = axes[i // ncols][i % ncols]
         style_ax(ax)
         series = _retention_series(panel_runs)
-        for arm in sorted(series, key=arm_sort_key):
-            depths = sorted(series[arm])
+        for arm, window in sorted(series,
+                                  key=lambda k: (arm_sort_key(k[0]),
+                                                 -(k[1] or 0))):
+            cells = series[(arm, window)]
             xs, ys, hs = [], [], []
-            for d in depths:
-                cell = series[arm][d]
+            for d in sorted(cells):
+                cell = cells[d]
                 if not cell["scores"]:
                     continue
                 xs.append(d)
@@ -507,9 +535,11 @@ def render_retention(suites: dict, round_meta: dict, specs: dict,
                                 color=MUTED, ha="center")
             if not xs:
                 continue
+            style = _window_style(window, windows)
             ax.plot(xs, ys, marker="o", markersize=4, linewidth=1.8,
-                    color=arm_color(arm), label=arm_label(arm))
-            ax.plot(xs, hs, linestyle="--", linewidth=1.0, alpha=0.55,
+                    linestyle=style, color=arm_color(arm),
+                    label=_series_label(arm, window))
+            ax.plot(xs, hs, linestyle=":", linewidth=0.9, alpha=0.45,
                     color=arm_color(arm))
         ax.set_ylim(-0.04, 1.04)
         ax.set_title(title, fontsize=10, color=INK)
@@ -520,8 +550,10 @@ def render_retention(suites: dict, round_meta: dict, specs: dict,
     for j in range(len(panels), nrows * ncols):
         axes[j // ncols][j % ncols].axis("off")
 
+    windows_note = ("; dash length = window tier"
+                    if len([w for w in windows if w]) > 1 else "")
     fig.suptitle("Context retention vs task depth "
-                 "(dashed = hallucination rate)",
+                 f"(dotted = hallucination rate{windows_note})",
                  fontsize=13, color=INK)
     if round_meta.get("freeze_tag") == SMOKE_TAG:
         smoke_watermark(fig)
@@ -550,10 +582,11 @@ def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
     if not data:
         return None
     runs = data["runs"]
-    arms: dict[str, dict] = {}
+    arms: dict[tuple, dict] = {}
     for r in runs:
-        cell = arms.setdefault(r["arm"], {"cost": 0.0, "passes": 0,
-                                          "runs": 0, "unpriced": 0})
+        cell = arms.setdefault(_series_key(r),
+                               {"cost": 0.0, "passes": 0,
+                                "runs": 0, "unpriced": 0})
         cell["runs"] += 1
         if isinstance(r.get("cost_usd"), (int, float)):
             cell["cost"] += r["cost_usd"]
@@ -567,10 +600,11 @@ def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
     fig, ax = plt.subplots(figsize=(7.4, 4.4))
     fig.patch.set_facecolor(SURFACE)
     style_ax(ax)
-    ordered = sorted(arms, key=arm_sort_key)
+    ordered = sorted(arms, key=lambda k: (arm_sort_key(k[0]),
+                                          -(k[1] or 0)))
     xs = range(len(ordered))
-    for x, arm in zip(xs, ordered):
-        cell = arms[arm]
+    for x, (arm, window) in zip(xs, ordered):
+        cell = arms[(arm, window)]
         cps = cell["cost"] / cell["passes"] if cell["passes"] else None
         if cps is None:
             ax.annotate("no passes", (x, 0.02), ha="center", fontsize=7,
@@ -584,8 +618,8 @@ def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
                     textcoords="offset points", xytext=(0, 4),
                     ha="center", fontsize=7, color=INK)
     ax.set_xticks(list(xs))
-    ax.set_xticklabels([arm_label(a) for a in ordered], fontsize=7,
-                       color=INK, wrap=True)
+    ax.set_xticklabels([_series_label(a, w) for a, w in ordered],
+                       fontsize=7, color=INK, wrap=True)
     ax.set_ylabel("USD per passing run", fontsize=8, color=MUTED)
     ax.set_title("Cost per successful outcome (agent spend only)",
                  fontsize=12, color=INK)
@@ -594,6 +628,74 @@ def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
     provenance(fig, round_meta, specs)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     path = out_dir / "cost_per_success.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
+def render_cost_at_depth(suites: dict, round_meta: dict, specs: dict,
+                         out_dir: Path):
+    """Cumulative billed tokens vs tool-call depth, per (arm, window).
+
+    The co-headline next to retention: at large windows nothing is
+    forgotten, but every call re-bills what the architecture chose to
+    carry. Token-denominated (not dollars) so mixed-model arms chart on
+    the same axis; the cost tables carry the dollars."""
+    data = suites.get("crs")
+    if not data:
+        return None
+    runs = [r for r in data["runs"] if r.get("depth_usage_curve")]
+    if not runs:
+        return None
+
+    series: dict[tuple, list] = {}
+    for r in runs:
+        series.setdefault(_series_key(r), []).append(r)
+    windows = sorted({r.get("window_tokens") for r in runs},
+                     key=lambda w: (w is None, -(w or 0)))
+
+    fig, ax = plt.subplots(figsize=(8.4, 5.0))
+    fig.patch.set_facecolor(SURFACE)
+    style_ax(ax)
+    for (arm, window), rs in sorted(series.items(),
+                                    key=lambda kv: (arm_sort_key(kv[0][0]),
+                                                    -(kv[0][1] or 0))):
+        # Mean cumulative billed tokens across runs, at each depth any
+        # run recorded; a run that died early keeps its last value.
+        depths = sorted({p["tool_calls"] for r in rs
+                         for p in r["depth_usage_curve"]})
+        ys = []
+        for d in depths:
+            vals = []
+            for r in rs:
+                pts = [p for p in r["depth_usage_curve"]
+                       if p["tool_calls"] <= d]
+                if pts:
+                    p = pts[-1]
+                    vals.append(p["prompt_tokens"]
+                                + p["completion_tokens"]
+                                + p["cached_tokens"]
+                                + p["cache_write_tokens"])
+            ys.append(sum(vals) / len(vals) if vals else 0)
+        ax.plot(depths, [y / 1e6 for y in ys], linewidth=1.8,
+                linestyle=_window_style(window, windows),
+                color=arm_color(arm), label=_series_label(arm, window))
+    ax.set_xlabel("tool calls", fontsize=8, color=MUTED)
+    ax.set_ylabel("cumulative billed tokens (millions)", fontsize=8,
+                  color=MUTED)
+    ax.set_title("What depth costs each architecture",
+                 fontsize=12, color=INK)
+    ax.legend(fontsize=7, loc="upper left", frameon=False)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    fig.text(0.01, 0.024,
+             "curves from each run's journaled cumulative usage (all "
+             "billed components incl. cache reads/writes); runs that "
+             "ended early hold their last value in the mean",
+             fontsize=6.6, color=MUTED, ha="left")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    path = out_dir / "cost_at_depth.png"
     fig.savefig(path, dpi=170)
     plt.close(fig)
     return path
@@ -652,7 +754,8 @@ def main() -> int:
         if path:
             written.append(path)
     for fn in (render_ablation, render_poster, render_retention,
-               render_cost_per_success, write_task_table):
+               render_cost_at_depth, render_cost_per_success,
+               write_task_table):
         path = fn(suites, round_meta, specs, args.out) \
             if fn is not write_task_table \
             else write_task_table(suites, args.out)

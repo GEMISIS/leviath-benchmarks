@@ -244,6 +244,14 @@ def main() -> int:
                              "limits in arms.json. Wall-clock is only "
                              "comparable between rounds run at the same "
                              "level, and every record carries it")
+    parser.add_argument("--window-tokens", type=int, default=None,
+                        help="pin every roster model's context window to "
+                             "min(native, N) for this invocation - the "
+                             "declared independent variable of the CRS "
+                             "window sweep. Model labels get an @<N>k "
+                             "suffix so tiers coexist in one results "
+                             "dir, and window_tokens lands in round.json "
+                             "and every record")
     parser.add_argument("--seed", type=int, default=1,
                         help="interleaving order seed (recorded)")
     parser.add_argument("--provider-config", default=None,
@@ -280,10 +288,35 @@ def main() -> int:
         return 2
 
     arms_cfg = load_arms_config(QUALITY_DIR / "arms.json")
+    if args.window_tokens:
+        # The window sweep: every model in the round runs under
+        # min(native, N). Region budgets are percentages of the window,
+        # so this shrinks every region proportionally - the same agent
+        # under a smaller deployment, which is the declared variable.
+        for entry in arms_cfg["models"].values():
+            if entry.get("tier") == "smoke":
+                continue
+            native = entry.get("context_window") or args.window_tokens
+            cap = dict(entry.get("capability_override") or {
+                "supports_temperature": True,
+                "supports_streaming": True,
+                "supports_tools": True,
+                "supports_system_prompt": True,
+                "max_output_tokens": 16384,
+            })
+            cap["max_context_tokens"] = min(native, args.window_tokens)
+            entry["capability_override"] = cap
+            entry["context_window"] = min(native, args.window_tokens)
     model_labels = (args.models.split(",") if args.models
                     else list(arms_cfg["models"]))
     arms = resolve_arms(arms_cfg, args.arms.split(","),
                         [m.strip() for m in model_labels])
+    if args.window_tokens:
+        suffix = f"@{args.window_tokens // 1000}k"
+        for arm in arms:
+            arm["window_tokens"] = args.window_tokens
+            arm["model_label"] = (f"{arm['model_label'] or 'native'} "
+                                  f"{suffix}")
 
     ages = roster_ages(arms_cfg, dt.datetime.now(timezone.utc).date())
     for label in sorted({a["model_label"] for a in arms} & set(ages)):
@@ -349,6 +382,7 @@ def main() -> int:
         "freeze_tag": freeze_tag,
         "suite": suite.name,
         "seed": args.seed,
+        "window_tokens": args.window_tokens,
         "reps": args.reps,
         "budget_usd": args.budget_usd,
         "per_run_max_tokens": args.per_run_max_tokens or None,

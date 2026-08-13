@@ -41,6 +41,27 @@
       "question": "Per the reference documents, how many times may a txn_id appear across all monthly files, and what must be done with a transaction whose account_id is not in the registry?",
       "expected": "A txn_id must appear exactly once across all monthly files combined; a transaction on an unregistered account cannot be priced or settled and must be escalated, whatever its stated fee.",
       "rubric": "Must give both: exactly-once txn_id uniqueness, and that unregistered-account transactions cannot be priced/settled and are escalated. One of the two is partial credit; saying ids are unique only within a month is a fail."
+    },
+    {
+      "after_tool_calls": 135,
+      "type": "factual_recall",
+      "question": "Per reference/fee-schedule.md, what is the fee for a plus-tier payment?",
+      "expected": "2.4% of gross + $0.25 fixed",
+      "rubric": "Must give both 2.4% and the $0.25 fixed component. Quoting another tier's rate (2.9%/1.9%) or another type's fee is a fail; percentage without the fixed component is partial credit."
+    },
+    {
+      "after_tool_calls": 160,
+      "type": "architecture",
+      "question": "Per the reference documents, what columns does reference/account-registry.csv have, and what role does the registry play in pricing a transaction?",
+      "expected": "Columns: account_id, name, tier, status, opened. The registry is the sole source of an account's fee tier, and that tier applies to every transaction on the account.",
+      "rubric": "Must list all five columns and state that the registry is the sole source of the fee tier. Missing a column or the sole-source role is partial credit; naming a different tier source (e.g. the transaction row itself) is a fail."
+    },
+    {
+      "after_tool_calls": 180,
+      "type": "factual_recall",
+      "question": "Reproduce the fee schedule's worked example: for a standard-tier payment of $100.00, what are the fee and the net amount?",
+      "expected": "Fee $3.20 ($2.90 percentage + $0.30 fixed); net $96.80.",
+      "rubric": "Must give fee $3.20 and net $96.80. Giving $2.90 as the total fee (forgetting the fixed component) or any other net is a fail; fee correct without the net is partial credit."
     }
   ]
 }

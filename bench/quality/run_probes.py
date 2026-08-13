@@ -180,6 +180,26 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
     rec = dict(rec)
     rec["schema"] = record_mod.SCHEMA
     rec["retention"] = retention
+    # Cumulative usage at every tool-call depth, straight from the
+    # journal fold: the cost-at-depth chart reads this instead of
+    # re-folding archives (charts read committed data only). Components
+    # are kept raw so any pricing convention can be applied later.
+    curve, last_calls = [], -1
+    for point in points:
+        meta = point.meta if isinstance(point.meta, dict) else {}
+        calls = int(meta.get("tool_calls", 0) or 0)
+        if calls <= last_calls:
+            continue
+        last_calls = calls
+        curve.append({
+            "tool_calls": calls,
+            "prompt_tokens": int(meta.get("prompt_tokens", 0) or 0),
+            "completion_tokens": int(meta.get("completion_tokens", 0) or 0),
+            "cached_tokens": int(meta.get("cached_tokens", 0) or 0),
+            "cache_write_tokens": int(meta.get("cache_write_tokens", 0)
+                                      or 0),
+        })
+    rec["depth_usage_curve"] = curve
     reached = [e for e in retention if e["reached"]]
     scored = [e["score"] for e in reached
               if isinstance(e.get("score"), (int, float))]

@@ -41,6 +41,27 @@
       "question": "Per the governance documents, how are links between documents written, and what makes a link a Rule 2 violation? What is the counting unit?",
       "expected": "Links are root-relative (e.g. api/rate-limits.md, never ../ or absolute URLs); a link whose .md target does not resolve to a file in the corpus is a violation, counted once per broken link occurrence.",
       "rubric": "Must say root-relative, that a violation is an unresolvable .md target, and that counting is per occurrence (not per document). Saying links are relative to the linking document, or counting per document, is a fail; omitting the counting unit is partial credit."
+    },
+    {
+      "after_tool_calls": 135,
+      "type": "factual_recall",
+      "question": "Per style-guide.md, which section do links between documents belong in, and what block type do configuration examples use?",
+      "expected": "Links belong in a '## See also' section; configuration examples use INI blocks (with credential values as the <REDACTED> placeholder).",
+      "rubric": "Must name the See also section and INI blocks. One of the two is partial credit; naming a different section (e.g. References) or block type (e.g. YAML, JSON) is a fail."
+    },
+    {
+      "after_tool_calls": 160,
+      "type": "architecture",
+      "question": "Per style-guide.md, how are document ids assigned, and what does the guide say about the H1 heading?",
+      "expected": "Ids are assigned from a central register and never reused; the H1 is the only level-1 heading in a document and repeats the id, as the policy requires.",
+      "rubric": "Must give both the central-register/never-reused assignment and that the H1 is the only level-1 heading repeating the id. One of the two is partial credit; saying ids are self-assigned or reusable is a fail."
+    },
+    {
+      "after_tool_calls": 180,
+      "type": "constraint_adherence",
+      "question": "Per POLICY.md, which directories are in scope for the rules, and which documents are exempt?",
+      "expected": "Every document under product-specs/, api/, and sops/ is in scope; the governance documents at the corpus root (POLICY.md, style-guide.md, INDEX.md) are exempt.",
+      "rubric": "Must give all three in-scope directories and all three exempt root documents. Missing one directory or one exempt document is partial credit; claiming a content directory is exempt or a governance document is in scope is a fail."
     }
   ]
 }

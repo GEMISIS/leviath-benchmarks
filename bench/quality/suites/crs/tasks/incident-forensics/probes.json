@@ -48,6 +48,20 @@
       "question": "Per the topology document, what is the only service on the path between edge-gateway and payment-gateway?",
       "expected": "checkout-api — edge-gateway never calls payment-gateway directly; the only path runs through checkout-api.",
       "rubric": "Must name checkout-api as the sole intermediary. Naming any other service, or claiming edge-gateway calls payment-gateway directly, is a fail."
+    },
+    {
+      "after_tool_calls": 150,
+      "type": "factual_recall",
+      "question": "Per config/alert-thresholds.yaml, what are session-cache's p99 latency threshold and its error-rate page threshold, and which team is paged?",
+      "expected": "p99_latency_ms: 40, error_rate_page_pct: 1.5, pager_team: platform-core",
+      "rubric": "Must give 40 ms, 1.5%, and platform-core. Quoting the defaults (900 ms / 5.0%) or another service's values or team is a fail; two of the three correct is partial credit."
+    },
+    {
+      "after_tool_calls": 180,
+      "type": "cross_file",
+      "question": "docs/topology.md lists an owner team for shipping-service, and config/alert-thresholds.yaml routes its pages to a pager_team. Do the two documents agree, and what team name(s) do they give?",
+      "expected": "They agree: both name fulfillment.",
+      "rubric": "Must state that the two files agree and name fulfillment. Naming a different team, claiming a mismatch, or answering for a different service is a fail."
     }
   ]
 }

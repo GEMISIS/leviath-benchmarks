@@ -9,7 +9,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.6.0"
+version = "0.7.0"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -26,7 +26,7 @@ mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Inventory the data files, their formats, and their columns"
 available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
-max_iterations = 10
+max_iterations = 15
 system_prompt = """
 Find out what data you actually have before computing anything.
 
@@ -189,7 +189,7 @@ mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Execute the plan with scripts and record the figures"
 available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
-max_iterations = 25
+max_iterations = 40
 max_revisits = 5
 transition_prompt = """
 Decide what happens next:

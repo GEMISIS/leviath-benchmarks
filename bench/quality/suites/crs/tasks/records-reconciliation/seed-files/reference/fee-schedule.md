@@ -1,4 +1,4 @@
-# Fee Schedule — Meridian Payments (effective 2024-07-01)
+# Fee Schedule — Meridian Payments (effective 2023-01-01)
 
 All amounts are USD with exactly two decimal places. Percentage fees
 are computed on the gross amount and rounded half away from zero to
