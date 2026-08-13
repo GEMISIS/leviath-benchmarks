@@ -9,19 +9,24 @@ owner: platform-core
 
 # DOC-9496: Loyalty Points
 
-Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation. Configuration for loyalty points is loaded at service start and refreshed every 47 minutes.
+Rollout is gated on the weekly release train unless an exemption is filed. This document describes the loyalty points area of the Meridian Commerce platform. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Overview
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Earlier drafts of this behavior were consolidated here from the team wiki. Changes to loyalty points go through the standard review workflow before release. The defaults listed below apply unless overridden per environment.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for loyalty points is loaded at service start and refreshed every 40 minutes. The loyalty points behavior is owned by the platform-core team and reviewed each quarter. Changes to loyalty points go through the standard review workflow before release.
+
+## Behavior
+
+Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the loyalty points area of the Meridian Commerce platform. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The loyalty points behavior is owned by the platform-core team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code.
 
 ## Defaults
 
-- cache lifetime: 2711 seconds
-- maximum batch size: 485
-- soft quota per client: 638 per hour
+- maximum batch size: 895
+- request timeout: 3801 ms
+- soft quota per client: 727 per hour
+- cache lifetime: 1972 seconds
 
 ## See also
 
-- [DOC-9922: Checkout Flow](product-specs/checkout-flow.md)
-- [DOC-5393: Search Endpoint](api/search-endpoint.md)
+- [DOC-4877: Gift Cards](product-specs/gift-cards.md)
+- [DOC-3221: Promotions Engine](product-specs/promotions-engine.md)

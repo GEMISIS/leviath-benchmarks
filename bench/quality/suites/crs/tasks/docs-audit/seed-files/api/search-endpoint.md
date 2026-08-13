@@ -8,20 +8,23 @@ owner: payments-platform
 
 # DOC-5393: Search Endpoint
 
-The search endpoint behavior is owned by the payments-platform team and reviewed each quarter. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Earlier drafts of this behavior were consolidated here from the team wiki. Rollout is gated on the weekly release train unless an exemption is filed. Changes to search endpoint go through the standard review workflow before release.
 
 ## Overview
 
-The search endpoint behavior is owned by the payments-platform team and reviewed each quarter. The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. This document describes the search endpoint area of the Meridian Commerce platform. Changes to search endpoint go through the standard review workflow before release. Requests beyond the configured limit receive a structured error response with a stable error code.
+
+## Behavior
+
+This document describes the search endpoint area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Defaults
 
-- soft quota per client: 3424 per hour
-- cache lifetime: 3304 seconds
-- retry budget: 589 attempts
+- retry budget: 2972 attempts
+- maximum batch size: 1938
+- default page size: 3791
 
 ## See also
 
-- [DOC-9664: Pagination Rules](api/pagination-rules.md)
-- [DOC-7657: Refunds Endpoint](api/refunds-endpoint.md)
-- [DOC-3383: Monitoring Setup](sops/monitoring-setup.md)
+- [DOC-4056: On-Call Handbook](sops/on-call-handbook.md)
+- [DOC-9622: Shipping Endpoint](api/shipping-endpoint.md)

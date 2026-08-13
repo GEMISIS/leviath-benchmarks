@@ -8,20 +8,33 @@ owner: payments-platform
 
 # DOC-1331: Order Tracking
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to order tracking go through the standard review workflow before release.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to order tracking go through the standard review workflow before release. The order tracking behavior is owned by the payments-platform team and reviewed each quarter.
 
 ## Overview
 
-Rollout is gated on the weekly release train unless an exemption is filed. Configuration for order tracking is loaded at service start and refreshed every 88 minutes. This document describes the order tracking area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment.
+Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for order tracking is loaded at service start and refreshed every 84 minutes. Operational alerts for this area route to the owning team's rotation. Rollout is gated on the weekly release train unless an exemption is filed.
+
+## Behavior
+
+Requests beyond the configured limit receive a structured error response with a stable error code. Changes to order tracking go through the standard review workflow before release. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation.
 
 ## Defaults
 
-- cache lifetime: 2892 seconds
-- maximum batch size: 1023
-- retry budget: 2358 attempts
+- request timeout: 3560 ms
+- soft quota per client: 3956 per hour
+- maximum batch size: 2577
+- default page size: 285
+
+## Configuration
+
+```ini
+[order-tracking]
+endpoint = https://internal.meridian.example/v2/order-tracking
+timeout_ms = 968
+api_key = "<REDACTED>"
+```
 
 ## See also
 
-- [DOC-9070: Certificate Renewal](sops/certificate-renewal.md)
-- [DOC-9622: Shipping Endpoint](api/shipping-endpoint.md)
-- [DOC-6502: Inventory Sync](product-specs/inventory-sync.md)
+- [DOC-5393: Search Endpoint](api/search-endpoint.md)
+- [DOC-3928: Vendor Onboarding](sops/vendor-onboarding.md)

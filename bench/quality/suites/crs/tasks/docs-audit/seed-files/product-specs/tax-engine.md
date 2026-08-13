@@ -8,29 +8,25 @@ owner: comms
 
 # DOC-6860: Tax Engine
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed.
+Earlier drafts of this behavior were consolidated here from the team wiki. Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment.
 
 ## Overview
 
-The tax engine behavior is owned by the comms team and reviewed each quarter. The defaults listed below apply unless overridden per environment. This document describes the tax engine area of the Meridian Commerce platform. Rollout is gated on the weekly release train unless an exemption is filed.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Rollout is gated on the weekly release train unless an exemption is filed. This document describes the tax engine area of the Meridian Commerce platform. Configuration for tax engine is loaded at service start and refreshed every 80 minutes.
+
+## Behavior
+
+Operational alerts for this area route to the owning team's rotation. Changes to tax engine go through the standard review workflow before release. The tax engine behavior is owned by the comms team and reviewed each quarter. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Defaults
 
-- retry budget: 1793 attempts
-- request timeout: 3713 ms
-- cache lifetime: 1891 seconds
-- soft quota per client: 1760 per hour
-
-## Configuration
-
-```ini
-[tax-engine]
-endpoint = https://internal.meridian.example/v2/tax-engine
-timeout_ms = 379
-api_key = "<REDACTED>"
-```
+- request timeout: 2290 ms
+- default page size: 2245
+- cache lifetime: 2901 seconds
+- soft quota per client: 2116 per hour
 
 ## See also
 
-- [DOC-3251: Data Archival](sops/data-archival.md)
-- [DOC-9735: Incident Response](sops/incident-response.md)
+- [DOC-9622: Shipping Endpoint](api/shipping-endpoint.md)
+- [DOC-8582: Auth Tokens](api/auth-tokens.md)
+- [DOC-9195: Price Rules](product-specs/price-rules.md)

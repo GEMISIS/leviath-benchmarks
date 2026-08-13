@@ -1,0 +1,46 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 15,
+      "type": "factual_recall",
+      "question": "Per POLICY.md Rule 1, what exact form must a document's id take, and what must the H1 title do with it?",
+      "expected": "id: is DOC- followed by exactly four digits, and the H1 must begin with that same id followed by a colon and a space.",
+      "rubric": "Must give both the DOC- prefix with exactly four digits and the H1-begins-with-id-plus-colon requirement. Saying 'a numeric id' without the four-digit constraint, or omitting the H1 requirement, is partial credit; any other format is a fail."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "factual_recall",
+      "question": "Per the policy's credential-hygiene rule, which three keys are covered and what literal placeholder must their example values use?",
+      "expected": "api_key, token, and password must use the literal placeholder <REDACTED>.",
+      "rubric": "Must name all three keys and the exact placeholder <REDACTED>. Missing a key or paraphrasing the placeholder (e.g. 'a redacted value') is partial credit; a different placeholder string is a fail."
+    },
+    {
+      "after_tool_calls": 50,
+      "type": "architecture",
+      "question": "Per style-guide.md, what are the three content sections of the corpus, what belongs in each, and which documents are allowed at the corpus root?",
+      "expected": "product-specs/ holds feature specifications, api/ holds endpoint references, sops/ holds operational procedures; only the governance documents (POLICY.md, style-guide.md, INDEX.md) live at the root.",
+      "rubric": "Must give all three sections with their content types and state that only the three governance documents live at the root. Missing one section or the root restriction is partial credit; inventing a fourth section is a fail."
+    },
+    {
+      "after_tool_calls": 70,
+      "type": "factual_recall",
+      "question": "What does the policy's deprecation rule require of a document whose front matter says status: deprecated?",
+      "expected": "It must declare superseded_by: naming an existing corpus file; one violation is counted per non-conforming document.",
+      "rubric": "Must mention the superseded_by key and that its target must exist in the corpus. Omitting the existence requirement is partial credit; requiring anything else (e.g. deletion, an archive move) is a fail."
+    },
+    {
+      "after_tool_calls": 90,
+      "type": "cross_file",
+      "question": "POLICY.md Rule 5 and style-guide.md both address version format. Do they agree, and are pre-release suffixes allowed?",
+      "expected": "They agree: versions are digits-only MAJOR.MINOR.PATCH, no v prefix, and pre-release tags/suffixes are never allowed; the style guide says it matches the policy exactly.",
+      "rubric": "Must state that the two documents agree, give the digits-only MAJOR.MINOR.PATCH format, and say pre-release suffixes are not allowed. Claiming a conflict is a fail; agreement without the pre-release detail is partial credit."
+    },
+    {
+      "after_tool_calls": 110,
+      "type": "constraint_adherence",
+      "question": "Per the governance documents, how are links between documents written, and what makes a link a Rule 2 violation? What is the counting unit?",
+      "expected": "Links are root-relative (e.g. api/rate-limits.md, never ../ or absolute URLs); a link whose .md target does not resolve to a file in the corpus is a violation, counted once per broken link occurrence.",
+      "rubric": "Must say root-relative, that a violation is an unresolvable .md target, and that counting is per occurrence (not per document). Saying links are relative to the linking document, or counting per document, is a fail; omitting the counting unit is partial credit."
+    }
+  ]
+}

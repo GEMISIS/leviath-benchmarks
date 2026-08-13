@@ -8,31 +8,34 @@ owner: identity
 
 # DOC-1267: Customers Endpoint
 
-Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code.
+Changes to customers endpoint go through the standard review workflow before release. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
 
 ## Overview
 
-Changes to customers endpoint go through the standard review workflow before release. The defaults listed below apply unless overridden per environment. Configuration for customers endpoint is loaded at service start and refreshed every 14 minutes. Identifiers used here follow the corpus-wide conventions in the style guide.
+Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Changes to customers endpoint go through the standard review workflow before release.
+
+## Behavior
+
+Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. The customers endpoint behavior is owned by the identity team and reviewed each quarter. Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Defaults
 
-- default page size: 1616
-- maximum batch size: 652
-- cache lifetime: 22 seconds
+- maximum batch size: 3836
+- soft quota per client: 3273 per hour
+- default page size: 3526
 
 ## Configuration
 
 ```ini
 [customers-endpoint]
 endpoint = https://internal.meridian.example/v2/customers-endpoint
-timeout_ms = 2450
+timeout_ms = 5200
 api_key = "<REDACTED>"
-api_key = "sk_live_ce9ed43dd8c6"
+api_key = "sk_live_ad44c1c73276"
 ```
 
 ## See also
 
-- [DOC-1211: Rollback Procedure](sops/rollback-procedure.md)
-- [DOC-9922: Checkout Flow](product-specs/checkout-flow.md)
-- [DOC-4750: Subscription Billing](product-specs/subscription-billing.md)
-- [Background notes](product-specs/returns-portal-v2.md)
+- [DOC-3067: Payments Endpoint](api/payments-endpoint.md)
+- [DOC-6773: Orders Endpoint](api/orders-endpoint.md)
+- [Background notes](sops/rollback-procedure-v2.md)

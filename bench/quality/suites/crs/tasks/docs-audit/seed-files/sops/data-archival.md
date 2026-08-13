@@ -8,29 +8,33 @@ owner: traffic-eng
 
 # DOC-3251: Data Archival
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. Configuration for data archival is loaded at service start and refreshed every 14 minutes.
+Earlier drafts of this behavior were consolidated here from the team wiki. Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed.
 
 ## Overview
 
-The data archival behavior is owned by the traffic-eng team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for data archival is loaded at service start and refreshed every 46 minutes.
+Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. Operational alerts for this area route to the owning team's rotation. Configuration for data archival is loaded at service start and refreshed every 62 minutes.
+
+## Behavior
+
+The data archival behavior is owned by the traffic-eng team and reviewed each quarter. Identifiers used here follow the corpus-wide conventions in the style guide. Configuration for data archival is loaded at service start and refreshed every 64 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Defaults
 
-- maximum batch size: 183
-- cache lifetime: 3513 seconds
-- default page size: 1641
-- request timeout: 2368 ms
+- default page size: 471
+- retry budget: 1315 attempts
+- soft quota per client: 432 per hour
+- cache lifetime: 366 seconds
 
 ## Configuration
 
 ```ini
 [data-archival]
 endpoint = https://internal.meridian.example/v2/data-archival
-timeout_ms = 2261
+timeout_ms = 635
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-7694: Catalog Endpoint](api/catalog-endpoint.md)
-- [DOC-4877: Gift Cards](product-specs/gift-cards.md)
+- [DOC-7780: Release Checklist](sops/release-checklist.md)
+- [DOC-3383: Monitoring Setup](sops/monitoring-setup.md)

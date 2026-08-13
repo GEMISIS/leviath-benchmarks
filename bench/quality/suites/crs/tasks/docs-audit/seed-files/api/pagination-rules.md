@@ -8,20 +8,22 @@ owner: storefront
 
 # DOC-9664: Pagination Rules
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
+Earlier drafts of this behavior were consolidated here from the team wiki. Identifiers used here follow the corpus-wide conventions in the style guide. The defaults listed below apply unless overridden per environment.
 
 ## Overview
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for pagination rules is loaded at service start and refreshed every 38 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the pagination rules area of the Meridian Commerce platform.
+Identifiers used here follow the corpus-wide conventions in the style guide. The pagination rules behavior is owned by the storefront team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
+
+## Behavior
+
+Operational alerts for this area route to the owning team's rotation. Configuration for pagination rules is loaded at service start and refreshed every 10 minutes. Requests beyond the configured limit receive a structured error response with a stable error code. Consumers should treat undocumented fields as unstable and subject to change without notice. The defaults listed below apply unless overridden per environment.
 
 ## Defaults
 
-- request timeout: 2060 ms
-- retry budget: 442 attempts
-- default page size: 1214
-- soft quota per client: 2076 per hour
+- maximum batch size: 98
+- soft quota per client: 3702 per hour
+- cache lifetime: 3478 seconds
 
 ## See also
 
-- [DOC-9070: Certificate Renewal](sops/certificate-renewal.md)
-- [DOC-4315: Wishlist Sharing](product-specs/wishlist-sharing.md)
+- [DOC-1417: Deploy Procedure](sops/deploy-procedure.md)

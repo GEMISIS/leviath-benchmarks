@@ -8,30 +8,22 @@ owner: identity
 
 # DOC-3067: Payments Endpoint
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice.
+This document describes the payments endpoint area of the Meridian Commerce platform. Earlier drafts of this behavior were consolidated here from the team wiki. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Overview
 
-Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment. The payments endpoint behavior is owned by the identity team and reviewed each quarter. This document describes the payments endpoint area of the Meridian Commerce platform.
+Changes to payments endpoint go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for payments endpoint is loaded at service start and refreshed every 78 minutes.
+
+## Behavior
+
+Earlier drafts of this behavior were consolidated here from the team wiki. The payments endpoint behavior is owned by the identity team and reviewed each quarter. Changes to payments endpoint go through the standard review workflow before release. Configuration for payments endpoint is loaded at service start and refreshed every 46 minutes. The defaults listed below apply unless overridden per environment.
 
 ## Defaults
 
-- retry budget: 3696 attempts
-- default page size: 1977
-- cache lifetime: 1128 seconds
-- soft quota per client: 3559 per hour
-
-## Configuration
-
-```ini
-[payments-endpoint]
-endpoint = https://internal.meridian.example/v2/payments-endpoint
-timeout_ms = 7178
-api_key = "<REDACTED>"
-```
+- maximum batch size: 888
+- default page size: 526
+- request timeout: 1369 ms
 
 ## See also
 
-- [DOC-4867: Inventory Endpoint](api/inventory-endpoint.md)
-- [DOC-9496: Loyalty Points](product-specs/loyalty-points.md)
 - [DOC-3221: Promotions Engine](product-specs/promotions-engine.md)

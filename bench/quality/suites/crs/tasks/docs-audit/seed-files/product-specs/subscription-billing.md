@@ -8,20 +8,31 @@ owner: discovery
 
 # DOC-4750: Subscription Billing
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for subscription billing is loaded at service start and refreshed every 80 minutes. Earlier drafts of this behavior were consolidated here from the team wiki.
+Identifiers used here follow the corpus-wide conventions in the style guide. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment.
 
 ## Overview
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Changes to subscription billing go through the standard review workflow before release. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code.
+This document describes the subscription billing area of the Meridian Commerce platform. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki. The subscription billing behavior is owned by the discovery team and reviewed each quarter.
+
+## Behavior
+
+Configuration for subscription billing is loaded at service start and refreshed every 43 minutes. Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment. Identifiers used here follow the corpus-wide conventions in the style guide. Changes to subscription billing go through the standard review workflow before release.
 
 ## Defaults
 
-- request timeout: 3826 ms
-- maximum batch size: 1825
-- cache lifetime: 2880 seconds
+- cache lifetime: 3157 seconds
+- maximum batch size: 1794
+- request timeout: 2478 ms
+
+## Configuration
+
+```ini
+[subscription-billing]
+endpoint = https://internal.meridian.example/v2/subscription-billing
+timeout_ms = 2561
+api_key = "<REDACTED>"
+```
 
 ## See also
 
-- [DOC-6678: Access Review](sops/access-review.md)
-- [DOC-9169: Errors Reference](api/errors-reference.md)
-- [DOC-1328: Key Rotation](sops/key-rotation.md)
+- [DOC-1233: Returns Portal](product-specs/returns-portal.md)

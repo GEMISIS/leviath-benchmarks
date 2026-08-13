@@ -8,28 +8,22 @@ owner: storefront
 
 # DOC-9169: Errors Reference
 
-Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Rollout is gated on the weekly release train unless an exemption is filed. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for errors reference is loaded at service start and refreshed every 5 minutes.
 
 ## Overview
 
-Consumers should treat undocumented fields as unstable and subject to change without notice. Identifiers used here follow the corpus-wide conventions in the style guide. Configuration for errors reference is loaded at service start and refreshed every 15 minutes. Changes to errors reference go through the standard review workflow before release.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for errors reference is loaded at service start and refreshed every 53 minutes. Changes to errors reference go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki.
+
+## Behavior
+
+Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Changes to errors reference go through the standard review workflow before release.
 
 ## Defaults
 
-- retry budget: 98 attempts
-- soft quota per client: 1230 per hour
-- default page size: 1368
-- maximum batch size: 3064
-
-## Configuration
-
-```ini
-[errors-reference]
-endpoint = https://internal.meridian.example/v2/errors-reference
-timeout_ms = 4805
-api_key = "<REDACTED>"
-```
+- retry budget: 600 attempts
+- soft quota per client: 308 per hour
+- default page size: 3240
 
 ## See also
 
-- [DOC-6462: Reporting Endpoint](api/reporting-endpoint.md)
+- [DOC-1233: Returns Portal](product-specs/returns-portal.md)

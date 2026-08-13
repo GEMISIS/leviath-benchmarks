@@ -351,6 +351,13 @@ def _render_doc(rng: random.Random, d: dict, by_path: dict,
                  n=rng.randrange(5, 90))
         for s in rng.sample(SENTENCES, 4)))
     body.append("")
+    body.append("## Behavior")
+    body.append("")
+    body.append(" ".join(
+        s.format(topic=d["topic"], owner=d["owner"],
+                 n=rng.randrange(5, 90))
+        for s in rng.sample(SENTENCES, 5)))
+    body.append("")
     body.append("## Defaults")
     body.append("")
     for b in rng.sample(BULLETS, rng.randrange(3, 5)):

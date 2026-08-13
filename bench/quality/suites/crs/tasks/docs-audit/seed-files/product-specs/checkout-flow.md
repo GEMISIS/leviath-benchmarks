@@ -14,24 +14,30 @@ The checkout flow behavior is owned by the discovery team and reviewed each quar
 
 Earlier drafts of this behavior were consolidated here from the team wiki. This document describes the checkout flow area of the Meridian Commerce platform. The checkout flow behavior is owned by the discovery team and reviewed each quarter. The defaults listed below apply unless overridden per environment.
 
+## Behavior
+
+Identifiers used here follow the corpus-wide conventions in the style guide. Configuration for checkout flow is loaded at service start and refreshed every 82 minutes. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki.
+
 ## Defaults
 
-- maximum batch size: 2021
-- retry budget: 2864 attempts
-- soft quota per client: 2485 per hour
-- cache lifetime: 3765 seconds
+- maximum batch size: 2714
+- soft quota per client: 2260 per hour
+- cache lifetime: 2398 seconds
+- retry budget: 1689 attempts
 
 ## Configuration
 
 ```ini
 [checkout-flow]
 endpoint = https://internal.meridian.example/v2/checkout-flow
-timeout_ms = 5536
+timeout_ms = 3627
 api_key = "<REDACTED>"
-api_key = "sk_live_becfe03943fd"
+api_key = "sk_live_530700193d18"
 ```
 
 ## See also
 
-- [DOC-9169: Errors Reference](api/errors-reference.md)
-- [Background notes](sops/monitoring-setup-v2.md)
+- [DOC-3221: Promotions Engine](product-specs/promotions-engine.md)
+- [DOC-4056: On-Call Handbook](sops/on-call-handbook.md)
+- [DOC-1417: Deploy Procedure](sops/deploy-procedure.md)
+- [Background notes](api/refunds-endpoint-v2.md)

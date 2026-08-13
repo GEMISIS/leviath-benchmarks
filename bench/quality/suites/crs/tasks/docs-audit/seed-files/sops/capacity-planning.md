@@ -8,30 +8,32 @@ owner: discovery
 
 # DOC-3572: Capacity Planning
 
-Earlier drafts of this behavior were consolidated here from the team wiki. Identifiers used here follow the corpus-wide conventions in the style guide. The defaults listed below apply unless overridden per environment.
+Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Overview
 
-Identifiers used here follow the corpus-wide conventions in the style guide. The capacity planning behavior is owned by the discovery team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
+The capacity planning behavior is owned by the discovery team and reviewed each quarter. Requests beyond the configured limit receive a structured error response with a stable error code. The defaults listed below apply unless overridden per environment. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+
+## Behavior
+
+Consumers should treat undocumented fields as unstable and subject to change without notice. Operational alerts for this area route to the owning team's rotation. Changes to capacity planning go through the standard review workflow before release. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for capacity planning is loaded at service start and refreshed every 74 minutes.
 
 ## Defaults
 
-- maximum batch size: 177
-- request timeout: 3272 ms
-- retry budget: 1859 attempts
-- soft quota per client: 3383 per hour
+- soft quota per client: 895 per hour
+- cache lifetime: 2675 seconds
+- request timeout: 3110 ms
 
 ## Configuration
 
 ```ini
 [capacity-planning]
 endpoint = https://internal.meridian.example/v2/capacity-planning
-timeout_ms = 502
+timeout_ms = 510
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
 - [DOC-9496: Loyalty Points](product-specs/loyalty-points.md)
-- [DOC-6502: Inventory Sync](product-specs/inventory-sync.md)
-- [DOC-1328: Key Rotation](sops/key-rotation.md)
+- [DOC-3097: Shipping Quotes](product-specs/shipping-quotes.md)

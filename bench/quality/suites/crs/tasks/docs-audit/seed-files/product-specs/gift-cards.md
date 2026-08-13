@@ -8,29 +8,33 @@ owner: storefront
 
 # DOC-4877: Gift Cards
 
-This document describes the gift cards area of the Meridian Commerce platform. Earlier drafts of this behavior were consolidated here from the team wiki. The gift cards behavior is owned by the storefront team and reviewed each quarter.
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation. Earlier drafts of this behavior were consolidated here from the team wiki.
 
 ## Overview
 
-Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for gift cards is loaded at service start and refreshed every 36 minutes. Consumers should treat undocumented fields as unstable and subject to change without notice.
+Rollout is gated on the weekly release train unless an exemption is filed. Requests beyond the configured limit receive a structured error response with a stable error code. The gift cards behavior is owned by the storefront team and reviewed each quarter. Configuration for gift cards is loaded at service start and refreshed every 53 minutes.
+
+## Behavior
+
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Earlier drafts of this behavior were consolidated here from the team wiki. Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the gift cards area of the Meridian Commerce platform.
 
 ## Defaults
 
-- cache lifetime: 1972 seconds
-- maximum batch size: 3463
-- soft quota per client: 3364 per hour
+- maximum batch size: 17
+- retry budget: 2835 attempts
+- cache lifetime: 1425 seconds
+- soft quota per client: 2809 per hour
 
 ## Configuration
 
 ```ini
 [gift-cards]
 endpoint = https://internal.meridian.example/v2/gift-cards
-timeout_ms = 2645
+timeout_ms = 2735
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-3067: Payments Endpoint](api/payments-endpoint.md)
-- [DOC-3097: Shipping Quotes](product-specs/shipping-quotes.md)
-- [DOC-8582: Auth Tokens](api/auth-tokens.md)
+- [DOC-7694: Catalog Endpoint](api/catalog-endpoint.md)
+- [DOC-1328: Key Rotation](sops/key-rotation.md)

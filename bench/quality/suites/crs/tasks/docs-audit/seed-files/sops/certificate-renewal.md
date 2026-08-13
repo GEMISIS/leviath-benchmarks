@@ -8,20 +8,24 @@ owner: discovery
 
 # DOC-9070: Certificate Renewal
 
-The certificate renewal behavior is owned by the discovery team and reviewed each quarter. The defaults listed below apply unless overridden per environment. Requests beyond the configured limit receive a structured error response with a stable error code.
+The defaults listed below apply unless overridden per environment. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Overview
 
-The defaults listed below apply unless overridden per environment. The certificate renewal behavior is owned by the discovery team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+Consumers should treat undocumented fields as unstable and subject to change without notice. This document describes the certificate renewal area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. The defaults listed below apply unless overridden per environment.
+
+## Behavior
+
+Rollout is gated on the weekly release train unless an exemption is filed. Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Operational alerts for this area route to the owning team's rotation. The certificate renewal behavior is owned by the discovery team and reviewed each quarter.
 
 ## Defaults
 
-- soft quota per client: 3299 per hour
-- retry budget: 3643 attempts
-- request timeout: 2777 ms
-- maximum batch size: 2933
+- retry budget: 2945 attempts
+- request timeout: 2537 ms
+- default page size: 2177
+- cache lifetime: 2556 seconds
 
 ## See also
 
-- [DOC-5393: Search Endpoint](api/search-endpoint.md)
-- [DOC-1328: Key Rotation](sops/key-rotation.md)
+- [DOC-3067: Payments Endpoint](api/payments-endpoint.md)
+- [DOC-9169: Errors Reference](api/errors-reference.md)

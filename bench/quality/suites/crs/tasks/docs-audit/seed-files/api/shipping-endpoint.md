@@ -8,28 +8,32 @@ owner: discovery
 
 # DOC-9622: Shipping Endpoint
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment.
+The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Overview
 
-Rollout is gated on the weekly release train unless an exemption is filed. The defaults listed below apply unless overridden per environment. Configuration for shipping endpoint is loaded at service start and refreshed every 34 minutes. Changes to shipping endpoint go through the standard review workflow before release.
+The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Identifiers used here follow the corpus-wide conventions in the style guide. Requests beyond the configured limit receive a structured error response with a stable error code.
+
+## Behavior
+
+This document describes the shipping endpoint area of the Meridian Commerce platform. Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to shipping endpoint go through the standard review workflow before release. Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for shipping endpoint is loaded at service start and refreshed every 43 minutes.
 
 ## Defaults
 
-- request timeout: 1712 ms
-- cache lifetime: 3631 seconds
-- maximum batch size: 658
+- soft quota per client: 2154 per hour
+- default page size: 3114
+- retry budget: 1010 attempts
+- maximum batch size: 3231
 
 ## Configuration
 
 ```ini
 [shipping-endpoint]
 endpoint = https://internal.meridian.example/v2/shipping-endpoint
-timeout_ms = 6496
+timeout_ms = 2735
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-3928: Vendor Onboarding](sops/vendor-onboarding.md)
-- [DOC-9496: Loyalty Points](product-specs/loyalty-points.md)
+- [DOC-7657: Refunds Endpoint](api/refunds-endpoint.md)

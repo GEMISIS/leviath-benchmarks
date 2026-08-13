@@ -8,29 +8,33 @@ owner: discovery
 
 # DOC-9195: Price Rules
 
-The price rules behavior is owned by the discovery team and reviewed each quarter. Changes to price rules go through the standard review workflow before release. This document describes the price rules area of the Meridian Commerce platform.
+Identifiers used here follow the corpus-wide conventions in the style guide. Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment.
 
 ## Overview
 
-Changes to price rules go through the standard review workflow before release. Rollout is gated on the weekly release train unless an exemption is filed. Consumers should treat undocumented fields as unstable and subject to change without notice. Earlier drafts of this behavior were consolidated here from the team wiki.
+This document describes the price rules area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide. Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed.
+
+## Behavior
+
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Configuration for price rules is loaded at service start and refreshed every 46 minutes. Identifiers used here follow the corpus-wide conventions in the style guide.
 
 ## Defaults
 
-- retry budget: 1258 attempts
-- cache lifetime: 3247 seconds
-- soft quota per client: 2566 per hour
+- default page size: 2353
+- retry budget: 1514 attempts
+- soft quota per client: 1525 per hour
 
 ## Configuration
 
 ```ini
 [price-rules]
 endpoint = https://internal.meridian.example/v2/price-rules
-timeout_ms = 5138
+timeout_ms = 5829
 api_key = "<REDACTED>"
 ```
 
 ## See also
 
-- [DOC-3572: Capacity Planning](sops/capacity-planning.md)
-- [DOC-9735: Incident Response](sops/incident-response.md)
-- [DOC-9622: Shipping Endpoint](api/shipping-endpoint.md)
+- [DOC-7915: Database Backup](sops/database-backup.md)
+- [DOC-1119: Storefront Themes](product-specs/storefront-themes.md)
+- [DOC-3097: Shipping Quotes](product-specs/shipping-quotes.md)

@@ -46,7 +46,9 @@ FAMILIES = {
 # data-pipeline were recovered with seed or validation gaps (see
 # README.md) and join this set as they are repaired; the generated
 # non-coding tasks join as their generators land.
-RUNNABLE = {"cli-tool", "rest-api", "stress-test"}
+RUNNABLE = {"cli-tool", "rest-api", "stress-test",
+            "incident-forensics", "records-reconciliation",
+            "docs-audit"}
 
 # The structured role is the composed flagship, by design.
 STRUCTURED_VARIANT = "adversarial-scoped-flagship"

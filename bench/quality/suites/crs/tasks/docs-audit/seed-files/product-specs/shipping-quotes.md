@@ -8,21 +8,23 @@ owner: comms
 
 # DOC-3097: Shipping Quotes
 
-Rollout is gated on the weekly release train unless an exemption is filed. Configuration for shipping quotes is loaded at service start and refreshed every 39 minutes. Identifiers used here follow the corpus-wide conventions in the style guide.
+Rollout is gated on the weekly release train unless an exemption is filed. The shipping quotes behavior is owned by the comms team and reviewed each quarter. Consumers should treat undocumented fields as unstable and subject to change without notice.
 
 ## Overview
 
-Identifiers used here follow the corpus-wide conventions in the style guide. Operational alerts for this area route to the owning team's rotation. Configuration for shipping quotes is loaded at service start and refreshed every 5 minutes. This document describes the shipping quotes area of the Meridian Commerce platform.
+This document describes the shipping quotes area of the Meridian Commerce platform. Configuration for shipping quotes is loaded at service start and refreshed every 75 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. Requests beyond the configured limit receive a structured error response with a stable error code.
+
+## Behavior
+
+Changes to shipping quotes go through the standard review workflow before release. Operational alerts for this area route to the owning team's rotation. Requests beyond the configured limit receive a structured error response with a stable error code. Rollout is gated on the weekly release train unless an exemption is filed. Configuration for shipping quotes is loaded at service start and refreshed every 86 minutes.
 
 ## Defaults
 
-- request timeout: 1577 ms
-- soft quota per client: 1272 per hour
-- cache lifetime: 2363 seconds
-- default page size: 3447
+- soft quota per client: 3156 per hour
+- maximum batch size: 3558
+- retry budget: 615 attempts
+- request timeout: 3437 ms
 
 ## See also
 
-- [DOC-1331: Order Tracking](product-specs/order-tracking.md)
-- [DOC-9664: Pagination Rules](api/pagination-rules.md)
-- [DOC-6678: Access Review](sops/access-review.md)
+- [DOC-1417: Deploy Procedure](sops/deploy-procedure.md)

@@ -8,27 +8,25 @@ owner: platform-core
 
 # DOC-6678: Access Review
 
-Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation. The access review behavior is owned by the platform-core team and reviewed each quarter.
+Configuration for access review is loaded at service start and refreshed every 54 minutes. Identifiers used here follow the corpus-wide conventions in the style guide. This document describes the access review area of the Meridian Commerce platform.
 
 ## Overview
 
-The defaults listed below apply unless overridden per environment. Changes to access review go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki. Rollout is gated on the weekly release train unless an exemption is filed.
+The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Consumers should treat undocumented fields as unstable and subject to change without notice. Changes to access review go through the standard review workflow before release.
+
+## Behavior
+
+This document describes the access review area of the Meridian Commerce platform. Changes to access review go through the standard review workflow before release. Consumers should treat undocumented fields as unstable and subject to change without notice. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Operational alerts for this area route to the owning team's rotation.
 
 ## Defaults
 
-- maximum batch size: 3711
-- request timeout: 3637 ms
-- retry budget: 1475 attempts
-
-## Configuration
-
-```ini
-[access-review]
-endpoint = https://internal.meridian.example/v2/access-review
-timeout_ms = 8941
-api_key = "<REDACTED>"
-```
+- retry budget: 490 attempts
+- soft quota per client: 2741 per hour
+- cache lifetime: 278 seconds
+- request timeout: 2176 ms
 
 ## See also
 
-- [DOC-6462: Reporting Endpoint](api/reporting-endpoint.md)
+- [DOC-1233: Returns Portal](product-specs/returns-portal.md)
+- [DOC-1331: Order Tracking](product-specs/order-tracking.md)
+- [DOC-3221: Promotions Engine](product-specs/promotions-engine.md)

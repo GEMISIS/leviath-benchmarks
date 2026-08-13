@@ -8,31 +8,35 @@ owner: platform-core
 
 # DOC-6463: Reporting Endpoint
 
-Configuration for reporting endpoint is loaded at service start and refreshed every 12 minutes. Changes to reporting endpoint go through the standard review workflow before release. Earlier drafts of this behavior were consolidated here from the team wiki.
+Operational alerts for this area route to the owning team's rotation. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. This document describes the reporting endpoint area of the Meridian Commerce platform.
 
 ## Overview
 
-The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation. This document describes the reporting endpoint area of the Meridian Commerce platform. Identifiers used here follow the corpus-wide conventions in the style guide.
+This document describes the reporting endpoint area of the Meridian Commerce platform. The defaults listed below apply unless overridden per environment. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning.
+
+## Behavior
+
+Earlier drafts of this behavior were consolidated here from the team wiki. Consumers should treat undocumented fields as unstable and subject to change without notice. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The reporting endpoint behavior is owned by the platform-core team and reviewed each quarter. Operational alerts for this area route to the owning team's rotation.
 
 ## Defaults
 
-- default page size: 2726
-- soft quota per client: 997 per hour
-- request timeout: 536 ms
-- retry budget: 568 attempts
+- cache lifetime: 1860 seconds
+- retry budget: 2989 attempts
+- request timeout: 532 ms
 
 ## Configuration
 
 ```ini
 [reporting-endpoint]
 endpoint = https://internal.meridian.example/v2/reporting-endpoint
-timeout_ms = 2449
+timeout_ms = 7448
 api_key = "<REDACTED>"
-api_key = "sk_live_73bdb239bd53"
+api_key = "sk_live_ea47895905f6"
 ```
 
 ## See also
 
 - [DOC-7915: Database Backup](sops/database-backup.md)
-- [Background notes](sops/key-rotation-v2.md)
-- [Background notes](sops/vendor-onboarding-v2.md)
+- [DOC-4867: Inventory Endpoint](api/inventory-endpoint.md)
+- [Background notes](product-specs/price-rules-v2.md)
+- [Background notes](product-specs/gift-cards-v2.md)

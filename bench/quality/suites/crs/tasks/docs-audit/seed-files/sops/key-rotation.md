@@ -8,29 +8,24 @@ owner: traffic-eng
 
 # DOC-1328: Key Rotation
 
-Operational alerts for this area route to the owning team's rotation. Consumers should treat undocumented fields as unstable and subject to change without notice. Configuration for key rotation is loaded at service start and refreshed every 24 minutes.
+Rollout is gated on the weekly release train unless an exemption is filed. Operational alerts for this area route to the owning team's rotation. The defaults listed below apply unless overridden per environment.
 
 ## Overview
 
-Requests beyond the configured limit receive a structured error response with a stable error code. Configuration for key rotation is loaded at service start and refreshed every 68 minutes. The defaults listed below apply unless overridden per environment. Operational alerts for this area route to the owning team's rotation.
+Configuration for key rotation is loaded at service start and refreshed every 72 minutes. Rollout is gated on the weekly release train unless an exemption is filed. Numbers in this section are targets, not guarantees, and are revisited during capacity planning. The key rotation behavior is owned by the traffic-eng team and reviewed each quarter.
+
+## Behavior
+
+Numbers in this section are targets, not guarantees, and are revisited during capacity planning. Configuration for key rotation is loaded at service start and refreshed every 47 minutes. Changes to key rotation go through the standard review workflow before release. Operational alerts for this area route to the owning team's rotation. This document describes the key rotation area of the Meridian Commerce platform.
 
 ## Defaults
 
-- soft quota per client: 2918 per hour
-- default page size: 3547
-- cache lifetime: 2720 seconds
-- maximum batch size: 111
-
-## Configuration
-
-```ini
-[key-rotation]
-endpoint = https://internal.meridian.example/v2/key-rotation
-timeout_ms = 8080
-api_key = "<REDACTED>"
-```
+- default page size: 178
+- cache lifetime: 1129 seconds
+- retry budget: 302 attempts
+- maximum batch size: 3996
 
 ## See also
 
-- [DOC-9664: Pagination Rules](api/pagination-rules.md)
-- [DOC-6462: Reporting Endpoint](api/reporting-endpoint.md)
+- [DOC-4877: Gift Cards](product-specs/gift-cards.md)
+- [DOC-4315: Wishlist Sharing](product-specs/wishlist-sharing.md)
