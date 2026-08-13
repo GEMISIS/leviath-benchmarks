@@ -90,8 +90,16 @@ def _archive_path(runs_dir: Path, rec: dict) -> Path | None:
 
 def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
                   keys: dict, *, grade: bool, dry_run: bool,
+                  robustness_label: str | None = None,
                   log=print) -> dict | None:
-    """Returns the amended record, or None when nothing was done."""
+    """Returns the amended record, or None when nothing was done.
+
+    With ``robustness_label`` set, the whole matrix replays under an
+    alternate reader model: replays land in their own directory and the
+    scores amend only ``reader_robustness[label]`` - the frozen main
+    retention data is never touched. This is the published answer to
+    "would the curve survive a different reader?".
+    """
     archive = _archive_path(runs_dir, rec)
     if archive is None:
         log(f"  {rec['task_id']}/{rec['arm']}: no run.lvr archive")
@@ -105,7 +113,11 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
     stem = record_mod.record_filename(
         rec["task_id"], rec["arm"], rec["model_label"],
         rec["rep"]).removesuffix(".json")
-    replay_dir = runs_dir / f"{stem}.artifacts" / "probe_replays"
+    subdir = "probe_replays"
+    if robustness_label:
+        slug = robustness_label.replace("/", "-").replace(" ", "-")
+        subdir = f"probe_replays_{slug}"
+    replay_dir = runs_dir / f"{stem}.artifacts" / subdir
     replay_dir.mkdir(parents=True, exist_ok=True)
 
     retention = []
@@ -113,62 +125,79 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
                 "cached_tokens": 0, "cache_write_tokens": 0}
     overhead_cost = 0.0
 
-    for probe in task_probes:
-        depth = probe["after_tool_calls"]
+    # The probe x depth MATRIX: every probe is asked at every reached
+    # grid depth, not only its own. Every probed fact lives in the
+    # reference documents from call zero, so every question is valid at
+    # every depth - and because probes replay offline, asking them all
+    # costs nothing in contamination. This removes the probe-difficulty
+    # vs depth confound outright: a drop in the curve is now a change
+    # in the CONTEXT, never a change in the question.
+    depth_grid = sorted({p["after_tool_calls"] for p in task_probes})
+    for depth in depth_grid:
         found = lvr.point_at_depth(points, depth)
-        entry = {"after_tool_calls": depth,
-                 "probe_type": probe["type"],
-                 "reached": found is not None}
         if found is None:
-            retention.append(entry)
+            for idx, probe in enumerate(task_probes):
+                retention.append({"after_tool_calls": depth,
+                                  "probe_id": idx,
+                                  "probe_type": probe["type"],
+                                  "reached": False})
             continue
         point, actual = found
-        entry["at_tool_calls"] = actual
-        request = assemble.assemble(point)
-        request["messages"] = (request["messages"]
-                               + [_probe_message(probe["question"])])
+        request_base = assemble.assemble(point)
         if dry_run:
-            log(f"  probe@{depth} (at {actual}): "
-                f"{len(request['system'])} system blocks, "
-                f"{len(request['messages'])} messages, "
-                f"tools {sorted(request['tool_names'])}")
-            retention.append(entry)
+            log(f"  depth {depth} (at {actual}): "
+                f"{len(request_base['system'])} system blocks, "
+                f"{len(request_base['messages'])} messages, "
+                f"{len(task_probes)} probes, "
+                f"tools {sorted(request_base['tool_names'])}")
+            for idx, probe in enumerate(task_probes):
+                retention.append({"after_tool_calls": depth,
+                                  "probe_id": idx,
+                                  "probe_type": probe["type"],
+                                  "reached": True,
+                                  "at_tool_calls": actual})
             continue
-
-        out = providers.call_chat(
-            cfg["reader_id"], request["system"], request["messages"],
-            request["tool_names"],
-            temperature=cfg.get("replay_temperature", 0),
-            max_tokens=cfg.get("replay_max_tokens", 1024), keys=keys)
-        for k in overhead:
-            overhead[k] += out["usage"].get(k, 0)
-        overhead_cost += cost_mod.cost_usd(out["usage"], cfg["reader_id"],
-                                           rates) or 0.0
-        (replay_dir / f"probe_{depth}.json").write_text(json.dumps({
-            "probe": probe, "at_tool_calls": actual,
-            "system_blocks": len(request["system"]),
-            "messages": len(request["messages"]),
-            "encoding": out["encoding"],
-            "answer": out["text"], "usage": out["usage"],
-            "reader_model": cfg["reader_id"],
-        }, indent=2) + "\n")
-        entry["read_by"] = cfg["reader_id"]
-
-        if grade:
-            verdict = evaluator.grade_answer(
-                probe, out["text"], grader_model_id=cfg["grader_id"],
-                keys=keys)
+        for idx, probe in enumerate(task_probes):
+            entry = {"after_tool_calls": depth, "probe_id": idx,
+                     "probe_type": probe["type"], "reached": True,
+                     "at_tool_calls": actual}
+            messages = (request_base["messages"]
+                        + [_probe_message(probe["question"])])
+            out = providers.call_chat(
+                cfg["reader_id"], request_base["system"], messages,
+                request_base["tool_names"],
+                temperature=cfg.get("replay_temperature", 0),
+                max_tokens=cfg.get("replay_max_tokens", 1024), keys=keys)
             for k in overhead:
-                overhead[k] += (verdict["usage"] or {}).get(k, 0)
+                overhead[k] += out["usage"].get(k, 0)
             overhead_cost += cost_mod.cost_usd(
-                verdict["usage"], cfg["grader_id"], rates) or 0.0
-            (replay_dir / f"probe_{depth}.grade.json").write_text(
-                json.dumps(verdict, indent=2) + "\n")
-            entry.update({"score": verdict["score"],
-                          "grade": verdict["grade"],
-                          "hallucinated": verdict["hallucinated"],
-                          "graded_by": cfg["grader_id"]})
-        retention.append(entry)
+                out["usage"], cfg["reader_id"], rates) or 0.0
+            (replay_dir / f"probe_{depth}_{idx}.json").write_text(
+                json.dumps({
+                    "probe": probe, "at_tool_calls": actual,
+                    "system_blocks": len(request_base["system"]),
+                    "messages": len(messages),
+                    "encoding": out["encoding"],
+                    "answer": out["text"], "usage": out["usage"],
+                    "reader_model": cfg["reader_id"],
+                }, indent=2) + "\n")
+            entry["read_by"] = cfg["reader_id"]
+
+            if grade:
+                verdict = evaluator.grade_answer(
+                    probe, out["text"], grader_model_id=cfg["grader_id"],
+                    keys=keys)
+                for k in overhead:
+                    overhead[k] += (verdict["usage"] or {}).get(k, 0)
+                overhead_cost += cost_mod.cost_usd(
+                    verdict["usage"], cfg["grader_id"], rates) or 0.0
+                (replay_dir / f"probe_{depth}_{idx}.grade.json").write_text(
+                    json.dumps(verdict, indent=2) + "\n")
+                entry.update({"score": verdict["score"],
+                              "grade": verdict["grade"],
+                              "hallucinated": verdict["hallucinated"],
+                              "graded_by": cfg["grader_id"]})
+            retention.append(entry)
 
     if dry_run:
         unreached = sum(1 for e in retention if not e["reached"])
@@ -179,6 +208,23 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
 
     rec = dict(rec)
     rec["schema"] = record_mod.SCHEMA
+    if robustness_label:
+        reached = [e for e in retention if e["reached"]]
+        scored = [e["score"] for e in reached
+                  if isinstance(e.get("score"), (int, float))]
+        rec.setdefault("reader_robustness", {})[robustness_label] = {
+            "reader_model": cfg["reader_id"],
+            "mean_score": (round(sum(scored) / len(scored), 4)
+                           if scored else None),
+            "n_probes": len(retention),
+            "n_reached": len(reached),
+            "n_hallucinated": sum(1 for e in reached
+                                  if e.get("hallucinated")),
+            "overhead_usage": overhead,
+            "overhead_cost_usd": round(overhead_cost, 6),
+        }
+        record_mod.write_record(runs_dir, rec)
+        return rec
     rec["retention"] = retention
     # Cumulative usage at every tool-call depth, straight from the
     # journal fold: the cost-at-depth chart reads this instead of
@@ -230,6 +276,12 @@ def main() -> int:
     parser.add_argument("--budget-usd", type=float, default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--reader-model", default=None,
+                        help="roster label of an ALTERNATE reader: replays "
+                             "the whole matrix under it and amends only "
+                             "reader_robustness[<label>], leaving the main "
+                             "retention data untouched (the robustness "
+                             "appendix)")
     args = parser.parse_args()
 
     load_dotenv(REPO_DIR / ".env")
@@ -245,8 +297,23 @@ def main() -> int:
 
     spent = 0.0
     amended = 0
+    robustness_label = None
+    if args.reader_model:
+        roster = round_meta.get("roster") or json.loads(
+            (QUALITY_DIR / "arms.json").read_text())["models"]
+        if args.reader_model not in roster:
+            raise SystemExit(f"--reader-model {args.reader_model!r} not "
+                             "in the roster")
+        if roster[args.reader_model]["id"] != cfg["reader_id"]:
+            robustness_label = args.reader_model
+            cfg = dict(cfg, reader_id=roster[args.reader_model]["id"])
+
     for rec in record_mod.load_records(runs_dir):
-        if rec.get("retention") and not args.force:
+        if robustness_label:
+            done = robustness_label in (rec.get("reader_robustness") or {})
+            if done and not args.force:
+                continue
+        elif rec.get("retention") and not args.force:
             continue
         if args.budget_usd is not None and spent >= args.budget_usd:
             print(f"budget cap: ${spent:.2f} >= ${args.budget_usd:.2f}")
@@ -254,10 +321,15 @@ def main() -> int:
         print(f"[{rec['task_id']} {rec['arm']} "
               f"{rec['model_label']} rep{rec['rep']}]")
         out = replay_record(rec, runs_dir, cfg, rates, keys,
-                            grade=args.grade, dry_run=args.dry_run)
+                            grade=args.grade, dry_run=args.dry_run,
+                            robustness_label=robustness_label)
         if out is not None:
             amended += 1
-            spent += out["probe_overhead"]["cost_usd"]
+            if robustness_label:
+                spent += out["reader_robustness"][robustness_label][
+                    "overhead_cost_usd"]
+            else:
+                spent += out["probe_overhead"]["cost_usd"]
 
     if amended and not args.dry_run:
         subprocess.run([sys.executable,
