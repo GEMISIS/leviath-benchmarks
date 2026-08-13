@@ -1,0 +1,12 @@
+{
+  "suite": "crs",
+  "seed": null,
+  "n": 2,
+  "universe_sha256": "255dcf8f0c7b0e6184857db0794eea6ca0b392b53e278c14823c4a9f99a1b0ec",
+  "excluded": [],
+  "task_ids": [
+    "records-reconciliation",
+    "docs-audit"
+  ],
+  "_note": "hand-picked SMOKE subset: the two accumulation-heavy tasks, for window-pressure calibration - never counted"
+}

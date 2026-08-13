@@ -268,7 +268,11 @@ NOISE_TEMPLATES = [
     ("ERROR", "failed to publish metrics batch: broker unavailable (will retry)"),
     ("ERROR", "temporary DNS failure resolving {peer} (retried ok)"),
 ]
-NOISE_WEIGHTS = [14, 9, 9, 9, 9, 6, 6, 6, 4, 4, 4, 4, 2, 2]
+# ERROR templates are rare on purpose: background error lines must be
+# scattered enough that a fifteen-minute window catches a handful in
+# most services yet can leave a quiet service at zero - the per-service
+# impact tally needs both kinds to mean anything.
+NOISE_WEIGHTS = [14, 9, 9, 9, 9, 6, 6, 6, 4, 4, 4, 4, 1, 1]
 
 NOISE_JOBS = ["ledger_sync", "sku_reindex", "email_digest",
               "token_sweep", "orders_rollup", "img_prewarm"]
@@ -497,8 +501,36 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
     step = _runbook_step(mode["mitigation"])
     propagation = ",".join([root] + [svc for svc, _ in caller_onsets]
                            + ["edge-gateway"])
+
+    # Per-service error-level counts in the impact window. Application
+    # services count lines whose level token is ERROR; edge-gateway,
+    # whose access log has no level field, counts its 5xx lines - the
+    # same rule as the line-5 impact count, by design.
+    err_counts: dict[str, int] = {"edge-gateway": impacted}
+    for svc in SERVICES:
+        if svc == "edge-gateway":
+            continue
+        err_counts[svc] = sum(
+            1 for t, _, line in entries[svc]
+            if t0 <= t < t0 + IMPACT_WINDOW_SECS
+            and line.split()[0] == "ERROR")
+    per_service = ",".join(f"{svc}={err_counts[svc]}"
+                           for svc in SERVICES)
+    zeros = sorted(svc for svc in SERVICES if err_counts[svc] == 0)
+    clean = ",".join(zeros) if zeros else "none"
+
+    # Whole-day WARN totals per application service; the noisiest one
+    # (alphabetically first on a tie) is the background-noise answer.
+    warn_counts = {
+        svc: sum(1 for _, _, line in entries[svc]
+                 if line.split()[0] == "WARN")
+        for svc in SERVICES if svc != "edge-gateway"}
+    top = max(warn_counts.values())
+    noisiest_svc = min(s for s, c in warn_counts.items() if c == top)
+    noisiest = f"{noisiest_svc}={top}"
+
     answers = [root, mode["key"], fmt_ts(t0), propagation,
-               str(impacted), str(step)]
+               str(impacted), str(step), per_service, clean, noisiest]
     return corpus, answers
 
 
@@ -593,8 +625,47 @@ def derive_answers(corpus: dict[str, str]) -> list[str]:
     if step is None:
         raise SystemExit("self-test: mitigation step not in runbook")
 
+    # Service order comes from the emitted topology table, not from the
+    # SERVICES constant - the report specifies "as listed in the
+    # topology document", so the re-derivation must read it from there.
+    table_rows = [line for line in
+                  corpus["docs/topology.md"].splitlines()
+                  if line.startswith("| ")]
+    order = [row.split("|")[1].strip() for row in table_rows[1:]]
+    if len(order) != len(SERVICES):
+        raise SystemExit("self-test: topology table does not list "
+                         "every service")
+
+    # Per-service error-level lines in [T0, T0 + window): level token
+    # ERROR in any rotated app.log; edge-gateway's 5xx access lines.
+    err_counts = {svc: 0 for svc in order}
+    warn_counts = {svc: 0 for svc in order if svc != "edge-gateway"}
+    for path in sorted(corpus):
+        if not path.startswith("logs/"):
+            continue
+        svc = path.split("/")[1]
+        for line in corpus[path].splitlines():
+            tokens = line.split()
+            t = parse_ts(tokens[0])
+            if svc == "edge-gateway":
+                if t0 <= t < t0 + IMPACT_WINDOW_SECS and \
+                        500 <= int(tokens[3]) < 600:
+                    err_counts[svc] += 1
+                continue
+            if tokens[1] == "ERROR" and \
+                    t0 <= t < t0 + IMPACT_WINDOW_SECS:
+                err_counts[svc] += 1
+            elif tokens[1] == "WARN":
+                warn_counts[svc] += 1
+    per_service = ",".join(f"{svc}={err_counts[svc]}" for svc in order)
+    zeros = sorted(svc for svc in order if err_counts[svc] == 0)
+    clean = ",".join(zeros) if zeros else "none"
+    top = max(warn_counts.values())
+    noisiest_svc = min(s for s, c in warn_counts.items() if c == top)
+    noisiest = f"{noisiest_svc}={top}"
+
     return [root, fields["key"], fmt_ts(t0), propagation,
-            str(impacted), str(step)]
+            str(impacted), str(step), per_service, clean, noisiest]
 
 
 def self_test(corpus: dict[str, str], answers: list[str]) -> None:
@@ -676,6 +747,9 @@ def main() -> int:
     print(f"  root={answers[0]} key={answers[1]} t0={answers[2]}")
     print(f"  propagation={answers[3]}")
     print(f"  impacted={answers[4]} runbook_step={answers[5]}")
+    print(f"  errors_by_service={answers[6]}")
+    print(f"  clean_services={answers[7]}")
+    print(f"  noisiest_warn={answers[8]}")
     print("self-test OK: all answers re-derived from the emitted corpus")
     return 0
 
