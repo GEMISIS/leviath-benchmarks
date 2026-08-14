@@ -32,6 +32,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+from conduct import CONDUCT  # noqa: E402
 from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
 
 
@@ -54,6 +55,14 @@ def check_policy(name: str) -> list[str]:
             problems.append(f"{name}/{sname}: blocking tools {blocking}")
         if stage.get("allow_blocking_tools"):
             problems.append(f"{name}/{sname}: allow_blocking_tools set")
+        # The fairness control: every LLM request in every arm sees the
+        # same evidence-conduct block exactly once in its system prompt,
+        # so the arms differ in structure, never in stated discipline.
+        n_conduct = stage.get("system_prompt", "").count(CONDUCT)
+        if n_conduct != 1:
+            problems.append(f"{name}/{sname}: conduct block appears "
+                            f"{n_conduct} times (policy: exactly once; "
+                            "run add_conduct.py / regenerate)")
     raw = (HERE / name / "agent.leviath").read_text()
     if "ask_user_confirm" in raw:
         problems.append(f"{name}: prompt text still references "

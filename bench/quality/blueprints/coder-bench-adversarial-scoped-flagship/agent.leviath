@@ -82,6 +82,16 @@ Then classify the project into exactly one tier and write `workflow`
 
 If there is genuinely no way to verify (tier 1 with no runnable code yet), say
 so explicitly in `workflow` rather than inventing a command that won't run.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Scan output is bulky and single-use - park it in clearable scratch, not the
@@ -190,6 +200,16 @@ Output a short bullet-list plan: which files to create/modify, what each does, k
 decisions, and the dependencies you found. If `workflow` is TIER 1, the plan must
 include writing the verification the implement stage will run. Be brief - the
 implement stage does the actual coding and reads this plan from the conversation.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Only passive reads route to the persistent `codebase` region; everything else
@@ -292,6 +312,16 @@ that actually runs.
 Keep this to a handful of iterations. You are buying information, not shipping
 code - do not start the real implementation here, and throw away scaffolding you
 created purely to test a hypothesis.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.prototype.tool_routing]
@@ -446,6 +476,16 @@ recorded and let the work proceed: a third rejection spends the revisit budget
 and the run ends with nothing implemented, which is worse than a flawed plan
 whose risks are documented. Say "accepted under protest" and name what you
 still doubt.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Reads persist to `codebase` like every other stage's; bash here is read-only
@@ -586,6 +626,16 @@ and take only the actions the task itself requires.
 
 Finish with a short summary of what changed, the final test counts, and an
 explicit statement that nothing regressed against `baseline`.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Large read output persists in `codebase`; test output persists in `test_results`
@@ -733,6 +783,16 @@ verify every DONE WHEN criterion rather than sampling.
 End with one of:
   APPROVED - no significant issues
   NEEDS CHANGES - <numbered list of specific required fixes>
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.review.tool_permissions]
@@ -825,6 +885,16 @@ Then REPLACE the `plan` region (context_write, key "plan") with a corrected
 numbered plan whose FIRST step is the smallest change you can verify with one
 command, and which names explicitly what NOT to touch again. Append one line to
 `errors` naming the dead end so it is not retried.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.reassess.tool_permissions]
@@ -910,6 +980,16 @@ Append a one-line summary of the failure to the `errors` region (context_append)
 so repeated failures become visible as a pattern, then transition back to
 implement to retry. If you see the SAME error recurring in `errors`, change
 approach rather than repeating the fix.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Route tool chatter to scratch (clearable), not `errors`: `errors` is a
@@ -999,6 +1079,16 @@ loose end you left.
 
 Do not paste the code back. They can read the diff; what they cannot read is
 why.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and

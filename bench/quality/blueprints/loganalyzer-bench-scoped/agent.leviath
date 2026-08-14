@@ -35,6 +35,16 @@ provides (`head`/`wc`/`file` on Unix, `Get-Content -TotalCount` and
 scripts; pulling the whole log into context buys nothing and costs a lot. Write a
 short format/structure summary to `findings` (context_write) so the analyze stage
 starts oriented. Raw sampled content lands in `logs`.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.ingest.tool_routing]
@@ -121,6 +131,16 @@ when you need precise parsing/aggregation you can't eyeball.
 
 If `error_report` says a previous stage hit its iteration cap, that stage was cut
 off before finishing - treat its output as incomplete and re-check what it missed.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.analyze.tool_routing]
@@ -219,6 +239,16 @@ or python via bash on Unix, PowerShell or python on Windows):
 Write small, focused scripts; test each before building on it. Script code and
 output land in `scripts`. Iterate until the output answers the analysis questions,
 then return to analyze.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.script.tool_routing]
@@ -307,6 +337,16 @@ structured by the `severity_index` tally. Include:
 
 Be precise - timestamps, counts, percentages, specific log lines. The report's
 severity counts must match `severity_index`.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and
@@ -342,6 +382,16 @@ A read or script execution failed. The `error_report` region holds the error
 text the runtime captured - read it first, diagnose it (a malformed log line, a
 script bug, a missing file), note a workaround, then return to analyze to
 continue with the data available.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
@@ -420,6 +470,16 @@ anything you could not explain, and name the report file if you wrote one.
 
 If you found nothing conclusive, say that plainly rather than dressing up a
 guess.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and

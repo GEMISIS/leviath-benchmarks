@@ -43,6 +43,16 @@ Prefer primary sources and well-established outlets; note when something is a bl
 forum, or vendor claim. Once you have solid coverage of the sub-topics, transition
 to analyze - don't keep searching for marginal additions. The analyze stage will
 send you back if it finds a real gap.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.gather.tool_routing]
@@ -123,6 +133,16 @@ Flag open questions you couldn't resolve.
 If `error_report` says a previous stage hit its iteration cap, that stage was cut
 off before finishing - treat its output as incomplete and verify coverage before
 concluding.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.analyze.tool_routing]
@@ -249,6 +269,16 @@ already sent this back twice, accept it with your remaining concerns recorded
 and let the work proceed: a third rejection spends the revisit budget and the
 run ends with no answer at all, which is worse than a flawed one you have
 documented. Say "accepted under protest" and name what you still doubt.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.claims_review.tool_routing]
@@ -350,6 +380,16 @@ Structure:
 - Sources - the numbered bibliography from `sources_index`.
 
 Keep it tight and skimmable. Every non-obvious claim must carry a [n] citation.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and
@@ -384,6 +424,16 @@ Something failed during research (a source fetch, a parse, etc.). The
 `error_report` region holds the error text the runtime captured - read it first,
 work out what went wrong, and note a workaround. Then hand back to analyze to
 continue with whatever material is available.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
@@ -461,6 +511,16 @@ file if you wrote one.
 
 Do not re-derive anything or re-list every source. This is what someone reads
 instead of the report, not a second copy of it.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Stage-scoped layout: this stage sees what its job needs and

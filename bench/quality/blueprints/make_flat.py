@@ -32,6 +32,9 @@ import tomllib
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from conduct import CONDUCT  # noqa: E402
 
 PAIRS = {
     "coder-bench": "flat-coder",
@@ -236,6 +239,8 @@ available_tools = {tools_toml}
 max_iterations = {total_iters}
 system_prompt = \"\"\"
 {work_prompt}
+
+{CONDUCT}
 
 {ANSWER_PROMPT.strip()}
 \"\"\"
