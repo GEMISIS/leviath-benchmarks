@@ -1238,10 +1238,19 @@ def render_tokens_over_time(suites: dict, round_meta: dict, specs: dict,
     return written
 
 
+# Each task's functional pass bar, as the verifier defines it - drawn
+# on the chart so "how close did it come" reads against "good enough".
+PASS_BARS = {"incident-chronicle": 12 / 17, "noisy-incident": 5 / 7,
+             "redacted-ledger": 6 / 8}
+
+
 def render_success_rate(suites: dict, round_meta: dict, specs: dict,
                         out_dir: Path):
-    """Success rate per arm, one panel per task, window tiers on the
-    x-axis once the sweep runs - the where-does-flat-recover picture."""
+    """The graded functional score per arm, one panel per task, window
+    tiers on the x-axis - continuous even at one rep. The task's pass
+    bar is the dashed line; a run with no deliverable is a labeled
+    notch, never a hidden zero. With reps, whiskers span min/max and
+    the pass RATE is annotated on each bar."""
     data = suites.get("hallucination")
     if not data:
         return None
@@ -1251,11 +1260,19 @@ def render_success_rate(suites: dict, round_meta: dict, specs: dict,
     arms = sorted({r["arm"] for r in runs}, key=arm_sort_key)
     width = 0.8 / max(len(arms), 1)
     fig, axes = plt.subplots(1, len(tasks),
-                             figsize=(4.6 * len(tasks), 4.2),
+                             figsize=(4.8 * len(tasks), 4.3),
                              squeeze=False, sharey=True)
     fig.patch.set_facecolor(SURFACE)
     for ax, task in zip(axes[0], tasks):
         style_ax(ax)
+        bar = PASS_BARS.get(task)
+        if bar:
+            ax.axhline(bar, color=INK2, linewidth=0.9,
+                       linestyle=(0, (5, 3)))
+            ax.annotate("pass bar", (0.99, bar),
+                        xycoords=("axes fraction", "data"),
+                        fontsize=6.2, color=INK2, ha="right",
+                        xytext=(0, 2), textcoords="offset points")
         for ai, arm in enumerate(arms):
             for wi, window in enumerate(windows):
                 cell = [r for r in runs if r["task_id"] == task
@@ -1263,46 +1280,51 @@ def render_success_rate(suites: dict, round_meta: dict, specs: dict,
                         and r["arm"] == arm]
                 if not cell:
                     continue
-                passes = sum(1 for r in cell
-                             if (r.get("score") or {}).get("passed"))
-                rate = passes / len(cell)
                 x = wi + (ai - (len(arms) - 1) / 2) * width
-                ax.bar([x], [rate], width=width * 0.9,
-                       color=arm_color(arm), zorder=3, alpha=0.55,
-                       label=arm_label(arm) if wi == 0 else None)
-                # The graded score rides the rate bar as a marker, so
-                # a 1-rep smoke still shows HOW right the passes were
-                # (and how close the failures came).
                 scores = [(r.get("functional") or {}).get("score")
                           for r in cell]
                 scores = [s for s in scores
                           if isinstance(s, (int, float))]
+                dnf = [r for r in cell if r.get("status") != "complete"]
                 if scores:
-                    ax.plot([x], [sum(scores) / len(scores)], "_",
-                            markersize=11, color=INK,
-                            markeredgewidth=2.2, zorder=4)
-                ax.annotate(f"n={len(cell)}", (x, rate),
-                            fontsize=5.6, color=MUTED, ha="center",
-                            xytext=(0, 2), textcoords="offset points")
+                    mean = sum(scores) / len(scores)
+                    ax.bar([x], [mean], width=width * 0.9,
+                           color=arm_color(arm), zorder=3,
+                           label=arm_label(arm) if wi == 0 else None)
+                    if len(scores) > 1:
+                        ax.plot([x, x], [min(scores), max(scores)],
+                                color=INK, linewidth=1.2, zorder=4)
+                        passes = sum(
+                            1 for r in cell
+                            if (r.get("score") or {}).get("passed"))
+                        ax.annotate(
+                            f"{passes}/{len(cell)} pass", (x, mean),
+                            fontsize=5.6, color=INK2, ha="center",
+                            xytext=(0, 3), textcoords="offset points")
+                if dnf and not scores:
+                    ax.bar([x], [0.015], width=width * 0.9,
+                           color=arm_color(arm), zorder=3,
+                           label=arm_label(arm) if wi == 0 else None)
+                    ax.annotate(dnf[0]["status"].upper(), (x, 0.03),
+                                fontsize=6.4, color="#b3261e",
+                                ha="center", rotation=90, va="bottom",
+                                fontweight="bold")
         ax.set_xticks(range(len(windows)))
         ax.set_xticklabels([f"@{w // 1000}k" if w else "native"
                             for w in windows], fontsize=8, color=INK2)
         ax.set_ylim(0, 1.08)
         ax.set_title(task, fontsize=10, color=INK)
-    axes[0][0].set_ylabel("pass rate (bar) / mean score (tick)",
-                          fontsize=8, color=MUTED)
+    axes[0][0].set_ylabel("graded functional score", fontsize=8,
+                          color=MUTED)
     axes[0][-1].legend(fontsize=6.4, frameon=False, loc="lower right")
-    fig.suptitle("Who finishes the job, per window tier", fontsize=12.5,
-                 color=INK)
+    fig.suptitle("How much of the job got done, per window tier",
+                 fontsize=12.5, color=INK)
     fig.text(0.01, 0.024,
-             "bar = fraction of runs clearing the task's pass bar "
-             "(n=1 per cell in a smoke, so bars read 0 or 1 until "
-             "counted rounds add reps); black tick = mean graded "
-             "functional score of the same runs",
+             "bar = mean graded score (continuous even at one rep); "
+             "dashed line = the verifier's pass bar; a labeled notch "
+             "means the run produced no deliverable at all; with reps, "
+             "whiskers span min/max and each bar carries its pass rate",
              fontsize=6.4, color=MUTED, ha="left")
-    if round_meta.get("freeze_tag") == SMOKE_TAG:
-        smoke_watermark(fig)
-    provenance(fig, round_meta, specs)
     fig.tight_layout(rect=(0, 0.05, 1, 0.92))
     path = out_dir / "success_rate.png"
     fig.savefig(path, dpi=170)
