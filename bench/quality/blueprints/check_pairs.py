@@ -229,8 +229,19 @@ def check_askable(source_name: str, stage_name: str) -> list[str]:
         problems.append(f"{askable_name}/{stage_name}: prompt is not "
                         "the source prompt plus the note")
 
+    # The permission table may differ in exactly one direction: "ask"
+    # relaxed to "allow" (what --yolo does inline on every other cell).
+    for tool, perm in a.get("tool_permissions", {}).items():
+        src_perm = s.get("tool_permissions", {}).get(tool)
+        if perm != src_perm and not (src_perm == "ask"
+                                     and perm == "allow"):
+            problems.append(f"{askable_name}: tool_permissions[{tool}] "
+                            f"= {perm!r}, source {src_perm!r} (only "
+                            "ask->allow is sanctioned)")
+
     def masked(doc: dict) -> dict:
         doc = json_roundtrip(doc)
+        doc.pop("tool_permissions", None)
         st = doc["stages"].get(stage_name, {})
         st.pop("allow_blocking_tools", None)
         st.pop("available_tools", None)

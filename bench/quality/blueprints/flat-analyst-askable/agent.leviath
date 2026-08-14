@@ -28,7 +28,7 @@ entry_stage = "work"
 [tool_permissions]
 read_file = "allow"
 list_dir = "allow"
-bash = "ask"
+bash = "allow"
 
 [stages.work]
 mode = "output"

@@ -47,6 +47,16 @@ _MODE = re.compile(r"^mode = ")
 
 def render(source: str, stage_name: str) -> str:
     text = (HERE / source / "agent.leviath").read_text()
+    # Every other cell runs --yolo, which auto-approves "ask"
+    # permissions inline; the ask test runs attended so the ask TOOLS
+    # survive, and without this the scripted user spends 15+ round
+    # trips rubber-stamping shell approvals - measured latency and
+    # journal noise, not the mechanism under test. Same table change
+    # in every arm; check_pairs asserts it.
+    text = re.sub(r'^(bash\s*=\s*)"ask"', r'\1"allow"', text,
+                  flags=re.MULTILINE)
+    text = re.sub(r'^(write_file\s*=\s*)"ask"', r'\1"allow"', text,
+                  flags=re.MULTILINE)
     out: list[str] = []
     stage = None
     in_prompt = False

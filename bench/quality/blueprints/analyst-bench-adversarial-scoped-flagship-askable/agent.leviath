@@ -21,7 +21,7 @@ entry_stage = "profile"
 [tool_permissions]
 read_file = "allow"
 list_dir  = "allow"
-bash      = "ask"
+bash      = "allow"
 
 # ─── Stage 1: Profile ─────────────────────────────────────────────────────────
 # Orient in the data before computing anything. Cheap model, hard cap: this

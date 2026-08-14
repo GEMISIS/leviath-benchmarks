@@ -705,6 +705,40 @@ LOCAL_WINDOWS = [(8_000, "8k local"), (32_000, "32k local"),
                  (128_000, "128k")]
 
 
+def _stage_bands(ax, requests: list[dict], color: str) -> None:
+    """Shade a multi-stage run's stage spans and name each one, so a
+    curve's sudden drops read as what they are: a new stage opening a
+    fresh scoped context."""
+    stages = [q.get("stage") for q in requests]
+    if len({s for s in stages if s}) < 2:
+        return
+    spans = []
+    start = 0
+    for i in range(1, len(stages) + 1):
+        if i == len(stages) or stages[i] != stages[start]:
+            if stages[start]:
+                spans.append((start + 1, i, stages[start]))
+            start = i
+    total = len(stages)
+    for j, (x0, x1, name) in enumerate(spans):
+        if j % 2 == 1:
+            ax.axvspan(x0 - 0.5, x1 + 0.5, color=color, alpha=0.055,
+                       zorder=0, linewidth=0)
+        if j > 0:
+            ax.axvline(x0 - 0.5, color=color, alpha=0.25,
+                       linewidth=0.7, linestyle=(0, (2, 3)), zorder=1)
+        # Labels sit just above the x-axis, clear of legends and the
+        # window reference lines; a sliver keeps its shading but stays
+        # unlabeled rather than smearing text over its neighbors.
+        if (x1 - x0 + 1) / total >= 0.07:
+            ax.annotate(name, ((x0 + x1) / 2, 0.015),
+                        xycoords=("data", "axes fraction"),
+                        fontsize=6.0, color=INK2, ha="center",
+                        va="bottom", alpha=0.9,
+                        rotation=90 if (x1 - x0 + 1) / total < 0.14
+                        else 0)
+
+
 def render_request_footprint(suites: dict, round_meta: dict, specs: dict,
                              out_dir: Path):
     """The footprint suite's headline: input tokens PER REQUEST over
@@ -744,6 +778,10 @@ def render_request_footprint(suites: dict, round_meta: dict, specs: dict,
                      arm_label(r["arm"]))
             ax.plot(xs, ys, linewidth=1.5, color=arm_color(r["arm"]),
                     label=label, alpha=0.9)
+            # The drops in a structured curve are stage transitions -
+            # each stage starts a fresh scoped context. Naming the
+            # stages turns an artifact into the mechanism.
+            _stage_bands(ax, fp["requests"], arm_color(r["arm"]))
         for tokens, name in LOCAL_WINDOWS:
             if tokens < top * 1.6:
                 ax.axhline(tokens, color=MUTED, linewidth=0.8,
@@ -776,6 +814,271 @@ def render_request_footprint(suites: dict, round_meta: dict, specs: dict,
     fig.savefig(path, dpi=170)
     plt.close(fig)
     return path
+
+
+def _win_suffix(r: dict) -> str:
+    w = r.get("window_tokens")
+    return f" @{w // 1000}k" if w else ""
+
+
+def _bar_groups(runs: list[dict]) -> tuple[list, list]:
+    """(task, window) groups x arm series, both in stable order."""
+    groups = sorted({(r["task_id"], r.get("window_tokens"))
+                     for r in runs},
+                    key=lambda g: (g[0], g[1] or 0))
+    arms = sorted({r["arm"] for r in runs}, key=arm_sort_key)
+    return groups, arms
+
+
+def _group_label(task: str, window) -> str:
+    return f"{task}\n@{window // 1000}k" if window else task
+
+
+def render_outcomes(suites: dict, round_meta: dict, specs: dict,
+                    out_dir: Path):
+    """Priority one, drawn first: what each arm actually delivered.
+    Functional score per (task, window) x arm; a run that produced no
+    deliverable is an explicit DNF marker, never a hidden zero."""
+    written = None
+    for suite, data in suites.items():
+        runs = [r for r in data["runs"] if r.get("functional")
+                or r.get("status") not in (None, "complete")]
+        if not runs or suite not in ("footprint", "hallucination"):
+            continue
+        groups, arms = _bar_groups(runs)
+        width = 0.8 / max(len(arms), 1)
+        fig, ax = plt.subplots(
+            figsize=(max(6.4, 1.9 * len(groups)), 4.6))
+        fig.patch.set_facecolor(SURFACE)
+        style_ax(ax)
+        for ai, arm in enumerate(arms):
+            xs, ys = [], []
+            for gi, (task, window) in enumerate(groups):
+                cell = [r for r in runs if r["task_id"] == task
+                        and r.get("window_tokens") == window
+                        and r["arm"] == arm]
+                if not cell:
+                    continue
+                x = gi + (ai - (len(arms) - 1) / 2) * width
+                scores = [(r.get("functional") or {}).get("score")
+                          for r in cell]
+                scores = [s for s in scores if isinstance(s, (int, float))]
+                if scores:
+                    xs.append(x)
+                    ys.append(sum(scores) / len(scores))
+                for r in cell:
+                    if r.get("status") != "complete":
+                        ax.annotate(r["status"].upper(), (x, 0.02),
+                                    fontsize=6.2, color="#b3261e",
+                                    ha="center", rotation=90,
+                                    va="bottom")
+            ax.bar(xs, ys, width=width * 0.92, color=arm_color(arm),
+                   label=arm_label(arm), zorder=3)
+        ax.set_xticks(range(len(groups)))
+        ax.set_xticklabels([_group_label(t, w) for t, w in groups],
+                           fontsize=7.6, color=INK2)
+        ax.set_ylim(0, 1.05)
+        ax.set_ylabel("functional score (bar) / no deliverable (DNF)",
+                      fontsize=8, color=MUTED)
+        ax.legend(fontsize=6.8, loc="lower right", frameon=False)
+        ax.set_title(f"Did it do the job? - {suite} suite",
+                     fontsize=12, color=INK)
+        if round_meta.get("freeze_tag") == SMOKE_TAG:
+            smoke_watermark(fig)
+        provenance(fig, round_meta, specs)
+        fig.tight_layout(rect=(0, 0.05, 1, 0.97))
+        path = out_dir / f"outcomes_{suite}.png"
+        fig.savefig(path, dpi=170)
+        plt.close(fig)
+        written = path
+    return written
+
+
+_CLASSIFIER_COLORS = [("fabrications", "#b3261e", "invented outright"),
+                      ("prior_matches", "#7b3fa0",
+                       "famous default, not the corpus"),
+                      ("decoy_captures", "#eb6834",
+                       "loud decoy named as cause"),
+                      ("investigation_errors", "#898781",
+                       "wrong but real")]
+
+
+def render_hallucination_channels(suites: dict, round_meta: dict,
+                                  specs: dict, out_dir: Path):
+    """The suite's two measurement channels side by side and never
+    pooled: what the agent SHIPPED (mechanical classifiers) and what a
+    fixed reader recalls from its journaled context (rate + n)."""
+    data = suites.get("hallucination")
+    if not data:
+        return None
+    runs = data["runs"]
+    groups, arms = _bar_groups(runs)
+    width = 0.8 / max(len(arms), 1)
+    fig, (axa, axb) = plt.subplots(1, 2, figsize=(13.4, 4.8))
+    fig.patch.set_facecolor(SURFACE)
+
+    style_ax(axa)
+    for ai, arm in enumerate(arms):
+        for gi, (task, window) in enumerate(groups):
+            cell = [r for r in runs if r["task_id"] == task
+                    and r.get("window_tokens") == window
+                    and r["arm"] == arm]
+            if not cell:
+                continue
+            x = gi + (ai - (len(arms) - 1) / 2) * width
+            hall = cell[0].get("hallucination") or {}
+            if cell[0].get("status") != "complete":
+                axa.annotate("DNF", (x, 0.05), fontsize=6.4,
+                             color="#b3261e", ha="center", rotation=90,
+                             va="bottom")
+                continue
+            bottom = 0
+            for key, color, _ in _CLASSIFIER_COLORS:
+                n = int(hall.get(key) or 0)
+                if n:
+                    axa.bar([x], [n], bottom=bottom, width=width * 0.92,
+                            color=color, zorder=3,
+                            edgecolor=arm_color(arm), linewidth=1.3)
+                    bottom += n
+            if bottom == 0:
+                # A clean deliverable is a result, not a gap: a zero
+                # marker in the arm's color says "ran, nothing wrong".
+                axa.plot([x], [0.04], marker="o", markersize=4,
+                         color=arm_color(arm), zorder=4)
+    axa.set_xticks(range(len(groups)))
+    axa.set_xticklabels([_group_label(t, w) for t, w in groups],
+                        fontsize=7.4, color=INK2)
+    axa.set_ylabel("wrong deliverable lines, classified", fontsize=8,
+                   color=MUTED)
+    axa.set_title("Deliverable channel (mechanical - no judge)",
+                  fontsize=10, color=INK)
+    from matplotlib.patches import Patch
+    axa.legend(handles=[Patch(color=c, label=lab)
+                        for _, c, lab in _CLASSIFIER_COLORS]
+               + [Patch(facecolor="none", edgecolor=arm_color(a),
+                        linewidth=1.3, label=arm_label(a))
+                  for a in arms],
+               fontsize=6.0, frameon=False, loc="upper center",
+               bbox_to_anchor=(0.5, 1.0), ncol=2)
+
+    style_ax(axb)
+    for ai, arm in enumerate(arms):
+        for gi, (task, window) in enumerate(groups):
+            cell = [r for r in runs if r["task_id"] == task
+                    and r.get("window_tokens") == window
+                    and r["arm"] == arm and r.get("retention")]
+            if not cell:
+                continue
+            x = gi + (ai - (len(arms) - 1) / 2) * width
+            reached = [p for p in cell[0]["retention"]
+                       if p.get("reached")]
+            if not reached:
+                continue
+            hall = sum(1 for p in reached if p.get("hallucinated"))
+            rate = hall / len(reached)
+            axb.bar([x], [rate * 100], width=width * 0.92,
+                    color=arm_color(arm), zorder=3)
+            axb.annotate(f"n={len(reached)}", (x, rate * 100),
+                         fontsize=5.6, color=MUTED, ha="center",
+                         xytext=(0, 2), textcoords="offset points")
+    axb.set_xticks(range(len(groups)))
+    axb.set_xticklabels([_group_label(t, w) for t, w in groups],
+                        fontsize=7.4, color=INK2)
+    axb.set_ylabel("% probe answers graded confident-invention",
+                   fontsize=8, color=MUTED)
+    axb.set_title("Reader channel (fixed reader + pinned grader)",
+                  fontsize=10, color=INK)
+
+    fig.suptitle("Hallucination, both channels - never one number",
+                 fontsize=13, color=INK)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    fig.text(0.01, 0.024,
+             "deliverable: every wrong line classified against "
+             "generator ground truth - 'fabricated' means the entity "
+             "exists nowhere in the corpus; reader: one fixed "
+             "third-vendor model answers every probe for every arm, "
+             "probes within a run are clustered (n = probe-depth "
+             "points, not independent samples)",
+             fontsize=6.4, color=MUTED, ha="left")
+    fig.tight_layout(rect=(0, 0.06, 1, 0.94))
+    path = out_dir / "hallucination_channels.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
+def render_token_cache(suites: dict, round_meta: dict, specs: dict,
+                       out_dir: Path):
+    """Priorities two and three in one drawing: bar height is billed
+    input (fewer tokens), its composition is the cache story (more
+    cached) - cheap cache reads vs full-price fresh vs premium writes."""
+    written = None
+    for suite, data in suites.items():
+        if suite not in ("footprint", "hallucination"):
+            continue
+        runs = [r for r in data["runs"] if r.get("usage")]
+        if not runs:
+            continue
+        groups, arms = _bar_groups(runs)
+        width = 0.8 / max(len(arms), 1)
+        fig, ax = plt.subplots(
+            figsize=(max(6.8, 2.0 * len(groups)), 4.8))
+        fig.patch.set_facecolor(SURFACE)
+        style_ax(ax)
+        segs = [("cached_tokens", 0.35, "cache reads (0.1x price)"),
+                ("prompt_tokens", 0.95, "fresh input (1x)"),
+                ("cache_write_tokens", 0.65, "cache writes (1.25x)")]
+        for ai, arm in enumerate(arms):
+            for gi, (task, window) in enumerate(groups):
+                cell = [r for r in runs if r["task_id"] == task
+                        and r.get("window_tokens") == window
+                        and r["arm"] == arm]
+                if not cell:
+                    continue
+                x = gi + (ai - (len(arms) - 1) / 2) * width
+                u = cell[0]["usage"]
+                bottom = 0
+                for key, alpha, _ in segs:
+                    v = (u.get(key) or 0) / 1000
+                    if v:
+                        ax.bar([x], [v], bottom=bottom,
+                               width=width * 0.92, zorder=3,
+                               color=arm_color(arm), alpha=alpha,
+                               linewidth=0)
+                        bottom += v
+                hit = cell[0].get("cache_hit_rate")
+                note = f"{hit:.2f}" if isinstance(hit, (int, float)) \
+                    else "?"
+                if cell[0].get("status") != "complete":
+                    note += f" {cell[0]['status'].upper()}"
+                ax.annotate(note, (x, bottom), fontsize=5.4,
+                            color=INK2, ha="center", xytext=(0, 2),
+                            textcoords="offset points", rotation=90)
+        ax.set_xticks(range(len(groups)))
+        ax.set_xticklabels([_group_label(t, w) for t, w in groups],
+                           fontsize=7.4, color=INK2)
+        ax.set_ylabel("billed input tokens (thousands)", fontsize=8,
+                      color=MUTED)
+        from matplotlib.patches import Patch
+        ax.legend(handles=[Patch(color=INK2, alpha=a, label=lab)
+                           for _, a, lab in segs]
+                  + [Patch(color=arm_color(arm), label=arm_label(arm))
+                     for arm in arms],
+                  fontsize=6.2, frameon=False, loc="upper left")
+        ax.set_title(f"Tokens billed and how much of them was cached - "
+                     f"{suite} suite (number = cache hit rate)",
+                     fontsize=11, color=INK)
+        if round_meta.get("freeze_tag") == SMOKE_TAG:
+            smoke_watermark(fig)
+        provenance(fig, round_meta, specs)
+        fig.tight_layout(rect=(0, 0.05, 1, 0.96))
+        path = out_dir / f"token_cache_{suite}.png"
+        fig.savefig(path, dpi=170)
+        plt.close(fig)
+        written = path
+    return written
 
 
 def write_task_table(suites: dict, out_dir: Path):
@@ -838,7 +1141,9 @@ def main() -> int:
             written.append(path)
     for fn in (render_ablation, render_poster, render_retention,
                render_cost_at_depth, render_request_footprint,
-               render_cost_per_success, write_task_table):
+               render_cost_per_success, render_outcomes,
+               render_hallucination_channels, render_token_cache,
+               write_task_table):
         path = fn(suites, round_meta, specs, args.out) \
             if fn is not write_task_table \
             else write_task_table(suites, args.out)
