@@ -225,6 +225,18 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                 score = {"passed": False, "detail": f"grade error: {exc}"}
         if score is None and status != "complete":
             score = {"passed": False, "detail": f"status {status}"}
+            # A failed run's token curve is data, not debris: the
+            # journal survives error/cap/timeout, so the footprint
+            # block lands on those records too (charts label the
+            # failure instead of omitting the run).
+            if hasattr(suite, "fold_footprint"):
+                try:
+                    fp = suite.fold_footprint(
+                        _artifacts_dir(artifacts_root, base))
+                    if fp:
+                        score["record_fields"] = {"request_footprint": fp}
+                except Exception as exc:
+                    log(f"  footprint fold errored: {exc}")
         rec = _finish(base, runs_dir, status=status, started=started,
                       ended=_utcnow(), wall=wall, meta=meta, arm=arm,
                       rates=rates, score=score,

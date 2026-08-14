@@ -71,8 +71,9 @@ def from_archive(archive: Path) -> dict | None:
         # request, so the provider correction works even though the
         # journal counters are cumulative across stages.
         d_in = sum(deltas.values())
+        d_cached = deltas["cached_tokens"]
         if meta.get("current_stage") in openai_stages:
-            d_in -= deltas["cached_tokens"]
+            d_in -= d_cached
         d_out = cum_out - prev_out
         if d_in <= 0 and d_out <= 0:
             continue  # persistence tick with no inference behind it
@@ -80,6 +81,7 @@ def from_archive(archive: Path) -> dict | None:
             "iteration": _meta_int(meta, "iteration"),
             "tool_calls": _meta_int(meta, "tool_calls"),
             "input_tokens": max(d_in, 0),
+            "cached_tokens": max(d_cached, 0),
             "output_tokens": max(d_out, 0),
         }
         stage = meta.get("current_stage")

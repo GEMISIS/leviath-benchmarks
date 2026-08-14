@@ -120,6 +120,15 @@ class Suite:
                         shutil.copyfile(item, dest)
         return task["prompt"]
 
+    def fold_footprint(self, artifacts_dir: Path) -> dict | None:
+        """The journal fold, status-independent: a failed run's curve
+        is data (the runner attaches it to error/cap records too)."""
+        for name in ("run.lvr.gz", "run.lvr"):
+            archive = Path(artifacts_dir) / "run" / name
+            if archive.is_file():
+                return footprint_mod.from_archive(archive)
+        return None
+
     def collect(self, task: dict, workdir: Path, artifacts_dir: Path,
                 answer) -> dict:
         artifacts_dir = Path(artifacts_dir).resolve()
@@ -128,13 +137,9 @@ class Suite:
                               f"verify_{task['id']}")
         result = verify.verify(task["dir"], workdir, artifacts_dir, answer)
         # The run's own journal, folded into the suite's headline data.
-        for name in ("run.lvr.gz", "run.lvr"):
-            archive = artifacts_dir / "run" / name
-            if archive.is_file():
-                fp = footprint_mod.from_archive(archive)
-                if fp:
-                    result["request_footprint"] = fp
-                break
+        fp = self.fold_footprint(artifacts_dir)
+        if fp:
+            result["request_footprint"] = fp
         return result
 
     def grade(self, task: dict, submission: dict) -> dict:

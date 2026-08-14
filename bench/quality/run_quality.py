@@ -231,10 +231,13 @@ def main() -> int:
                         help="results dir (default: results/<stamp>_<host>)")
     parser.add_argument("--budget-usd", type=float, default=None)
     parser.add_argument("--per-run-max-tokens", type=int,
-                        default=3_000_000,
+                        default=30_000_000,
                         help="mid-run billed-token ceiling per run; the "
                              "run is cancelled and recorded as 'cap' "
-                             "when exceeded (0 disables)")
+                             "when exceeded (0 disables). A runaway "
+                             "backstop, not a working limit - runs "
+                             "should finish on their own budgets, and "
+                             "a cell that hits this is itself a finding")
     parser.add_argument("--task-timeout", type=float,
                         default=DEFAULT_TIMEOUT_SECS)
     parser.add_argument("--concurrency", type=int, default=1,
