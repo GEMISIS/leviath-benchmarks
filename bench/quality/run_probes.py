@@ -38,8 +38,7 @@ from core import assemble, cost as cost_mod, evaluator, lvr  # noqa: E402
 from core import providers, record as record_mod, scrub  # noqa: E402
 from run_quality import load_dotenv  # noqa: E402
 
-sys.path.insert(0, str(QUALITY_DIR / "suites" / "crs"))
-import probes as probes_mod  # noqa: E402
+from core import probes as probes_mod  # noqa: E402
 
 # The fixed instruction wrapped around every probe question. Frozen with
 # the round: its sha lands in probe_overhead so a change is visible.
@@ -72,9 +71,14 @@ def _probe_message(question: str) -> dict:
         {"type": "text", "text": PROBE_WRAPPER.format(question=question)}]}
 
 
-def _load_task_probes(task_id: str) -> list[dict]:
-    return probes_mod.load_probes(
-        QUALITY_DIR / "suites" / "crs" / "tasks" / task_id / "probes.json")
+def _load_task_probes(probes_dir: Path, task_id: str) -> list[dict]:
+    """Probes live beside the MEASUREMENT, not the task: a probes dir
+    holds one <task_id>.json per task (falling back to the older
+    <task_id>/probes.json layout), so any suite's runs can be probed by
+    any probe set without coupling the two."""
+    flat = probes_dir / f"{task_id}.json"
+    nested = probes_dir / task_id / "probes.json"
+    return probes_mod.load_probes(flat if flat.is_file() else nested)
 
 
 def _archive_path(runs_dir: Path, rec: dict) -> Path | None:
@@ -89,8 +93,8 @@ def _archive_path(runs_dir: Path, rec: dict) -> Path | None:
 
 
 def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
-                  keys: dict, *, grade: bool, dry_run: bool,
-                  robustness_label: str | None = None,
+                  keys: dict, *, probes_dir: Path, grade: bool,
+                  dry_run: bool, robustness_label: str | None = None,
                   log=print) -> dict | None:
     """Returns the amended record, or None when nothing was done.
 
@@ -104,7 +108,7 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
     if archive is None:
         log(f"  {rec['task_id']}/{rec['arm']}: no run.lvr archive")
         return None
-    task_probes = _load_task_probes(rec["task_id"])
+    task_probes = _load_task_probes(probes_dir, rec["task_id"])
     points = lvr.fold(archive)
     if not points:
         log(f"  {rec['task_id']}/{rec['arm']}: empty journal")
@@ -272,12 +276,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Replay and grade CRS retention probes.")
     parser.add_argument("results_dir", type=Path)
-    parser.add_argument("--suite", default="crs",
+    parser.add_argument("--suite", default="footprint",
                         help="suite name under quality/ whose runs to "
-                             "probe. DORMANT NOTE: the retention (CRS) "
-                             "suite was split apart 2026-08-14; this "
-                             "tool waits for its successor "
-                             "retention/window suite")
+                             "probe")
+    parser.add_argument("--probes-dir", type=Path,
+                        default=QUALITY_DIR / "suites" / "hallucination"
+                        / "probes",
+                        help="directory of <task_id>.json probe files; "
+                             "probes live beside the measurement, not "
+                             "the task")
     parser.add_argument("--grade", action="store_true")
     parser.add_argument("--budget-usd", type=float, default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -327,6 +334,7 @@ def main() -> int:
         print(f"[{rec['task_id']} {rec['arm']} "
               f"{rec['model_label']} rep{rec['rep']}]")
         out = replay_record(rec, runs_dir, cfg, rates, keys,
+                            probes_dir=args.probes_dir,
                             grade=args.grade, dry_run=args.dry_run,
                             robustness_label=robustness_label)
         if out is not None:
