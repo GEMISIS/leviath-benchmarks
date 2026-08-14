@@ -111,11 +111,14 @@ class Suite:
         # standard no-HITL blueprints.
         if self.interaction_for(task) is not None:
             blueprint = f"{blueprint}-askable"
-        elif task["id"] in READONLY_TASKS:
+        elif task.get("id") in READONLY_TASKS:
             blueprint = f"{blueprint}-readonly"
         return blueprint, []
 
     def interaction_for(self, task: dict) -> dict | None:
+        # Tolerates the runner's synthetic family-only task dicts.
+        if not task.get("dir"):
+            return None
         pack = task["dir"] / "user-pack.md"
         if not pack.is_file():
             return None

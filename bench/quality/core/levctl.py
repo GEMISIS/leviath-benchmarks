@@ -170,7 +170,7 @@ class QualityHome:
         cmd = [self.lev, "run", agent, "--task", task_text,
                "--json", "--workdir", str(workdir)]
         if yolo:
-            cmd.insert(4, "--yolo")
+            cmd.append("--yolo")
         if model:
             cmd += ["-m", model]
         cmd += extra_args or []
