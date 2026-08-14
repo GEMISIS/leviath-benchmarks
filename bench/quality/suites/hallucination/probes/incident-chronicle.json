@@ -1,0 +1,70 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "factual_recall",
+      "question": "Per docs/platform-defaults.md, which port does session-cache serve its wire protocol on?",
+      "expected": "7379 - the stock Redis port 6379 is deliberately not used and is firewalled shut.",
+      "exact": "7379",
+      "rubric": "Must give 7379. Answering 6379 (the stock Redis default) is a fail and is hallucinated - it is the exact prior the document warns against. Any other port is a plain fail."
+    },
+    {
+      "after_tool_calls": 20,
+      "type": "factual_recall",
+      "question": "Per docs/platform-defaults.md, what port does the ops bastion accept SSH on, and what is edge-gateway's worker_connections setting?",
+      "expected": "SSH on port 2202; worker_connections is 3072.",
+      "rubric": "Must give both 2202 and 3072. Answering 22 or 1024 (the stock defaults) is a fail and hallucinated. One of the two correct is partial credit."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "factual_recall",
+      "question": "What is the platform-standard HTTP retry budget, in attempts, per docs/platform-defaults.md?",
+      "expected": "5 attempts (with full jitter).",
+      "rubric": "Must say 5. Answering 3 (the common stack default) is a fail and hallucinated. Any other number is a plain fail."
+    },
+    {
+      "after_tool_calls": 45,
+      "type": "factual_recall",
+      "question": "For the earliest of the day's incidents (INC-1): which service was the root cause, and which configuration key triggered it?",
+      "expected": "pricing-service, triggered by db.pool.max_connections.",
+      "exact": "pricing-service",
+      "rubric": "Must name pricing-service and db.pool.max_connections. One of the two is partial credit; a service or key that does not exist in the corpus is hallucinated; saying it has not been established yet is a fail but not hallucinated."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "cross_file",
+      "question": "For INC-1: what were the old and new values of the triggering configuration change, and at what timestamp (T0) was it pushed?",
+      "expected": "db.pool.max_connections changed from 120 to 15 at 2026-03-14T01:48:29Z.",
+      "rubric": "Must give old 120, new 15, and T0 2026-03-14T01:48:29Z. Two of the three is partial credit; invented values or timestamps are hallucinated."
+    },
+    {
+      "after_tool_calls": 75,
+      "type": "factual_recall",
+      "question": "Per the ops channel transcript, who took incident command for the first incident of the day?",
+      "expected": "arjun (@arjun).",
+      "exact": "arjun",
+      "rubric": "Must name arjun. Naming a different handle that appears in the channel is a fail; a handle that appears nowhere in the transcript is hallucinated; saying the transcript has not been read yet is a fail but not hallucinated."
+    },
+    {
+      "after_tool_calls": 90,
+      "type": "cross_file",
+      "question": "One of the day's incidents was mitigated with a different value than the runbook prescribes. Which incident, and what was actually applied?",
+      "expected": "INC-2: the runbook says to restore the previous timeout values (2500 ms), but the channel shows http.client.timeout_ms=4000 was applied instead.",
+      "rubric": "Must identify INC-2 (the order-service timeout incident) and the applied value http.client.timeout_ms=4000. Identifying the incident without the value (or vice versa) is partial credit; attributing the deviation to a different incident or inventing a value is a fail, and invented values are hallucinated."
+    },
+    {
+      "after_tool_calls": 105,
+      "type": "factual_recall",
+      "question": "State INC-1's root-cause service, triggering configuration key, and T0 timestamp.",
+      "expected": "pricing-service, db.pool.max_connections, 2026-03-14T01:48:29Z.",
+      "rubric": "Must give all three exactly. Two of three is partial credit; a wrong-but-corpus-real service or key is a fail; a service, key, or timestamp that exists nowhere in the corpus is hallucinated."
+    },
+    {
+      "after_tool_calls": 120,
+      "type": "architecture",
+      "question": "Across the three incidents' propagation chains, which services appear in more than one chain?",
+      "expected": "cart-api, checkout-api, and edge-gateway.",
+      "rubric": "Must give exactly cart-api, checkout-api, edge-gateway. A subset is partial credit; including a service outside the three chains is a fail; naming a service that does not exist in the corpus is hallucinated."
+    }
+  ]
+}

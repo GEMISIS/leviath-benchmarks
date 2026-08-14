@@ -162,9 +162,15 @@ class QualityHome:
     # -- runs ---------------------------------------------------------
     def launch(self, agent: str, task_text: str, workdir: Path,
                model: str | None = None, extra_args: list[str] | None = None,
-               extra_env: dict | None = None) -> str:
-        cmd = [self.lev, "run", agent, "--task", task_text, "--yolo",
+               extra_env: dict | None = None, yolo: bool = True) -> str:
+        # yolo=False keeps the ask_user_* tools in the advertised tool
+        # set (--yolo strips them before inference); the caller must
+        # then answer interactions itself or the run parks until the
+        # daemon's interaction timeout.
+        cmd = [self.lev, "run", agent, "--task", task_text,
                "--json", "--workdir", str(workdir)]
+        if yolo:
+            cmd.insert(4, "--yolo")
         if model:
             cmd += ["-m", model]
         cmd += extra_args or []

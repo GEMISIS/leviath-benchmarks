@@ -1,0 +1,17 @@
+{
+  "seed": 3517,
+  "answers": [
+    "session-cache",
+    "cache.ttl_s",
+    "2026-03-14T05:41:41Z",
+    "auth-service",
+    "ruled-out: notification-service=not-on-request-path",
+    "ruled-out: recommendation-api=recovered-before-onset",
+    "ruled-out: search-api=rolled-back-before-onset"
+  ],
+  "decoys": {
+    "notification-service": "not-on-request-path",
+    "recommendation-api": "recovered-before-onset",
+    "search-api": "rolled-back-before-onset"
+  }
+}

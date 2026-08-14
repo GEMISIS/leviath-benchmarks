@@ -16,6 +16,18 @@ stage prompt of every blueprint.
 
 CONDUCT_MARK = "Evidence conduct"
 
+# The ask tests' addition (make_askable.py), identical in every arm:
+# the flat variant carries it in its single work prompt, the structured
+# variant in the stage charged with validating inputs. Deliberately
+# silent about how many questions will be answered - the scripted
+# user's cap is a property of the measurement, not of the task.
+ASK_NOTE = """\
+The person who assigned this task is reachable with the ask_user_text
+tool. If the provided material genuinely lacks something the
+deliverable requires, ask for exactly that missing item, in one
+focused question, before finalizing - and never ask about things the
+material already establishes."""
+
 CONDUCT = """\
 Evidence conduct, applying to everything you produce:
 - Cite the source of every factual claim (file and line, log entry,

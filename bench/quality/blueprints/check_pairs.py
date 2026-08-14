@@ -32,7 +32,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from conduct import CONDUCT  # noqa: E402
+from conduct import ASK_NOTE, CONDUCT  # noqa: E402
+from make_askable import ASKABLE  # noqa: E402
 from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
 
 
@@ -41,9 +42,17 @@ def load(name: str) -> dict:
 
 
 def check_policy(name: str) -> list[str]:
-    """The benchmark policy, asserted: single-model stages, no HITL."""
+    """The benchmark policy, asserted: single-model stages, no HITL.
+
+    The one sanctioned exception: -askable variants (the ask test)
+    carry exactly ask_user_text on exactly the stage make_askable.py
+    names, for every arm symmetrically; check_askable() holds them to
+    their source byte-for-byte beyond that.
+    """
     doc = load(name)
     problems = []
+    ask_stage = (ASKABLE.get(name.removesuffix("-askable"))
+                 if name.endswith("-askable") else None)
     for sname, stage in doc.get("stages", {}).items():
         models = (stage.get("model") or {}).get("models") or []
         if len(models) != 1:
@@ -51,9 +60,10 @@ def check_policy(name: str) -> list[str]:
                             "list (policy: exactly 1, no fallbacks)")
         blocking = [t for t in stage.get("available_tools", [])
                     if _excluded_tool(t) and not t.startswith("context_")]
-        if blocking:
+        allowed = ["ask_user_text"] if sname == ask_stage else []
+        if blocking != allowed:
             problems.append(f"{name}/{sname}: blocking tools {blocking}")
-        if stage.get("allow_blocking_tools"):
+        if stage.get("allow_blocking_tools") and sname != ask_stage:
             problems.append(f"{name}/{sname}: allow_blocking_tools set")
         # The fairness control: every LLM request in every arm sees the
         # same evidence-conduct block exactly once in its system prompt,
@@ -190,6 +200,48 @@ def check_compact_variant(flat_name: str, compacting_name: str) -> list[str]:
     return problems
 
 
+def check_askable(source_name: str, stage_name: str) -> list[str]:
+    """An askable variant is its source plus the ask channel on one
+    stage and NOTHING else - three insertions, byte-accountable."""
+    askable_name = f"{source_name}-askable"
+    if not (HERE / askable_name / "agent.leviath").is_file():
+        return [f"{askable_name}: missing (regenerate with "
+                "make_askable.py)"]
+    s, a = load(source_name), load(askable_name)
+    problems = []
+
+    stage = a.get("stages", {}).get(stage_name, {})
+    s_stage = s.get("stages", {}).get(stage_name, {})
+    a_tools = list(stage.get("available_tools", []))
+    if a_tools != s_stage.get("available_tools", []) + ["ask_user_text"]:
+        problems.append(f"{askable_name}/{stage_name}: tools are not "
+                        "source + ask_user_text")
+    note_counts = [st.get("system_prompt", "").count(ASK_NOTE)
+                   for st in a["stages"].values()]
+    if sum(note_counts) != 1 or \
+            stage.get("system_prompt", "").count(ASK_NOTE) != 1:
+        problems.append(f"{askable_name}: ask note must appear exactly "
+                        f"once, in {stage_name} (counts {note_counts})")
+    if not stage.get("system_prompt", "").startswith(
+            s_stage.get("system_prompt", "").rstrip()):
+        problems.append(f"{askable_name}/{stage_name}: prompt is not "
+                        "the source prompt plus the note")
+
+    def masked(doc: dict) -> dict:
+        doc = json_roundtrip(doc)
+        st = doc["stages"].get(stage_name, {})
+        st.pop("allow_blocking_tools", None)
+        st.pop("available_tools", None)
+        st.pop("system_prompt", None)
+        return doc
+
+    if masked(s) != masked(a):
+        problems.append(f"{askable_name}: differs from {source_name} "
+                        f"beyond the ask channel on {stage_name} "
+                        "(regenerate with make_askable.py)")
+    return problems
+
+
 def json_roundtrip(doc: dict) -> dict:
     import copy
     return copy.deepcopy(doc)
@@ -245,6 +297,15 @@ def main() -> int:
                 print(f"  FAIL {p}")
         else:
             print(f"{flat_name} vs {compacting_name}: OK (compacting)")
+    for source_name, stage_name in ASKABLE.items():
+        problems = check_askable(source_name, stage_name)
+        if problems:
+            failed = True
+            print(f"{source_name} vs {source_name}-askable:")
+            for p in problems:
+                print(f"  FAIL {p}")
+        else:
+            print(f"{source_name} vs {source_name}-askable: OK (askable)")
     return 1 if failed else 0
 
 

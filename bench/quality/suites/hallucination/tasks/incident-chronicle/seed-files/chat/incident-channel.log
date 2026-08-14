@@ -1,0 +1,162 @@
+2026-03-14T00:06:50Z @sofia: lunch run, back in 20
+2026-03-14T00:07:10Z @arjun: dashboards for pricing-service look normal to me
+2026-03-14T00:18:14Z @priya: dashboards for notification-service look normal to me
+2026-03-14T00:26:45Z @elena: canaries for billing-worker flapped once and settled
+2026-03-14T00:32:20Z @elena: canaries for recommendation-api flapped once and settled
+2026-03-14T00:51:54Z @maya: CI queue is slow again, anyone else?
+2026-03-14T00:54:26Z @maya: handing the pager to the next rotation at the top of the hour
+2026-03-14T00:56:16Z @sofia: handing the pager to the next rotation at the top of the hour
+2026-03-14T01:07:21Z @sofia: CI queue is slow again, anyone else?
+2026-03-14T01:11:46Z @elena: deploy train for fraud-detector is green, rolling
+2026-03-14T01:23:31Z @dmitri: canaries for order-service flapped once and settled
+2026-03-14T01:26:58Z @priya: dashboards for notification-service look normal to me
+2026-03-14T01:27:49Z @elena: canaries for order-service flapped once and settled
+2026-03-14T01:46:10Z @tomas: reviewing the token_sweep change now
+2026-03-14T01:50:10Z @maya: seeing alerts light up for pricing-service
+2026-03-14T01:50:56Z @arjun: taking IC, thread here
+2026-03-14T01:57:54Z @tomas: rotating the email_digest credentials later today, heads up
+2026-03-14T02:00:48Z @elena: error budget for pricing-service is burning fast
+2026-03-14T02:06:31Z @kenji: quiet shift so far, famous last words
+2026-03-14T02:12:55Z @arjun: applied pool.emergency_max=200 per the runbook, watching error rates
+2026-03-14T02:16:37Z @sofia: deploy train for shipping-service is green, rolling
+2026-03-14T02:17:56Z @elena: lunch run, back in 20
+2026-03-14T02:20:25Z @elena: culprit change rolled back, watching recovery
+2026-03-14T02:21:04Z @tomas: morning folks
+2026-03-14T02:21:57Z @sofia: deploy train for checkout-api is green, rolling
+2026-03-14T02:29:37Z @maya: handing the pager to the next rotation at the top of the hour
+2026-03-14T02:31:57Z @sofia: lunch run, back in 20
+2026-03-14T02:37:01Z @tomas: CI queue is slow again, anyone else?
+2026-03-14T02:40:48Z @priya: handing the pager to the next rotation at the top of the hour
+2026-03-14T02:44:53Z @tomas: lunch run, back in 20
+2026-03-14T02:47:23Z @sofia: reviewing the token_sweep change now
+2026-03-14T02:53:56Z @elena: rotating the sku_reindex credentials later today, heads up
+2026-03-14T02:55:17Z @priya: rotating the img_prewarm credentials later today, heads up
+2026-03-14T03:00:05Z @priya: canaries for auth-service flapped once and settled
+2026-03-14T03:05:53Z @maya: lunch run, back in 20
+2026-03-14T03:07:59Z @maya: reviewing the ledger_sync change now
+2026-03-14T03:10:55Z @dmitri: reviewing the img_prewarm change now
+2026-03-14T03:12:27Z @dmitri: dashboards for auth-service look normal to me
+2026-03-14T03:13:12Z @sofia: handing the pager to the next rotation at the top of the hour
+2026-03-14T03:13:45Z @sofia: CI queue is slow again, anyone else?
+2026-03-14T03:14:34Z @elena: quiet shift so far, famous last words
+2026-03-14T03:15:19Z @maya: dashboards for cart-api look normal to me
+2026-03-14T03:22:12Z @tomas: rotating the token_sweep credentials later today, heads up
+2026-03-14T03:25:41Z @dmitri: CI queue is slow again, anyone else?
+2026-03-14T03:29:33Z @dmitri: canaries for notification-service flapped once and settled
+2026-03-14T03:30:55Z @arjun: morning folks
+2026-03-14T03:34:53Z @dmitri: handing the pager to the next rotation at the top of the hour
+2026-03-14T03:37:24Z @arjun: CI queue is slow again, anyone else?
+2026-03-14T03:41:22Z @tomas: deploy train for shipping-service is green, rolling
+2026-03-14T03:47:57Z @maya: morning folks
+2026-03-14T03:49:29Z @dmitri: reviewing the img_prewarm change now
+2026-03-14T03:51:29Z @elena: morning folks
+2026-03-14T04:05:33Z @dmitri: rotating the token_sweep credentials later today, heads up
+2026-03-14T04:17:47Z @dmitri: morning folks
+2026-03-14T04:23:00Z @kenji: reviewing the email_digest change now
+2026-03-14T04:24:37Z @arjun: deploy train for notification-service is green, rolling
+2026-03-14T04:34:02Z @priya: handing the pager to the next rotation at the top of the hour
+2026-03-14T04:40:32Z @dmitri: morning folks
+2026-03-14T04:43:24Z @priya: CI queue is slow again, anyone else?
+2026-03-14T04:47:56Z @priya: morning folks
+2026-03-14T04:52:25Z @priya: CI queue is slow again, anyone else?
+2026-03-14T04:57:12Z @kenji: handing the pager to the next rotation at the top of the hour
+2026-03-14T05:15:41Z @elena: quiet shift so far, famous last words
+2026-03-14T05:27:05Z @maya: rotating the email_digest credentials later today, heads up
+2026-03-14T05:29:52Z @priya: dashboards for checkout-api look normal to me
+2026-03-14T05:36:54Z @elena: deploy train for checkout-api is green, rolling
+2026-03-14T05:40:07Z @tomas: reviewing the orders_rollup change now
+2026-03-14T05:42:53Z @elena: seeing alerts light up for order-service
+2026-03-14T05:43:17Z @maya: taking IC
+2026-03-14T05:48:14Z @tomas: tracing from the edge down, it bottoms out at order-service
+2026-03-14T05:48:17Z @maya: CI queue is slow again, anyone else?
+2026-03-14T06:00:39Z @sofia: morning folks
+2026-03-14T06:04:31Z @elena: lunch run, back in 20
+2026-03-14T06:06:57Z @sofia: rotating the ledger_sync credentials later today, heads up
+2026-03-14T06:07:09Z @maya: could not get http.client.timeout_ms=2500 approved, applied http.client.timeout_ms=4000 instead - holding so far
+2026-03-14T06:13:09Z @dmitri: rollback is in, edge error rate coming down
+2026-03-14T06:18:24Z @tomas: reviewing the token_sweep change now
+2026-03-14T06:20:57Z @dmitri: CI queue is slow again, anyone else?
+2026-03-14T06:25:02Z @maya: deploy train for inventory-service is green, rolling
+2026-03-14T06:26:34Z @maya: quiet shift so far, famous last words
+2026-03-14T06:28:32Z @sofia: dashboards for pricing-service look normal to me
+2026-03-14T06:30:16Z @priya: quiet shift so far, famous last words
+2026-03-14T06:39:49Z @kenji: reviewing the img_prewarm change now
+2026-03-14T06:45:24Z @arjun: quiet shift so far, famous last words
+2026-03-14T06:47:43Z @priya: reviewing the email_digest change now
+2026-03-14T06:50:30Z @arjun: morning folks
+2026-03-14T07:06:43Z @kenji: quiet shift so far, famous last words
+2026-03-14T07:08:10Z @sofia: handing the pager to the next rotation at the top of the hour
+2026-03-14T07:09:48Z @sofia: dashboards for payment-gateway look normal to me
+2026-03-14T07:16:30Z @tomas: canaries for order-service flapped once and settled
+2026-03-14T07:28:29Z @dmitri: reviewing the img_prewarm change now
+2026-03-14T07:29:04Z @sofia: quiet shift so far, famous last words
+2026-03-14T07:38:05Z @priya: CI queue is slow again, anyone else?
+2026-03-14T07:50:38Z @elena: lunch run, back in 20
+2026-03-14T07:51:38Z @tomas: canaries for pricing-service flapped once and settled
+2026-03-14T07:54:53Z @arjun: handing the pager to the next rotation at the top of the hour
+2026-03-14T07:55:44Z @arjun: rotating the sku_reindex credentials later today, heads up
+2026-03-14T08:08:08Z @maya: quiet shift so far, famous last words
+2026-03-14T08:08:25Z @dmitri: canaries for cart-api flapped once and settled
+2026-03-14T08:09:33Z @kenji: canaries for fraud-detector flapped once and settled
+2026-03-14T08:20:37Z @sofia: lunch run, back in 20
+2026-03-14T08:25:08Z @dmitri: reviewing the token_sweep change now
+2026-03-14T08:25:35Z @tomas: reviewing the sku_reindex change now
+2026-03-14T08:36:20Z @arjun: CI queue is slow again, anyone else?
+2026-03-14T08:40:13Z @elena: quiet shift so far, famous last words
+2026-03-14T08:40:22Z @tomas: dashboards for shipping-service look normal to me
+2026-03-14T08:41:44Z @sofia: rotating the sku_reindex credentials later today, heads up
+2026-03-14T08:44:52Z @elena: reviewing the token_sweep change now
+2026-03-14T08:54:20Z @kenji: morning folks
+2026-03-14T08:57:31Z @arjun: reviewing the img_prewarm change now
+2026-03-14T08:59:22Z @sofia: rotating the sku_reindex credentials later today, heads up
+2026-03-14T09:04:17Z @tomas: quiet shift so far, famous last words
+2026-03-14T09:06:01Z @dmitri: lunch run, back in 20
+2026-03-14T09:07:11Z @elena: reviewing the email_digest change now
+2026-03-14T09:13:40Z @maya: morning folks
+2026-03-14T09:22:13Z @sofia: rotating the email_digest credentials later today, heads up
+2026-03-14T09:24:53Z @sofia: morning folks
+2026-03-14T09:27:58Z @sofia: morning folks
+2026-03-14T09:29:05Z @dmitri: morning folks
+2026-03-14T09:37:03Z @maya: deploy train for checkout-api is green, rolling
+2026-03-14T09:37:32Z @dmitri: pages are firing for inventory-service, who can take point?
+2026-03-14T09:38:08Z @priya: taking IC
+2026-03-14T09:47:12Z @dmitri: inventory-service looks unhealthy, checking its callers now
+2026-03-14T09:47:40Z @arjun: CI queue is slow again, anyone else?
+2026-03-14T09:47:43Z @kenji: quiet shift so far, famous last words
+2026-03-14T09:48:12Z @arjun: morning folks
+2026-03-14T09:52:09Z @kenji: quiet shift so far, famous last words
+2026-03-14T09:56:15Z @arjun: quiet shift so far, famous last words
+2026-03-14T09:57:52Z @kenji: handing the pager to the next rotation at the top of the hour
+2026-03-14T09:58:28Z @maya: quiet shift so far, famous last words
+2026-03-14T10:01:55Z @kenji: reviewing the token_sweep change now
+2026-03-14T10:02:50Z @priya: applied cache.heap_limit_mb=4096 per the runbook, watching error rates
+2026-03-14T10:03:11Z @kenji: handing the pager to the next rotation at the top of the hour
+2026-03-14T10:05:25Z @arjun: reviewing the token_sweep change now
+2026-03-14T10:07:54Z @tomas: dashboards for inventory-service look normal to me
+2026-03-14T10:08:45Z @kenji: CI queue is slow again, anyone else?
+2026-03-14T10:08:58Z @maya: rollback is in, edge error rate coming down
+2026-03-14T10:09:46Z @sofia: lunch run, back in 20
+2026-03-14T10:18:08Z @arjun: rotating the sku_reindex credentials later today, heads up
+2026-03-14T10:19:26Z @maya: CI queue is slow again, anyone else?
+2026-03-14T10:20:00Z @arjun: dashboards for inventory-service look normal to me
+2026-03-14T10:38:44Z @arjun: morning folks
+2026-03-14T10:42:06Z @dmitri: rotating the ledger_sync credentials later today, heads up
+2026-03-14T10:42:26Z @priya: reviewing the email_digest change now
+2026-03-14T10:49:33Z @priya: deploy train for session-cache is green, rolling
+2026-03-14T10:58:42Z @dmitri: CI queue is slow again, anyone else?
+2026-03-14T11:05:40Z @arjun: morning folks
+2026-03-14T11:08:15Z @tomas: quiet shift so far, famous last words
+2026-03-14T11:11:17Z @elena: quiet shift so far, famous last words
+2026-03-14T11:12:17Z @tomas: morning folks
+2026-03-14T11:12:37Z @dmitri: handing the pager to the next rotation at the top of the hour
+2026-03-14T11:13:19Z @sofia: rotating the ledger_sync credentials later today, heads up
+2026-03-14T11:15:35Z @dmitri: lunch run, back in 20
+2026-03-14T11:19:07Z @sofia: lunch run, back in 20
+2026-03-14T11:23:54Z @sofia: dashboards for notification-service look normal to me
+2026-03-14T11:25:31Z @dmitri: dashboards for cart-api look normal to me
+2026-03-14T11:28:15Z @tomas: morning folks
+2026-03-14T11:30:11Z @arjun: dashboards for notification-service look normal to me
+2026-03-14T11:32:26Z @tomas: lunch run, back in 20
+2026-03-14T11:33:19Z @arjun: lunch run, back in 20
+2026-03-14T11:45:14Z @priya: CI queue is slow again, anyone else?
+2026-03-14T11:47:16Z @dmitri: handing the pager to the next rotation at the top of the hour

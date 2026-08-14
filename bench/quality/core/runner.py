@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import cost as cost_mod
+from . import interact as interact_mod
 from . import record as record_mod
 
 __all__ = ["run_matrix"]
@@ -134,11 +135,25 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         status, meta, answer = "error", None, None
         stage_records: list[dict] = []
         archived: list[str] = []
+        # The ask tests: a task with an interaction spec runs without
+        # --yolo (so ask tools survive to inference) and the scripted
+        # user answers its questions; every other task keeps the
+        # standing unattended policy.
+        interaction = (suite.interaction_for(task)
+                       if hasattr(suite, "interaction_for") else None)
+        scripted = None
         try:
             prompt = suite.prepare(task, workdir)
             run_id = home.launch(blueprint, prompt, workdir,
                                  model=arm["model_id"],
-                                 extra_args=extra_cli)
+                                 extra_args=extra_cli,
+                                 yolo=interaction is None)
+            if interaction:
+                scripted = interact_mod.ScriptedUser(
+                    home.lev, home.env(), run_id,
+                    pack=interaction["pack"],
+                    max_answers=int(interaction.get("max_answers", 2)),
+                ).start()
             should_cancel = None
             if per_run_max_tokens:
                 # Model-agnostic mid-run ceiling on billed tokens; the
@@ -170,6 +185,15 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         except Exception as exc:  # recorded, never skipped
             log(f"  run errored: {exc}")
             status = "error" if status not in ("timeout",) else status
+        finally:
+            if scripted is not None:
+                scripted.stop()
+                # Beside the record whatever happened: an errored ask
+                # run's questions are evidence, not debris.
+                try:
+                    scripted.write(_artifacts_dir(artifacts_root, base))
+                except OSError as exc:
+                    log(f"  interactions.json not written: {exc}")
         wall = round(time.time() - t0, 1)
 
         score = None

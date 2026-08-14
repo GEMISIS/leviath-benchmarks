@@ -1,0 +1,4 @@
+Reply with ONLY the 17-line numbered report the task specifies: one
+fact per line in the exact order and formats given, `N. value`, exact
+spellings from the source files, comma-separated lists without spaces,
+no headings, no commentary.

@@ -54,6 +54,11 @@ _V2_BLOCKS = {
     "functional": {"score", "detail"},
     "request_footprint": {"n_requests", "input_p50", "input_max",
                           "input_growth", "output_p50", "requests"},
+    # The hallucination suite's deliverable channel: mechanical
+    # classifier counts from the task verifier (wrong-but-real vs
+    # invented vs prior-match), never mixed with the reader channel.
+    "hallucination": {"fabrications", "prior_matches", "decoy_captures",
+                      "investigation_errors", "asked", "detail"},
 }
 _RETENTION_KEYS = {"after_tool_calls", "probe_type", "reached"}
 
