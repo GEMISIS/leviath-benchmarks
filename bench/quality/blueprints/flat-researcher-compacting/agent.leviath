@@ -19,7 +19,7 @@
 
 [agent]
 name = "flat-researcher-compacting"
-version = "0.4.0"
+version = "0.4.1"
 description = "Strong flat baseline for researcher: identical to flat-researcher except the window compacts on overflow instead of evicting"
 entry_stage = "work"
 

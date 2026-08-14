@@ -4,7 +4,7 @@
 
 [agent]
 name = "researcher"
-version = "0.4.0"
+version = "0.4.1"
 description = "Research assistant - gather, analyze, and summarize with a gather↔analyze refinement loop and error recovery"
 entry_stage = "gather"
 
@@ -43,6 +43,11 @@ Prefer primary sources and well-established outlets; note when something is a bl
 forum, or vendor claim. Once you have solid coverage of the sub-topics, transition
 to analyze - don't keep searching for marginal additions. The analyze stage will
 send you back if it finds a real gap.
+
+`raw_findings` holds only the last few sources you read - older ones evict as
+new ones arrive. Distill what matters from each source into `claims` (with its
+source ref) while it is still in front of you, then move on; do not plan to
+re-read.
 
 Evidence conduct, applying to everything you produce:
 - Cite the source of every factual claim (file and line, log entry,
@@ -333,7 +338,13 @@ sources_index  = { kind = "pinned", budget = "3%", summarizable = false }
 format         = { kind = "pinned", budget = "1%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
 
 # Raw source material (bulk, evictable).
-raw_findings   = { kind = "temporary", budget = "38%" }
+# The absolute cap matters more than the percentage: a percentage
+# alone scales with the model's window, and at a 1M-token window
+# "38%" is a 380k hoard ceiling that never evicts - the region soaks
+# up whole repositories and every request rewrites the cache suffix.
+# ~24k holds the last handful of sources; older ones evict oldest-
+# first, which is the point: distill into `claims`, then let go.
+raw_findings   = { kind = "temporary", budget = "38%", max_tokens = 24000 }
 # Extracted claims (with source refs) and cross-source conflicts.
 claims         = { kind = "sliding_window", max_items = 30, budget = "10%", summarizable = false }
 contradictions = { kind = "clearable",      budget = "3%" }
