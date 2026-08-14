@@ -1238,6 +1238,74 @@ def render_tokens_over_time(suites: dict, round_meta: dict, specs: dict,
     return written
 
 
+def render_survival(suites: dict, round_meta: dict, specs: dict,
+                    out_dir: Path):
+    """P(deliverable) vs window size, one line per arm, one panel per
+    task: the probability a run produces a deliverable at all, from
+    completed-with-substance runs over total reps. The cliff, measured.
+    Needs reps to mean anything; with n=1 it degenerates to 0/1 steps
+    and says so in the caption."""
+    data = suites.get("hallucination")
+    if not data:
+        return None
+    runs = data["runs"]
+    tasks = sorted({r["task_id"] for r in runs})
+    windows = sorted({r.get("window_tokens") or 0 for r in runs})
+    if len(windows) < 2:
+        return None
+    arms = sorted({r["arm"] for r in runs}, key=arm_sort_key)
+    fig, axes = plt.subplots(1, len(tasks),
+                             figsize=(4.9 * len(tasks), 4.3),
+                             squeeze=False, sharey=True)
+    fig.patch.set_facecolor(SURFACE)
+    max_n = 1
+    for ax, task in zip(axes[0], tasks):
+        style_ax(ax)
+        for arm in arms:
+            xs, ys = [], []
+            for wi, window in enumerate(windows):
+                cell = [r for r in runs if r["task_id"] == task
+                        and (r.get("window_tokens") or 0) == window
+                        and r["arm"] == arm]
+                if not cell:
+                    continue
+                delivered = sum(
+                    1 for r in cell if r.get("status") == "complete"
+                    and isinstance((r.get("functional") or {})
+                                   .get("score"), (int, float)))
+                max_n = max(max_n, len(cell))
+                xs.append(wi)
+                ys.append(delivered / len(cell))
+            if xs:
+                ax.plot(xs, ys, marker="o", markersize=4.5,
+                        linewidth=1.8, color=arm_color(arm),
+                        label=arm_label(arm), alpha=0.92)
+        ax.set_xticks(range(len(windows)))
+        ax.set_xticklabels([f"{w // 1000}k" if w else "native"
+                            for w in windows], fontsize=8.5, color=INK2)
+        ax.set_ylim(-0.04, 1.06)
+        ax.set_xlabel("context window", fontsize=8, color=MUTED)
+        ax.set_title(task, fontsize=10, color=INK)
+    axes[0][0].set_ylabel("P(deliverable)", fontsize=8.5, color=MUTED)
+    axes[0][-1].legend(fontsize=6.2, frameon=False, loc="lower right")
+    fig.suptitle("The cliff, measured: probability of producing a "
+                 "deliverable, by window", fontsize=12.5, color=INK)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    fig.text(0.01, 0.024,
+             f"P(deliverable) = completed-with-a-graded-deliverable "
+             f"runs / total runs per cell (max n per cell this round: "
+             f"{max_n}); at n=1 the curve degenerates to 0/1 steps - "
+             "reps give it its real shape",
+             fontsize=6.4, color=MUTED, ha="left")
+    fig.tight_layout(rect=(0, 0.05, 1, 0.92))
+    path = out_dir / "survival.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
 # Each task's functional pass bar, as the verifier defines it - drawn
 # on the chart so "how close did it come" reads against "good enough".
 PASS_BARS = {"incident-chronicle": 12 / 17, "noisy-incident": 5 / 7,
@@ -1394,7 +1462,8 @@ def main() -> int:
                render_cost_at_depth, render_request_footprint,
                render_cost_per_success, render_outcomes,
                render_run_lifetimes, render_tokens_over_time,
-               render_success_rate, write_task_table):
+               render_success_rate, render_survival,
+               write_task_table):
         path = fn(suites, round_meta, specs, args.out) \
             if fn is not write_task_table \
             else write_task_table(suites, args.out)
