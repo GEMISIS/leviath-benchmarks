@@ -161,9 +161,13 @@ class Suite:
     def grade(self, task: dict, submission: dict) -> dict:
         fp = submission.pop("request_footprint", None)
         detail = submission.get("detail", {})
-        hall = {k: int(detail.get(k, 0)) for k in _COUNTS}
+        # Verifiers report counts either at detail top level or under
+        # a "summary" sub-dict; both are canonical, absent means zero.
+        counts = detail.get("summary") or detail
+        hall = {k: int(counts.get(k, 0)) for k in _COUNTS}
         hall["asked"] = detail.get("asked")
-        hall["detail"] = detail.get("classified", {})
+        hall["detail"] = (detail.get("classified")
+                          or counts.get("captured") or {})
         record_fields = {
             "functional": {
                 "score": round(float(submission.get("score", 0.0)), 4),

@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime as dt
 import gzip
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -820,6 +821,146 @@ class FootprintSuiteTests(unittest.TestCase):
         out2 = mod.verify(task["dir"], Path("."), Path("."), wrong_root)
         self.assertTrue(out2["functional_pass"])  # 3 of 4 still passes
         self.assertLess(out2["score"], 1.0)
+
+
+class HallucinationSuiteTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "hallucination_suite",
+            QUALITY_DIR / "suites" / "hallucination" / "suite.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        cls.suite = mod.Suite()
+        cls.tasks = cls.suite.load_tasks(None)
+
+    def test_all_three_tasks_load(self):
+        families = {t["id"]: t["family"] for t in self.tasks}
+        self.assertEqual(families, {
+            "incident-chronicle": "loganalyzer",
+            "noisy-incident": "loganalyzer",
+            "redacted-ledger": "analyst"})
+
+    def test_ask_task_maps_to_askable_blueprints(self):
+        ledger = next(t for t in self.tasks
+                      if t["id"] == "redacted-ledger")
+        chron = next(t for t in self.tasks
+                     if t["id"] == "incident-chronicle")
+        cases = [
+            (ledger, {"role": "flat", "variant": None},
+             "flat-analyst-askable"),
+            (ledger, {"role": "flat", "variant": "compacting"},
+             "flat-analyst-compacting-askable"),
+            (ledger, {"role": "structured", "variant": None},
+             "analyst-bench-adversarial-scoped-flagship-askable"),
+            (chron, {"role": "flat", "variant": None},
+             "flat-loganalyzer"),
+            (chron, {"role": "structured", "variant": None},
+             "loganalyzer-bench-adversarial-scoped-flagship"),
+        ]
+        for task, arm, expected in cases:
+            got, _ = self.suite.agent_for_task(task, arm)
+            self.assertEqual(got, expected)
+        # Every askable blueprint the mapping names must exist frozen.
+        for name in ("flat-analyst-askable",
+                     "flat-analyst-compacting-askable",
+                     "analyst-bench-adversarial-scoped-flagship-askable"):
+            self.assertTrue((QUALITY_DIR / "blueprints" / name
+                             / "agent.leviath").is_file(), name)
+
+    def test_interaction_spec_only_for_the_ask_task(self):
+        for task in self.tasks:
+            spec = self.suite.interaction_for(task)
+            if task["id"] == "redacted-ledger":
+                self.assertEqual(spec["max_answers"], 2)
+                self.assertIn("1.65%", spec["pack"])
+            else:
+                self.assertIsNone(spec)
+
+    def test_probes_load_for_every_task(self):
+        from core.probes import load_probes
+        probes_dir = QUALITY_DIR / "suites" / "hallucination" / "probes"
+        for task in self.tasks:
+            probes = load_probes(probes_dir / f"{task['id']}.json")
+            self.assertGreaterEqual(len(probes), 6, task["id"])
+
+    def test_grade_hoists_hallucination_block(self):
+        verdict = self.suite.grade(self.tasks[0], {
+            "functional_pass": True, "score": 0.9,
+            "detail": {"fabrications": 1, "prior_matches": 2,
+                       "asked": {"n_questions": 1, "right_gap": True,
+                                 "questions": ["q"]},
+                       "classified": {"line_7": "prior"}}})
+        hall = verdict["record_fields"]["hallucination"]
+        self.assertEqual(hall["fabrications"], 1)
+        self.assertEqual(hall["prior_matches"], 2)
+        self.assertEqual(hall["decoy_captures"], 0)
+        self.assertTrue(hall["asked"]["right_gap"])
+        from core import record as record_mod
+        rec = _minimal_record()
+        rec["hallucination"] = hall
+        record_mod.validate(rec)  # block shape accepted by the schema
+
+    def test_chronicle_verifier_flags_prior_match(self):
+        task = next(t for t in self.tasks
+                    if t["id"] == "incident-chronicle")
+        mod = _load_verify(task)
+        key = json.loads((task["dir"] / "answers.json").read_text())
+        good = list(key["answers"])
+        trap_line = sorted(key["prior_traps"])[0]
+        good[int(trap_line) - 1] = key["prior_traps"][trap_line]["prior"]
+        out = mod.verify(task["dir"], Path("."), Path("."),
+                         "\n".join(good))
+        self.assertGreaterEqual(out["detail"]["prior_matches"], 1)
+
+    def test_noisy_verifier_fails_decoy_root(self):
+        task = next(t for t in self.tasks if t["id"] == "noisy-incident")
+        mod = _load_verify(task)
+        key = json.loads((task["dir"] / "answers.json").read_text())
+        wrong = list(key["answers"])
+        wrong[0] = sorted(key["decoys"])[0]  # a decoy as root cause
+        out = mod.verify(task["dir"], Path("."), Path("."),
+                         "\n".join(wrong))
+        self.assertFalse(out["functional_pass"])
+        graded = self.suite.grade(task, out)
+        self.assertGreaterEqual(
+            graded["record_fields"]["hallucination"]["decoy_captures"], 1)
+
+    def test_scripted_user_pack_budget_and_transcript(self):
+        from core.interact import NO_MORE, ScriptedUser
+        user = ScriptedUser("lev", {}, "run-1", pack="THE PACK",
+                            max_answers=2)
+        sent = []
+        user._run = lambda args: (sent.append(args)
+                                  or subprocess.CompletedProcess(
+                                      args, 0, "", ""))
+        for i, kind in enumerate(
+                ("free_text", "free_text", "free_text", "confirm")):
+            user._answer(f"ask-{i}", {"kind": kind, "prompt": f"q{i}",
+                                      "stage_name": "verify"})
+        replies = [t["reply"] for t in user.transcript]
+        self.assertEqual(replies, ["pack", "pack", "no_more", "approve"])
+        self.assertEqual(sent[0][2], "THE PACK")
+        self.assertEqual(sent[2][2], NO_MORE)
+        self.assertEqual(sent[3][2], "--approve")
+        # Questions are logged verbatim for the right-gap metric.
+        self.assertEqual(user.transcript[0]["question"], "q0")
+
+
+def _load_verify(task):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        f"verify_{task['id']}", task["dir"] / "verify.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _minimal_record():
+    rec = {key: None for key in record.REQUIRED_KEYS}
+    rec.update({"schema": "quality-run-v2", "status": "complete"})
+    return rec
 
 
 class ProvidersTests(unittest.TestCase):

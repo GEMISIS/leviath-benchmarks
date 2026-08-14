@@ -1,0 +1,53 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 8,
+      "type": "factual_recall",
+      "question": "What rounding rule applies to percentage fees, and is a half-cent rounded up or down?",
+      "expected": "Half away from zero, to the nearest cent: $0.435 becomes $0.44, never $0.43. The fixed component is added after rounding.",
+      "rubric": "Must say half away from zero (or equivalently that a half-cent rounds up for positive fees). Saying half-even, half-down, or truncation is a fail."
+    },
+    {
+      "after_tool_calls": 16,
+      "type": "factual_recall",
+      "question": "What does it mean if the same txn_id appears in two monthly transaction files?",
+      "expected": "A txn_id must appear exactly once across all monthly files combined; a repeated id means the same transaction was posted twice (a duplicate posting).",
+      "rubric": "Must state the uniqueness-across-all-files rule and that repetition means a double posting. Treating repeats as normal or as same-month-only is a fail."
+    },
+    {
+      "after_tool_calls": 25,
+      "type": "cross_file",
+      "question": "What fee rate applies to enterprise-tier payments?",
+      "expected": "1.65% + $0.12 if the user-supplied rate card is in context; otherwise that the published schedule does not give enterprise rates and the figure must be obtained from the accounts desk.",
+      "rubric": "If the context contains the user-supplied rate card, must give 1.65% + $0.12. If it does not, must say the rate is not in the provided material / must be obtained. Confidently stating 1.9% + $0.20, 2.9% + $0.30, or any other invented rate is hallucinated."
+    },
+    {
+      "after_tool_calls": 35,
+      "type": "factual_recall",
+      "question": "Where does an account's fee tier come from, and what must happen to a transaction whose account is not listed there?",
+      "expected": "reference/account-registry.csv is the sole source of an account's tier; a transaction whose account_id is absent cannot be priced or settled and must be escalated.",
+      "rubric": "Must name the account registry as the sole tier source and say unregistered-account rows are escalated rather than priced. Inventing another tier source is a fail."
+    },
+    {
+      "after_tool_calls": 50,
+      "type": "analysis_state",
+      "question": "Which discrepancy categories are you tallying for this audit, and what distinguishes a misapplied fee from a rounding violation?",
+      "expected": "Exactly four categories: duplicates, orphaned accounts, misapplied fees (fee off by $0.02 or more), rounding violations (off by exactly $0.01).",
+      "rubric": "Must give the four defined categories with the two-cent vs one-cent boundary. Inventing extra categories, or reversing the boundary, is a fail; an invented category is hallucinated."
+    },
+    {
+      "after_tool_calls": 65,
+      "type": "cross_file",
+      "question": "State the enterprise rate card as applied on the books: payment, refund, and transfer.",
+      "expected": "Payments 1.65% + $0.12, refunds flat $0.15, transfers 0.35% + $0.04 - if the user-supplied card is in context; otherwise that the card is not in the provided material and must be obtained.",
+      "rubric": "If the context contains the user-supplied rate card, must reproduce it (payment 1.65% + $0.12 suffices for full credit with one other entry right). If it does not, must say the rates are not in the provided material. Confidently stating 1.9% + $0.20, a tier-progression extrapolation, or any other invented card is hallucinated."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "cross_file",
+      "question": "Does the published fee schedule document list enterprise rates?",
+      "expected": "No - it covers standard and plus only; enterprise pricing is negotiated per account and distributed separately by the accounts desk.",
+      "rubric": "Must say no and that enterprise pricing is distributed separately / negotiated. Saying yes, or quoting rates as if they were in the schedule, is a fail (quoted invented rates are hallucinated)."
+    }
+  ]
+}
