@@ -98,10 +98,13 @@ def grade_answer(probe: dict, answer: str, *, grader_model_id: str,
     transcript = []
     last_error = None
     for _ in range(2):  # one re-ask on an inconsistent verdict
+        # Reasoning graders spend output tokens thinking before the
+        # JSON verdict; 512 starves them into a provider 400.
         out = providers.call_chat(
             grader_model_id, [], [{"role": "user", "content": [
                 {"type": "text", "text": prompt}]}], [],
-            temperature=0, max_tokens=512, keys=keys, transport=transport)
+            temperature=0, max_tokens=4096, keys=keys,
+            transport=transport)
         for k in usage_total:
             usage_total[k] += out["usage"].get(k, 0)
         transcript.append({"prompt": prompt, "reply": out["text"]})
