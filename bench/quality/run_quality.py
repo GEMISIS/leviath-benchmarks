@@ -263,6 +263,11 @@ def main() -> int:
     parser.add_argument("--providers-dir", default=None,
                         help="script-provider dir to install (mock runs)")
     parser.add_argument("--keep-context", action="store_true")
+    parser.add_argument("--home", default=None,
+                        help="isolated home directory (default "
+                             "/tmp/levqual); a distinct home lets two "
+                             "rounds run side by side without wiping "
+                             "each other's daemon")
     parser.add_argument("--unsafe-smoke", action="store_true",
                         help="run without a freeze tag; records are "
                              "stamped UNFROZEN-SMOKE")
@@ -348,7 +353,8 @@ def main() -> int:
         specs_path.write_text(
             json.dumps(machine_specs.gather(args.lev), indent=2) + "\n")
 
-    home = QualityHome(args.lev)
+    home = (QualityHome(args.lev, home=Path(args.home)) if args.home
+            else QualityHome(args.lev))
     blueprints_dir = QUALITY_DIR / "blueprints"
     config_text = (Path(args.provider_config).read_text()
                    if args.provider_config else
