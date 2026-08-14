@@ -129,7 +129,8 @@ def main() -> int:
             print(f"{rec['task_id'][:18]:18} {rec['arm'][:24]:24} "
                   f"@{(rec.get('window_tokens') or 0) // 1000:3}k "
                   f"{rec.get('status', '?'):8} -> {mode}")
-        out = runs_dir / "failure_modes.json"
+        # Beside runs/, never inside it - the runs dir is records-only.
+        out = runs_dir.parent / "failure_modes.json"
         out.write_text(json.dumps(rows, indent=1) + "\n")
     print("\nmode counts by arm kind:")
     tally: Counter = Counter()

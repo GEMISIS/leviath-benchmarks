@@ -114,6 +114,10 @@ def load_records(runs_dir: Path) -> list[dict]:
     records = []
     for path in sorted(Path(runs_dir).glob("*.json")):
         record = json.loads(path.read_text())
+        # Sidecar json (analysis tables, preserved .bak copies) lives
+        # beside records; only shaped records are records.
+        if not isinstance(record, dict) or "schema" not in record:
+            continue
         validate(record)
         records.append(record)
     return records
