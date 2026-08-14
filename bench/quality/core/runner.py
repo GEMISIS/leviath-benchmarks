@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import gzip
+import json
 import random
 import shutil
 import threading
@@ -196,6 +197,23 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                     log(f"  interactions.json not written: {exc}")
         wall = round(time.time() - t0, 1)
 
+        mix_mapping = None
+        if arm["model_id"] is None:
+            blueprint_toml = (home.home / ".leviath" / "agents"
+                              / blueprint / "agent.leviath")
+            try:
+                mix_mapping = cost_mod.stagemix_mapping(blueprint_toml)
+            except Exception:
+                mix_mapping = None
+        if mix_mapping:
+            # Beside the journal, for the footprint fold: OpenAI's
+            # prompt_tokens INCLUDE cached tokens, so per-request input
+            # deltas need to know which stages ran on which provider.
+            run_art = _artifacts_dir(artifacts_root, base) / "run"
+            run_art.mkdir(parents=True, exist_ok=True)
+            (run_art / "stage_models.json").write_text(
+                json.dumps(mix_mapping, indent=1) + "\n")
+
         score = None
         if status in ("complete",):
             art = _artifacts_dir(artifacts_root, base)
@@ -207,15 +225,6 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                 score = {"passed": False, "detail": f"grade error: {exc}"}
         if score is None and status != "complete":
             score = {"passed": False, "detail": f"status {status}"}
-
-        mix_mapping = None
-        if arm["model_id"] is None:
-            blueprint_toml = (home.home / ".leviath" / "agents"
-                              / blueprint / "agent.leviath")
-            try:
-                mix_mapping = cost_mod.stagemix_mapping(blueprint_toml)
-            except Exception:
-                mix_mapping = None
         rec = _finish(base, runs_dir, status=status, started=started,
                       ended=_utcnow(), wall=wall, meta=meta, arm=arm,
                       rates=rates, score=score,

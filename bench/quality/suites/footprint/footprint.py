@@ -31,26 +31,49 @@ def _meta_int(meta: dict, key: str) -> int:
     return int(meta.get(key, 0) or 0)
 
 
+def _openai_stages(archive: Path) -> set[str]:
+    """Stages served by an OpenAI model, whose prompt_tokens INCLUDE
+    cached tokens (Anthropic's exclude them) - summing prompt+cached
+    for those stages double-counts. The runner writes the stage map
+    beside the journal; absent (single-model runs), empty set."""
+    import json
+    path = Path(archive).parent / "stage_models.json"
+    try:
+        mapping = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return set()
+    return {stage for stage, model in mapping.items()
+            if str(model).startswith("openai/")}
+
+
 def from_archive(archive: Path) -> dict | None:
     """Fold run.lvr(.gz) into the request-footprint block, or None."""
     points = lvr.fold(archive)
     if not points:
         return None
+    openai_stages = _openai_stages(archive)
 
     requests = []
-    prev_in = prev_out = None
+    prev = None
     prev_ts = None
+    prev_out = None
     for p in points:
         meta = p.meta if isinstance(p.meta, dict) else {}
-        cum_in = (_meta_int(meta, "prompt_tokens")
-                  + _meta_int(meta, "cached_tokens")
-                  + _meta_int(meta, "cache_write_tokens"))
+        cur = {k: _meta_int(meta, k) for k in
+               ("prompt_tokens", "cached_tokens", "cache_write_tokens")}
         cum_out = _meta_int(meta, "completion_tokens")
         ts = meta.get("updated_at")
-        if prev_in is None:
-            prev_in, prev_out, prev_ts = cum_in, cum_out, ts
+        if prev is None:
+            prev, prev_out, prev_ts = cur, cum_out, ts
             continue
-        d_in, d_out = cum_in - prev_in, cum_out - prev_out
+        deltas = {k: cur[k] - prev[k] for k in cur}
+        # Per-counter deltas attribute the cached share to THIS
+        # request, so the provider correction works even though the
+        # journal counters are cumulative across stages.
+        d_in = sum(deltas.values())
+        if meta.get("current_stage") in openai_stages:
+            d_in -= deltas["cached_tokens"]
+        d_out = cum_out - prev_out
         if d_in <= 0 and d_out <= 0:
             continue  # persistence tick with no inference behind it
         entry = {
@@ -63,7 +86,7 @@ def from_archive(archive: Path) -> dict | None:
                                                        (int, float)):
             entry["secs"] = max(int(ts - prev_ts), 0)
         requests.append(entry)
-        prev_in, prev_out, prev_ts = cum_in, cum_out, ts
+        prev, prev_out, prev_ts = cur, cum_out, ts
 
     if not requests:
         return None
