@@ -31,11 +31,13 @@ def _meta_int(meta: dict, key: str) -> int:
     return int(meta.get(key, 0) or 0)
 
 
-def _openai_stages(archive: Path) -> set[str]:
-    """Stages served by an OpenAI model, whose prompt_tokens INCLUDE
-    cached tokens (Anthropic's exclude them) - summing prompt+cached
-    for those stages double-counts. The runner writes the stage map
-    beside the journal; absent (single-model runs), empty set."""
+def _cached_inclusive_stages(archive: Path) -> set[str]:
+    """Stages whose usage reports prompt_tokens INCLUDING cached
+    tokens - OpenAI semantics, which OpenRouter normalizes to as well
+    (Grok's critic stage reported 86k cached inside its prompt count).
+    Anthropic's exclude them, so summing prompt+cached for these
+    stages double-counts. The runner writes the stage map beside the
+    journal; absent (single-model anthropic runs), empty set."""
     import json
     path = Path(archive).parent / "stage_models.json"
     try:
@@ -43,7 +45,7 @@ def _openai_stages(archive: Path) -> set[str]:
     except (OSError, ValueError):
         return set()
     return {stage for stage, model in mapping.items()
-            if str(model).startswith("openai/")}
+            if str(model).startswith(("openai/", "openrouter/"))}
 
 
 def from_archive(archive: Path) -> dict | None:
@@ -51,7 +53,7 @@ def from_archive(archive: Path) -> dict | None:
     points = lvr.fold(archive)
     if not points:
         return None
-    openai_stages = _openai_stages(archive)
+    cached_inclusive = _cached_inclusive_stages(archive)
 
     requests = []
     prev = None
@@ -72,7 +74,7 @@ def from_archive(archive: Path) -> dict | None:
         # journal counters are cumulative across stages.
         d_in = sum(deltas.values())
         d_cached = deltas["cached_tokens"]
-        if meta.get("current_stage") in openai_stages:
+        if meta.get("current_stage") in cached_inclusive:
             d_in -= d_cached
         d_out = cum_out - prev_out
         if d_in <= 0 and d_out <= 0:

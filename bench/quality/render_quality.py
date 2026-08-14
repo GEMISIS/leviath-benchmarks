@@ -1186,6 +1186,16 @@ def render_tokens_over_time(suites: dict, round_meta: dict, specs: dict,
             ax.plot(xs, outs, color=color, linewidth=1.1,
                     linestyle=(0, (2, 2)),
                     label=f"{arm_label(r['arm'])} - output")
+            # A stage-transition tick spans two calls (the edge's
+            # compaction + the new stage's first request), so it can
+            # legitimately top the window pin; the diamond says so.
+            stages = [q.get("stage") for q in fp["requests"]]
+            trans = [i + 1 for i in range(1, len(stages))
+                     if stages[i] and stages[i] != stages[i - 1]]
+            if trans:
+                ax.plot(trans, [ins[i - 1] for i in trans], "D",
+                        markersize=4, color=color, markerfacecolor
+                        =SURFACE, markeredgewidth=1.2, zorder=4)
             note = _status_note(r)
             if note and xs:
                 ax.plot([xs[-1]], [ins[-1]], marker="x", markersize=7,
@@ -1214,9 +1224,10 @@ def render_tokens_over_time(suites: dict, round_meta: dict, specs: dict,
         provenance(fig, round_meta, specs)
         fig.text(0.01, 0.024,
                  "a journal tick usually equals one provider request; "
-                 "under retry/thrash conditions a tick can span more "
-                 "than one call, which is why a curve can exceed the "
-                 "pinned window",
+                 "diamonds mark stage-transition ticks (the edge's "
+                 "compaction call + the new stage's first request in "
+                 "one tick), and thrash/retry ticks can also span "
+                 "calls - single requests never exceed the pin",
                  fontsize=6.4, color=MUTED, ha="left")
         fig.tight_layout(rect=(0, 0.05, 1, 0.96))
         suffix = f"_w{window // 1000}k" if window else ""
