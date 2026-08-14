@@ -24,11 +24,11 @@ instead of causality will be wrong.
 
 ## The evidence
 
-- `logs/<service>/app.log`, `app.log.1` … `app.log.5` — rotated
-  application logs for fourteen services (`.5` is the oldest window,
-  the bare file the newest; each file covers two hours, 00:00–12:00
+- `logs/<service>/app.log`, `app.log.1` … `app.log.11` — rotated
+  application logs for fourteen services (`.11` is the oldest window,
+  the bare file the newest; each file covers one hour, 00:00–12:00
   total).
-- `logs/edge-gateway/access.log{,.1,...,.5}` — the edge tier's access
+- `logs/edge-gateway/access.log{,.1,...,.11}` — the edge tier's access
   log, one line per request:
   `timestamp method path status latency request-id`.
 - `changes/config-audit.log` — every configuration change pushed to any

@@ -855,17 +855,23 @@ class HallucinationSuiteTests(unittest.TestCase):
             (ledger, {"role": "structured", "variant": None},
              "analyst-bench-adversarial-scoped-flagship-askable"),
             (chron, {"role": "flat", "variant": None},
-             "flat-loganalyzer"),
+             "flat-loganalyzer-readonly"),
+            (chron, {"role": "flat", "variant": "compacting"},
+             "flat-loganalyzer-compacting-readonly"),
             (chron, {"role": "structured", "variant": None},
-             "loganalyzer-bench-adversarial-scoped-flagship"),
+             "loganalyzer-bench-adversarial-scoped-flagship-readonly"),
         ]
         for task, arm, expected in cases:
             got, _ = self.suite.agent_for_task(task, arm)
             self.assertEqual(got, expected)
-        # Every askable blueprint the mapping names must exist frozen.
+        # Every conditioned blueprint the mapping names must exist.
         for name in ("flat-analyst-askable",
                      "flat-analyst-compacting-askable",
-                     "analyst-bench-adversarial-scoped-flagship-askable"):
+                     "analyst-bench-adversarial-scoped-flagship-askable",
+                     "flat-loganalyzer-readonly",
+                     "flat-loganalyzer-compacting-readonly",
+                     "loganalyzer-bench-adversarial-scoped-flagship"
+                     "-readonly"):
             self.assertTrue((QUALITY_DIR / "blueprints" / name
                              / "agent.leviath").is_file(), name)
 

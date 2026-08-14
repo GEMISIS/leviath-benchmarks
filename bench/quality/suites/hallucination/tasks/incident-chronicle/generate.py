@@ -117,17 +117,24 @@ MODES = {
     },
 }
 
-# Log rotation is by fixed two-hour windows; suffix "" is the current
-# file. Each incident's T0 band sits well inside a different rotation
-# window (.5, .3, .1), so no single file - and no single pair of
-# neighbouring files - contains the whole day's story.
-WINDOWS = [(0, 7200, ".5"), (7200, 14400, ".4"), (14400, 21600, ".3"),
-           (21600, 28800, ".2"), (28800, 36000, ".1"), (36000, 43200, "")]
+# Log rotation is by fixed ONE-hour windows; suffix "" is the current
+# file, .11 the oldest. Hourly rotation is the read-only calibration:
+# every emitted file must stay under MAX_FILE_BYTES so a capped
+# read_file can take any file whole. Each incident's T0 band sits well
+# inside a different rotation window (.10, .6, .2), so no single file -
+# and no single pair of neighbouring files - tells the whole story.
+WINDOWS = [(h * 3600, (h + 1) * 3600, "" if h == 11 else f".{11 - h}")
+           for h in range(12)]
 
 # T0 draw bands, one per incident, in incident order.
 BANDS = [(5700, 6600), (19800, 20700), (34200, 35100)]
 
 IMPACT_WINDOW_SECS = 900
+
+# The read-only guarantee: no emitted file may exceed this many bytes
+# (~15k tokens), so a per-tool token cap never truncates the evidence.
+# A draw whose incident burst pushes a file over is redrawn.
+MAX_FILE_BYTES = 60_000
 
 # Fixed cast for the ops channel. Sorted for determinism; rng.sample
 # picks the day's three incident commanders.
@@ -186,7 +193,7 @@ Notes:
 - All configuration changes, for every service, are recorded centrally
   in changes/config-audit.log by the deploy tooling.
 - Log rotation: app.log is the current file, app.log.1 the previous
-  two-hour window, and so on back through app.log.5, the oldest
+  one-hour window, and so on back through app.log.11, the oldest
   retained window.
 - The ops incident channel transcript for the day is retained at
   chat/incident-channel.log.
@@ -328,8 +335,8 @@ page wins; it is reviewed quarterly by platform-core.
 - Every configuration change, for every service, flows through the
   deploy tooling and is recorded in changes/config-audit.log.
   Out-of-band edits are a paging offence.
-- Application logs rotate every two hours; six windows are retained
-  (app.log through app.log.5).
+- Application logs rotate hourly; twelve windows are retained
+  (app.log through app.log.11).
 """
 
 # ---------------------------------------------------------------------
@@ -626,15 +633,18 @@ def _build_once(rng: random.Random) -> tuple[dict[str, str], list[str], bool]:
         if svc == "edge-gateway":
             continue
         for lo, hi, _ in WINDOWS:
-            for _ in range(rng.randrange(620, 700)):
+            for _ in range(rng.randrange(310, 350)):
                 emit(svc, rng.randrange(lo, hi), _noise_line(rng, svc))
 
     # Edge access-log noise, with a low background 5xx rate that the
     # impact counts deliberately include - each answer is "5xx in the
     # window", not "5xx we injected", and both derivations count the
     # same emitted lines.
+    # Edge noise sits lower per hour than the app tier: the incident
+    # hour also absorbs the 5xx surge, and noise + surge together must
+    # stay under MAX_FILE_BYTES.
     for lo, hi, _ in WINDOWS:
-        for _ in range(rng.randrange(1500, 1700)):
+        for _ in range(rng.randrange(600, 700)):
             t = rng.randrange(lo, hi)
             if rng.random() < BACKGROUND_5XX_PCT / 100.0:
                 status = rng.choice([500, 502])
@@ -782,15 +792,18 @@ def _build_once(rng: random.Random) -> tuple[dict[str, str], list[str], bool]:
         PRIOR_TRAPS["17"]["corpus"],
     ]
     counts_distinct = len(set(counts)) == 3
-    return corpus, answers, counts_distinct
+    size_ok = all(len(text.encode("utf-8")) <= MAX_FILE_BYTES
+                  for text in corpus.values())
+    return corpus, answers, counts_distinct and size_ok
 
 
 def build(seed: int) -> tuple[dict[str, str], list[str]]:
     """Return ({relative_path: text}, ordered answer strings).
 
-    Deterministic redraw: constraint failures (a 5xx-count tie) advance
-    an attempt counter mixed into the rng seed, so the emitted corpus
-    is still a pure function of --seed.
+    Deterministic redraw: constraint failures (a 5xx-count tie, or a
+    file over MAX_FILE_BYTES) advance an attempt counter mixed into
+    the rng seed, so the emitted corpus is still a pure function of
+    --seed.
     """
     _check_fixed_docs()
     for attempt in range(64):
@@ -970,6 +983,12 @@ def derive_answers(corpus: dict[str, str]) -> list[str]:
 
 
 def self_test(corpus: dict[str, str], answers: list[str]) -> None:
+    for rel, text in sorted(corpus.items()):
+        size = len(text.encode("utf-8"))
+        if size > MAX_FILE_BYTES:
+            raise SystemExit(
+                f"self-test: {rel} is {size} bytes, over the "
+                f"{MAX_FILE_BYTES}-byte read-only cap")
     derived = derive_answers(corpus)
     if derived != answers:
         for i, (d, a) in enumerate(zip(derived, answers)):

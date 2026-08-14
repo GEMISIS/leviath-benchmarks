@@ -92,16 +92,24 @@ DECOYS = {
 }
 D2_KEY = "search.index.refresh_interval_s"
 
-# Log rotation by fixed two-hour windows; suffix "" is the current file.
-WINDOWS = [(0, 7200, ".5"), (7200, 14400, ".4"), (14400, 21600, ".3"),
-           (21600, 28800, ".2"), (28800, 36000, ".1"), (36000, 43200, "")]
+# Log rotation by fixed ONE-hour windows; suffix "" is the current
+# file, ".11" the oldest. Hourly (not two-hourly) because the suite's
+# read-only condition reads files whole through a token-capped
+# read_file: every emitted file must fit a single capped read.
+WINDOWS = [(h * 3600, (h + 1) * 3600,
+            "" if h == 11 else f".{11 - h}") for h in range(12)]
+
+# The read-only calibration guarantee: no emitted file may exceed this
+# (~15k tokens), or the read-only arms could not read it whole. build()
+# redraws with a salted rng if a burst lands badly; self_test asserts.
+MAX_FILE_BYTES = 60_000
 
 # ---------------------------------------------------------------------
 # Fixed reference documents (seed-independent, shared with log-search).
 # ---------------------------------------------------------------------
 
 TOPOLOGY_MD = """\
-# Aurora Platform — Service Topology (rev 15)
+# Aurora Platform — Service Topology (rev 16)
 
 Customer traffic enters at edge-gateway, which authenticates via
 auth-service and fans out to cart-api, checkout-api, and search-api.
@@ -140,7 +148,7 @@ Notes:
 - All configuration changes, for every service, are recorded centrally
   in changes/config-audit.log by the deploy tooling.
 - Log rotation: app.log is the current file, app.log.1 the previous
-  two-hour window, and so on back through app.log.5, the oldest
+  one-hour window, and so on back through app.log.11, the oldest
   retained window.
 """
 
@@ -377,8 +385,25 @@ def _timeline(rng: random.Random) -> dict:
 
 
 def build(seed: int) -> tuple[dict[str, str], list[str]]:
-    """Return ({relative_path: text}, ordered answer strings)."""
-    rng = random.Random(seed)
+    """Return ({relative_path: text}, ordered answer strings).
+
+    The salted-redraw loop is the file-size guarantee: if a seed's
+    stream happens to pile a burst into one hourly file past
+    MAX_FILE_BYTES, the whole corpus is redrawn from a deterministic
+    salted rng (str seeding is platform-stable) until every file fits.
+    Salt 0 is the plain seed, so ordinary seeds reproduce unsalted.
+    """
+    for salt in range(50):
+        rng = random.Random(seed if salt == 0 else f"{seed}/{salt}")
+        corpus, answers = _build_once(rng)
+        if all(len(t.encode("utf-8")) <= MAX_FILE_BYTES
+               for t in corpus.values()):
+            return corpus, answers
+    raise SystemExit(f"seed {seed}: no salt keeps every file under "
+                     f"{MAX_FILE_BYTES} bytes")
+
+
+def _build_once(rng: random.Random) -> tuple[dict[str, str], list[str]]:
     tl = _timeline(rng)
     t0, onset, rollback = tl["t0"], tl["onset"], tl["rollback"]
 
@@ -396,11 +421,11 @@ def build(seed: int) -> tuple[dict[str, str], list[str]]:
         if svc == "edge-gateway":
             continue
         for lo, hi, _ in WINDOWS:
-            for _ in range(rng.randrange(480, 560)):
+            for _ in range(rng.randrange(240, 280)):
                 emit(svc, rng.randrange(lo, hi), _noise_line(rng, svc))
 
     for lo, hi, _ in WINDOWS:
-        for _ in range(rng.randrange(1250, 1450)):
+        for _ in range(rng.randrange(625, 725)):
             t = rng.randrange(lo, hi)
             if rng.random() < BACKGROUND_5XX_PCT / 100.0:
                 status = rng.choice([500, 502])
@@ -741,6 +766,13 @@ def derive_answers(corpus: dict[str, str]) -> list[str]:
 
 
 def self_test(corpus: dict[str, str], answers: list[str]) -> None:
+    # The read-only calibration guarantee, asserted independently of
+    # build()'s redraw loop: every file must fit one capped read.
+    oversize = {p: len(t.encode("utf-8")) for p, t in corpus.items()
+                if len(t.encode("utf-8")) > MAX_FILE_BYTES}
+    if oversize:
+        raise SystemExit(f"self-test: files over {MAX_FILE_BYTES}B: "
+                         f"{oversize}")
     derived = derive_answers(corpus)
     if derived != answers:
         for i, (d, a) in enumerate(zip(derived, answers)):

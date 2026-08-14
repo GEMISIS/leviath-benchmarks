@@ -52,7 +52,11 @@ for path in sorted(glob.glob(str(BP / "*" / "agent.leviath"))):
             # to a stage that only reads it destroys the evidence.
             dest = doc["stages"].get(target) or {}
             routing = dest.get("tool_routing") or {}
-            writes = set(routing.get("overrides", {}).values())
+            # An override is a region string or a {region,
+            # max_result_tokens} table; a cap-only table names no region.
+            writes = {v if isinstance(v, str) else v.get("region")
+                      for v in routing.get("overrides", {}).values()}
+            writes.discard(None)
             if routing.get("default_region"):
                 writes.add(routing["default_region"])
             hit = PROTECTED.intersection(cfg.get("clear") or []) - carry - writes

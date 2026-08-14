@@ -51,6 +51,27 @@ hit — the recorded request_footprint block (input_max against the pin)
 is the published evidence of that, not an assumption. The pin also
 mirrors the local-model deployment story the footprint suite makes.
 
+## The read-only condition
+
+The log tasks additionally run **read-only**: no shell, no writes —
+agents work from file reads alone (make_readonly.py generates the
+variants; check_pairs.py enforces the invariants). The reason is a
+finding from this program's own calibration: script-solvable tasks
+never create context pressure at any corpus size, because agents
+compute over files on disk and keep tiny contexts — with a shell,
+every arm routes around the thing this suite measures. The condition
+applies to every arm identically (the structured agent loses its
+scripting stage whole; the prompt passages that mandate scripting are
+replaced with read-only equivalents in both arms from one substitution
+table), the corpora guarantee no file exceeds 60KB so a whole rotated
+log is one readable result everywhere, and the scripted-condition
+results from the footprint suite are published alongside as the
+contrast. It is a disclosed condition, like a closed-book exam — not a
+claim about how agents should analyze logs in production. The ask test
+keeps its shell: auditing 39,000 ledger rows by hand would be absurd,
+and its mechanism (the missing fact is not on disk at all) needs no
+window pressure.
+
 ## The ask test (redacted-ledger)
 
 A required fact is absent from the corpus and held by a scripted user.

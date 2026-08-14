@@ -54,6 +54,11 @@ FAMILIES = {
 # The structured role is the composed flagship, by design.
 STRUCTURED_VARIANT = "adversarial-scoped-flagship"
 
+# The log tasks run in the read-only condition (no shell, no writes -
+# make_readonly.py has the why); the ask test runs on ask-enabled
+# variants. Both conditions apply to every arm symmetrically.
+READONLY_TASKS = {"incident-chronicle", "noisy-incident"}
+
 # Classifier counts the record's hallucination block always carries;
 # a verifier only reports the ones its task can decide, the rest stay
 # zero so cross-task aggregation is a plain sum.
@@ -101,10 +106,13 @@ class Suite:
             if arm.get("variant"):
                 blueprint = f"{blueprint}-{arm['variant']}"
         # The ask test runs on ask-enabled counterparts (make_askable.py)
-        # for every arm symmetrically; the other tasks keep the standard
-        # no-HITL blueprints.
+        # for every arm symmetrically; the log tasks run on read-only
+        # counterparts (make_readonly.py); everything else keeps the
+        # standard no-HITL blueprints.
         if self.interaction_for(task) is not None:
             blueprint = f"{blueprint}-askable"
+        elif task["id"] in READONLY_TASKS:
+            blueprint = f"{blueprint}-readonly"
         return blueprint, []
 
     def interaction_for(self, task: dict) -> dict | None:

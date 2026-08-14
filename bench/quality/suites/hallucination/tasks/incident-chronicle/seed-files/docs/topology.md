@@ -35,7 +35,7 @@ Notes:
 - All configuration changes, for every service, are recorded centrally
   in changes/config-audit.log by the deploy tooling.
 - Log rotation: app.log is the current file, app.log.1 the previous
-  two-hour window, and so on back through app.log.5, the oldest
+  one-hour window, and so on back through app.log.11, the oldest
   retained window.
 - The ops incident channel transcript for the day is retained at
   chat/incident-channel.log.

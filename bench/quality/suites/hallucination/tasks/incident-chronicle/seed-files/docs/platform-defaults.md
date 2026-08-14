@@ -29,5 +29,5 @@ page wins; it is reviewed quarterly by platform-core.
 - Every configuration change, for every service, flows through the
   deploy tooling and is recorded in changes/config-audit.log.
   Out-of-band edits are a paging offence.
-- Application logs rotate every two hours; six windows are retained
-  (app.log through app.log.5).
+- Application logs rotate hourly; twelve windows are retained
+  (app.log through app.log.11).

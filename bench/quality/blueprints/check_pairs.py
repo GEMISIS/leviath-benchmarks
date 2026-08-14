@@ -35,6 +35,8 @@ sys.path.insert(0, str(HERE))
 from conduct import ASK_NOTE, CONDUCT  # noqa: E402
 from make_askable import ASKABLE  # noqa: E402
 from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
+from make_readonly import (DROPPED_TOOLS, READONLY_FLATS,  # noqa: E402
+                           READONLY_STRUCTURED)
 
 
 def load(name: str) -> dict:
@@ -242,6 +244,49 @@ def check_askable(source_name: str, stage_name: str) -> list[str]:
     return problems
 
 
+def check_readonly() -> list[str]:
+    """The read-only condition's invariants: no shell/writes anywhere,
+    the script stage gone, and the flat/structured symmetry (tool
+    union, iteration budget) holding within the condition."""
+    problems = []
+    docs = {}
+    for name in [READONLY_STRUCTURED] + READONLY_FLATS:
+        path = HERE / f"{name}-readonly" / "agent.leviath"
+        if not path.is_file():
+            return [f"{name}-readonly: missing (regenerate with "
+                    "make_readonly.py)"]
+        docs[name] = load(f"{name}-readonly")
+    s = docs[READONLY_STRUCTURED]
+    if "script" in s["stages"]:
+        problems.append("readonly structured still has a script stage")
+    for name, doc in docs.items():
+        for sname, stage in doc["stages"].items():
+            bad = [t for t in stage.get("available_tools", [])
+                   if t in DROPPED_TOOLS]
+            if bad:
+                problems.append(f"{name}-readonly/{sname}: dropped "
+                                f"tools survived: {bad}")
+    s_tools = {t for st in s["stages"].values()
+               for t in st.get("available_tools", [])
+               if not _excluded_tool(t)}
+    s_budget = sum(int(st.get("max_iterations", 10))
+                   for st in s["stages"].values())
+    for flat in READONLY_FLATS:
+        f = docs[flat]
+        f_tools = set(f["stages"]["work"].get("available_tools", []))
+        if f_tools != s_tools:
+            problems.append(
+                f"{flat}-readonly tool union mismatch: structured-only "
+                f"{sorted(s_tools - f_tools)}, flat-only "
+                f"{sorted(f_tools - s_tools)}")
+        if f["stages"]["work"]["max_iterations"] != s_budget:
+            problems.append(
+                f"{flat}-readonly budget "
+                f"{f['stages']['work']['max_iterations']} != readonly "
+                f"structured sum {s_budget}")
+    return problems
+
+
 def json_roundtrip(doc: dict) -> dict:
     import copy
     return copy.deepcopy(doc)
@@ -306,6 +351,14 @@ def main() -> int:
                 print(f"  FAIL {p}")
         else:
             print(f"{source_name} vs {source_name}-askable: OK (askable)")
+    problems = check_readonly()
+    if problems:
+        failed = True
+        print("readonly condition:")
+        for p in problems:
+            print(f"  FAIL {p}")
+    else:
+        print("readonly condition: OK (no shell/writes, symmetric)")
     return 1 if failed else 0
 
 

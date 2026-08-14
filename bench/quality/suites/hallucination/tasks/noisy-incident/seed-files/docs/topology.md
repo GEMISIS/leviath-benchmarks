@@ -1,4 +1,4 @@
-# Aurora Platform — Service Topology (rev 15)
+# Aurora Platform — Service Topology (rev 16)
 
 Customer traffic enters at edge-gateway, which authenticates via
 auth-service and fans out to cart-api, checkout-api, and search-api.
@@ -37,5 +37,5 @@ Notes:
 - All configuration changes, for every service, are recorded centrally
   in changes/config-audit.log by the deploy tooling.
 - Log rotation: app.log is the current file, app.log.1 the previous
-  two-hour window, and so on back through app.log.5, the oldest
+  one-hour window, and so on back through app.log.11, the oldest
   retained window.

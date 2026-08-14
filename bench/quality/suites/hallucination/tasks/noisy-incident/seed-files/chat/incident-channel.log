@@ -1,9 +1,9 @@
-2026-03-14T00:12:54Z <mira> taking over on-call from the night rotation, dashboards green
-2026-03-14T01:32:47Z <anna-k> push-relay cert alerts on notification-service are tracked in OPS-889; renewal is scheduled, alerts are noisy but harmless
-2026-03-14T02:42:05Z <deshaun> rec-api workers churning again, watching it
-2026-03-14T03:12:38Z <tomas> rec-api OOM churn is BUG-1234, known, self-heals - not related to anything customer-facing
-2026-03-14T03:39:41Z <mira> search team is tuning index refresh, expect some search-api noise
-2026-03-14T03:50:30Z <mira> reverted the index refresh tuning on search-api, error burst stopped
-2026-03-14T06:15:43Z <yusuf> seeing elevated checkout latency on the edge dashboard, anyone deploying?
-2026-03-14T06:27:05Z <tomas> not us, search change was this morning and already reverted
-2026-03-14T07:21:10Z <anna-k> edge error rate trending back down, keeping the channel open for the postmortem
+2026-03-14T00:06:59Z <anna-k> taking over on-call from the night rotation, dashboards green
+2026-03-14T01:25:21Z <tomas> push-relay cert alerts on notification-service are tracked in OPS-889; renewal is scheduled, alerts are noisy but harmless
+2026-03-14T02:41:47Z <mira> rec-api workers churning again, watching it
+2026-03-14T03:13:25Z <petra> rec-api OOM churn is BUG-1234, known, self-heals - not related to anything customer-facing
+2026-03-14T03:37:05Z <anna-k> search team is tuning index refresh, expect some search-api noise
+2026-03-14T03:51:15Z <yusuf> reverted the index refresh tuning on search-api, error burst stopped
+2026-03-14T06:16:26Z <deshaun> seeing elevated checkout latency on the edge dashboard, anyone deploying?
+2026-03-14T06:32:04Z <mira> not us, search change was this morning and already reverted
+2026-03-14T07:16:42Z <anna-k> edge error rate trending back down, keeping the channel open for the postmortem
