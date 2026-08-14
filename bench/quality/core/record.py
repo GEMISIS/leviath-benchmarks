@@ -35,7 +35,12 @@ __all__ = ["SCHEMA", "SCHEMAS", "REQUIRED_KEYS", "STATUSES",
 
 SCHEMA = "quality-run-v2"
 SCHEMAS = {"quality-run-v1", "quality-run-v2"}
-STATUSES = {"complete", "error", "timeout", "no_answer", "cap"}
+# "cancelled" covers runs stopped outside the harness's own guards -
+# leviath pauses a run on provider credit exhaustion, and the operator
+# cancels it rather than waiting out the timeout; the spend is real
+# and the record must be writable.
+STATUSES = {"complete", "error", "timeout", "no_answer", "cap",
+            "cancelled"}
 REQUIRED_KEYS = {
     "schema", "freeze_tag", "suite", "task_id", "arm", "model_label",
     "model_policy", "rep", "blueprint", "lev", "status", "started_utc",

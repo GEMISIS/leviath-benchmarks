@@ -207,7 +207,8 @@ class QualityHome:
 
     def wait(self, run_id: str, timeout_secs: float,
              poll_secs: float = 1.0,
-             should_cancel=None) -> tuple[str, dict | None]:
+             should_cancel=None,
+             max_paused_secs: float = 7200.0) -> tuple[str, dict | None]:
         """Poll meta.json until terminal. Returns (status, meta).
 
         On timeout the run is cancelled and status "timeout" returned.
@@ -217,13 +218,32 @@ class QualityHome:
         blow through a whole round budget before the next between-run
         check. Either way the captured meta still carries the tokens
         spent.
+
+        A PAUSED run is waiting on the outside world - leviath pauses
+        on provider credit exhaustion, resumable after a top-up - and
+        spends nothing, so paused time does not count against the task
+        timeout. The harness retries `lev resume` once a minute (a
+        resume without credits just re-pauses on the next inference)
+        and gives up after ``max_paused_secs`` of accumulated pause.
         """
         deadline = time.time() + timeout_secs
         meta = None
+        paused_total = 0.0
+        resume_at = 0.0
         while time.time() < deadline:
             meta = self.meta(run_id)
             if meta and meta.get("status") in TERMINAL:
                 return meta["status"], meta
+            if meta and meta.get("status") == "paused":
+                paused_total += poll_secs
+                deadline += poll_secs
+                if paused_total > max_paused_secs:
+                    break  # falls through to cancel/timeout below
+                if time.time() >= resume_at:
+                    subprocess.run([self.lev, "resume", run_id],
+                                   env=self.env(), capture_output=True,
+                                   text=True)
+                    resume_at = time.time() + 60.0
             if meta and should_cancel is not None and should_cancel(meta):
                 subprocess.run([self.lev, "cancel", run_id],
                                env=self.env(), capture_output=True,
