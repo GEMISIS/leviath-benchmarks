@@ -48,8 +48,54 @@ def _cached_inclusive_stages(archive: Path) -> set[str]:
             if str(model).startswith(("openai/", "openrouter/"))}
 
 
+def _from_usage_records(archive: Path) -> list[dict] | None:
+    """Exact per-call entries from lev 0.3.10's InferenceUsage records
+    (leviath#445). Each record carries its own provider, so the
+    cached-inclusive correction needs no stage map: Anthropic's
+    prompt_tokens exclude cached tokens, everyone else's include them."""
+    try:
+        _, recs, _ = lvr.read_archive(archive)
+    except Exception:
+        return None
+    usage = [r["InferenceUsage"] for r in recs if "InferenceUsage" in r]
+    if not usage:
+        return None
+    entries = []
+    prev_at = None
+    for u in usage:
+        prompt = int(u.get("prompt_tokens") or 0)
+        cached = int(u.get("cached_tokens") or 0)
+        cw = int(u.get("cache_write_tokens") or 0)
+        if str(u.get("provider", "")).startswith("anthropic"):
+            d_in = prompt + cached + cw
+        else:
+            d_in = prompt + cw
+        entry = {
+            "iteration": int(u.get("iteration") or 0),
+            "stage": u.get("stage") or None,
+            "kind": u.get("kind") or None,
+            "input_tokens": d_in,
+            "cached_tokens": cached,
+            "output_tokens": int(u.get("completion_tokens") or 0),
+        }
+        at = u.get("at")
+        if isinstance(at, (int, float)) and isinstance(prev_at,
+                                                       (int, float)):
+            entry["secs"] = max(int(at - prev_at), 0)
+        prev_at = at if isinstance(at, (int, float)) else prev_at
+        entries.append(entry)
+    return entries
+
+
 def from_archive(archive: Path) -> dict | None:
-    """Fold run.lvr(.gz) into the request-footprint block, or None."""
+    """Fold run.lvr(.gz) into the request-footprint block, or None.
+
+    Prefers exact per-call InferenceUsage records (lev >= 0.3.10);
+    falls back to per-tick deltas of the cumulative Progress counters
+    for older archives."""
+    exact = _from_usage_records(archive)
+    if exact:
+        return _summarize(exact, exact_per_call=True)
     points = lvr.fold(archive)
     if not points:
         return None
@@ -95,6 +141,11 @@ def from_archive(archive: Path) -> dict | None:
         requests.append(entry)
         prev, prev_out, prev_ts = cur, cum_out, ts
 
+    return _summarize(requests, exact_per_call=False)
+
+
+def _summarize(requests: list[dict],
+               exact_per_call: bool) -> dict | None:
     if not requests:
         return None
     if len(requests) > MAX_CURVE_POINTS:
@@ -113,6 +164,9 @@ def from_archive(archive: Path) -> dict | None:
     tail_mean = sum(tail) / len(tail)
     return {
         "n_requests": n,
+        # True = one entry per provider call (lev >= 0.3.10 usage
+        # records); False = per journal tick, which can span calls.
+        "exact_per_call": exact_per_call,
         "input_p50": int(statistics.median(inputs)),
         "input_max": max(inputs),
         "input_head_mean": int(head_mean),

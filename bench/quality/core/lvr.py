@@ -204,6 +204,9 @@ _KNOWN_VARIANTS = frozenset({
     "Header", "OwnershipChanged", "Inference", "ToolBatch", "ToolCallDone",
     "ContextCheckpoint", "ContextDiff", "Message", "StatusChanged",
     "Checkpoint", "Progress",
+    # lev 0.3.10 (leviath#445): per-provider-call usage, written as it
+    # lands - the exact per-request record the footprint fold prefers.
+    "InferenceUsage",
 })
 
 

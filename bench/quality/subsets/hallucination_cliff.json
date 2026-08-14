@@ -1,0 +1,11 @@
+{
+  "suite": "hallucination",
+  "seed": 20260816,
+  "n": 2,
+  "universe_sha256": "9db1d286b46b91230d6eafb70e1b484d1c047ef6aa2b7ab775980b15e3354bff",
+  "excluded": [],
+  "task_ids": [
+    "incident-chronicle",
+    "noisy-incident"
+  ]
+}
