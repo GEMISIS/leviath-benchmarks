@@ -82,6 +82,9 @@ def from_archive(archive: Path) -> dict | None:
             "input_tokens": max(d_in, 0),
             "output_tokens": max(d_out, 0),
         }
+        stage = meta.get("current_stage")
+        if stage:
+            entry["stage"] = stage
         if isinstance(ts, (int, float)) and isinstance(prev_ts,
                                                        (int, float)):
             entry["secs"] = max(int(ts - prev_ts), 0)

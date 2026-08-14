@@ -42,6 +42,18 @@ Grade the agent's answer on this 4-point scale:
 - **Wrong (0.0)**: Confident but incorrect
 - **Hallucinated (-0.5)**: Invented information not present in the original context
 
+Important: the agent answers from the FULL working context of the
+original run, which you cannot see - only the expected answer and
+rubric. Extra detail beyond the expected answer (the run's own tallies,
+filenames, working notes, or values it established during the task) is
+NOT hallucination and must not lower the grade, as long as it does not
+contradict the expected answer or the rubric. Reserve "hallucinated"
+for answers that assert something the expected answer or rubric shows
+to be false, or that invent entities or values where the rubric says
+the information does not exist. When the core answer is right and the
+additions are merely unverifiable from where you sit, grade on the
+core answer alone.
+
 Respond with a JSON object in this exact format:
 {{
   "grade": "correct" | "partial" | "wrong" | "hallucinated",
