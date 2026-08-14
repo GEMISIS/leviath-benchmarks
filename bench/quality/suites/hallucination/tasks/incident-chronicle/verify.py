@@ -70,6 +70,10 @@ def verify(task_dir: Path, workdir: Path, artifacts_dir: Path,
         if i in (2, 5, 8):
             return g not in audit_text
         if i == 11:
+            # "none" is the format's legitimate empty answer - wrong
+            # when the key disagrees, but nothing was invented.
+            if g == "none":
+                return False
             return any(s and s not in services for s in g.split(","))
         if i == 13:
             return any(h and f"@{h}" not in chat_text
