@@ -365,6 +365,14 @@ def main() -> int:
     # TTL costs nothing extra on hits and is part of what a structured
     # arm is claimed to be able to do. Native Anthropic provider only.
     config_text += '\n[providers]\nanthropic_cache_ttl = "1h"\n'
+    # Blueprint tool_permissions are a ceiling by default (only
+    # web_search/web_fetch may loosen); --yolo masks that by
+    # auto-approving. The ask tests run attended so the ask tools
+    # survive - without this, every shell call parks on an approval
+    # the scripted user must rubber-stamp (~35 round trips per run).
+    # The home is hermetic and every other cell runs --yolo, so this
+    # only makes attended cells behave like the rest of the matrix.
+    config_text += '\n[security]\nallow_blueprint_permissions = true\n'
     home.install(blueprints_dir, config_text,
                  providers_dir=(Path(args.providers_dir)
                                 if args.providers_dir else None))
