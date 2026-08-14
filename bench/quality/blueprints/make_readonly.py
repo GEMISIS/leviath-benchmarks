@@ -39,7 +39,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 READONLY_STRUCTURED = "loganalyzer-bench-adversarial-scoped-flagship"
-READONLY_FLATS = ["flat-loganalyzer", "flat-loganalyzer-compacting"]
+READONLY_FLATS = ["flat-loganalyzer", "flat-loganalyzer-compacting",
+                  "flat-loganalyzer-hardened",
+                  "flat-loganalyzer-compacting-hardened"]
 READONLY = [READONLY_STRUCTURED] + READONLY_FLATS
 
 DROPPED_TOOLS = ("bash", "write_file", "edit_file")

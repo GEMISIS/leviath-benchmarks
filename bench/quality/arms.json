@@ -170,6 +170,20 @@
    "model": null,
    "variant": "adversarial-scoped-sonnet-loop",
    "note": "flagship with the loop stage on the workhorse model."
+  },
+  {
+   "name": "flat-pinned-hardened",
+   "role": "flat",
+   "model": "$sweep",
+   "variant": "hardened",
+   "note": "flat baseline + the wind-down and result-hygiene discipline production harnesses carry; the variance-decomposition arm for the collapse study"
+  },
+  {
+   "name": "flat-compacting-hardened",
+   "role": "flat",
+   "model": "$sweep",
+   "variant": "compacting-hardened",
+   "note": "the compacting baseline with the same hardening"
   }
  ],
  "_context_window": "Context window in tokens, pinned per model and written into the runtime's config as a model_capabilities override. Region budgets are percentages of the window, so the window decides how big every region is. Since 0.3.3 (#360) the runtime primes OpenRouter windows from the provider at daemon start, so the override is no longer a bug workaround - it is a freeze: the round pins the window it measured under rather than inheriting whatever /models returned that day (the priming also frequently lacks max_output_tokens). Each value here was verified against the provider, and the resolved window is recorded in every round.",

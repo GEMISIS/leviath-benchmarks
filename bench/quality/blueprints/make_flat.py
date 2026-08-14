@@ -119,6 +119,19 @@ no preamble and no report nobody asked for.
 """,
 }
 
+# The hardened variants' extra discipline: the wind-down every
+# production harness carries, plus tighter tool-result hygiene. This is
+# baseline STRENGTHENING - if hardened flat stops collapsing, the
+# honest claim narrows to "discipline can be prompted, but structure is
+# the sum of the disciplines, guaranteed".
+WIND_DOWN = """
+Budget your investigation. If tool results start coming back empty or
+truncated, if a call fails twice in a row, or if you notice yourself
+re-reading files you have already read, STOP investigating immediately
+and call submit_output with your best current answer - a partial
+report delivered beats a perfect one that never ships. Never respond
+with an empty message: when in doubt, submit what you have."""
+
 ANSWER_PROMPT = """
 Deliver the final answer to the task. Report only what you actually
 established.
@@ -148,7 +161,7 @@ def _pick_model_list(doc: dict) -> list[dict]:
 
 
 def make_flat(structured_name: str, flat_name: str,
-              compacting: bool = False) -> str:
+              compacting: bool = False, hardened: bool = False) -> str:
     doc = tomllib.loads(
         (HERE / structured_name / "agent.leviath").read_text())
     stages = doc["stages"]
@@ -180,7 +193,8 @@ def make_flat(structured_name: str, flat_name: str,
             f"provider = \"{compaction.get('provider')}\"\n"
             f"model = \"{compaction.get('model')}\"\n\n")
 
-    base_flat = flat_name.removesuffix("-compacting")
+    base_flat = (flat_name.removesuffix("-hardened")
+                 .removesuffix("-compacting"))
     work_prompt = WORK_PROMPTS[base_flat].strip()
     upstream = doc["agent"]["name"]
 
@@ -241,12 +255,12 @@ system_prompt = \"\"\"
 {work_prompt}
 
 {CONDUCT}
-
+{(chr(10) + WIND_DOWN.strip() + chr(10)) if hardened else ""}
 {ANSWER_PROMPT.strip()}
 \"\"\"
 
 [stages.work.tool_routing]
-default_region = "conversation"
+{'max_result_tokens = 6000' + chr(10) if hardened else ""}default_region = "conversation"
 
 [stages.work.transitions]
 
@@ -295,11 +309,16 @@ def _mirror_tools(structured_name: str, flat_name: str) -> int:
 
 def main() -> int:
     for structured_name, flat_name in PAIRS.items():
-        for name, compacting in ((flat_name, False),
-                                 (COMPACT_VARIANTS[flat_name], True)):
+        variants = [(flat_name, False, False),
+                    (COMPACT_VARIANTS[flat_name], True, False),
+                    (f"{flat_name}-hardened", False, True),
+                    (f"{COMPACT_VARIANTS[flat_name]}-hardened", True,
+                     True)]
+        for name, compacting, hardened in variants:
             out = HERE / name
             out.mkdir(parents=True, exist_ok=True)
-            text = make_flat(structured_name, name, compacting=compacting)
+            text = make_flat(structured_name, name,
+                             compacting=compacting, hardened=hardened)
             tomllib.loads(text)  # must parse before it lands on disk
             (out / "agent.leviath").write_text(text)
             n = _mirror_tools(structured_name, name)
