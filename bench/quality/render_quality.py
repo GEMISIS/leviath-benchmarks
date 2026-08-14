@@ -1268,23 +1268,38 @@ def render_success_rate(suites: dict, round_meta: dict, specs: dict,
                 rate = passes / len(cell)
                 x = wi + (ai - (len(arms) - 1) / 2) * width
                 ax.bar([x], [rate], width=width * 0.9,
-                       color=arm_color(arm), zorder=3,
+                       color=arm_color(arm), zorder=3, alpha=0.55,
                        label=arm_label(arm) if wi == 0 else None)
-                if len(cell) > 1:
-                    ax.annotate(f"n={len(cell)}", (x, rate),
-                                fontsize=5.6, color=MUTED, ha="center",
-                                xytext=(0, 2),
-                                textcoords="offset points")
+                # The graded score rides the rate bar as a marker, so
+                # a 1-rep smoke still shows HOW right the passes were
+                # (and how close the failures came).
+                scores = [(r.get("functional") or {}).get("score")
+                          for r in cell]
+                scores = [s for s in scores
+                          if isinstance(s, (int, float))]
+                if scores:
+                    ax.plot([x], [sum(scores) / len(scores)], "_",
+                            markersize=11, color=INK,
+                            markeredgewidth=2.2, zorder=4)
+                ax.annotate(f"n={len(cell)}", (x, rate),
+                            fontsize=5.6, color=MUTED, ha="center",
+                            xytext=(0, 2), textcoords="offset points")
         ax.set_xticks(range(len(windows)))
         ax.set_xticklabels([f"@{w // 1000}k" if w else "native"
                             for w in windows], fontsize=8, color=INK2)
         ax.set_ylim(0, 1.08)
         ax.set_title(task, fontsize=10, color=INK)
-    axes[0][0].set_ylabel("success rate (functional pass)", fontsize=8,
-                          color=MUTED)
+    axes[0][0].set_ylabel("pass rate (bar) / mean score (tick)",
+                          fontsize=8, color=MUTED)
     axes[0][-1].legend(fontsize=6.4, frameon=False, loc="lower right")
     fig.suptitle("Who finishes the job, per window tier", fontsize=12.5,
                  color=INK)
+    fig.text(0.01, 0.024,
+             "bar = fraction of runs clearing the task's pass bar "
+             "(n=1 per cell in a smoke, so bars read 0 or 1 until "
+             "counted rounds add reps); black tick = mean graded "
+             "functional score of the same runs",
+             fontsize=6.4, color=MUTED, ha="left")
     if round_meta.get("freeze_tag") == SMOKE_TAG:
         smoke_watermark(fig)
     provenance(fig, round_meta, specs)
