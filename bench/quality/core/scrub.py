@@ -20,8 +20,11 @@ from pathlib import Path
 __all__ = ["scan"]
 
 _PATTERNS = [
-    re.compile(rb"sk-ant-[A-Za-z0-9_\-]{10,}"),
-    re.compile(rb"sk-[A-Za-z0-9_\-]{20,}"),
+    # The boundary guard matters: leviath's interaction request ids are
+    # "ask-<tool_call_id>", whose tail matches a bare sk- pattern - a
+    # whole round of ask-test transcripts once tripped the scrubber.
+    re.compile(rb"(?<![A-Za-z0-9])sk-ant-[A-Za-z0-9_\-]{10,}"),
+    re.compile(rb"(?<![A-Za-z0-9])sk-[A-Za-z0-9_\-]{20,}"),
     re.compile(rb"AIza[A-Za-z0-9_\-]{30,}"),
     re.compile(rb"hf_[A-Za-z0-9]{20,}"),
     re.compile(rb"github_pat_[A-Za-z0-9_]{20,}"),
