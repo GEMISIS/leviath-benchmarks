@@ -740,21 +740,22 @@ class EvaluatorTests(unittest.TestCase):
         self.assertIsNone(out["score"])
 
 
-class CrsSuiteTests(unittest.TestCase):
+class FootprintSuiteTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        crs_dir = QUALITY_DIR / "suites" / "crs"
-        sys.path.insert(0, str(crs_dir))
-        from suites.crs.suite import Suite
+        fp_dir = QUALITY_DIR / "suites" / "footprint"
+        sys.path.insert(0, str(fp_dir))
+        from suites.footprint.suite import Suite
         cls.suite = Suite()
         cls.tasks = cls.suite.load_tasks(None)
 
-    def test_runnable_tasks_load_with_valid_probes(self):
+    def test_all_three_tasks_load(self):
         ids = {t["id"] for t in self.tasks}
-        self.assertLessEqual({"cli-tool", "rest-api", "stress-test"}, ids)
-        for t in self.tasks:
-            depths = [p["after_tool_calls"] for p in t["probes"]]
-            self.assertEqual(depths, sorted(depths))
+        self.assertEqual(ids, {"snake-cpp", "log-search", "explain-repo"})
+        families = {t["id"]: t["family"] for t in self.tasks}
+        self.assertEqual(families["snake-cpp"], "coder")
+        self.assertEqual(families["log-search"], "loganalyzer")
+        self.assertEqual(families["explain-repo"], "researcher")
 
     def test_blueprint_mapping(self):
         task = next(t for t in self.tasks if t["family"] == "coder")
@@ -769,12 +770,56 @@ class CrsSuiteTests(unittest.TestCase):
                 task, {"role": role, "variant": variant})
             self.assertEqual(got, expected)
 
-    def test_grade_hoists_validation_block(self):
+    def test_grade_hoists_functional_and_footprint(self):
         verdict = self.suite.grade(self.tasks[0], {
-            "passed": 3, "failed": 1, "errors": 0, "total": 4,
-            "failures": ["t"], "suite_hash": "x"})
+            "functional_pass": False, "score": 0.5,
+            "detail": {"points": 2, "of": 4},
+            "request_footprint": {
+                "n_requests": 3, "input_p50": 5000, "input_max": 9000,
+                "input_growth": 1.4, "output_p50": 400,
+                "requests": []}})
         self.assertFalse(verdict["passed"])
-        self.assertEqual(verdict["record_fields"]["validation"]["total"], 4)
+        self.assertEqual(
+            verdict["record_fields"]["functional"]["score"], 0.5)
+        self.assertEqual(
+            verdict["record_fields"]["request_footprint"]["input_p50"],
+            5000)
+
+    def test_footprint_fold_on_real_archive(self):
+        import glob
+        from suites.footprint import footprint as fp_mod
+        archives = glob.glob(str(
+            QUALITY_DIR.parent.parent / "results" / "*" / "quality" / "*"
+            / "runs" / "*.artifacts" / "run" / "run.lvr.gz"))
+        if not archives:
+            self.skipTest("no real archives on this machine")
+        fp = fp_mod.from_archive(Path(archives[0]))
+        if fp is None:
+            self.skipTest("archive folded to no requests")
+        self.assertGreater(fp["n_requests"], 0)
+        self.assertGreaterEqual(fp["input_max"], fp["input_p50"])
+        for req in fp["requests"]:
+            self.assertGreaterEqual(req["input_tokens"], 0)
+
+    def test_log_search_verifier_scores_partials(self):
+        task = next(t for t in self.tasks if t["id"] == "log-search")
+        sys.path.insert(0, str(task["dir"]))
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "ls_verify", task["dir"] / "verify.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        import json as _json
+        key = _json.loads(
+            (task["dir"] / "answers.json").read_text())["answers"]
+        perfect = "\n".join(str(a) for a in key[:4])
+        out = mod.verify(task["dir"], Path("."), Path("."), perfect)
+        self.assertTrue(out["functional_pass"])
+        self.assertEqual(out["score"], 1.0)
+        wrong_root = "\n".join(["nope"] + [str(a) for a in key[1:4]])
+        out2 = mod.verify(task["dir"], Path("."), Path("."), wrong_root)
+        self.assertTrue(out2["functional_pass"])  # 3 of 4 still passes
+        self.assertLess(out2["score"], 1.0)
 
 
 class ProvidersTests(unittest.TestCase):

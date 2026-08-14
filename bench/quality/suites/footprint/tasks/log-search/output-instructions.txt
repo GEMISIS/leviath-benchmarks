@@ -1,0 +1,3 @@
+Reply with ONLY the four-line report the task specifies: root-cause
+service, configuration key, T0 timestamp, propagation order. One item
+per line, exact spellings, no headings, no numbering, no commentary.

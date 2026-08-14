@@ -58,11 +58,21 @@ sha256. Everything needed to say exactly what ran.
 Every run writes a record - failures, timeouts, and budget cap-outs
 included. There is no mechanism for excluding one.
 
-## quality-run-v2 (superset of v1; Context Retention Suite fields)
+## quality-run-v2 (superset of v1)
 
 v2 records carry everything above (with `schema: "quality-run-v2"`) plus
-four optional blocks, written by the CRS suite and the probe-replay
-phase. v1 records stay valid; readers accept both.
+optional blocks written by the newer suites. v1 records stay valid;
+readers accept both.
+
+Footprint-suite blocks:
+
+| field | meaning |
+|---|---|
+| `functional` | `{score: 0..1, detail}` — the generous functional bar's graded result (compiles-and-plays, facts found, document grounded), while `score.passed` carries the pass/fail |
+| `request_footprint` | `{n_requests, input_p50, input_max, input_head_mean, input_tail_mean, input_growth, output_p50, secs_p50, requests: [{iteration, tool_calls, input_tokens, output_tokens, secs}]}` — per-request tokens over the run, folded from the journal's cumulative provider-billed counters. `input_growth` (tail mean ÷ head mean) is the stability verdict: ~1 holds, >1 grows |
+
+Retention blocks (dormant since the CRS split; kept for the successor
+retention/window suite):
 
 | field | meaning |
 |---|---|

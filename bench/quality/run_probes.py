@@ -272,6 +272,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Replay and grade CRS retention probes.")
     parser.add_argument("results_dir", type=Path)
+    parser.add_argument("--suite", default="crs",
+                        help="suite name under quality/ whose runs to "
+                             "probe. DORMANT NOTE: the retention (CRS) "
+                             "suite was split apart 2026-08-14; this "
+                             "tool waits for its successor "
+                             "retention/window suite")
     parser.add_argument("--grade", action="store_true")
     parser.add_argument("--budget-usd", type=float, default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -291,7 +297,7 @@ def main() -> int:
     round_meta = json.loads((quality / "round.json").read_text())
     cfg = _probe_config(round_meta)
     rates = cost_mod.load_rates(QUALITY_DIR / "rates.json")
-    runs_dir = quality / "crs" / "runs"
+    runs_dir = quality / args.suite / "runs"
     if not runs_dir.is_dir():
         raise SystemExit(f"no crs runs under {quality}")
 

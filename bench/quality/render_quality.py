@@ -493,7 +493,7 @@ def render_retention(suites: dict, round_meta: dict, specs: dict,
     hallucination rate. Point labels carry n (reached/total) so
     survivorship is visible on the chart itself, never hidden in a
     footnote. Per-task panels first, pooled panel last."""
-    data = suites.get("crs")
+    data = suites.get("footprint") or suites.get("crs")
     if not data:
         return None
     runs = [r for r in data["runs"] if r.get("retention")]
@@ -578,7 +578,7 @@ def render_cost_per_success(suites: dict, round_meta: dict, specs: dict,
     """Cost per passing run, per arm - cost per run rewards cheap
     failure; this is the number a buyer pays. Probe overhead excluded
     (it is measurement)."""
-    data = suites.get("crs")
+    data = suites.get("footprint") or suites.get("crs")
     if not data:
         return None
     runs = data["runs"]
@@ -641,7 +641,7 @@ def render_cost_at_depth(suites: dict, round_meta: dict, specs: dict,
     forgotten, but every call re-bills what the architecture chose to
     carry. Token-denominated (not dollars) so mixed-model arms chart on
     the same axis; the cost tables carry the dollars."""
-    data = suites.get("crs")
+    data = suites.get("footprint") or suites.get("crs")
     if not data:
         return None
     runs = [r for r in data["runs"] if r.get("depth_usage_curve")]
@@ -701,9 +701,86 @@ def render_cost_at_depth(suites: dict, round_meta: dict, specs: dict,
     return path
 
 
+LOCAL_WINDOWS = [(8_000, "8k local"), (32_000, "32k local"),
+                 (128_000, "128k")]
+
+
+def render_request_footprint(suites: dict, round_meta: dict, specs: dict,
+                             out_dir: Path):
+    """The footprint suite's headline: input tokens PER REQUEST over
+    the run, per arm - stability vs growth. Horizontal reference lines
+    mark common local-model windows: an arm whose curve crosses a line
+    cannot run on that deployment at all, which is the local-viability
+    argument drawn rather than asserted."""
+    data = suites.get("footprint")
+    if not data:
+        return None
+    runs = [r for r in data["runs"] if r.get("request_footprint")]
+    if not runs:
+        return None
+
+    tasks = sorted({r["task_id"] for r in runs})
+    ncols = min(len(tasks), 3)
+    nrows = (len(tasks) + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols,
+                             figsize=(6.4 * ncols, 4.8 * nrows),
+                             squeeze=False)
+    fig.patch.set_facecolor(SURFACE)
+
+    for i, task in enumerate(tasks):
+        ax = axes[i // ncols][i % ncols]
+        style_ax(ax)
+        task_runs = [r for r in runs if r["task_id"] == task]
+        top = 0
+        for r in sorted(task_runs,
+                        key=lambda r: arm_sort_key(r["arm"])):
+            fp = r["request_footprint"]
+            xs = list(range(1, len(fp["requests"]) + 1))
+            ys = [q["input_tokens"] for q in fp["requests"]]
+            top = max(top, max(ys, default=0))
+            growth = fp.get("input_growth")
+            label = (f"{arm_label(r['arm'])} "
+                     f"(growth {growth}x)" if growth else
+                     arm_label(r["arm"]))
+            ax.plot(xs, ys, linewidth=1.5, color=arm_color(r["arm"]),
+                    label=label, alpha=0.9)
+        for tokens, name in LOCAL_WINDOWS:
+            if tokens < top * 1.6:
+                ax.axhline(tokens, color=MUTED, linewidth=0.8,
+                           linestyle=(0, (4, 3)))
+                ax.annotate(name, (0.99, tokens),
+                            xycoords=("axes fraction", "data"),
+                            textcoords="offset points", xytext=(0, 3),
+                            fontsize=6.5, color=MUTED, ha="right")
+        ax.set_title(task, fontsize=10, color=INK)
+        ax.set_xlabel("request #", fontsize=8, color=MUTED)
+        ax.set_ylabel("input tokens per request", fontsize=8,
+                      color=MUTED)
+        ax.legend(fontsize=6.6, loc="upper left", frameon=False)
+    for j in range(len(tasks), nrows * ncols):
+        axes[j // ncols][j % ncols].axis("off")
+
+    fig.suptitle("What each request carries, over the life of the run",
+                 fontsize=13, color=INK)
+    if round_meta.get("freeze_tag") == SMOKE_TAG:
+        smoke_watermark(fig)
+    provenance(fig, round_meta, specs)
+    fig.text(0.01, 0.024,
+             "per-request input = delta of the journal's cumulative "
+             "provider-billed counters (prompt + cache reads + cache "
+             "writes); dashed lines mark deployments whose window the "
+             "curve must stay under to run there",
+             fontsize=6.6, color=MUTED, ha="left")
+    fig.tight_layout(rect=(0, 0.05, 1, 0.95))
+    path = out_dir / "request_footprint.png"
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+    return path
+
+
 def write_task_table(suites: dict, out_dir: Path):
     """Machine-readable per-(task, arm) results beside the charts."""
-    data = suites.get("crs")
+    data = suites.get("footprint") or suites.get("crs")
     if not data:
         return None
     rows: dict[tuple[str, str], dict] = {}
@@ -716,6 +793,9 @@ def write_task_table(suites: dict, out_dir: Path):
         mean = (r.get("retention_summary") or {}).get("mean_score")
         if isinstance(mean, (int, float)):
             cell["retention"].append(mean)
+        functional = (r.get("functional") or {}).get("score")
+        if isinstance(functional, (int, float)):
+            cell.setdefault("functional", []).append(functional)
     table = [{
         "task": task, "arm": arm, "runs": cell["runs"],
         "passes": cell["passes"],
@@ -723,6 +803,9 @@ def write_task_table(suites: dict, out_dir: Path):
         "mean_retention": (round(sum(cell["retention"])
                                  / len(cell["retention"]), 4)
                            if cell["retention"] else None),
+        "mean_functional": (round(sum(cell["functional"])
+                                  / len(cell["functional"]), 4)
+                            if cell.get("functional") else None),
     } for (task, arm), cell in sorted(rows.items())]
     if not table:
         return None
@@ -754,8 +837,8 @@ def main() -> int:
         if path:
             written.append(path)
     for fn in (render_ablation, render_poster, render_retention,
-               render_cost_at_depth, render_cost_per_success,
-               write_task_table):
+               render_cost_at_depth, render_request_footprint,
+               render_cost_per_success, write_task_table):
         path = fn(suites, round_meta, specs, args.out) \
             if fn is not write_task_table \
             else write_task_table(suites, args.out)

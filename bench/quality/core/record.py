@@ -50,6 +50,10 @@ _V2_BLOCKS = {
     "retention_summary": {"mean_score", "n_probes", "n_reached",
                           "n_hallucinated"},
     "probe_overhead": {"usage", "cost_usd", "reader_model", "grader_model"},
+    # The footprint suite: functional score + per-request token curve.
+    "functional": {"score", "detail"},
+    "request_footprint": {"n_requests", "input_p50", "input_max",
+                          "input_growth", "output_p50", "requests"},
 }
 _RETENTION_KEYS = {"after_tool_calls", "probe_type", "reached"}
 

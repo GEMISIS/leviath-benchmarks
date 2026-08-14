@@ -28,13 +28,14 @@ methodology behind them is in [`../../METHODOLOGY.md`](../../METHODOLOGY.md).
    round the reader and grader models get capability cells too, and the
    paid smoke must show a compaction actually firing in the
    flat-compacting arm before that arm is frozen.
-7. **Probes (CRS rounds).** The `probes` block in `arms.json` names the
-   fixed reader model (one reader for every arm - it carries the
-   retention curve's model control) and the cross-vendor grader; both
-   are frozen with the round, and the probe wrapper + grader prompt
-   shas land in every record's `probe_overhead`. Verify each task's
-   `probes.json` parses (`suites/crs/probes.py`) and that generated
-   tasks regenerate byte-identical (`generate.py --check`).
+7. **Footprint rounds.** Generated tasks regenerate byte-identical
+   (`generate.py --check`); explain-repo's `repo.json` commit is
+   re-pinned and exists locally; snake/explain verifiers pass their own
+   self-tests; runs go at **concurrency 1** (wall-clock is a headline
+   metric here). The `probes` block's grader model doubles as the
+   explain-repo coherence grader and stays frozen with the round.
+   (The full probe machinery is dormant until the successor
+   retention/window suite.)
 8. **Tag.** `git tag qbench-YYYY-MM-rN` on a clean tree. The runner
    refuses to start otherwise. For a CRS round, the tag is also the
    commitment to publish the round's result, whatever it shows -
