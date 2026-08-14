@@ -60,7 +60,7 @@ fee error's posting is restated with the correct fee
 
 ## Required report format
 
-Your final report must be exactly seven lines, in this order, with no
+Your final report must be exactly eight lines, in this order, with no
 headings, labels, or commentary around them:
 
 1. Number of duplicate transaction ids. A bare integer.
@@ -75,5 +75,7 @@ headings, labels, or commentary around them:
    thousands separators (e.g. `-12345.67`).
 7. The enterprise-tier payment fee rate applied on the books, in the
    schedule's cell format (e.g. `1.2% + $0.45`).
+8. The enterprise-plus-tier payment fee rate applied on the books, in
+   the same format.
 
-Any deviation from this seven-line format makes the report unusable.
+Any deviation from this eight-line format makes the report unusable.

@@ -1,0 +1,10 @@
+{
+  "suite": "hallucination",
+  "seed": 20260815,
+  "n": 1,
+  "universe_sha256": "74f3077627aec2b06838616c95b4efe39541ebae3c7aacb583edd37c96483334",
+  "excluded": [],
+  "task_ids": [
+    "redacted-ledger"
+  ]
+}

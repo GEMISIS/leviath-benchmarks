@@ -32,7 +32,7 @@ ACC-1030,Pinnacle Outfitters Co,standard,active,2018-11-16
 ACC-1031,Redwood Robotics Group,enterprise,active,2019-08-11
 ACC-1032,Harbor Systems Co,enterprise,active,2021-04-13
 ACC-1033,Harbor Labs Group,standard,active,2020-12-15
-ACC-1034,Orchard Works Co,plus,active,2021-09-09
+ACC-1034,Orchard Works Co,enterprise_plus,active,2021-09-09
 ACC-1035,Bluebird Trading Co,enterprise,active,2019-02-12
 ACC-1036,Lakeside Labs Inc,standard,active,2018-08-17
 ACC-1037,Lakeside Media Ltd,plus,active,2020-06-10
@@ -66,7 +66,7 @@ ACC-1064,Copperleaf Goods LLC,standard,active,2021-10-20
 ACC-1065,Redwood Systems Co,enterprise,active,2021-12-17
 ACC-1066,Marble Outfitters Ltd,standard,active,2018-02-22
 ACC-1067,Northwind Freight Group,plus,active,2021-03-24
-ACC-1068,Ironclad Analytics Group,standard,active,2018-02-10
+ACC-1068,Ironclad Analytics Group,enterprise_plus,active,2018-02-10
 ACC-1069,Redwood Systems Ltd,standard,active,2018-01-13
 ACC-1070,Copperleaf Studios LLC,standard,active,2022-03-27
 ACC-1071,Cascade Foods LLC,plus,active,2019-04-18
