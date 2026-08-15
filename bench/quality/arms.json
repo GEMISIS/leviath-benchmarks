@@ -81,6 +81,13 @@
    },
    "override_reason": "pin for reproducibility: OpenRouter reports a 500k window and no max_completion_tokens for this model; the round pins both rather than measuring whatever the live lookup serves",
    "_note": "cross-vendor critic for the CRS flagship: a genuinely different lab attacking the planner's plan. Verify with a capability cell before any counted round."
+  },
+  "Qwen 3.8 Local": {
+   "id": "ollama/qwen3.8",
+   "context_window": null,
+   "tier": "local",
+   "_note": "the local-model validation arm: fill context_window and the exact ollama tag once the model is pulled; rates are zero (local compute), recorded as 0 not null; released date provisional - correct when the model card is confirmed",
+   "released": "2026-08-01"
   }
  },
  "tiers": {

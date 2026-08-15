@@ -1,0 +1,3 @@
+# quality smoke: deterministic script provider
+[model_providers.mockx]
+script = "mockx"
