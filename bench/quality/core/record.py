@@ -38,9 +38,12 @@ SCHEMAS = {"quality-run-v1", "quality-run-v2"}
 # "cancelled" covers runs stopped outside the harness's own guards -
 # leviath pauses a run on provider credit exhaustion, and the operator
 # cancels it rather than waiting out the timeout; the spend is real
-# and the record must be writable.
+# and the record must be writable. "infra" marks cells never launched
+# (or dead on arrival) because a provider account was already known
+# dead - measurement of the account, not the arm, and excluded from
+# every science aggregate by construction.
 STATUSES = {"complete", "error", "timeout", "no_answer", "cap",
-            "cancelled"}
+            "cancelled", "infra"}
 REQUIRED_KEYS = {
     "schema", "freeze_tag", "suite", "task_id", "arm", "model_label",
     "model_policy", "rep", "blueprint", "lev", "status", "started_utc",

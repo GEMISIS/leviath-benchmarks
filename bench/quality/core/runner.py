@@ -74,6 +74,17 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
     records = []
     lock = threading.Lock()
     concurrency = max(1, int(concurrency or 1))
+    # The circuit breaker leviath doesn't have yet (leviath#456): once
+    # one cell dies to provider credit exhaustion, every not-yet-
+    # launched cell records as "infra" instead of rediscovering the
+    # dead account - 31 cells burned before this existed.
+    credits_dead = threading.Event()
+
+    _CREDIT_SIGNS = ("out of credits", "credit balance is too low")
+
+    def _credit_death(meta: dict | None) -> bool:
+        return any(s in str((meta or {}).get("error") or "").lower()
+                   for s in _CREDIT_SIGNS)
 
     def run_cell(i: int, cell: tuple) -> None:
         nonlocal spent
@@ -111,6 +122,17 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         if arm.get("window_tokens"):
             base["window_tokens"] = arm["window_tokens"]
 
+        if credits_dead.is_set():
+            log(f"[{i}/{len(cells)}] {label}: SKIPPED - provider "
+                "credits exhausted earlier in this round")
+            with lock:
+                records.append(_finish(
+                    base, runs_dir, status="infra", started=_utcnow(),
+                    ended=_utcnow(), wall=0.0, meta=None, arm=arm,
+                    rates=rates,
+                    score={"passed": False,
+                           "detail": "provider credits exhausted"}))
+            return
         with lock:
             over_budget = budget_usd is not None and spent >= budget_usd
         if over_budget:
@@ -195,6 +217,13 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                     scripted.write(_artifacts_dir(artifacts_root, base))
                 except OSError as exc:
                     log(f"  interactions.json not written: {exc}")
+        if status == "error" and _credit_death(meta):
+            # Not the arm's failure: the account died (leviath#456).
+            status = "infra"
+            if not credits_dead.is_set():
+                log("  PROVIDER CREDITS EXHAUSTED - remaining cells "
+                    "will be skipped, not burned")
+                credits_dead.set()
         wall = round(time.time() - t0, 1)
 
         mix_mapping = None
