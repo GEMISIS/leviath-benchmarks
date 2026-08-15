@@ -40,9 +40,14 @@ GRID = "#e1e0d9"
 BASE = "#c3c2b7"
 
 # Narrative order: today's setup first, the full configuration last.
-ARM_ORDER = ["flat-pinned", "flat-compacting", "structured-pinned",
+ARM_ORDER = ["flat-pinned", "flat-pinned-hardened", "flat-compacting",
+             "flat-compacting-hardened", "structured-pinned",
              "structured-stagemix", "structured-mix-flagship"]
 ARM_COLORS = {"flat-pinned": "#eb6834", "flat-compacting": "#b45309",
+              # Hardened = the same flat family, one shade removed:
+              # discipline added, architecture unchanged.
+              "flat-pinned-hardened": "#f2a35c",
+              "flat-compacting-hardened": "#7a3b06",
               "structured-pinned": "#2a78d6",
               "structured-stagemix": "#1baf7a",
               "structured-mix-flagship": "#1baf7a"}
@@ -50,6 +55,9 @@ ARM_LABELS = {
     "flat-pinned": "flat context, one model (today's typical setup)",
     "flat-compacting": "flat context + compaction "
                        "(production-style baseline)",
+    "flat-pinned-hardened": "flat + prompted wind-down & result "
+                            "hygiene (hardened)",
+    "flat-compacting-hardened": "flat + compaction, hardened",
     "structured-pinned": "structured context, one model",
     "structured-stagemix": "structured context, mixed models per stage",
     "structured-mix-flagship": "Leviath flagship (structured regions, "
