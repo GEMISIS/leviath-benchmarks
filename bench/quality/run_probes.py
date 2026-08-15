@@ -81,6 +81,28 @@ def _load_task_probes(probes_dir: Path, task_id: str) -> list[dict]:
     return probes_mod.load_probes(flat if flat.is_file() else nested)
 
 
+def _fold_drift(archive: Path, points: list) -> list[str]:
+    """Region names whose reconstructed final state disagrees with the
+    archived context.json - with leviath#455 (unjournaled temporary-
+    region evictions) the replay is BIGGER than reality there."""
+    ctx = Path(archive).parent / "context.json"
+    if not ctx.is_file() or not points:
+        return []
+    try:
+        snap = json.loads(ctx.read_text())
+    except (OSError, ValueError):
+        return []
+    want = lvr.snapshot_regions(snap)
+    got = points[-1].regions
+    return sorted(
+        name for name, w in want.items()
+        if isinstance(got.get(name), dict)
+        and (len(got[name].get("entries", []))
+             != len(w.get("entries", []))
+             or got[name].get("current_tokens")
+             != w.get("current_tokens")))
+
+
 def _archive_path(runs_dir: Path, rec: dict) -> Path | None:
     stem = record_mod.record_filename(
         rec["task_id"], rec["arm"], rec["model_label"],
@@ -260,6 +282,12 @@ def replay_record(rec: dict, runs_dir: Path, cfg: dict, rates: dict,
         "n_reached": len(reached),
         "n_hallucinated": sum(1 for e in reached if e.get("hallucinated")),
     }
+    # leviath#455: temporary-region evictions are not journaled, so a
+    # replayed context can hold MORE than the live agent kept. Flag the
+    # affected regions so this run's retention wears the caveat.
+    drift = _fold_drift(archive, points)
+    if drift:
+        rec["retention_summary"]["fold_drift_regions"] = drift
     rec["probe_overhead"] = {
         "usage": overhead,
         "cost_usd": round(overhead_cost, 6),

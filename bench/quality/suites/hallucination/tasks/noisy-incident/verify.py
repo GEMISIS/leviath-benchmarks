@@ -58,19 +58,27 @@ def verify(task_dir: Path, workdir: Path, artifacts_dir: Path,
         entry["score"] = 0.0
         if not got:
             return entry
+        # Only entity-shaped tokens can be classified invented; prose
+        # or severity words are format failures, not inventions.
+        import re as _re
+        entity = bool(_re.fullmatch(r"[A-Za-z0-9._/@-]{2,40}", got)) \
+            and got.lower() not in {"critical", "warning", "info",
+                                    "none", "unknown", "n/a", "error"}
         if kind == "service":
             if got in decoys:
                 entry["decoy_capture"] = True
                 captures.append({"line": i, "service": got})
             if got not in services:
-                entry["fabricated"] = True
-                fabrications += 1
+                if entity:
+                    entry["fabricated"] = True
+                    fabrications += 1
             else:
                 investigation_errors += 1
         elif kind == "key":
             if got not in audit_text:
-                entry["fabricated"] = True
-                fabrications += 1
+                if entity:
+                    entry["fabricated"] = True
+                    fabrications += 1
             else:
                 investigation_errors += 1
         else:  # timestamps: wrong vs invented is not decidable

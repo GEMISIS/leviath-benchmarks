@@ -60,10 +60,25 @@ def verify(task_dir: Path, workdir: Path, artifacts_dir: Path,
     if runbook.is_file():
         runbook_text = runbook.read_text()
 
+    def entity_like(g: str) -> bool:
+        """Only entity-shaped tokens can be classified invented: a
+        severity word, prose, or a dumped findings-index line is a
+        FORMAT failure, and counting it as fabrication would pollute
+        the invention metric with shape mismatches (a flagship rep
+        once shipped its findings region verbatim - 8 'fabrications',
+        zero of them inventions)."""
+        return bool(re.fullmatch(r"[A-Za-z0-9._/@-]{2,40}", g)) and \
+            g.lower() not in {"critical", "warning", "info", "none",
+                              "unknown", "n/a", "error"}
+
     def fabricated(i: int, g: str) -> bool | None:
         """True = the wrong answer names something that exists nowhere
         in the corpus; None = wrong-vs-invented is not decidable."""
         if not g:
+            return None
+        if i in (1, 2, 4, 5, 7, 8, 13, 14) and not all(
+                entity_like(part.strip()) for part in g.split(",")
+                if part.strip()) :
             return None
         if i in (1, 4, 7):
             return g not in services
