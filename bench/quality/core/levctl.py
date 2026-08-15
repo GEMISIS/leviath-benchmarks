@@ -124,9 +124,16 @@ class QualityHome:
 
     # -- daemon -------------------------------------------------------
     def start_daemon(self, extra_env: dict | None = None) -> None:
+        # The daemon's own output is diagnostic gold - a devnull here
+        # once cost the answer to whether persistence appends failed
+        # (leviath#455). One file per home, append mode, kept for the
+        # round's lifetime.
+        log_path = self.home / ".leviath" / "daemon.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        self._daemon_log = open(log_path, "ab")
         self._daemon = subprocess.Popen(
             [self.lev, "daemon"], env=self.env(extra_env),
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=self._daemon_log, stderr=subprocess.STDOUT,
             start_new_session=True)
         deadline = time.time() + _READY_TIMEOUT
         while time.time() < deadline:
