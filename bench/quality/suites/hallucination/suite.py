@@ -48,6 +48,7 @@ TASKS_DIR = _HERE / "tasks"
 FAMILIES = {
     "incident-chronicle": "loganalyzer",
     "noisy-incident": "loganalyzer",
+    "policy-conflicts": "loganalyzer",
     "redacted-ledger": "analyst",
 }
 
@@ -57,7 +58,8 @@ STRUCTURED_VARIANT = "adversarial-scoped-flagship"
 # The log tasks run in the read-only condition (no shell, no writes -
 # make_readonly.py has the why); the ask test runs on ask-enabled
 # variants. Both conditions apply to every arm symmetrically.
-READONLY_TASKS = {"incident-chronicle", "noisy-incident"}
+READONLY_TASKS = {"incident-chronicle", "noisy-incident",
+                  "policy-conflicts"}
 
 # Classifier counts the record's hallucination block always carries;
 # a verifier only reports the ones its task can decide, the rest stay

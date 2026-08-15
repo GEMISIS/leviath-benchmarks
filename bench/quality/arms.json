@@ -95,7 +95,8 @@
   "workhorse": "the everyday mid-tier",
   "open-weight": "best available open model",
   "economy": "cheapest capable tier",
-  "smoke": "deterministic mock provider, development only"
+  "smoke": "deterministic mock provider, development only",
+  "local": "runs on the operator's own hardware; provider price is genuinely zero, wall-clock is the cost"
  },
  "arms": [
   {
