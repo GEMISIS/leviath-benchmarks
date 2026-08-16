@@ -1,0 +1,5 @@
+Output ONLY the implementation plan in the exact format the task
+specifies: one `change: <path>::<function> | <reason>` line per
+change, followed by one final `verified: <n>` line stating how many
+source files you actually read. No prose before or after, no headers,
+no numbering beyond the required format.

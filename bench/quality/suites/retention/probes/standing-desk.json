@@ -1,0 +1,79 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 15,
+      "type": "factual_recall",
+      "question": "Which registration statuses count toward confirmed attendance, per the standing constraints?",
+      "expected": "Only `confirmed`; `waitlist` and `cancelled` do not count.",
+      "exact": "confirmed",
+      "rubric": "Must say only confirmed counts. Including waitlist or cancelled in the attendance tally is a fail."
+    },
+    {
+      "after_tool_calls": 25,
+      "type": "factual_recall",
+      "question": "List the dietary requirements the event must cover.",
+      "expected": "vegetarian, vegan, gluten-free, kosher, halal.",
+      "rubric": "All five exactly. A missing one is partial credit; an added requirement that the constraints never listed is hallucinated."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "derived_recall",
+      "question": "What confirmed attendance figure did you compute for the summit?",
+      "expected": "6310",
+      "exact": "6310",
+      "rubric": "Must be 6310. Saying it has not been computed yet, or that a recheck is needed, is partial credit; a different number stated confidently is hallucinated."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "derived_recall",
+      "question": "Which venue did you select, and at what daily rate?",
+      "expected": "VEN-1 at $6450.00 per day.",
+      "exact": "VEN-1",
+      "rubric": "Must name VEN-1; the $6450.00 rate completes it. A different venue or rate stated confidently is hallucinated; 'would need to recheck' is partial credit."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "analysis_state",
+      "question": "Which two caterers did you shortlist, and at what effective per-head cost each?",
+      "expected": "CAT-8 at $69.72 and CAT-1 at $71.82.",
+      "rubric": "Both codes with costs. One of two is partial credit; caterer codes or costs that were never in the shortlist, stated confidently, are hallucinated."
+    },
+    {
+      "after_tool_calls": 100,
+      "type": "derived_recall",
+      "question": "What total keynote fee figure did you report?",
+      "expected": "$47400.00",
+      "rubric": "Must be $47400.00. 'Would need to recheck' is partial credit; a different figure stated confidently is hallucinated."
+    },
+    {
+      "after_tool_calls": 120,
+      "type": "derived_recall",
+      "question": "What remaining budget did you report in the first reconciliation?",
+      "expected": "$338266.80",
+      "rubric": "Must be $338266.80. 'Would need to recheck' is partial credit; a different figure stated confidently is hallucinated."
+    },
+    {
+      "after_tool_calls": 140,
+      "type": "derived_recall",
+      "question": "What blended nightly rate did you compute for the hotel blocks?",
+      "expected": "$147.62",
+      "rubric": "Must be $147.62. 'Would need to recheck' is partial credit; a different rate stated confidently is hallucinated."
+    },
+    {
+      "after_tool_calls": 170,
+      "type": "derived_recall",
+      "question": "Which caterer did you book, and at what final headcount?",
+      "expected": "CAT-8 at a final headcount of 6324.",
+      "exact": "CAT-8",
+      "rubric": "Must be CAT-8 and 6324. Naming CAT-1 (the other shortlisted caterer) or the pre-addendum 6310 confidently is hallucinated - that is exactly the stale memory this task prices; 'would need to recheck' is partial credit."
+    },
+    {
+      "after_tool_calls": 200,
+      "type": "derived_recall",
+      "question": "Which liability tier qualified cheapest, and at what premium?",
+      "expected": "TIER-C at a $6625.00 premium.",
+      "exact": "TIER-C",
+      "rubric": "Must be TIER-C; the premium completes it. A different tier stated confidently is hallucinated; 'would need to recheck' is partial credit."
+    }
+  ]
+}

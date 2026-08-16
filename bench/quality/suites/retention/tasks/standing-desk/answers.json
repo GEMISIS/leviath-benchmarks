@@ -1,0 +1,381 @@
+{
+ "phases": {
+  "01": {
+   "dependent": false,
+   "depends_on": [],
+   "lines": {
+    "attendance": "6310",
+    "dietary": "1902",
+    "venue": "VEN-1",
+    "venue_daily_rate": "$6450.00"
+   }
+  },
+  "02": {
+   "dependent": true,
+   "depends_on": [
+    "01"
+   ],
+   "lines": {
+    "shortlist_1": "CAT-8 $69.72",
+    "shortlist_2": "CAT-1 $71.82"
+   }
+  },
+  "03": {
+   "dependent": false,
+   "depends_on": [],
+   "lines": {
+    "keynote_fees": "$47400.00",
+    "keynotes": "Bruno Fontaine; Wendell Tanaka; Xiomara Vasquez; Greta Kovacs; Wendell Jankowski"
+   }
+  },
+  "04": {
+   "dependent": true,
+   "depends_on": [
+    "01"
+   ],
+   "lines": {
+    "av_total": "$9050.00",
+    "av_vendor": "AV-B"
+   }
+  },
+  "05": {
+   "dependent": true,
+   "depends_on": [
+    "01",
+    "02",
+    "03",
+    "04"
+   ],
+   "lines": {
+    "av_total": "$9050.00",
+    "catering_estimate": "$439933.20",
+    "remaining": "$338266.80",
+    "speaker_total": "$47400.00",
+    "venue_total": "$19350.00"
+   }
+  },
+  "06": {
+   "dependent": true,
+   "depends_on": [
+    "01"
+   ],
+   "lines": {
+    "blended_rate": "$147.62",
+    "hotels": "HTL-1=875,HTL-2=1625,HTL-3=650,HTL-4=61,HTL-5=575"
+   }
+  },
+  "07": {
+   "dependent": false,
+   "depends_on": [],
+   "lines": {
+    "signed_revenue": "$500600.00",
+    "unsigned_gold": "6"
+   }
+  },
+  "08": {
+   "dependent": true,
+   "depends_on": [
+    "03"
+   ],
+   "lines": {
+    "day1": "Bruno Fontaine; Wendell Tanaka",
+    "day2": "Greta Kovacs; Wendell Jankowski",
+    "day3": "Xiomara Vasquez"
+   }
+  },
+  "09": {
+   "dependent": true,
+   "depends_on": [
+    "01",
+    "02",
+    "05"
+   ],
+   "lines": {
+    "caterer": "CAT-8",
+    "catering_cost": "$440935.16",
+    "delta_vs_estimate": "$1001.96",
+    "final_headcount": "6324"
+   }
+  },
+  "10": {
+   "dependent": true,
+   "depends_on": [
+    "01",
+    "06"
+   ],
+   "lines": {
+    "shuttles": "HTL-1=26,HTL-2=48,HTL-3=20,HTL-4=2,HTL-5=17",
+    "transport_daily": "$38420.00"
+   }
+  },
+  "11": {
+   "dependent": true,
+   "depends_on": [
+    "03",
+    "04",
+    "05",
+    "09"
+   ],
+   "lines": {
+    "insurance_tier": "TIER-C",
+    "premium": "$6625.00"
+   }
+  },
+  "12": {
+   "dependent": true,
+   "depends_on": [
+    "05",
+    "06",
+    "09",
+    "10",
+    "11"
+   ],
+   "lines": {
+    "final_remaining": "$47713.05",
+    "largest_line": "catering"
+   }
+  }
+ },
+ "registry": {
+  "code_universe": {
+   "av_vendors": [
+    "AV-A",
+    "AV-B",
+    "AV-C",
+    "AV-D",
+    "AV-E"
+   ],
+   "caterers": [
+    "CAT-1",
+    "CAT-2",
+    "CAT-3",
+    "CAT-4",
+    "CAT-5",
+    "CAT-6",
+    "CAT-7",
+    "CAT-8"
+   ],
+   "hotels": [
+    "HTL-1",
+    "HTL-2",
+    "HTL-3",
+    "HTL-4",
+    "HTL-5",
+    "HTL-6"
+   ],
+   "insurance_tiers": [
+    "TIER-A",
+    "TIER-B",
+    "TIER-C",
+    "TIER-D"
+   ],
+   "speakers": [
+    "Ada Bergstrom",
+    "Ada Eriksen",
+    "Ada Hashimoto",
+    "Ada Lindqvist",
+    "Ada Quispe",
+    "Ada Sorensen",
+    "Ada Vasquez",
+    "Bruno Fontaine",
+    "Bruno Grigoryan",
+    "Bruno Jankowski",
+    "Bruno Petrov",
+    "Bruno Vasquez",
+    "Carmen Castellanos",
+    "Carmen Lindqvist",
+    "Carmen Ustinov",
+    "Deepak Sorensen",
+    "Deepak Yamada",
+    "Farid Fontaine",
+    "Farid Jankowski",
+    "Farid Lindqvist",
+    "Farid Vasquez",
+    "Farid Vasquez",
+    "Farid Yamada",
+    "Farid Zielinski",
+    "Greta Castellanos",
+    "Greta Castellanos",
+    "Greta Fontaine",
+    "Greta Hashimoto",
+    "Greta Kovacs",
+    "Greta Quispe",
+    "Greta Rasmussen",
+    "Greta Tanaka",
+    "Hiro Eriksen",
+    "Hiro Hashimoto",
+    "Hiro Lindqvist",
+    "Hiro Moreau",
+    "Hiro Okonkwo",
+    "Hiro Sorensen",
+    "Hiro Xu",
+    "Ines Eriksen",
+    "Ines Fontaine",
+    "Ines Grigoryan",
+    "Ines Tanaka",
+    "Ines Tanaka",
+    "Ines Tanaka",
+    "Jonas Castellanos",
+    "Jonas Kovacs",
+    "Keiko Ustinov",
+    "Keiko Vasquez",
+    "Lars Okonkwo",
+    "Lars Petrov",
+    "Lars Quispe",
+    "Mireille Fontaine",
+    "Mireille Lindqvist",
+    "Mireille Moreau",
+    "Nadia Eriksen",
+    "Nadia Hashimoto",
+    "Nadia Jankowski",
+    "Nadia Nakamura",
+    "Nadia Zielinski",
+    "Omar Abbasi",
+    "Omar Castellanos",
+    "Omar Eriksen",
+    "Omar Hashimoto",
+    "Omar Rasmussen",
+    "Omar Ustinov",
+    "Priya Abbasi",
+    "Priya Grigoryan",
+    "Priya Hashimoto",
+    "Priya Hashimoto",
+    "Priya Nakamura",
+    "Priya Petrov",
+    "Quentin Abbasi",
+    "Quentin Grigoryan",
+    "Quentin Moreau",
+    "Quentin Petrov",
+    "Rosa Dimitrov",
+    "Rosa Grigoryan",
+    "Rosa Hashimoto",
+    "Rosa Jankowski",
+    "Rosa Nakamura",
+    "Rosa Petrov",
+    "Rosa Ustinov",
+    "Rosa Xu",
+    "Rosa Zielinski",
+    "Sven Tanaka",
+    "Sven Vasquez",
+    "Sven Wieland",
+    "Tamar Okonkwo",
+    "Tamar Sorensen",
+    "Umut Fontaine",
+    "Umut Hashimoto",
+    "Umut Petrov",
+    "Vera Jankowski",
+    "Wendell Abbasi",
+    "Wendell Eriksen",
+    "Wendell Grigoryan",
+    "Wendell Jankowski",
+    "Wendell Tanaka",
+    "Wendell Tanaka",
+    "Wendell Ustinov",
+    "Wendell Vasquez",
+    "Wendell Yamada",
+    "Xiomara Eriksen",
+    "Xiomara Lindqvist",
+    "Xiomara Nakamura",
+    "Xiomara Petrov",
+    "Xiomara Vasquez",
+    "Xiomara Yamada",
+    "Yusuf Abbasi",
+    "Yusuf Grigoryan",
+    "Yusuf Iyer",
+    "Yusuf Kovacs",
+    "Yusuf Okonkwo",
+    "Yusuf Okonkwo",
+    "Yusuf Petrov",
+    "Yusuf Zielinski",
+    "Zofia Tanaka",
+    "Zofia Vasquez",
+    "Zofia Xu"
+   ],
+   "venues": [
+    "VEN-1",
+    "VEN-2",
+    "VEN-3",
+    "VEN-4",
+    "VEN-5",
+    "VEN-6"
+   ]
+  },
+  "dependencies": {
+   "01": [],
+   "02": [
+    "01"
+   ],
+   "03": [],
+   "04": [
+    "01"
+   ],
+   "05": [
+    "01",
+    "02",
+    "03",
+    "04"
+   ],
+   "06": [
+    "01"
+   ],
+   "07": [],
+   "08": [
+    "03"
+   ],
+   "09": [
+    "01",
+    "02",
+    "05"
+   ],
+   "10": [
+    "01",
+    "06"
+   ],
+   "11": [
+    "03",
+    "04",
+    "05",
+    "09"
+   ],
+   "12": [
+    "05",
+    "06",
+    "09",
+    "10",
+    "11"
+   ]
+  },
+  "known_alternatives": {
+   "02": {
+    "shortlist_1": [
+     "CAT-1 $71.82"
+    ]
+   },
+   "09": {
+    "caterer": [
+     "CAT-1"
+    ],
+    "catering_cost": [
+     "$439967.90",
+     "$454216.00"
+    ],
+    "delta_vs_estimate": [
+     "$34.70",
+     "$14282.80"
+    ],
+    "final_headcount": [
+     "6310"
+    ]
+   },
+   "11": {
+    "insurance_tier": [
+     "TIER-A"
+    ],
+    "premium": [
+     "$3450.00"
+    ]
+   }
+  }
+ },
+ "seed": 7451
+}

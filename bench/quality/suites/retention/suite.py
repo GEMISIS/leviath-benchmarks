@@ -41,6 +41,7 @@ TASKS_DIR = _HERE / "tasks"
 
 FAMILIES = {
     "deceptive-arch": "coder",
+    "deceptive-arch-xl": "coder",
     "live-service": "loganalyzer",
     "standing-desk": "analyst",
 }

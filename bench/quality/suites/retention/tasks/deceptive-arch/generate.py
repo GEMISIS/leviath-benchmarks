@@ -189,6 +189,71 @@ CHAINS = [
                "to per-dependency probes in ProbeKit"),
 ]
 
+# Extra pathways for --scale > 1 (the XL variant): four more
+# load-bearing and four more auxiliary, same shapes.
+XL_CHAINS = [
+    dict(id="burst_credit", lb=True,
+         a=("atlas/api/burst.py", "draw_burst"),
+         b=("atlas/core/burst.py", "BurstAccount", "draw"),
+         c=("atlas/adapters/credit_store.py", "CreditStore", "debit"),
+         key="credit_store", flag="enable_burst_credit",
+         story="Short traffic bursts draw from BurstAccount, which "
+               "debits prepaid burst credits in CreditStore before "
+               "hard limits apply"),
+    dict(id="rate_headers", lb=True,
+         a=("atlas/api/headers.py", "attach_rate_headers"),
+         b=("atlas/core/rate_view.py", "RateView", "snapshot"),
+         c=("atlas/adapters/usage_store.py", "UsageStore", "snapshot"),
+         key="rate_view", flag="enable_rate_headers",
+         story="Responses carry X-RateLimit headers rendered by "
+               "RateView from live UsageStore snapshots"),
+    dict(id="plan_catalog", lb=True,
+         a=("atlas/api/plans.py", "get_plan"),
+         b=("atlas/core/plans.py", "PlanCatalog", "resolve"),
+         c=("atlas/adapters/plan_store.py", "PlanStore", "get_row"),
+         key="plan_store", flag="enable_plan_catalog",
+         story="Tenant plan tiers resolve through PlanCatalog, which "
+               "reads canonical plan rows from PlanStore"),
+    dict(id="abuse_guard", lb=True,
+         a=("atlas/api/abuse.py", "flag_abuse"),
+         b=("atlas/core/abuse.py", "AbuseGuard", "evaluate"),
+         c=("atlas/adapters/strike_store.py", "StrikeStore",
+            "add_strike"),
+         key="strike_store", flag="enable_abuse_guard",
+         story="Abusive traffic is scored by AbuseGuard, which "
+               "persists strikes in StrikeStore feeding the limiter's "
+               "penalty tier"),
+    dict(id="doc_preview", lb=False,
+         a=("atlas/api/previews.py", "render_preview"),
+         b=("atlas/core/previews.py", "PreviewBuilder", "build"),
+         c=("atlas/adapters/render_farm.py", "RenderFarm", "submit"),
+         key="render_farm", flag="enable_previews",
+         story="Document previews are built by PreviewBuilder and "
+               "rasterized on the RenderFarm"),
+    dict(id="thumbnailer", lb=False,
+         a=("atlas/jobs/thumbnails.py", "run_thumbnails"),
+         b=("atlas/core/thumbs.py", "ThumbService", "make"),
+         c=("atlas/adapters/image_kit.py", "ImageKit", "resize"),
+         key="image_kit", flag="enable_thumbnails",
+         story="Thumbnail jobs run through ThumbService, which "
+               "resizes via ImageKit with per-tenant presets"),
+    dict(id="geo_router", lb=False,
+         a=("atlas/api/geo.py", "route_request"),
+         b=("atlas/core/geo.py", "GeoRouter", "pick_region"),
+         c=("atlas/adapters/region_map.py", "RegionMap", "lookup"),
+         key="region_map", flag="enable_geo_router",
+         story="Requests are pinned to home regions by GeoRouter "
+               "using RegionMap's tenant residency table"),
+    dict(id="backup_verify", lb=False,
+         a=("atlas/jobs/backups.py", "verify_backups"),
+         b=("atlas/core/backups.py", "BackupVerifier", "verify"),
+         c=("atlas/adapters/object_store.py", "ObjectStore",
+            "head_object"),
+         key="backup_verifier", flag="enable_backup_verifier",
+         story="Nightly verification walks BackupVerifier over "
+               "ObjectStore heads to prove restore points exist"),
+]
+
 DEFECTS = ("not_registered", "wrong_key", "dead_branch",
            "signature_mismatch", "commented_out")
 
@@ -478,18 +543,22 @@ class {ccls}:
 # ---------------------------------------------------------------------
 
 
-def build(seed: int) -> tuple[dict[str, str], dict]:
+def build(seed: int, scale: int = 1) -> tuple[dict[str, str], dict]:
     rng = random.Random(seed)
+    chains = CHAINS if scale == 1 else CHAINS + XL_CHAINS
+    n_lb_dec = 5 if scale == 1 else 8
+    n_other_dec = 3 if scale == 1 else 4
 
-    lb = [c for c in CHAINS if c["lb"]]
-    other = [c for c in CHAINS if not c["lb"]]
-    deceptive_ids = set(x["id"] for x in rng.sample(lb, 5))
-    deceptive_ids |= set(x["id"] for x in rng.sample(other, 3))
+    lb = [c for c in chains if c["lb"]]
+    other = [c for c in chains if not c["lb"]]
+    deceptive_ids = set(x["id"] for x in rng.sample(lb, n_lb_dec))
+    deceptive_ids |= set(
+        x["id"] for x in rng.sample(other, n_other_dec))
 
     # Defect assignment. commented_out is split into its AB and BC
     # placements at assignment time so emission and registration agree.
     assignment: dict[str, str] = {}
-    for ch in CHAINS:
+    for ch in chains:
         if ch["id"] not in deceptive_ids:
             continue
         defect = rng.choice(DEFECTS)
@@ -507,7 +576,7 @@ def build(seed: int) -> tuple[dict[str, str], dict]:
     registry_registrations = []
     chains_meta = []
     c_specs: dict[tuple[str, str], list] = {}
-    for ch in CHAINS:
+    for ch in chains:
         defect = assignment.get(ch["id"])
         apath, afn = ch["a"]
         bpath, bcls, bfn = ch["b"]
@@ -599,10 +668,10 @@ register_defaults()
 
     # Defaults: every chain flag EXCEPT the dead_branch ones, so the
     # missing key is the defect and the self-test can prove it.
-    dead_flags = {ch["flag"] for ch in CHAINS
+    dead_flags = {ch["flag"] for ch in chains
                   if assignment.get(ch["id"]) == "dead_branch"}
     flag_lines = "\n".join(
-        f'    "{ch["flag"]}": True,' for ch in CHAINS
+        f'    "{ch["flag"]}": True,' for ch in chains
         if ch["flag"] not in dead_flags)
     m = module(DEFAULTS_PATH, "Shipped configuration defaults.")
     m["blocks"].append(f'''
@@ -614,9 +683,18 @@ DEFAULTS = {{
 }}
 ''')
 
-    # Filler modules.
+    # Filler modules; the XL variant synthesizes extra ones so the
+    # corpus outgrows even a 1M-token window.
     for path, doc in FILL_MODULES:
         module(path, doc)
+    if scale > 1:
+        pkgs = ["util", "core", "adapters", "jobs", "api"]
+        for i in range(44 * scale):
+            pkg = pkgs[i % len(pkgs)]
+            noun = FILL_NOUNS[i % len(FILL_NOUNS)]
+            verb = FILL_VERBS[(i * 7) % len(FILL_VERBS)]
+            module(f"atlas/{pkg}/aux_{verb}_{noun}_{i:03d}.py",
+                   f"Auxiliary {verb} helpers for {noun} handling.")
 
     # Render every module with padding to a seeded target length.
     corpus: dict[str, str] = {}
@@ -627,7 +705,8 @@ DEFAULTS = {{
         if m["imports"]:
             text += "".join(m["imports"])
         text += "".join(m["blocks"])
-        target = rng.randrange(480, 640)
+        target = (rng.randrange(480, 640) if scale == 1
+                  else rng.randrange(700, 980))
         text = _pad_module(rng, text, target, stem)
         corpus[f"seed-files/{path}"] = text
 
@@ -642,7 +721,7 @@ DEFAULTS = {{
             "Atlas is a multi-tenant document platform. The pathways",
             "below are the load-bearing delegations; each is stable",
             "and verified in CI.", ""]
-    for ch in CHAINS:
+    for ch in chains:
         apath, afn = ch["a"]
         bpath, bcls, bfn = ch["b"]
         cpath, ccls, cfn = ch["c"]
@@ -685,16 +764,24 @@ def _fn_arity(tree: ast.AST, cls: str, fn: str) -> int | None:
 
 
 def _call_args(tree: ast.AST, method: str) -> list[int]:
+    """Arg counts of ``self._backend.<method>(...)`` calls only - a
+    bare attr match would also count dict ``.get`` and friends when a
+    backend method shares a common name."""
     out = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and \
                 isinstance(node.func, ast.Attribute) and \
-                node.func.attr == method:
+                node.func.attr == method and \
+                isinstance(node.func.value, ast.Attribute) and \
+                node.func.value.attr == "_backend":
             out.append(len(node.args))
     return out
 
 
-def self_test(corpus: dict[str, str], meta: dict) -> None:
+def self_test(corpus: dict[str, str], meta: dict,
+              expected_lbd: int = 5,
+              min_bytes: int = MIN_TOTAL_BYTES,
+              max_bytes: int = MAX_TOTAL_BYTES) -> None:
     def text(path: str) -> str:
         return corpus[f"seed-files/{path}"]
 
@@ -715,9 +802,9 @@ def self_test(corpus: dict[str, str], meta: dict) -> None:
 
     # 2. Size discipline.
     total = sum(len(b.encode()) for b in corpus.values())
-    if not MIN_TOTAL_BYTES <= total <= MAX_TOTAL_BYTES:
+    if not min_bytes <= total <= max_bytes:
         problems.append(f"corpus {total} bytes outside "
-                        f"[{MIN_TOTAL_BYTES}, {MAX_TOTAL_BYTES}]")
+                        f"[{min_bytes}, {max_bytes}]")
     for rel, body in corpus.items():
         if len(body.encode()) > MAX_FILE_BYTES:
             problems.append(f"{rel} exceeds {MAX_FILE_BYTES} bytes")
@@ -726,7 +813,8 @@ def self_test(corpus: dict[str, str], meta: dict) -> None:
     defaults_text = text(DEFAULTS_PATH)
 
     for ch_meta in meta["chains"]:
-        ch = next(c for c in CHAINS if c["id"] == ch_meta["id"])
+        ch = next(c for c in CHAINS + XL_CHAINS
+                  if c["id"] == ch_meta["id"])
         cid = ch["id"]
         apath, afn = ch["a"]
         bpath, bcls, bfn = ch["b"]
@@ -783,8 +871,9 @@ def self_test(corpus: dict[str, str], meta: dict) -> None:
                 problems.append(f"{cid}: BC hookup not commented")
 
     lbd = meta["load_bearing_deceptive"]
-    if len(lbd) != 5:
-        problems.append(f"load-bearing deceptive count {len(lbd)} != 5")
+    if len(lbd) != expected_lbd:
+        problems.append(f"load-bearing deceptive count {len(lbd)} != "
+                        f"{expected_lbd}")
 
     if problems:
         for p in problems:

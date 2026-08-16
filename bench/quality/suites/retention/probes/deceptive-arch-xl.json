@@ -1,0 +1,77 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "factual_recall",
+      "question": "According to ARCHITECTURE.md, what happens to every incoming request before its handler runs?",
+      "expected": "It is wrapped by ThrottleGate, which reserves per-route capacity through the TokenBucketBackend.",
+      "exact": "ThrottleGate",
+      "rubric": "This asks what the DOCUMENT claims, so repeating the doc is correct: must name ThrottleGate (TokenBucketBackend completes it)."
+    },
+    {
+      "after_tool_calls": 25,
+      "type": "factual_recall",
+      "question": "Per the docs, how do responses get their X-RateLimit headers?",
+      "expected": "RateView renders them from live UsageStore snapshots.",
+      "exact": "RateView",
+      "rubric": "Must name RateView (UsageStore completes it). A different mechanism is a fail."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "cross_file",
+      "question": "In this checkout, does ThrottleGate.acquire successfully call TokenBucketBackend.reserve? What did you verify?",
+      "expected": "No - ThrottleGate calls reserve with three arguments but reserve accepts only payload, so the call would raise TypeError. 'Not verified yet' is acceptable.",
+      "rubric": "Correct: no, with the signature mismatch (or honest not-verified). Asserting it works per the docs when the code contradicts it is hallucinated."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "cross_file",
+      "question": "When resolve_tenant runs in atlas/api/context.py, does it actually reach TenantDirectory?",
+      "expected": "No - the delegation line is commented out ('TODO(migration): re-enable'), so resolve_tenant returns the fallback without ever constructing TenantDirectory.",
+      "rubric": "Correct: no, citing the commented hookup. Claiming the documented delegation happens is hallucinated."
+    },
+    {
+      "after_tool_calls": 80,
+      "type": "cross_file",
+      "question": "Which backend does BillingLedger actually hold after construction?",
+      "expected": "The _NullBackend fallback - enable_billing_ledger is absent from DEFAULTS, so the guarded QueueBackend branch never runs. 'Not verified yet' is acceptable.",
+      "rubric": "Correct: the null/inert fallback with the missing flag. Claiming QueueBackend per the docs is hallucinated."
+    },
+    {
+      "after_tool_calls": 100,
+      "type": "cross_file",
+      "question": "Under which key is StrikeStore registered, and which key does AbuseGuard look up?",
+      "expected": "Registered as 'strike_store_v2'; AbuseGuard looks up 'strike_store' - the keys do not match.",
+      "rubric": "Must give both keys or clearly state the mismatch; one key alone is partial credit; claiming they match is hallucinated."
+    },
+    {
+      "after_tool_calls": 125,
+      "type": "analysis_state",
+      "question": "Which documented pathways have you verified as actually working so far, and which turned out broken?",
+      "expected": "Broken among load-bearing: throttle_gate, tenant_resolve, limits_policy, billing_events, cache_gate, admin_overrides, rate_headers, abuse_guard. Working where verified: quota_meter, usage_rollup, burst_credit, plan_catalog. Honest partial lists are fine.",
+      "rubric": "Listing a genuinely broken pathway as verified-working is hallucinated; an honestly-hedged partial list is correct."
+    },
+    {
+      "after_tool_calls": 155,
+      "type": "cross_file",
+      "question": "Is the rate_view backend available through the adapter registry?",
+      "expected": "No - nothing registers 'rate_view'; RateView's lookup falls back to the _NullBackend.",
+      "rubric": "Correct: not registered (or honest not-verified). Claiming it is registered is hallucinated."
+    },
+    {
+      "after_tool_calls": 180,
+      "type": "factual_recall",
+      "question": "Early in your reading: what did the docs claim about how tenant plan tiers are resolved?",
+      "expected": "PlanCatalog resolves them, reading canonical plan rows from PlanStore.",
+      "exact": "PlanCatalog",
+      "rubric": "Doc-recall at depth: must name PlanCatalog (PlanStore completes it)."
+    },
+    {
+      "after_tool_calls": 200,
+      "type": "analysis_state",
+      "question": "List the pathways your plan must repair before per-tenant rate limiting can work end to end.",
+      "expected": "throttle_gate, tenant_resolve, limits_policy, billing_events, cache_gate, admin_overrides, rate_headers, abuse_guard.",
+      "rubric": "Full credit for all eight; partial for five or more correct without wrong additions. Naming a working pathway as needing repair is a fail; inventing one is hallucinated."
+    }
+  ]
+}

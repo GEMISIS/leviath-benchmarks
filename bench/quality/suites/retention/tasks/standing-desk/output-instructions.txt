@@ -1,0 +1,5 @@
+Your final output is the session summary the desk asked for when it
+closed the session: one line per phase, in order, of the form
+`phase-NN.md: <that phase's headline figure or choice>`, and nothing
+else. Report only what you actually wrote to the phase files during
+the session.

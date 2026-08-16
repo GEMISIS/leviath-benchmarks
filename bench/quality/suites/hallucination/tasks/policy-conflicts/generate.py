@@ -135,6 +135,43 @@ CONFLICTS = [
           "purchase-order issuance.",
      "essence": "pre-contract security assessment versus immediate "
                 "marketplace access"},
+    # --- XL pool: templates 10-14 exist for the scaled variant; the
+    # base task samples only CONFLICTS[:9], so appending here cannot
+    # disturb the committed base corpus.
+    {"key": "selfbook-vs-desk", "a_dom": "HR", "b_dom": "EXP",
+     "a": "Employees arrange their itineraries independently, using "
+          "whichever provider suits them.",
+     "b": "All travel is booked exclusively via the corporate desk.",
+     "essence": "self-service itinerary booking versus mandatory "
+                "corporate desk"},
+    {"key": "pipeline-vs-push", "a_dom": "OPS", "b_dom": "ACC",
+     "a": "Production changes deploy through the automated pipeline "
+          "alone.",
+     "b": "Engineers holding elevated roles may write directly onto "
+          "live infrastructure.",
+     "essence": "pipeline-only deployment versus direct elevated "
+                "write access"},
+    {"key": "compact-vs-evidence", "a_dom": "RET", "b_dom": "INC",
+     "a": "Message archives older than one year are compacted into "
+          "summaries.",
+     "b": "Investigations require untouched original communications "
+          "going back three full calendar cycles.",
+     "essence": "one-year archive compaction versus three-year "
+                "original evidence"},
+    {"key": "freeze-vs-autoscale", "a_dom": "FIN", "b_dom": "OPS",
+     "a": "Quarter-end closes with a spending freeze covering the "
+          "final week.",
+     "b": "Capacity purchases proceed automatically once utilization "
+          "crosses eighty percent.",
+     "essence": "quarter-end spending freeze versus automatic "
+                "capacity purchases"},
+    {"key": "aggregate-vs-keystroke", "a_dom": "PRIV", "b_dom": "HR",
+     "a": "Workplace analytics collect nothing beyond aggregate, "
+          "anonymized counts.",
+     "b": "Individual keystroke telemetry feeds performance "
+          "dossiers.",
+     "essence": "anonymized aggregate analytics versus individual "
+                "keystroke telemetry"},
 ]
 
 # Decoy pairs: same topic, COMPATIBLE statements. The shared anchor
@@ -189,6 +226,41 @@ DECOYS = [
      "b": "Procurement files the executed data processing agreement "
           "before any vendor account is enabled.",
      "why": "same DPA prerequisite, rule and filing step"},
+    # --- XL pool: decoys 8-12; the base places only DECOYS[:7].
+    {"key": "soc-24-7", "a_dom": "SEC", "b_dom": "INC",
+     "anchor": "twenty-four seven",
+     "a": "The security operations center monitors alerts "
+          "twenty-four seven.",
+     "b": "Incident intake relies on the twenty-four seven "
+          "monitoring rotation.",
+     "why": "same round-the-clock monitoring, stated twice"},
+    {"key": "capex-template", "a_dom": "OPS", "b_dom": "FIN",
+     "anchor": "capital expenditure template",
+     "a": "Infrastructure purchases follow the capital expenditure "
+          "template.",
+     "b": "Finance reviews each capital expenditure template within "
+          "one week of submission.",
+     "why": "same template requirement, rule and review step"},
+    {"key": "consent-form", "a_dom": "HR", "b_dom": "PRIV",
+     "anchor": "consent form",
+     "a": "New hires sign the monitoring consent form during "
+          "onboarding.",
+     "b": "The privacy office archives every signed monitoring "
+          "consent form.",
+     "why": "same consent form, signing and archiving view"},
+    {"key": "least-privilege", "a_dom": "ACC", "b_dom": "OPS",
+     "anchor": "least privilege",
+     "a": "Role definitions follow the least privilege principle.",
+     "b": "Automation service accounts are scoped to least "
+          "privilege before activation.",
+     "why": "same least-privilege principle, roles and automation"},
+    {"key": "encrypted-at-rest", "a_dom": "RET", "b_dom": "SEC",
+     "anchor": "encrypted at rest",
+     "a": "Archived records remain encrypted at rest for their full "
+          "retention term.",
+     "b": "Storage volumes holding archives are encrypted at rest "
+          "using managed keys.",
+     "why": "same at-rest encryption, records and volumes view"},
 ]
 
 # The prior-divergence trap: a password floor no famous standard uses.
@@ -303,13 +375,19 @@ def _fill(rng: random.Random, template: str) -> str:
 # ---------------------------------------------------------------------
 
 
-def _build_once(rng: random.Random) -> tuple[dict, dict]:
+def _build_once(rng: random.Random, scale: int = 1,
+                n_conflicts: int = N_CONFLICTS, n_decoys: int = 7,
+                n_pool: int = 9) -> tuple[dict, dict]:
+    """One corpus draw. The scale/count parameters exist for the XL
+    variant; every default reproduces the scale-1 rng stream exactly
+    (same randrange bounds, same sample population sizes), so the
+    committed base corpus stays byte-identical."""
     # --- document skeletons ------------------------------------------
     docs: dict[str, dict] = {}  # id -> {domain, title, n_sections}
     by_domain: dict[str, list[str]] = {}
     for prefix in DOMAINS:  # dict order: deterministic
-        count = rng.randrange(3, 6)
-        numbers = sorted(rng.sample(range(1, 20), count))
+        count = rng.randrange(3 * scale, 6 * scale)
+        numbers = sorted(rng.sample(range(1, 20 * scale), count))
         ids = [f"{prefix}-{n}" for n in numbers]
         by_domain[prefix] = ids
         for doc_id in ids:
@@ -321,7 +399,7 @@ def _build_once(rng: random.Random) -> tuple[dict, dict]:
     all_ids = sorted(docs)
 
     # --- choose and place conflicts ----------------------------------
-    chosen = rng.sample(CONFLICTS, N_CONFLICTS)
+    chosen = rng.sample(CONFLICTS[:n_pool], n_conflicts)
     placements: dict[tuple[str, int], list[str]] = {}
     used_pairs: set[frozenset] = set()
     registry_conflicts = []
@@ -347,7 +425,7 @@ def _build_once(rng: random.Random) -> tuple[dict, dict]:
 
     # --- place decoys (pair must not collide with a conflict pair) ---
     registry_decoys = []
-    for d in DECOYS:
+    for d in DECOYS[:n_decoys]:
         for _ in range(30):
             a_id, a_sec = place(d["a_dom"], d["a"])
             b_pool = [x for x in by_domain[d["b_dom"]] if x != a_id]
@@ -445,13 +523,17 @@ def _build_once(rng: random.Random) -> tuple[dict, dict]:
     return corpus, {"answers": answers, **registry}
 
 
-def build(seed: int) -> tuple[dict[str, str], dict]:
+def build(seed: int, scale: int = 1,
+          n_conflicts: int = N_CONFLICTS, n_decoys: int = 7,
+          n_pool: int = 9) -> tuple[dict[str, str], dict]:
     """Salted redraw: statistically the sizes always fit, but the
     guarantee must be a guarantee (salt 0 is the plain seed)."""
     for salt in range(50):
         rng = random.Random(seed if salt == 0 else f"{seed}/{salt}")
         try:
-            corpus, registry = _build_once(rng)
+            corpus, registry = _build_once(
+                rng, scale=scale, n_conflicts=n_conflicts,
+                n_decoys=n_decoys, n_pool=n_pool)
         except ValueError:
             continue
         if all(len(t.encode()) <= MAX_FILE_BYTES
