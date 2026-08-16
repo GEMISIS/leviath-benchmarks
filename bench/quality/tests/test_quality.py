@@ -852,6 +852,7 @@ class HallucinationSuiteTests(unittest.TestCase):
             "incident-chronicle": "loganalyzer",
             "noisy-incident": "loganalyzer",
             "policy-conflicts": "loganalyzer",
+            "policy-conflicts-xl": "loganalyzer",
             "redacted-ledger": "analyst"})
 
     def test_ask_task_maps_to_askable_blueprints(self):
