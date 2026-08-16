@@ -597,9 +597,20 @@ class LvrOracleTests(unittest.TestCase):
     archive must match exactly in full (order and max_tokens included).
     """
 
+    # The one archive written before the leviath#455 digest fix that
+    # actually caught the bug: preserved as evidence, exempt by NAME.
+    # Anything else drifting means a regression, and fails loudly.
+    KNOWN_PRE_FIX_DRIFT = (
+        "paper_w32k/quality/hallucination/runs/"
+        "noisy-incident__structured-mix-flagship__native-@32k"
+        "__rep2.artifacts/run",)
+
     def test_final_fold_point_matches_context_json(self):
         strict_matches = 0
         for run_dir in REAL_RUN_DIRS:
+            if any(str(run_dir).endswith(k)
+                   for k in self.KNOWN_PRE_FIX_DRIFT):
+                continue
             with self.subTest(run=str(run_dir)):
                 warnings: list[str] = []
                 points = lvr.fold(run_dir / "run.lvr.gz", warnings=warnings)
@@ -613,12 +624,6 @@ class LvrOracleTests(unittest.TestCase):
                 for name in want:
                     g, w = got[name], want[name]
                     self.assertEqual(g["kind"], w["kind"], name)
-                    if w["kind"] in ("temporary", "clearable"):
-                        # leviath#455: mutations to evictable regions
-                        # are under-journaled in 0.3.10 (evictions in
-                        # both directions of drift). Known upstream
-                        # gap - tolerated here, flagged by run_probes.
-                        continue
                     self.assertEqual(len(g["entries"]), len(w["entries"]),
                                      f"{name}: entry count differs")
                     self.assertEqual(g["entries"], w["entries"],
