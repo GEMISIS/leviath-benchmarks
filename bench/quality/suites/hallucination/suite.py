@@ -49,6 +49,7 @@ FAMILIES = {
     "incident-chronicle": "loganalyzer",
     "noisy-incident": "loganalyzer",
     "policy-conflicts": "loganalyzer",
+    "policy-conflicts-xl": "loganalyzer",
     "redacted-ledger": "analyst",
 }
 
@@ -59,7 +60,7 @@ STRUCTURED_VARIANT = "adversarial-scoped-flagship"
 # make_readonly.py has the why); the ask test runs on ask-enabled
 # variants. Both conditions apply to every arm symmetrically.
 READONLY_TASKS = {"incident-chronicle", "noisy-incident",
-                  "policy-conflicts"}
+                  "policy-conflicts", "policy-conflicts-xl"}
 
 # Classifier counts the record's hallucination block always carries;
 # a verifier only reports the ones its task can decide, the rest stay
