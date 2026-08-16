@@ -296,6 +296,17 @@ def main() -> int:
         return 2
 
     arms_cfg = load_arms_config(QUALITY_DIR / "arms.json")
+    # Local models' declared window is the SERVING truth (num_ctx is
+    # baked into the ollama model), and leviath's built-in capability
+    # table cannot know a derived model's name - without the override
+    # it assumes a larger window, assembles over num_ctx, and Ollama
+    # front-truncates the system+user messages into template errors.
+    for entry in arms_cfg["models"].values():
+        if entry.get("tier") == "local" and entry.get("context_window"):
+            cap = dict(entry.get("capability_override") or {})
+            cap.setdefault("max_context_tokens",
+                           entry["context_window"])
+            entry["capability_override"] = cap
     if args.window_tokens:
         # The window sweep: every model in the round runs under
         # min(native, N). Region budgets are percentages of the window,
