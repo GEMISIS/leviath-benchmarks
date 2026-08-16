@@ -33,10 +33,17 @@ NO_MORE = ("No further information is available. Proceed with what you "
 
 
 class ScriptedUser:
-    def __init__(self, lev: str, env: dict, run_id: str, pack: str,
-                 max_answers: int = 2, poll_secs: float = 1.0):
+    def __init__(self, lev: str, env: dict, run_id: str,
+                 pack: str | list[str], max_answers: int = 2,
+                 poll_secs: float = 1.0):
         self.lev, self.env, self.run_id = lev, env, run_id
-        self.pack, self.max_answers = pack, max_answers
+        # A single pack answers every question identically (the ask
+        # tests); an ordered LIST is a session script - question N gets
+        # pack N (the long-running-session tasks), then NO_MORE.
+        self.packs = pack if isinstance(pack, list) else None
+        self.pack = pack if isinstance(pack, str) else ""
+        self.max_answers = (len(pack) if isinstance(pack, list)
+                            else max_answers)
         self.poll_secs = poll_secs
         self.transcript: list[dict] = []
         self._answered: set[str] = set()
@@ -99,7 +106,10 @@ class ScriptedUser:
         kind = req.get("kind")
         if kind == "free_text":
             if self._packs_given < self.max_answers:
-                reply, text = "pack", self.pack
+                text = (self.packs[self._packs_given]
+                        if self.packs is not None else self.pack)
+                reply = (f"pack-{self._packs_given + 1}"
+                         if self.packs is not None else "pack")
                 self._packs_given += 1
             else:
                 reply, text = "no_more", NO_MORE

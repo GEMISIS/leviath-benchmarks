@@ -1,0 +1,5 @@
+Output exactly the six numbered report lines the task defines - root
+cause path+category, drained item id, worker metric name, applied
+mitigation key=value, the runbook discrepancy line, and the service's
+own orders-processed count - one per line, numbered 1-6, with nothing
+before, between, or after them. No prose, no headers, no explanation.

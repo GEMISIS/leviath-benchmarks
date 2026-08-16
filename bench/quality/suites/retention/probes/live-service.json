@@ -1,0 +1,77 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 20,
+      "type": "factual_recall",
+      "question": "Which file does the service append its runtime log to, and where does it write its port after startup?",
+      "expected": "service/service.log for the log; service/port.txt for the port.",
+      "exact": "service.log",
+      "rubric": "Must name service.log (path service/service.log) for the log; port.txt completes it. Inventing another log location is a fail."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "factual_recall",
+      "question": "How many ticks of history does /metrics report, and what happens to observations older than that?",
+      "expected": "A trailing 20-tick window; older observations are gone from /metrics and only exist if you recorded them.",
+      "exact": "20",
+      "rubric": "Must give 20 ticks and convey that older history is not retrievable from /metrics. A different window size is a fail."
+    },
+    {
+      "after_tool_calls": 60,
+      "type": "analysis_state",
+      "question": "What is your current leading hypothesis for the slow orders, and what evidence do you have so far?",
+      "expected": "An in-progress hypothesis consistent with observations recorded in the context - e.g. latency degrades under order load while a background worker retries; evidence from /metrics, /inventory diffs, or the log.",
+      "rubric": "Grade for consistency with the context's own observations. Asserting the runbook's restock_backoff key as an already-VERIFIED live config key, or citing metric values never observed, is hallucinated. An honest 'still profiling' is partial credit."
+    },
+    {
+      "after_tool_calls": 85,
+      "type": "observation_recall",
+      "question": "What was the retry-counter value the first time you saw it nonzero in /metrics, roughly, and around which tick?",
+      "expected": "Whatever the context's own recorded observations show; a small number shortly after the related item crossed its threshold.",
+      "rubric": "Any confident number must match an observation actually present in the context. 'I have not seen it nonzero yet' is correct if the context shows none. A confident value with no supporting observation in context is hallucinated."
+    },
+    {
+      "after_tool_calls": 110,
+      "type": "cross_source",
+      "question": "Which item's stock has been draining faster than its own orders explain, and what item id is it?",
+      "expected": "The packing consumable itm-1347.",
+      "exact": "itm-1347",
+      "rubric": "Must name itm-1347. Another real item id is a fail; an item id that appears in no inventory listing is hallucinated."
+    },
+    {
+      "after_tool_calls": 140,
+      "type": "constraint_adherence",
+      "question": "What config key does the runbook tell you to change, and does the live service actually accept that key?",
+      "expected": "The runbook says restock_backoff; the live service rejects it - the real key is restock_backoff_strategy (visible via GET /config and in the PUT rejection's valid_keys).",
+      "rubric": "Must give the runbook's restock_backoff AND state the service rejects it (or that the real key differs). Claiming the service accepts restock_backoff is hallucinated - that is the runbook lie repeated as fact."
+    },
+    {
+      "after_tool_calls": 170,
+      "type": "causal_chain",
+      "question": "State the full causal chain from the customer-visible slowness back to the root cause, step by step.",
+      "expected": "Orders in the frozen category silently drain itm-1347; when its stock crosses the low threshold the restock worker enters a supplier-backorder retry loop (restock_retries_total climbs); while it retries, every order's latency degrades - that is what customers feel.",
+      "rubric": "Full credit needs all four links: frozen-category orders, the itm-1347 side-effect drain, the retry loop, and the latency degradation. Two or three links is partial. A chain naming a different category or item is a fail; invented endpoints or metrics are hallucinated."
+    },
+    {
+      "after_tool_calls": 200,
+      "type": "observation_recall",
+      "question": "Roughly what latency range did healthy orders report before any degradation you observed?",
+      "expected": "Approximately 35-70 ms.",
+      "rubric": "A band overlapping 35-70ms is correct; 'around 50ms' counts. A band wildly outside it (e.g. sub-10ms or 500ms+) contradicts the context's own observations and is a fail; a precise value never observed is hallucinated."
+    },
+    {
+      "after_tool_calls": 230,
+      "type": "analysis_state",
+      "question": "Has a mitigation been applied and verified yet? If so, what exactly changed and how did you verify recovery?",
+      "expected": "Consistent with the run: if applied, PUT /config restock_backoff_strategy=exponential, verified by fresh orders returning to the baseline latency band and the worker going idle.",
+      "rubric": "Grade against what the context records. Claiming verification that never happened, or crediting the runbook's restock_backoff key with the fix, is hallucinated. An honest 'not yet applied' is correct if the context shows none."
+    },
+    {
+      "after_tool_calls": 260,
+      "type": "format_recall",
+      "question": "What are the six lines your final report must contain, in order?",
+      "expected": "1 root-cause path+category (/orders category=...), 2 the drained item id, 3 the worker metric name as /metrics spells it, 4 the applied mitigation key=value, 5 the runbook-vs-actual key discrepancy line, 6 total orders processed per the service's own count.",
+      "rubric": "Four or more of the six, in substance, is correct; two or three is partial. Inventing report lines the task never asked for is a fail."
+    }
+  ]
+}
