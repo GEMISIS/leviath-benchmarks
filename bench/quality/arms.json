@@ -83,10 +83,10 @@
    "_note": "cross-vendor critic for the CRS flagship: a genuinely different lab attacking the planner's plan. Verify with a capability cell before any counted round."
   },
   "Qwen 3.8 Local": {
-   "id": "ollama/qwen3.8",
-   "context_window": null,
+   "id": "ollama/qwen3.8-32k",
+   "context_window": 32768,
    "tier": "local",
-   "_note": "the local-model validation arm: fill context_window and the exact ollama tag once the model is pulled; rates are zero (local compute), recorded as 0 not null; released date provisional - correct when the model card is confirmed",
+   "_note": "local validation arm: qwen3.8:latest (27.3B Q4_K_M, arch max 262k) served via a derived ollama model with num_ctx 32768 baked in - ollama silently truncates past num_ctx, so the window is pinned model-side, not assumed. released date provisional.",
    "released": "2026-08-01"
   }
  },

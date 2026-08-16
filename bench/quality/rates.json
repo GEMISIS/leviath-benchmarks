@@ -71,7 +71,7 @@
   "pricing_varies_by_provider": true,
   "_note": "OpenRouter base tier, captured 2026-08-14; the provider doubles prompt/completion rates past 200k prompt tokens - pin the route and re-check the tier before a counted round"
  },
- "ollama/qwen3.8": {
+ "ollama/qwen3.8-32k": {
   "input_per_mtok": 0.0,
   "output_per_mtok": 0.0,
   "cache_read_per_mtok": 0.0,
