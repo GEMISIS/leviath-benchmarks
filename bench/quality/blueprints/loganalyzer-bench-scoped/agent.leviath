@@ -65,7 +65,7 @@ bash      = "logs"
 [stages.ingest.context.regions]
 task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
-logs = { kind = "temporary", budget = "55%" }
+logs = { kind = "temporary", volatility = "grows", budget = "55%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
@@ -162,7 +162,7 @@ bash      = "scratch"
 task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
 findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "10%", strategy = "bulk", overflow = 10, summarizable = false, required = true }
-logs = { kind = "temporary", budget = "30%" }
+logs = { kind = "temporary", volatility = "grows", budget = "30%" }
 scripts = { kind = "compacting", budget = "14%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
@@ -268,7 +268,7 @@ read_file = "logs"
 [stages.script.context.regions]
 task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "6%", strategy = "bulk", overflow = 10, summarizable = false }
-logs = { kind = "temporary", budget = "28%" }
+logs = { kind = "temporary", volatility = "grows", budget = "28%" }
 scripts = { kind = "compacting", budget = "32%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "18%", strategy = "bulk", overflow = 10 }
@@ -360,7 +360,7 @@ Evidence conduct, applying to everything you produce:
 task = { kind = "pinned", volatility = "stable", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 severity_index = { kind = "pinned", volatility = "grows", budget = "3%", summarizable = false }
 findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
-logs = { kind = "temporary", budget = "22%" }
+logs = { kind = "temporary", volatility = "grows", budget = "22%" }
 scripts = { kind = "compacting", budget = "18%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
@@ -407,7 +407,7 @@ Evidence conduct, applying to everything you produce:
 [stages.error_recovery.context.regions]
 task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
 findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
-logs = { kind = "temporary", budget = "22%" }
+logs = { kind = "temporary", volatility = "grows", budget = "22%" }
 scripts = { kind = "compacting", budget = "22%", compact_at = "80%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "4%" }
@@ -504,7 +504,7 @@ task            = { kind = "pinned", volatility = "stable", budget = "2%", min_t
 severity_index  = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
 findings        = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 
-logs            = { kind = "temporary",       budget = "32%" }
+logs            = { kind = "temporary", volatility = "grows",       budget = "32%" }
 scripts         = { kind = "compacting",      budget = "22%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 

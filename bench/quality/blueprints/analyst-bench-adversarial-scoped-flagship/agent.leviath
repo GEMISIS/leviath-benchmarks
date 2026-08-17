@@ -76,7 +76,7 @@ bash      = "data_preview"
 [stages.profile.context.regions]
 task = { kind = "pinned", volatility = "stable", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", volatility = "grows", budget = "6%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
-data_preview = { kind = "temporary", budget = "55%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "55%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "25%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
@@ -188,7 +188,7 @@ bash      = "scratch"
 task = { kind = "pinned", volatility = "stable", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", volatility = "grows", budget = "12%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", volatility = "grows", budget = "12%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
-data_preview = { kind = "temporary", budget = "38%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "38%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "3%" }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
@@ -312,7 +312,7 @@ bash      = "scratch"
 task = { kind = "pinned", volatility = "stable", budget = "8%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 data_map = { kind = "pinned", volatility = "grows", budget = "15%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 plan = { kind = "pinned", volatility = "grows", budget = "30%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
-data_preview = { kind = "temporary", budget = "18%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "18%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "18%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "3%" }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
@@ -434,7 +434,7 @@ plan = { kind = "pinned", volatility = "grows", budget = "10%", required = true,
 results = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "14%", strategy = "bulk", overflow = 10, summarizable = false }
 scripts = { kind = "compacting", budget = "22%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
-data_preview = { kind = "temporary", budget = "18%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "18%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "16%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
@@ -555,7 +555,7 @@ plan = { kind = "pinned", volatility = "grows", budget = "12%", required = true,
 results = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "18%", strategy = "bulk", overflow = 10, summarizable = false }
 scripts = { kind = "compacting", budget = "14%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
-data_preview = { kind = "temporary", budget = "15%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "15%" }
 answer_draft = { kind = "pinned", volatility = "grows", budget = "12%", required = true, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "15%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
@@ -639,7 +639,7 @@ task = { kind = "pinned", volatility = "stable", budget = "5%", min_tokens = 400
 plan = { kind = "pinned", volatility = "grows", budget = "10%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 results = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "15%", strategy = "bulk", overflow = 10, summarizable = false }
 scripts = { kind = "compacting", budget = "20%", compact_at = "80%" }
-data_preview = { kind = "temporary", budget = "15%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "15%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "3%" }
 error_report = { kind = "pinned", volatility = "grows", budget = "5%" }
@@ -766,7 +766,7 @@ results      = { kind = "sliding_window", volatility = "grows", max_items = 30, 
 answer_draft = { kind = "pinned", volatility = "grows", budget = "10%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 
 # Bulk and evictable: samples of the data pulled in for orientation.
-data_preview = { kind = "temporary", budget = "28%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "28%" }
 # Script code and output, compacted as the loop runs.
 scripts      = { kind = "compacting", budget = "22%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }

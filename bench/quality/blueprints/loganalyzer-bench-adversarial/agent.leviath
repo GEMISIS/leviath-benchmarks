@@ -536,7 +536,7 @@ task            = { kind = "pinned", volatility = "stable", budget = "2%", min_t
 severity_index  = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
 findings        = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 
-logs            = { kind = "temporary",       budget = "32%" }
+logs            = { kind = "temporary", volatility = "grows",       budget = "32%" }
 scripts         = { kind = "compacting",      budget = "22%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 

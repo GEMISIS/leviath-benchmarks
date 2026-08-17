@@ -535,7 +535,7 @@ results      = { kind = "sliding_window", volatility = "grows", max_items = 30, 
 answer_draft = { kind = "pinned", volatility = "grows", budget = "10%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 
 # Bulk and evictable: samples of the data pulled in for orientation.
-data_preview = { kind = "temporary", budget = "28%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "28%" }
 # Script code and output, compacted as the loop runs.
 scripts      = { kind = "compacting", budget = "22%", compact_at = "80%" }
 scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }

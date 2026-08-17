@@ -76,7 +76,7 @@ default_region = "raw_findings"
 query = { kind = "pinned", volatility = "stable", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 scope = { kind = "pinned", volatility = "stable", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", volatility = "grows", budget = "5%", summarizable = false }
-raw_findings = { kind = "temporary", budget = "56%", max_tokens = 24000 }
+raw_findings = { kind = "temporary", volatility = "grows", budget = "56%", max_tokens = 24000 }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "28%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "2%" }
 
@@ -167,7 +167,7 @@ query = { kind = "pinned", volatility = "stable", budget = "3%", min_tokens = 40
 scope = { kind = "pinned", volatility = "stable", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", volatility = "grows", budget = "6%", summarizable = false }
 format = { kind = "pinned", volatility = "stable", budget = "2%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
-raw_findings = { kind = "temporary", budget = "40%", max_tokens = 24000 }
+raw_findings = { kind = "temporary", volatility = "grows", budget = "40%", max_tokens = 24000 }
 claims = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "14%", summarizable = false, required = true }
 contradictions = { kind = "clearable", budget = "4%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
@@ -307,7 +307,7 @@ query = { kind = "pinned", volatility = "stable", budget = "3%", min_tokens = 40
 scope = { kind = "pinned", volatility = "stable", budget = "2%", seed = "scope" }
 sources_index = { kind = "pinned", volatility = "grows", budget = "8%", summarizable = false }
 format = { kind = "pinned", volatility = "stable", budget = "2%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
-raw_findings = { kind = "temporary", budget = "31%", max_tokens = 24000 }
+raw_findings = { kind = "temporary", volatility = "grows", budget = "31%", max_tokens = 24000 }
 claims = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", summarizable = false }
 contradictions = { kind = "clearable", budget = "6%" }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
@@ -454,7 +454,7 @@ Evidence conduct, applying to everything you produce:
 [stages.error_recovery.context.regions]
 query = { kind = "pinned", volatility = "stable", budget = "3%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 sources_index = { kind = "pinned", volatility = "grows", budget = "5%", summarizable = false }
-raw_findings = { kind = "temporary", budget = "32%", max_tokens = 24000 }
+raw_findings = { kind = "temporary", volatility = "grows", budget = "32%", max_tokens = 24000 }
 conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "45%", strategy = "bulk", overflow = 10 }
 error_report = { kind = "pinned", volatility = "grows", budget = "8%" }
 
@@ -563,7 +563,7 @@ format         = { kind = "pinned", volatility = "stable", budget = "1%", seed =
 # up whole repositories and every request rewrites the cache suffix.
 # ~24k holds the last handful of sources; older ones evict oldest-
 # first, which is the point: distill into `claims`, then let go.
-raw_findings   = { kind = "temporary", budget = "38%", max_tokens = 24000 }
+raw_findings   = { kind = "temporary", volatility = "grows", budget = "38%", max_tokens = 24000 }
 # Extracted claims (with source refs) and cross-source conflicts.
 claims         = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "10%", summarizable = false }
 contradictions = { kind = "clearable",      budget = "3%" }

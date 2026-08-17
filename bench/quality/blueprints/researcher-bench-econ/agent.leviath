@@ -348,7 +348,7 @@ format         = { kind = "pinned", volatility = "stable", budget = "1%", seed =
 # up whole repositories and every request rewrites the cache suffix.
 # ~24k holds the last handful of sources; older ones evict oldest-
 # first, which is the point: distill into `claims`, then let go.
-raw_findings   = { kind = "temporary", budget = "38%", max_tokens = 24000 }
+raw_findings   = { kind = "temporary", volatility = "grows", budget = "38%", max_tokens = 24000 }
 # Extracted claims (with source refs) and cross-source conflicts.
 claims         = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "10%", summarizable = false }
 contradictions = { kind = "clearable",      budget = "3%" }

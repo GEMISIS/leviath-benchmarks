@@ -21,6 +21,14 @@ The policy, matching the runtime docs and the #474 guidance:
   evicted wholesale; the `rewritten` default is already the honest
   declaration, so those lines are left untouched.
 
+Exception to the default (leviath #490): a lifecycle region may now
+declare `grows` and get within-stage chunk caching - the kind only
+names when contents are thrown away, not whether they hold still in
+between. The temporary regions that are append-mostly corpus dumps
+(`logs`, `data_preview`, `raw_findings`) declare it; working regions
+that genuinely rewrite (`scratch`, `test_results`, `contradictions`)
+keep the default.
+
 Idempotent: lines already carrying `volatility` are skipped.
 """
 from __future__ import annotations
@@ -40,6 +48,11 @@ STABLE_NAMES = {"task", "stage_instructions", "query", "conventions",
 
 GROWS_KINDS = {"pinned", "sliding_window", "compact_history"}
 
+# Append-mostly lifecycle regions (leviath #490): chunk-cacheable
+# within a stage once declared, evicted wholesale at stage exit as
+# before. Only these names; other temporary/clearable regions rewrite.
+TEMP_GROWS_NAMES = {"logs", "data_preview", "raw_findings"}
+
 LINE_RE = re.compile(
     r'^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\{\s*kind\s*=\s*"([a-z_]+)"')
 
@@ -54,6 +67,9 @@ def annotate(text: str) -> tuple[str, int]:
             if name in STABLE_NAMES and kind == "pinned":
                 vol = "stable"
             elif kind in GROWS_KINDS:
+                vol = "grows"
+            elif (name in TEMP_GROWS_NAMES
+                  and kind in ("temporary", "clearable")):
                 vol = "grows"
             if vol:
                 needle = f'kind = "{kind}"'
