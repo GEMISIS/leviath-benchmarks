@@ -532,25 +532,25 @@ Evidence conduct, applying to everything you produce:
 
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
-task            = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index  = { kind = "pinned", budget = "2%", summarizable = false }
-findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+task            = { kind = "pinned", volatility = "stable", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index  = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
+findings        = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 
 logs            = { kind = "temporary",       budget = "32%" }
 scripts         = { kind = "compacting",      budget = "22%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 
-conversation    = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+conversation    = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
 scratch         = { kind = "clearable", budget = "4%" }
 
 # Written by the RUNTIME on an abnormal stage ending (issue #154): a failed
 # inference call's error text, or a note that a stage hit its iteration cap.
 # Pinned so it survives the edge transform into the stage that acts on it.
-error_report    = { kind = "pinned", budget = "2%" }
+error_report    = { kind = "pinned", volatility = "grows", budget = "2%" }
 
 # The per-stage system prompt. Declared, the runtime keeps it at the END of
 # the pinned block run; undeclared, it lands in the first pinned region
 # (`task`) and rewrites the head of the prompt every transition. Working
 # stages also share one available_tools set: the tool array is hashed ahead
 # of the system blocks, so differing sets invalidate the cache prefix.
-stage_instructions = { kind = "pinned", budget = "3%", max_tokens = 4000 }
+stage_instructions = { kind = "pinned", volatility = "stable", budget = "3%", max_tokens = 4000 }

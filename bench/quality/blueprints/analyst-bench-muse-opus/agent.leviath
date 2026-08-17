@@ -518,13 +518,13 @@ Evidence conduct, applying to everything you produce:
 # block 1 of the prefix on every transition), and pinned regions are
 # declared stable-first so a region that fills late invalidates only what
 # sits behind it.
-task         = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+task         = { kind = "pinned", volatility = "stable", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 # What the data is: written once in profile, read by every later stage.
-data_map     = { kind = "pinned", budget = "3%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
+data_map     = { kind = "pinned", volatility = "grows", budget = "3%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.
-plan         = { kind = "pinned", budget = "3%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
+plan         = { kind = "pinned", volatility = "grows", budget = "3%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 # Every figure established, with how it was computed.
-results      = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+results      = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 # The deliverable itself, committed by the stage that checked it. Separate
 # from `results` because working notes and the answer are different things:
 # `results` accumulates figures and how they were derived, and a stage reading
@@ -532,23 +532,23 @@ results      = { kind = "sliding_window", max_items = 30, budget = "8%", strateg
 # required, so a checking stage that forgets to write it is re-run and told to.
 # The failure this exists to stop: an output stage with no tools, handed only
 # a description of a four-hundred-item answer, invents four hundred items.
-answer_draft = { kind = "pinned", budget = "10%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
+answer_draft = { kind = "pinned", volatility = "grows", budget = "10%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 
 # Bulk and evictable: samples of the data pulled in for orientation.
 data_preview = { kind = "temporary", budget = "28%" }
 # Script code and output, compacted as the loop runs.
 scripts      = { kind = "compacting", budget = "22%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 
-conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
 scratch      = { kind = "clearable", budget = "4%" }
 
 # Written by the runtime on an abnormal stage ending: a failed inference call's
 # error text, or a note that a stage hit its iteration cap. Pinned so it
 # survives the edge transform into the stage that acts on it.
-error_report = { kind = "pinned", budget = "2%" }
+error_report = { kind = "pinned", volatility = "grows", budget = "2%" }
 
 # The per-stage system prompt. Declared, the runtime keeps it at the END of
 # the pinned block run; undeclared, it is injected into the first pinned
 # region (`task`), which rewrites the head of the prompt every transition.
-stage_instructions = { kind = "pinned", budget = "3%", max_tokens = 4000 }
+stage_instructions = { kind = "pinned", volatility = "stable", budget = "3%", max_tokens = 4000 }

@@ -201,7 +201,8 @@ def make_flat(structured_name: str, flat_name: str,
     if compacting:
         conversation = ('conversation = { kind = "sliding_window", '
                         'max_items = 400, budget = "91%", '
-                        'strategy = "compact", compact_count = 20 }')
+                        'strategy = "compact", compact_count = 20, '
+                        'volatility = "grows" }')
         overflow_note = (
             "# The window compacts on overflow - the oldest entries are\n"
             "# summarized rather than evicted, which is what production\n"
@@ -213,7 +214,8 @@ def make_flat(structured_name: str, flat_name: str,
     else:
         conversation = ('conversation = { kind = "sliding_window", '
                         'max_items = 400, budget = "91%", '
-                        'strategy = "bulk", overflow = 20 }')
+                        'strategy = "bulk", overflow = 20, '
+                        'volatility = "grows" }')
         overflow_note = (
             "# The window evicts oldest-first on overflow - the classic\n"
             "# truncating loop.")
@@ -268,13 +270,18 @@ system_prompt = \"\"\"
 # min_tokens floors survive a small pinned window (the CRS window
 # sweep): a percentage budget that starves the task text kills the run
 # at spawn, which measures the harness rather than the arm.
-task = {{ kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task"{req_msg} }}
+# Volatility declarations (runtime orders the prompt by them and
+# places cache markers accordingly, stable first): the flat arm gets
+# the same honest annotations as the structured bases - seeded-once
+# text is `stable`, append-only regions are `grows`. Undeclared
+# defaults to `rewritten` (sorted last, never cached ahead of churn).
+task = {{ kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", volatility = "stable"{req_msg} }}
 {conversation}
-error_report = {{ kind = "pinned", budget = "2%" }}
+error_report = {{ kind = "pinned", budget = "2%", volatility = "grows" }}
 # Declared so the per-stage prompt gets its own region instead of being
 # injected into `task` (the first pinned region), where it both churns
 # the cache prefix and competes with the task text for budget.
-stage_instructions = {{ kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000 }}
+stage_instructions = {{ kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000, volatility = "stable" }}
 """
 
 

@@ -70,11 +70,11 @@ read_file = { region = "logs", max_result_tokens = 16000 }
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.ingest.context.regions]
-task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-findings = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "55%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
-error_report = { kind = "pinned", budget = "3%" }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
+error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
 [stages.ingest.transitions.analyze]
 hint = "Log format identified, ready to analyze"
@@ -166,15 +166,15 @@ read_file = { region = "logs", max_result_tokens = 16000 }
 # refuses to generate one).
 # Budgets sum to 93% of this stage's window.
 [stages.analyze.context.regions]
-task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index = { kind = "pinned", budget = "2%", summarizable = false }
-findings = { kind = "sliding_window", max_items = 30, budget = "10%", strategy = "bulk", overflow = 10, summarizable = false, required = true }
+task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "10%", strategy = "bulk", overflow = 10, summarizable = false, required = true }
 logs = { kind = "temporary", budget = "30%" }
 scripts = { kind = "compacting", budget = "14%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "5%" }
-error_report = { kind = "pinned", budget = "3%" }
+error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
 [stages.analyze.transitions.analysis_review]
 hint = "Analysis done - have it attacked before reporting"
@@ -306,13 +306,13 @@ read_file = { region = "logs", max_result_tokens = 16000 }
 # refuses to generate one).
 # Budgets sum to 95% of this stage's window.
 [stages.analysis_review.context.regions]
-task = { kind = "pinned", budget = "6%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index = { kind = "pinned", budget = "4%", summarizable = false }
-findings = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
+task = { kind = "pinned", volatility = "stable", budget = "6%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index = { kind = "pinned", volatility = "grows", budget = "4%", summarizable = false }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "35%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "22%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "5%" }
-error_report = { kind = "pinned", budget = "3%" }
+error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
 [stages.analysis_review.transitions.analyze]
 hint = "The analysis has a defect that would make the scripts or the answer wrong"
@@ -395,14 +395,14 @@ Evidence conduct, applying to everything you produce:
 # refuses to generate one).
 # Budgets sum to 94% of this stage's window.
 [stages.report.context.regions]
-task = { kind = "pinned", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index = { kind = "pinned", budget = "3%", summarizable = false }
-findings = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
+task = { kind = "pinned", volatility = "stable", budget = "5%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index = { kind = "pinned", volatility = "grows", budget = "3%", summarizable = false }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "22%" }
 scripts = { kind = "compacting", budget = "18%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
-error_report = { kind = "pinned", budget = "3%" }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
 [stages.report.transitions.summary]
 hint = "The report is written"
@@ -443,13 +443,13 @@ Evidence conduct, applying to everything you produce:
 # refuses to generate one).
 # Budgets sum to 92% of this stage's window.
 [stages.error_recovery.context.regions]
-task = { kind = "pinned", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-findings = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+task = { kind = "pinned", volatility = "stable", budget = "4%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 logs = { kind = "temporary", budget = "22%" }
 scripts = { kind = "compacting", budget = "22%", compact_at = "80%" }
-conversation = { kind = "sliding_window", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "24%", strategy = "bulk", overflow = 10 }
 scratch = { kind = "clearable", budget = "4%" }
-error_report = { kind = "pinned", budget = "8%" }
+error_report = { kind = "pinned", volatility = "grows", budget = "8%" }
 
 [stages.error_recovery.transitions.report]
 hint = "Recovery is not converging - report the findings so far"
@@ -528,38 +528,38 @@ Evidence conduct, applying to everything you produce:
 # refuses to generate one).
 # Budgets sum to 91% of this stage's window.
 [stages.summary.context.regions]
-task = { kind = "pinned", budget = "8%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index = { kind = "pinned", budget = "5%", summarizable = false }
-findings = { kind = "sliding_window", max_items = 30, budget = "35%", strategy = "bulk", overflow = 10, summarizable = false }
-conversation = { kind = "sliding_window", max_items = 30, budget = "40%", strategy = "bulk", overflow = 10 }
-error_report = { kind = "pinned", budget = "3%" }
+task = { kind = "pinned", volatility = "stable", budget = "8%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index = { kind = "pinned", volatility = "grows", budget = "5%", summarizable = false }
+findings = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "35%", strategy = "bulk", overflow = 10, summarizable = false }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "40%", strategy = "bulk", overflow = 10 }
+error_report = { kind = "pinned", volatility = "grows", budget = "3%" }
 
 [stages.summary.transitions]
 
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
-task            = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-severity_index  = { kind = "pinned", budget = "2%", summarizable = false }
-findings        = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+task            = { kind = "pinned", volatility = "stable", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
+severity_index  = { kind = "pinned", volatility = "grows", budget = "2%", summarizable = false }
+findings        = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
 
 logs            = { kind = "temporary",       budget = "32%" }
 scripts         = { kind = "compacting",      budget = "22%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 
-conversation    = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+conversation    = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
 scratch         = { kind = "clearable", budget = "4%" }
 
 # Written by the RUNTIME on an abnormal stage ending (issue #154): a failed
 # inference call's error text, or a note that a stage hit its iteration cap.
 # Pinned so it survives the edge transform into the stage that acts on it.
-error_report    = { kind = "pinned", budget = "2%" }
+error_report    = { kind = "pinned", volatility = "grows", budget = "2%" }
 
 # The per-stage system prompt. Declared, the runtime keeps it at the END of
 # the pinned block run; undeclared, it lands in the first pinned region
 # (`task`) and rewrites the head of the prompt every transition. Working
 # stages also share one available_tools set: the tool array is hashed ahead
 # of the system blocks, so differing sets invalidate the cache prefix.
-stage_instructions = { kind = "pinned", budget = "3%", max_tokens = 4000 }
+stage_instructions = { kind = "pinned", volatility = "stable", budget = "3%", max_tokens = 4000 }
 
 [stages.report.tool_routing]
 [stages.report.tool_routing.overrides]

@@ -95,10 +95,15 @@ model = "claude-sonnet-5"
 # min_tokens floors survive a small pinned window (the CRS window
 # sweep): a percentage budget that starves the task text kills the run
 # at spawn, which measures the harness rather than the arm.
-task = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Name the log file(s)/dir and what to look for via --task." }
-conversation = { kind = "sliding_window", max_items = 400, budget = "91%", strategy = "bulk", overflow = 20 }
-error_report = { kind = "pinned", budget = "2%" }
+# Volatility declarations (runtime orders the prompt by them and
+# places cache markers accordingly, stable first): the flat arm gets
+# the same honest annotations as the structured bases - seeded-once
+# text is `stable`, append-only regions are `grows`. Undeclared
+# defaults to `rewritten` (sorted last, never cached ahead of churn).
+task = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", volatility = "stable", required_message = "Name the log file(s)/dir and what to look for via --task." }
+conversation = { kind = "sliding_window", max_items = 400, budget = "91%", strategy = "bulk", overflow = 20, volatility = "grows" }
+error_report = { kind = "pinned", budget = "2%", volatility = "grows" }
 # Declared so the per-stage prompt gets its own region instead of being
 # injected into `task` (the first pinned region), where it both churns
 # the cache prefix and competes with the task text for budget.
-stage_instructions = { kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000 }
+stage_instructions = { kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000, volatility = "stable" }
