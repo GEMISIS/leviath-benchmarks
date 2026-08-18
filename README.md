@@ -101,6 +101,13 @@ resumption** (run paused, daemon killed, restarted, `lev resume`).
 
 ## Quality track
 
+The current full comparison — survival under window pressure,
+truthfulness, sessions, economics, and where flat wins — is
+[`bench/quality/FLAGSHIP-VS-FLAT.md`](bench/quality/FLAGSHIP-VS-FLAT.md);
+every table regenerates from `results/` by script, and the round
+runbooks under [`bench/quality/rounds/`](bench/quality/rounds/)
+reproduce each tier byte-for-byte against the leviath commit they name.
+
 The context arms, run on external suites and compared with exact
 statistics (see [`METHODOLOGY.md`](METHODOLOGY.md) for the full
 design):
