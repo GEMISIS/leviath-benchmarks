@@ -1,0 +1,6 @@
+The document itself must be written to ARCHITECTURE-EXPLAINED.md in the
+working directory. Reply with the line
+"Document written to ARCHITECTURE-EXPLAINED.md", followed by a blank
+line, followed by the full text of the document exactly as written to
+the file. Nothing else - no preamble and no commentary after the
+document.

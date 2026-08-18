@@ -1,0 +1,62 @@
+{
+  "seed": 8117,
+  "answers": [
+    "/orders category=frozen",
+    "itm-1347",
+    "restock_retries_total",
+    "restock_backoff_strategy=exponential",
+    "runbook says restock_backoff, actual restock_backoff_strategy",
+    ""
+  ],
+  "prior_traps": {
+    "4": {
+      "corpus": "restock_backoff_strategy=exponential",
+      "prior": "restock_backoff=exponential"
+    }
+  },
+  "vocab": {
+    "metric_keys": [
+      "restock_retries_total",
+      "avg_latency_ms_window",
+      "orders_in_window",
+      "window_ticks",
+      "tick"
+    ],
+    "config_keys": [
+      "metrics_window_ticks",
+      "order_qty_cap",
+      "restock_backoff_strategy"
+    ],
+    "item_ids": [
+      "itm-1347",
+      "itm-2489",
+      "itm-2937",
+      "itm-2947",
+      "itm-3915",
+      "itm-4128",
+      "itm-5724",
+      "itm-5759",
+      "itm-8488",
+      "itm-8646",
+      "itm-8897",
+      "itm-9209",
+      "itm-9517"
+    ],
+    "categories": [
+      "beverage",
+      "perishable",
+      "frozen",
+      "dry-goods",
+      "household"
+    ]
+  },
+  "registration": {
+    "fault_category": "frozen",
+    "related_item": "itm-1347",
+    "metric_key": "restock_retries_total",
+    "true_key": "restock_backoff_strategy",
+    "wrong_key": "restock_backoff",
+    "threshold": 13
+  },
+  "expected_depth": 137
+}

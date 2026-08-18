@@ -1,0 +1,36 @@
+{
+  "seed": 2731,
+  "answers": [
+    "pricing-service",
+    "db.pool.max_connections",
+    "2026-03-14T01:48:29Z",
+    "order-service",
+    "http.client.timeout_ms",
+    "2026-03-14T05:40:58Z",
+    "inventory-service",
+    "cache.heap_limit_mb",
+    "2026-03-14T09:35:01Z",
+    "2,1,3",
+    "cart-api,checkout-api,edge-gateway",
+    "386",
+    "arjun,maya,priya",
+    "INC-2:http.client.timeout_ms=4000",
+    "7379",
+    "2202",
+    "5"
+  ],
+  "prior_traps": {
+    "15": {
+      "corpus": "7379",
+      "prior": "6379"
+    },
+    "16": {
+      "corpus": "2202",
+      "prior": "22"
+    },
+    "17": {
+      "corpus": "5",
+      "prior": "3"
+    }
+  }
+}

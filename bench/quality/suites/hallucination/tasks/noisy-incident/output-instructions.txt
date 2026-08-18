@@ -1,0 +1,5 @@
+Reply with ONLY the seven-line report the task specifies: root-cause
+service, configuration key, T0 timestamp, first degraded caller, and
+one `ruled-out: <service>=<tag>` line per excluded loud event in
+alphabetical service order. One item per line, exact spellings, no
+headings, no numbering, no commentary.

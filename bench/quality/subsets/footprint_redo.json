@@ -1,0 +1,10 @@
+{
+  "suite": "footprint",
+  "seed": 20260815,
+  "n": 1,
+  "universe_sha256": "a8c5f2520ceb1e355016e99d31b045cc0db8169617a8122ca6fb373c6e15d403",
+  "excluded": [],
+  "task_ids": [
+    "explain-repo"
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "seed": 5981,
+  "answers": [
+    "conflict: ACC-17 <-> HR-9 | quarterly entitlement certification versus anniversary-only access review",
+    "conflict: EXP-5 <-> FIN-12 | director signature threshold contradicts self-approval spending limit",
+    "conflict: PRIV-10 <-> OPS-10 | EU residency guarantee versus overseas backup replication",
+    "conflict: RET-6 <-> VEN-2 | customer purge timeline contradicts supplier retention floor",
+    "conflict: SEC-12 <-> PRIV-19 | seven-year audit retention versus ninety-day log erasure",
+    "conflict: VEN-10 <-> FIN-13 | pre-contract security assessment versus immediate marketplace access",
+    "reviewed: 44"
+  ],
+  "conflicts": [
+    {
+      "key": "pentest-vs-instant",
+      "essence": "pre-contract security assessment versus immediate marketplace access",
+      "doc_a": "VEN-10",
+      "section_a": 6,
+      "statement_a": "New suppliers undergo a penetration assessment before contract execution.",
+      "doc_b": "FIN-13",
+      "section_b": 6,
+      "statement_b": "Third parties gain marketplace access immediately upon purchase-order issuance."
+    },
+    {
+      "key": "certify-vs-anniversary",
+      "essence": "quarterly entitlement certification versus anniversary-only access review",
+      "doc_a": "ACC-17",
+      "section_a": 2,
+      "statement_a": "Line managers certify their reports' entitlements at the close of each quarter.",
+      "doc_b": "HR-9",
+      "section_b": 3,
+      "statement_b": "Access privileges are examined only during the employee's anniversary evaluation."
+    },
+    {
+      "key": "residency-vs-backup",
+      "essence": "EU residency guarantee versus overseas backup replication",
+      "doc_a": "PRIV-10",
+      "section_a": 2,
+      "statement_a": "Personal information belonging to EU residents never leaves union territory.",
+      "doc_b": "OPS-10",
+      "section_b": 6,
+      "statement_b": "Nightly backups replicate to the Oregon and Singapore regions."
+    },
+    {
+      "key": "audit-vs-minimize",
+      "essence": "seven-year audit retention versus ninety-day log erasure",
+      "doc_a": "SEC-12",
+      "section_a": 1,
+      "statement_a": "Audit trails persist for seven years in immutable storage.",
+      "doc_b": "PRIV-19",
+      "section_b": 7,
+      "statement_b": "Activity logs are erased after ninety days to honor minimization."
+    },
+    {
+      "key": "signature-vs-selfserve",
+      "essence": "director signature threshold contradicts self-approval spending limit",
+      "doc_a": "EXP-5",
+      "section_a": 5,
+      "statement_a": "Purchases above five hundred dollars require a director's signature.",
+      "doc_b": "FIN-12",
+      "section_b": 6,
+      "statement_b": "Spending under two thousand USD may proceed on the employee's own authority."
+    },
+    {
+      "key": "retention-vs-vendor",
+      "essence": "customer purge timeline contradicts supplier retention floor",
+      "doc_a": "RET-6",
+      "section_a": 4,
+      "statement_a": "Customer records are purged twenty-four months after account closure.",
+      "doc_b": "VEN-2",
+      "section_b": 1,
+      "statement_b": "Datasets shared with suppliers shall retain the complete client history for the entire duration of the supplier agreement, with a five-year floor."
+    }
+  ],
+  "decoys": [
+    {
+      "key": "quarterly-scans",
+      "why": "same quarterly cadence stated twice",
+      "anchor": "quarterly",
+      "doc_a": "SEC-19",
+      "statement_a": "External vulnerability scans run quarterly against every internet-facing host.",
+      "doc_b": "OPS-10",
+      "statement_b": "The operations calendar reserves the first week of each fiscal quarter for the quarterly external scan."
+    },
+    {
+      "key": "erasure-clock",
+      "why": "same thirty-day deadline, policy and tracking view",
+      "anchor": "thirty",
+      "doc_a": "RET-17",
+      "statement_a": "Erasure requests complete within thirty days of receipt.",
+      "doc_b": "PRIV-1",
+      "statement_b": "The privacy office tracks every erasure ticket against the thirty-day completion clock."
+    },
+    {
+      "key": "mfa-everywhere",
+      "why": "same multi-factor requirement, rule and provisioning",
+      "anchor": "multi-factor",
+      "doc_a": "ACC-6",
+      "statement_a": "All administrative consoles require multi-factor authentication.",
+      "doc_b": "SEC-14",
+      "statement_b": "Multi-factor authentication is provisioned for administrative console access during onboarding."
+    },
+    {
+      "key": "reimburse-45",
+      "why": "same forty-five-day settlement window",
+      "anchor": "forty-five",
+      "doc_a": "EXP-2",
+      "statement_a": "Approved reimbursements are paid within forty-five days.",
+      "doc_b": "FIN-13",
+      "statement_b": "Finance settles approved reimbursement claims on a forty-five-day cycle."
+    },
+    {
+      "key": "sev1-page",
+      "why": "same fifteen-minute paging promise",
+      "anchor": "fifteen",
+      "doc_a": "INC-5",
+      "statement_a": "A severity-one incident pages the on-call engineer within fifteen minutes.",
+      "doc_b": "OPS-5",
+      "statement_b": "On-call rotations are staffed so severity-one pages are acknowledged inside fifteen minutes."
+    },
+    {
+      "key": "day-one-training",
+      "why": "same first-day training obligation",
+      "anchor": "first working day",
+      "doc_a": "HR-7",
+      "statement_a": "Security awareness training is completed on the first working day.",
+      "doc_b": "SEC-14",
+      "statement_b": "Onboarding schedules security awareness training for the first working day."
+    },
+    {
+      "key": "dpa-required",
+      "why": "same DPA prerequisite, rule and filing step",
+      "anchor": "data processing agreement",
+      "doc_a": "VEN-15",
+      "statement_a": "Every vendor relationship requires an executed data processing agreement.",
+      "doc_b": "PRIV-10",
+      "statement_b": "Procurement files the executed data processing agreement before any vendor account is enabled."
+    }
+  ],
+  "prior_traps": {
+    "password_min_length": {
+      "corpus": "19",
+      "priors": [
+        "8",
+        "12",
+        "14"
+      ],
+      "doc": "SEC-12",
+      "section": 5
+    }
+  },
+  "n_docs": 44
+}

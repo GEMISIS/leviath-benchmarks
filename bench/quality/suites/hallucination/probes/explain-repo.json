@@ -1,0 +1,43 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "factual_recall",
+      "question": "Which crate provides the command-line binary, and what is the binary called?",
+      "expected": "crates/leviath-cli builds the `lev` binary.",
+      "exact": "leviath-cli",
+      "rubric": "Must name leviath-cli (or crates/leviath-cli) as the CLI crate; naming the binary `lev` completes it. A different crate is a fail; the crate without the binary name is partial credit."
+    },
+    {
+      "after_tool_calls": 20,
+      "type": "factual_recall",
+      "question": "Which crate holds the provider integrations (the code that talks to model APIs)?",
+      "expected": "crates/leviath-providers",
+      "exact": "leviath-providers",
+      "rubric": "Must name leviath-providers. Attributing providers to leviath-runtime, leviath-core, or an invented crate is a fail."
+    },
+    {
+      "after_tool_calls": 35,
+      "type": "architecture",
+      "question": "Name four workspace crates besides the CLI crate, exactly as the workspace manifest spells them.",
+      "expected": "Any four of: leviath, leviath-core, leviath-net, leviath-agent-client, leviath-runtime, leviath-providers, leviath-mcp, leviath-scripting, leviath-package, leviath-alloc, leviath-tools, leviath-sys, leviath-telemetry, leviath-testkit, xtask.",
+      "rubric": "All four names must be real workspace members spelled exactly. One invented or misspelled crate name makes the answer hallucinated; three real of four named is partial credit."
+    },
+    {
+      "after_tool_calls": 50,
+      "type": "cross_file",
+      "question": "Where does the agent runtime's pipeline live - which crate and directory?",
+      "expected": "crates/leviath-runtime, in src/pipeline/.",
+      "exact": "leviath-runtime",
+      "rubric": "Must name leviath-runtime; the src/pipeline/ path completes it. Placing the pipeline in core or cli is a fail."
+    },
+    {
+      "after_tool_calls": 65,
+      "type": "architecture",
+      "question": "Is there a separate crate for scripting support, and if so what is it called?",
+      "expected": "Yes - crates/leviath-scripting.",
+      "exact": "leviath-scripting",
+      "rubric": "Must say yes and name leviath-scripting exactly. 'No' or an invented name is a fail (and an invented name is hallucinated)."
+    }
+  ]
+}

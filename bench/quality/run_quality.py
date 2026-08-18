@@ -92,7 +92,14 @@ def require_result_capable(lev: str) -> None:
             "build, then point --lev at it.")
 # Comparisons are pre-registered: arm a is hypothesized to pass MORE and
 # bill FEWER tokens than arm b.
-COMPARISONS = [("structured-pinned", "flat-pinned")]
+COMPARISONS = [
+    ("structured-pinned", "flat-pinned"),
+    # CRS pre-registered comparisons: the Leviath arm is the composed
+    # flagship (the configuration the runtime actually recommends), read
+    # against the strong flat baseline first and the plain one second.
+    ("structured-mix-flagship", "flat-compacting"),
+    ("flat-compacting", "flat-pinned"),
+]
 
 
 # Roster recency (METHODOLOGY.md): the roster carries models released
@@ -224,10 +231,13 @@ def main() -> int:
                         help="results dir (default: results/<stamp>_<host>)")
     parser.add_argument("--budget-usd", type=float, default=None)
     parser.add_argument("--per-run-max-tokens", type=int,
-                        default=3_000_000,
+                        default=30_000_000,
                         help="mid-run billed-token ceiling per run; the "
                              "run is cancelled and recorded as 'cap' "
-                             "when exceeded (0 disables)")
+                             "when exceeded (0 disables). A runaway "
+                             "backstop, not a working limit - runs "
+                             "should finish on their own budgets, and "
+                             "a cell that hits this is itself a finding")
     parser.add_argument("--task-timeout", type=float,
                         default=DEFAULT_TIMEOUT_SECS)
     parser.add_argument("--concurrency", type=int, default=1,
@@ -237,6 +247,14 @@ def main() -> int:
                              "limits in arms.json. Wall-clock is only "
                              "comparable between rounds run at the same "
                              "level, and every record carries it")
+    parser.add_argument("--window-tokens", type=int, default=None,
+                        help="pin every roster model's context window to "
+                             "min(native, N) for this invocation - the "
+                             "declared independent variable of the CRS "
+                             "window sweep. Model labels get an @<N>k "
+                             "suffix so tiers coexist in one results "
+                             "dir, and window_tokens lands in round.json "
+                             "and every record")
     parser.add_argument("--seed", type=int, default=1,
                         help="interleaving order seed (recorded)")
     parser.add_argument("--provider-config", default=None,
@@ -245,6 +263,11 @@ def main() -> int:
     parser.add_argument("--providers-dir", default=None,
                         help="script-provider dir to install (mock runs)")
     parser.add_argument("--keep-context", action="store_true")
+    parser.add_argument("--home", default=None,
+                        help="isolated home directory (default "
+                             "/tmp/levqual); a distinct home lets two "
+                             "rounds run side by side without wiping "
+                             "each other's daemon")
     parser.add_argument("--unsafe-smoke", action="store_true",
                         help="run without a freeze tag; records are "
                              "stamped UNFROZEN-SMOKE")
@@ -273,10 +296,44 @@ def main() -> int:
         return 2
 
     arms_cfg = load_arms_config(QUALITY_DIR / "arms.json")
+    # Local models' declared window is the SERVING truth (num_ctx is
+    # baked into the ollama model), and leviath's built-in capability
+    # table cannot know a derived model's name - without the override
+    # it assumes a larger window, assembles over num_ctx, and Ollama
+    # front-truncates the system+user messages into template errors.
+    for entry in arms_cfg["models"].values():
+        if entry.get("tier") == "local" and entry.get("context_window"):
+            cap = dict(entry.get("capability_override") or {})
+            cap.setdefault("max_context_tokens",
+                           entry["context_window"])
+            entry["capability_override"] = cap
+    if args.window_tokens:
+        # The window sweep: every model in the round runs under
+        # min(native, N). Region budgets are percentages of the window,
+        # so this shrinks every region proportionally - the same agent
+        # under a smaller deployment, which is the declared variable.
+        for entry in arms_cfg["models"].values():
+            if entry.get("tier") == "smoke":
+                continue
+            native = entry.get("context_window") or args.window_tokens
+            # Pin ONLY the window. Overrides apply field-by-field since
+            # #338, so every capability flag stays the runtime's own -
+            # inventing flags here is how a model that refuses
+            # `temperature` gets sent one and 400s every call.
+            cap = dict(entry.get("capability_override") or {})
+            cap["max_context_tokens"] = min(native, args.window_tokens)
+            entry["capability_override"] = cap
+            entry["context_window"] = min(native, args.window_tokens)
     model_labels = (args.models.split(",") if args.models
                     else list(arms_cfg["models"]))
     arms = resolve_arms(arms_cfg, args.arms.split(","),
                         [m.strip() for m in model_labels])
+    if args.window_tokens:
+        suffix = f"@{args.window_tokens // 1000}k"
+        for arm in arms:
+            arm["window_tokens"] = args.window_tokens
+            arm["model_label"] = (f"{arm['model_label'] or 'native'} "
+                                  f"{suffix}")
 
     ages = roster_ages(arms_cfg, dt.datetime.now(timezone.utc).date())
     for label in sorted({a["model_label"] for a in arms} & set(ages)):
@@ -307,7 +364,8 @@ def main() -> int:
         specs_path.write_text(
             json.dumps(machine_specs.gather(args.lev), indent=2) + "\n")
 
-    home = QualityHome(args.lev)
+    home = (QualityHome(args.lev, home=Path(args.home)) if args.home
+            else QualityHome(args.lev))
     blueprints_dir = QUALITY_DIR / "blueprints"
     config_text = (Path(args.provider_config).read_text()
                    if args.provider_config else
@@ -322,6 +380,19 @@ def main() -> int:
     config_text = (f"{config_text}\n"
                    + QualityHome.concurrency_config(
                        args.concurrency, arms_cfg.get("rate_limits", {})))
+    # Anthropic cache entries default to a 5-minute TTL, which a staged
+    # run outlives between writing a prefix and re-reading it; the hour
+    # TTL costs nothing extra on hits and is part of what a structured
+    # arm is claimed to be able to do. Native Anthropic provider only.
+    config_text += '\n[providers]\nanthropic_cache_ttl = "1h"\n'
+    # Blueprint tool_permissions are a ceiling by default (only
+    # web_search/web_fetch may loosen); --yolo masks that by
+    # auto-approving. The ask tests run attended so the ask tools
+    # survive - without this, every shell call parks on an approval
+    # the scripted user must rubber-stamp (~35 round trips per run).
+    # The home is hermetic and every other cell runs --yolo, so this
+    # only makes attended cells behave like the rest of the matrix.
+    config_text += '\n[security]\nallow_blueprint_permissions = true\n'
     home.install(blueprints_dir, config_text,
                  providers_dir=(Path(args.providers_dir)
                                 if args.providers_dir else None))
@@ -337,6 +408,7 @@ def main() -> int:
         "freeze_tag": freeze_tag,
         "suite": suite.name,
         "seed": args.seed,
+        "window_tokens": args.window_tokens,
         "reps": args.reps,
         "budget_usd": args.budget_usd,
         "per_run_max_tokens": args.per_run_max_tokens or None,

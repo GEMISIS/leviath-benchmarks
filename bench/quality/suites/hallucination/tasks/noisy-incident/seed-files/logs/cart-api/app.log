@@ -1,0 +1,255 @@
+2026-03-14T11:00:00Z INFO [startup] scheduled job orders_rollup finished in 22s
+2026-03-14T11:00:05Z WARN [scheduler] certificate for inventory-service expires in 4698 days
+2026-03-14T11:00:14Z WARN [http.server] slow query 258 ms on table email_digest
+2026-03-14T11:00:14Z DEBUG [http.server] worker w64 idle for 47s
+2026-03-14T11:00:16Z WARN [http.server] slow query 305 ms on table orders_rollup
+2026-03-14T11:00:37Z INFO [cache] scheduled job orders_rollup finished in 96s
+2026-03-14T11:00:51Z INFO [http.server] cache refresh complete: 4218 entries loaded
+2026-03-14T11:01:37Z WARN [gc] certificate for session-cache expires in 4098 days
+2026-03-14T11:01:45Z WARN [http.server] retrying metrics flush (attempt 614)
+2026-03-14T11:01:52Z INFO [metrics] cache refresh complete: 3876 entries loaded
+2026-03-14T11:02:05Z DEBUG [http.server] gc pause 274 ms (young gen)
+2026-03-14T11:02:06Z INFO [metrics] scheduled job ledger_sync finished in 50s
+2026-03-14T11:02:46Z INFO [metrics] connection established to session-cache:8081
+2026-03-14T11:02:56Z INFO [scheduler] connection established to pricing-service:8080
+2026-03-14T11:03:16Z INFO [scheduler] heartbeat ok (epoch 3800)
+2026-03-14T11:03:20Z DEBUG [metrics] worker w40 idle for 69s
+2026-03-14T11:03:34Z WARN [cache] retrying metrics flush (attempt 3778)
+2026-03-14T11:03:37Z DEBUG [gc] gc pause 716 ms (young gen)
+2026-03-14T11:03:41Z DEBUG [cache] queue depth 3850 within limits
+2026-03-14T11:03:51Z INFO [metrics] heartbeat ok (epoch 420)
+2026-03-14T11:04:03Z WARN [startup] slow query 841 ms on table sku_reindex
+2026-03-14T11:04:05Z INFO [scheduler] request w16 completed status=200 in 759 ms
+2026-03-14T11:04:10Z INFO [metrics] scheduled job sku_reindex finished in 21s
+2026-03-14T11:04:26Z DEBUG [http.server] gc pause 777 ms (young gen)
+2026-03-14T11:04:29Z INFO [gc] connection established to pricing-service:8199
+2026-03-14T11:04:36Z INFO [scheduler] heartbeat ok (epoch 3306)
+2026-03-14T11:04:40Z DEBUG [metrics] worker w2 idle for 55s
+2026-03-14T11:05:01Z INFO [http.server] request w44 completed status=200 in 534 ms
+2026-03-14T11:05:10Z INFO [gc] connection established to inventory-service:8109
+2026-03-14T11:05:13Z INFO [http.server] heartbeat ok (epoch 2543)
+2026-03-14T11:05:14Z INFO [gc] heartbeat ok (epoch 4941)
+2026-03-14T11:05:35Z INFO [startup] cache refresh complete: 204 entries loaded
+2026-03-14T11:05:40Z INFO [http.server] cache refresh complete: 297 entries loaded
+2026-03-14T11:05:54Z DEBUG [http.server] worker w52 idle for 98s
+2026-03-14T11:06:20Z DEBUG [metrics] worker w13 idle for 32s
+2026-03-14T11:06:21Z INFO [http.server] request w29 completed status=200 in 734 ms
+2026-03-14T11:06:33Z WARN [gc] retrying metrics flush (attempt 3100)
+2026-03-14T11:06:42Z DEBUG [startup] worker w62 idle for 67s
+2026-03-14T11:06:45Z INFO [scheduler] scheduled job token_sweep finished in 53s
+2026-03-14T11:07:05Z INFO [startup] heartbeat ok (epoch 3657)
+2026-03-14T11:07:06Z WARN [cache] certificate for pricing-service expires in 3522 days
+2026-03-14T11:07:13Z INFO [http.server] request w48 completed status=200 in 149 ms
+2026-03-14T11:07:55Z INFO [startup] cache refresh complete: 844 entries loaded
+2026-03-14T11:07:55Z WARN [scheduler] slow query 442 ms on table ledger_sync
+2026-03-14T11:08:15Z INFO [scheduler] scheduled job img_prewarm finished in 43s
+2026-03-14T11:08:22Z INFO [gc] request w13 completed status=200 in 121 ms
+2026-03-14T11:08:23Z INFO [http.server] heartbeat ok (epoch 2940)
+2026-03-14T11:09:11Z INFO [cache] cache refresh complete: 4941 entries loaded
+2026-03-14T11:09:11Z DEBUG [startup] queue depth 2165 within limits
+2026-03-14T11:09:41Z INFO [http.server] scheduled job email_digest finished in 112s
+2026-03-14T11:09:52Z WARN [http.server] retrying metrics flush (attempt 3138)
+2026-03-14T11:09:54Z INFO [scheduler] request w3 completed status=200 in 712 ms
+2026-03-14T11:09:59Z INFO [http.server] request w19 completed status=200 in 183 ms
+2026-03-14T11:10:05Z INFO [scheduler] scheduled job img_prewarm finished in 15s
+2026-03-14T11:10:15Z DEBUG [scheduler] gc pause 33 ms (young gen)
+2026-03-14T11:10:22Z INFO [gc] request w8 completed status=200 in 545 ms
+2026-03-14T11:10:29Z WARN [gc] certificate for inventory-service expires in 3853 days
+2026-03-14T11:10:58Z INFO [scheduler] connection established to pricing-service:8156
+2026-03-14T11:11:14Z DEBUG [gc] gc pause 392 ms (young gen)
+2026-03-14T11:11:27Z INFO [http.server] request w41 completed status=200 in 204 ms
+2026-03-14T11:11:27Z INFO [gc] connection established to pricing-service:8141
+2026-03-14T11:11:31Z INFO [metrics] connection established to inventory-service:8091
+2026-03-14T11:11:53Z WARN [scheduler] slow query 559 ms on table orders_rollup
+2026-03-14T11:12:21Z INFO [metrics] connection established to inventory-service:8174
+2026-03-14T11:12:23Z ERROR [http.server] temporary DNS failure resolving inventory-service (retried ok)
+2026-03-14T11:12:24Z DEBUG [http.server] worker w20 idle for 87s
+2026-03-14T11:12:58Z INFO [metrics] request w42 completed status=200 in 624 ms
+2026-03-14T11:13:00Z INFO [cache] scheduled job sku_reindex finished in 55s
+2026-03-14T11:13:10Z INFO [metrics] scheduled job ledger_sync finished in 74s
+2026-03-14T11:13:11Z INFO [startup] scheduled job email_digest finished in 45s
+2026-03-14T11:13:15Z DEBUG [cache] gc pause 470 ms (young gen)
+2026-03-14T11:13:27Z DEBUG [gc] worker w4 idle for 7s
+2026-03-14T11:13:42Z ERROR [scheduler] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T11:13:42Z WARN [cache] thread pool active 1743/64
+2026-03-14T11:13:54Z INFO [metrics] cache refresh complete: 2535 entries loaded
+2026-03-14T11:14:03Z DEBUG [http.server] worker w43 idle for 94s
+2026-03-14T11:14:33Z INFO [scheduler] scheduled job token_sweep finished in 82s
+2026-03-14T11:14:38Z INFO [http.server] scheduled job email_digest finished in 18s
+2026-03-14T11:14:58Z INFO [startup] cache refresh complete: 3327 entries loaded
+2026-03-14T11:15:00Z INFO [gc] cache refresh complete: 18 entries loaded
+2026-03-14T11:15:16Z INFO [cache] connection established to session-cache:8096
+2026-03-14T11:16:32Z INFO [metrics] scheduled job email_digest finished in 10s
+2026-03-14T11:16:50Z INFO [metrics] request w14 completed status=200 in 616 ms
+2026-03-14T11:17:01Z INFO [metrics] cache refresh complete: 3223 entries loaded
+2026-03-14T11:17:01Z WARN [gc] certificate for session-cache expires in 2375 days
+2026-03-14T11:17:06Z WARN [http.server] slow query 237 ms on table sku_reindex
+2026-03-14T11:17:21Z INFO [metrics] request w2 completed status=200 in 420 ms
+2026-03-14T11:18:20Z INFO [metrics] request w52 completed status=200 in 72 ms
+2026-03-14T11:18:22Z WARN [metrics] retrying metrics flush (attempt 3923)
+2026-03-14T11:18:22Z INFO [gc] heartbeat ok (epoch 4906)
+2026-03-14T11:18:24Z INFO [gc] request w25 completed status=200 in 546 ms
+2026-03-14T11:18:28Z WARN [scheduler] retrying metrics flush (attempt 2588)
+2026-03-14T11:18:36Z WARN [startup] thread pool active 1703/64
+2026-03-14T11:18:36Z DEBUG [metrics] worker w64 idle for 11s
+2026-03-14T11:18:36Z WARN [startup] retrying metrics flush (attempt 988)
+2026-03-14T11:18:38Z DEBUG [scheduler] queue depth 4725 within limits
+2026-03-14T11:18:56Z INFO [metrics] heartbeat ok (epoch 939)
+2026-03-14T11:19:26Z WARN [http.server] retrying metrics flush (attempt 101)
+2026-03-14T11:19:29Z DEBUG [scheduler] queue depth 3261 within limits
+2026-03-14T11:20:01Z INFO [startup] request w18 completed status=200 in 562 ms
+2026-03-14T11:20:01Z DEBUG [gc] queue depth 4273 within limits
+2026-03-14T11:20:03Z DEBUG [cache] queue depth 1479 within limits
+2026-03-14T11:20:03Z WARN [scheduler] certificate for pricing-service expires in 2011 days
+2026-03-14T11:20:15Z WARN [scheduler] certificate for pricing-service expires in 4493 days
+2026-03-14T11:20:18Z DEBUG [metrics] gc pause 35 ms (young gen)
+2026-03-14T11:20:36Z INFO [cache] request w2 completed status=200 in 667 ms
+2026-03-14T11:21:31Z DEBUG [startup] gc pause 357 ms (young gen)
+2026-03-14T11:21:49Z WARN [scheduler] thread pool active 2347/64
+2026-03-14T11:22:14Z WARN [scheduler] certificate for pricing-service expires in 1868 days
+2026-03-14T11:22:36Z WARN [metrics] thread pool active 557/64
+2026-03-14T11:22:38Z WARN [metrics] thread pool active 332/64
+2026-03-14T11:22:48Z WARN [startup] retrying metrics flush (attempt 1049)
+2026-03-14T11:22:57Z INFO [http.server] request w52 completed status=200 in 393 ms
+2026-03-14T11:23:00Z DEBUG [cache] gc pause 666 ms (young gen)
+2026-03-14T11:23:07Z DEBUG [scheduler] worker w13 idle for 118s
+2026-03-14T11:23:32Z WARN [startup] slow query 51 ms on table token_sweep
+2026-03-14T11:24:06Z INFO [cache] request w62 completed status=200 in 554 ms
+2026-03-14T11:24:13Z INFO [gc] scheduled job token_sweep finished in 25s
+2026-03-14T11:24:41Z INFO [metrics] heartbeat ok (epoch 4711)
+2026-03-14T11:24:50Z ERROR [gc] temporary DNS failure resolving inventory-service (retried ok)
+2026-03-14T11:24:51Z DEBUG [cache] worker w33 idle for 25s
+2026-03-14T11:25:10Z INFO [gc] scheduled job img_prewarm finished in 106s
+2026-03-14T11:25:17Z WARN [scheduler] slow query 809 ms on table orders_rollup
+2026-03-14T11:25:45Z DEBUG [http.server] worker w51 idle for 18s
+2026-03-14T11:26:05Z WARN [startup] retrying metrics flush (attempt 1935)
+2026-03-14T11:26:05Z INFO [scheduler] request w21 completed status=200 in 467 ms
+2026-03-14T11:26:05Z INFO [http.server] connection established to session-cache:8080
+2026-03-14T11:26:29Z INFO [startup] scheduled job token_sweep finished in 52s
+2026-03-14T11:26:30Z INFO [scheduler] request w37 completed status=200 in 108 ms
+2026-03-14T11:26:48Z INFO [metrics] scheduled job ledger_sync finished in 71s
+2026-03-14T11:27:01Z WARN [scheduler] slow query 267 ms on table orders_rollup
+2026-03-14T11:27:05Z INFO [startup] cache refresh complete: 2334 entries loaded
+2026-03-14T11:27:10Z WARN [http.server] retrying metrics flush (attempt 4168)
+2026-03-14T11:28:26Z WARN [http.server] slow query 448 ms on table sku_reindex
+2026-03-14T11:28:52Z INFO [startup] connection established to pricing-service:8190
+2026-03-14T11:29:12Z WARN [http.server] slow query 744 ms on table img_prewarm
+2026-03-14T11:29:28Z DEBUG [http.server] queue depth 3238 within limits
+2026-03-14T11:29:30Z DEBUG [cache] gc pause 444 ms (young gen)
+2026-03-14T11:30:02Z INFO [startup] request w60 completed status=200 in 164 ms
+2026-03-14T11:30:31Z INFO [cache] heartbeat ok (epoch 1336)
+2026-03-14T11:30:43Z INFO [startup] scheduled job email_digest finished in 119s
+2026-03-14T11:30:44Z INFO [metrics] cache refresh complete: 1408 entries loaded
+2026-03-14T11:30:52Z INFO [metrics] request w14 completed status=200 in 734 ms
+2026-03-14T11:31:21Z INFO [scheduler] scheduled job orders_rollup finished in 26s
+2026-03-14T11:31:29Z INFO [cache] request w21 completed status=200 in 307 ms
+2026-03-14T11:31:43Z INFO [cache] scheduled job token_sweep finished in 78s
+2026-03-14T11:31:49Z INFO [startup] heartbeat ok (epoch 2938)
+2026-03-14T11:31:50Z INFO [cache] cache refresh complete: 2099 entries loaded
+2026-03-14T11:32:24Z INFO [metrics] cache refresh complete: 4959 entries loaded
+2026-03-14T11:32:54Z INFO [metrics] heartbeat ok (epoch 4984)
+2026-03-14T11:32:54Z WARN [gc] thread pool active 4926/64
+2026-03-14T11:33:19Z WARN [metrics] retrying metrics flush (attempt 3031)
+2026-03-14T11:33:24Z DEBUG [startup] gc pause 149 ms (young gen)
+2026-03-14T11:33:25Z INFO [startup] request w19 completed status=200 in 320 ms
+2026-03-14T11:33:29Z DEBUG [http.server] queue depth 560 within limits
+2026-03-14T11:33:38Z INFO [scheduler] heartbeat ok (epoch 78)
+2026-03-14T11:33:44Z WARN [startup] slow query 283 ms on table img_prewarm
+2026-03-14T11:34:23Z DEBUG [gc] worker w6 idle for 113s
+2026-03-14T11:34:28Z DEBUG [scheduler] gc pause 776 ms (young gen)
+2026-03-14T11:34:38Z INFO [metrics] scheduled job token_sweep finished in 67s
+2026-03-14T11:34:45Z WARN [http.server] certificate for session-cache expires in 4776 days
+2026-03-14T11:35:22Z DEBUG [startup] gc pause 486 ms (young gen)
+2026-03-14T11:35:48Z INFO [scheduler] request w46 completed status=200 in 872 ms
+2026-03-14T11:36:23Z DEBUG [metrics] gc pause 336 ms (young gen)
+2026-03-14T11:36:30Z INFO [gc] request w39 completed status=200 in 466 ms
+2026-03-14T11:36:59Z WARN [startup] thread pool active 4305/64
+2026-03-14T11:37:03Z DEBUG [gc] worker w50 idle for 44s
+2026-03-14T11:37:14Z INFO [startup] connection established to pricing-service:8178
+2026-03-14T11:38:38Z WARN [startup] thread pool active 4332/64
+2026-03-14T11:39:01Z DEBUG [cache] queue depth 2580 within limits
+2026-03-14T11:39:05Z INFO [cache] request w32 completed status=200 in 764 ms
+2026-03-14T11:39:39Z WARN [metrics] slow query 627 ms on table sku_reindex
+2026-03-14T11:40:23Z INFO [startup] request w39 completed status=200 in 779 ms
+2026-03-14T11:40:25Z DEBUG [startup] gc pause 406 ms (young gen)
+2026-03-14T11:40:52Z WARN [cache] thread pool active 1/64
+2026-03-14T11:40:57Z INFO [http.server] scheduled job img_prewarm finished in 39s
+2026-03-14T11:40:58Z INFO [gc] request w60 completed status=200 in 311 ms
+2026-03-14T11:41:20Z WARN [metrics] certificate for pricing-service expires in 479 days
+2026-03-14T11:41:31Z INFO [http.server] request w9 completed status=200 in 893 ms
+2026-03-14T11:42:57Z INFO [startup] cache refresh complete: 1361 entries loaded
+2026-03-14T11:42:57Z INFO [scheduler] scheduled job email_digest finished in 21s
+2026-03-14T11:43:07Z INFO [cache] heartbeat ok (epoch 3732)
+2026-03-14T11:43:09Z DEBUG [startup] queue depth 4378 within limits
+2026-03-14T11:43:33Z DEBUG [gc] queue depth 2507 within limits
+2026-03-14T11:43:35Z INFO [gc] heartbeat ok (epoch 3598)
+2026-03-14T11:43:38Z INFO [http.server] request w2 completed status=200 in 514 ms
+2026-03-14T11:43:51Z INFO [gc] heartbeat ok (epoch 2871)
+2026-03-14T11:44:02Z WARN [startup] thread pool active 2842/64
+2026-03-14T11:44:11Z INFO [scheduler] cache refresh complete: 3817 entries loaded
+2026-03-14T11:44:13Z INFO [metrics] scheduled job img_prewarm finished in 10s
+2026-03-14T11:44:44Z INFO [metrics] cache refresh complete: 498 entries loaded
+2026-03-14T11:44:50Z INFO [startup] cache refresh complete: 109 entries loaded
+2026-03-14T11:44:52Z INFO [metrics] scheduled job sku_reindex finished in 34s
+2026-03-14T11:44:57Z WARN [cache] thread pool active 3928/64
+2026-03-14T11:45:13Z INFO [gc] connection established to pricing-service:8113
+2026-03-14T11:45:19Z INFO [cache] connection established to session-cache:8180
+2026-03-14T11:45:34Z INFO [metrics] request w59 completed status=200 in 413 ms
+2026-03-14T11:45:49Z INFO [startup] request w9 completed status=200 in 572 ms
+2026-03-14T11:45:57Z WARN [gc] retrying metrics flush (attempt 210)
+2026-03-14T11:46:24Z WARN [metrics] thread pool active 3132/64
+2026-03-14T11:47:28Z INFO [gc] cache refresh complete: 2950 entries loaded
+2026-03-14T11:47:37Z INFO [http.server] request w19 completed status=200 in 205 ms
+2026-03-14T11:47:41Z INFO [startup] scheduled job img_prewarm finished in 113s
+2026-03-14T11:48:01Z DEBUG [http.server] worker w24 idle for 20s
+2026-03-14T11:48:48Z DEBUG [startup] worker w8 idle for 1s
+2026-03-14T11:49:06Z WARN [cache] retrying metrics flush (attempt 2803)
+2026-03-14T11:49:16Z INFO [metrics] scheduled job img_prewarm finished in 105s
+2026-03-14T11:49:34Z INFO [http.server] connection established to pricing-service:8165
+2026-03-14T11:49:36Z INFO [gc] request w44 completed status=200 in 191 ms
+2026-03-14T11:49:38Z INFO [startup] heartbeat ok (epoch 438)
+2026-03-14T11:50:01Z INFO [metrics] request w42 completed status=200 in 835 ms
+2026-03-14T11:50:26Z INFO [startup] connection established to inventory-service:8164
+2026-03-14T11:50:29Z WARN [scheduler] retrying metrics flush (attempt 2125)
+2026-03-14T11:50:30Z ERROR [http.server] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T11:50:33Z DEBUG [metrics] worker w46 idle for 20s
+2026-03-14T11:50:51Z DEBUG [metrics] gc pause 810 ms (young gen)
+2026-03-14T11:51:06Z INFO [scheduler] heartbeat ok (epoch 2529)
+2026-03-14T11:51:47Z WARN [scheduler] thread pool active 593/64
+2026-03-14T11:51:55Z WARN [startup] thread pool active 2597/64
+2026-03-14T11:51:57Z DEBUG [gc] queue depth 4289 within limits
+2026-03-14T11:52:05Z DEBUG [startup] queue depth 3440 within limits
+2026-03-14T11:52:06Z INFO [metrics] scheduled job email_digest finished in 12s
+2026-03-14T11:52:07Z DEBUG [startup] queue depth 1909 within limits
+2026-03-14T11:52:09Z INFO [startup] request w30 completed status=200 in 687 ms
+2026-03-14T11:52:19Z WARN [cache] retrying metrics flush (attempt 1542)
+2026-03-14T11:52:30Z INFO [scheduler] heartbeat ok (epoch 4410)
+2026-03-14T11:52:47Z INFO [scheduler] cache refresh complete: 4205 entries loaded
+2026-03-14T11:52:52Z INFO [metrics] cache refresh complete: 1120 entries loaded
+2026-03-14T11:52:57Z INFO [gc] scheduled job orders_rollup finished in 109s
+2026-03-14T11:53:05Z INFO [cache] request w26 completed status=200 in 75 ms
+2026-03-14T11:53:07Z INFO [startup] cache refresh complete: 2712 entries loaded
+2026-03-14T11:53:20Z DEBUG [startup] gc pause 806 ms (young gen)
+2026-03-14T11:53:32Z INFO [metrics] connection established to inventory-service:8132
+2026-03-14T11:53:41Z INFO [scheduler] heartbeat ok (epoch 3801)
+2026-03-14T11:54:17Z INFO [cache] request w58 completed status=200 in 796 ms
+2026-03-14T11:54:25Z INFO [http.server] request w35 completed status=200 in 786 ms
+2026-03-14T11:54:43Z DEBUG [scheduler] gc pause 523 ms (young gen)
+2026-03-14T11:55:24Z WARN [gc] certificate for inventory-service expires in 3291 days
+2026-03-14T11:55:29Z INFO [scheduler] request w39 completed status=200 in 701 ms
+2026-03-14T11:55:35Z INFO [metrics] heartbeat ok (epoch 334)
+2026-03-14T11:56:00Z INFO [scheduler] heartbeat ok (epoch 2849)
+2026-03-14T11:57:02Z DEBUG [cache] gc pause 835 ms (young gen)
+2026-03-14T11:57:09Z INFO [http.server] heartbeat ok (epoch 794)
+2026-03-14T11:57:49Z INFO [cache] scheduled job email_digest finished in 116s
+2026-03-14T11:58:02Z WARN [startup] thread pool active 3796/64
+2026-03-14T11:58:06Z INFO [cache] cache refresh complete: 2234 entries loaded
+2026-03-14T11:58:13Z INFO [gc] cache refresh complete: 2797 entries loaded
+2026-03-14T11:58:22Z INFO [http.server] scheduled job orders_rollup finished in 38s
+2026-03-14T11:58:25Z INFO [gc] heartbeat ok (epoch 4650)
+2026-03-14T11:59:06Z INFO [cache] connection established to inventory-service:8190
+2026-03-14T11:59:30Z INFO [metrics] connection established to inventory-service:8185
+2026-03-14T11:59:53Z INFO [cache] connection established to inventory-service:8107
+2026-03-14T11:59:55Z WARN [metrics] certificate for pricing-service expires in 4769 days
+2026-03-14T11:59:56Z WARN [cache] certificate for inventory-service expires in 4997 days
+2026-03-14T11:59:58Z WARN [scheduler] certificate for pricing-service expires in 4262 days

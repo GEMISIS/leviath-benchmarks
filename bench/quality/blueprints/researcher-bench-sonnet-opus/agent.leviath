@@ -8,7 +8,7 @@
 
 [agent]
 name = "researcher"
-version = "0.2.0"
+version = "0.4.1"
 description = "Research assistant - gather, analyze, and summarize with a gather↔analyze refinement loop and error recovery"
 entry_stage = "gather"
 
@@ -27,8 +27,8 @@ mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Gather relevant information on the topic"
 # web_search / web_fetch are provided by the agent's script tools (issue #97).
-available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "context_append"]
-max_iterations = 8
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
+max_iterations = 20
 max_revisits = 2
 system_prompt = """
 You are gathering source material on the topic in the `query` region, within any
@@ -47,6 +47,21 @@ Prefer primary sources and well-established outlets; note when something is a bl
 forum, or vendor claim. Once you have solid coverage of the sub-topics, transition
 to analyze - don't keep searching for marginal additions. The analyze stage will
 send you back if it finds a real gap.
+
+`raw_findings` holds only the last few sources you read - older ones evict as
+new ones arrive. Distill what matters from each source into `claims` (with its
+source ref) while it is still in front of you, then move on; do not plan to
+re-read.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.gather.tool_routing]
@@ -87,8 +102,8 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Analyze and synthesize findings"
-available_tools = ["read_file", "web_fetch", "context_write", "context_append"]
-max_iterations = 20
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
+max_iterations = 30
 max_revisits = 3
 transition_prompt = """
 You've analyzed the material gathered so far. Decide what happens next:
@@ -112,6 +127,16 @@ Flag open questions you couldn't resolve.
 If `error_report` says a previous stage hit its iteration cap, that stage was cut
 off before finishing - treat its output as incomplete and verify coverage before
 concluding.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.analyze.tool_routing]
@@ -169,8 +194,8 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-sonnet-5" }] }
 description = "Create a concise, well-organized summary"
-available_tools = ["write_file", "read_file"]
-max_iterations = 10
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
+max_iterations = 12
 system_prompt = """
 Check `task` first. If it only asked a specific question, writing a report is
 work nobody asked for: do not write one, and move to summary with the answer.
@@ -188,6 +213,16 @@ Structure:
 - Sources - the numbered bibliography from `sources_index`.
 
 Keep it tight and skimmable. Every non-obvious claim must carry a [n] citation.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.summarize.transitions.summary]
@@ -198,7 +233,7 @@ hint = "The report is written"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Diagnose and recover from errors during gathering or analysis"
-available_tools = ["read_file", "bash"]
+available_tools = ["web_search", "web_fetch", "read_file", "list_dir", "bash", "write_file", "context_write", "context_append"]
 max_iterations = 8
 max_revisits = 1
 system_prompt = """
@@ -206,6 +241,16 @@ Something failed during research (a source fetch, a parse, etc.). The
 `error_report` region holds the error text the runtime captured - read it first,
 work out what went wrong, and note a workaround. Then hand back to analyze to
 continue with whatever material is available.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Un-exhaustible escape (lint: dead-end-possible): when every looping
@@ -269,6 +314,16 @@ file if you wrote one.
 
 Do not re-derive anything or re-list every source. This is what someone reads
 instead of the report, not a second copy of it.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.summary.transitions]
@@ -278,30 +333,43 @@ instead of the report, not a second copy of it.
 # absolute `max_tokens`/`threshold_tokens` guard-rail. Percentages are ceilings.
 [context.regions]
 # The research question - required. Supplied via --task (or the API/ACP task field).
-query          = { kind = "pinned", budget = "1%", required = true, seed = "task", required_message = "State the research question via --task." }
+query          = { kind = "pinned", volatility = "stable", budget = "1%", min_tokens = 4000, required = true, seed = "task", required_message = "State the research question via --task." }
 # Optional caller bounds: --scope "peer-reviewed sources since 2020 only".
-scope          = { kind = "pinned", budget = "1%", seed = "scope" }
+scope          = { kind = "pinned", volatility = "stable", budget = "1%", seed = "scope" }
 # Growing bibliography with credibility notes (curated by the agent).
-sources_index  = { kind = "pinned", budget = "3%" }
+sources_index  = { kind = "pinned", volatility = "grows", budget = "3%", summarizable = false }
 # Citation/confidence rules (seeded with a sensible default the agent follows).
-format         = { kind = "pinned", budget = "1%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
+format         = { kind = "pinned", volatility = "stable", budget = "1%", seed = { literal = "Cite every non-obvious claim as [n], matching a numbered entry in the Sources bibliography (title + URL/path). Mark each finding's confidence as high / medium / low based on source count and credibility." } }
 
 # Raw source material (bulk, evictable).
-raw_findings   = { kind = "temporary", budget = "38%" }
+# The absolute cap matters more than the percentage: a percentage
+# alone scales with the model's window, and at a 1M-token window
+# "38%" is a 380k hoard ceiling that never evicts - the region soaks
+# up whole repositories and every request rewrites the cache suffix.
+# ~24k holds the last handful of sources; older ones evict oldest-
+# first, which is the point: distill into `claims`, then let go.
+raw_findings   = { kind = "temporary", volatility = "grows", budget = "38%", max_tokens = 24000 }
 # Extracted claims (with source refs) and cross-source conflicts.
-claims         = { kind = "sliding_window", max_items = 30, budget = "10%" }
+claims         = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "10%", summarizable = false }
 contradictions = { kind = "clearable",      budget = "3%" }
 
 # Synthesis workspace (compacts to a running history when it grows).
 synthesis         = { kind = "compacting",      budget = "12%", compact_at = "80%" }
-synthesis_history = { kind = "compact_history", source_region = "synthesis", budget = "3%" }
+synthesis_history = { kind = "compact_history", volatility = "grows", source_region = "synthesis", budget = "3%" }
 
 # The message stream. An explicit sliding_window `conversation` region is required -
 # the per-stage layout is rebuilt from this table on each transition, so an
 # auto-added one would be dropped after the first stage.
-conversation      = { kind = "sliding_window", max_items = 30, budget = "21%", strategy = "bulk", overflow = 10 }
+conversation      = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "21%", strategy = "bulk", overflow = 10 }
 
 # Written by the RUNTIME on an abnormal stage ending (issue #154): a failed
 # inference call's error text, or a note that a stage hit its iteration cap.
 # Pinned so it survives the edge transform into the stage that acts on it.
-error_report      = { kind = "pinned", budget = "2%" }
+error_report      = { kind = "pinned", volatility = "grows", budget = "2%" }
+
+# The per-stage system prompt. Declared, the runtime keeps it at the END of
+# the pinned block run; undeclared, it lands in the first pinned region
+# (`query`) and rewrites the head of the prompt every transition. Working
+# stages also share one available_tools set: the tool array is hashed ahead
+# of the system blocks, so differing sets invalidate the cache prefix.
+stage_instructions = { kind = "pinned", volatility = "stable", budget = "3%", max_tokens = 4000 }

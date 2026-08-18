@@ -27,6 +27,7 @@ Afterwards: check_pairs.py (the variants must satisfy the same policy).
 """
 from __future__ import annotations
 
+import json
 import sys
 import tomllib
 from pathlib import Path
@@ -70,6 +71,111 @@ SCOPES["analyst-bench-adversarial"]["plan_review"] = {
     "conversation": 18, "scratch": 3, "error_report": 3,
 }
 
+# CACHE RULE for every table here: each stage lists its regions in the same
+# relative order as the agent's global [context.regions] declaration, so the
+# pinned prefix stays byte-stable across stage transitions.
+# FLOOR RULE: `findings` is persistent and summarizable = false, so a
+# stage giving it less than the stage before silently deletes the oldest
+# entries with no way back. Its budget must never shrink along the main
+# path (ingest -> analyze -> [review] -> report -> verify -> summary).
+SCOPES["loganalyzer-bench"] = {
+    "ingest": {"task": 4, "findings": 8, "logs": 55,
+               "conversation": 24, "error_report": 3},
+    "analyze": {"task": 4, "severity_index": 2, "findings": 14,
+                "logs": 34, "conversation": 22, "scratch": 12,
+                "error_report": 3},
+    "report": {"task": 5, "severity_index": 3, "findings": 20,
+               "logs": 20, "report_draft": 20,
+               "conversation": 20, "error_report": 3},
+    "verify": {"task": 4, "severity_index": 3, "findings": 20,
+               "logs": 25, "report_draft": 20,
+               "conversation": 18, "scratch": 4, "error_report": 3},
+    "error_recovery": {"task": 4, "findings": 20, "logs": 20,
+                       "report_draft": 12, "conversation": 24,
+                       "scratch": 4, "error_report": 8},
+    "summary": {"task": 8, "severity_index": 5, "findings": 25,
+                "report_draft": 20, "conversation": 35,
+                "error_report": 3},
+}
+
+# The critic is deliberately narrow: the findings, the index, and enough of
+# the raw log to check them against - not the script workspace.
+SCOPES["loganalyzer-bench-adversarial"] = dict(SCOPES["loganalyzer-bench"])
+SCOPES["loganalyzer-bench-adversarial"]["analysis_review"] = {
+    "task": 6, "severity_index": 4, "findings": 20, "logs": 35,
+    "conversation": 22, "scratch": 5, "error_report": 3,
+}
+
+SCOPES["researcher-bench"] = {
+    "gather": {"query": 2, "scope": 2, "sources_index": 5,
+               "raw_findings": 56, "conversation": 28, "error_report": 2},
+    "analyze": {"query": 3, "scope": 2, "sources_index": 6, "format": 2,
+                "raw_findings": 40, "claims": 14, "contradictions": 4,
+                "conversation": 22, "error_report": 3},
+    # summarize builds from claims, not raw bulk - that is the point of
+    # the pipeline. raw_findings stays parked here.
+    "summarize": {"query": 4, "sources_index": 8, "format": 3, "claims": 30,
+                  "contradictions": 8, "conversation": 40, "error_report": 3},
+    "error_recovery": {"query": 3, "sources_index": 5, "raw_findings": 32,
+                       "conversation": 45, "error_report": 8},
+    "summary": {"query": 6, "claims": 32, "conversation": 54,
+                "error_report": 3},
+}
+
+# The claims critic gets the claims, the evidence to check them against, and
+# the rules they were graded under - not the synthesis workspace.
+SCOPES["researcher-bench-adversarial"] = dict(SCOPES["researcher-bench"])
+SCOPES["researcher-bench-adversarial"]["claims_review"] = {
+    "query": 3, "scope": 2, "sources_index": 8, "format": 2,
+    "raw_findings": 31, "claims": 20, "contradictions": 6,
+    "conversation": 22, "error_report": 3,
+}
+
+SCOPES["coder-bench"] = {
+    "discover": {"task": 3, "repo_files": 5, "conventions": 4,
+                 "architecture": 4, "error_report": 3, "discovery": 6,
+                 "workflow": 4, "codebase": 40, "conversation": 22,
+                 "scratch": 5},
+    "analyze": {"task": 5, "conventions": 4, "architecture": 4, "plan": 5,
+                "prototypes": 5, "error_report": 3, "discovery": 6,
+                "workflow": 4, "codebase": 30, "conversation": 26},
+    "prototype": {"task": 3, "plan": 6, "prototypes": 6, "stuck_report": 2,
+                  "error_report": 3, "discovery": 5, "workflow": 4,
+                  "codebase": 24, "implementation": 10, "test_results": 8,
+                  "conversation": 22},
+    "implement": {"task": 2, "conventions": 3, "plan": 5, "prototypes": 3,
+                  "stuck_report": 1, "error_report": 2, "discovery": 4,
+                  "workflow": 3, "baseline": 4, "codebase": 16,
+                  "implementation": 26, "test_results": 8, "errors": 3,
+                  "conversation": 16},
+    "review": {"task": 6, "conventions": 4, "plan": 5, "error_report": 3,
+               "workflow": 4, "baseline": 5, "codebase": 18,
+               "implementation": 24, "test_results": 10,
+               "conversation": 16},
+    "reassess": {"task": 5, "conventions": 3, "architecture": 3, "plan": 8,
+                 "prototypes": 4, "stuck_report": 4, "error_report": 3,
+                 "discovery": 4, "workflow": 4, "codebase": 16,
+                 "implementation": 16, "test_results": 10, "errors": 4,
+                 "conversation": 12},
+    "error_recovery": {"task": 4, "plan": 6, "error_report": 8,
+                       "discovery": 4, "workflow": 3, "codebase": 20,
+                       "implementation": 12, "test_results": 8,
+                       "errors": 8, "conversation": 22},
+    "summary": {"task": 10, "plan": 5, "error_report": 4, "workflow": 3,
+                "baseline": 3, "implementation": 30, "test_results": 10,
+                "errors": 5, "conversation": 25},
+}
+
+# The plan critic is the narrowest working scope in the graph: the plan, the
+# contracts to hold it to, and the files needed to falsify it - not the whole
+# workspace.
+SCOPES["coder-bench-adversarial"] = dict(SCOPES["coder-bench"])
+SCOPES["coder-bench-adversarial"]["plan_review"] = {
+    "task": 6, "conventions": 3, "architecture": 4, "plan": 12,
+    "prototypes": 5, "error_report": 3, "discovery": 6, "workflow": 5,
+    "codebase": 25, "conversation": 22, "scratch": 3,
+}
+
 MAX_BUDGET = 97   # leave the window headroom for the stage-instruction block
 
 # Regions a stage must have written before it may leave. Asserted per stage
@@ -78,6 +184,27 @@ MAX_BUDGET = 97   # leave the window headroom for the stage-instruction block
 # region could possibly be filled.
 REQUIRED = {"analyst-bench": {"verify": {"answer_draft"}}}
 REQUIRED["analyst-bench-adversarial"] = REQUIRED["analyst-bench"]
+# analyze must leave with findings/claims written: they are the spine every
+# downstream deliverable is built from. report/summary regions themselves
+# cannot be asserted (a report is a file on disk).
+# verify cannot spawn without a draft to check: this is the gate that makes
+# the report stage's context_write mandatory in practice, not just in prose.
+REQUIRED["loganalyzer-bench"] = {"analyze": {"findings"},
+                                 "verify": {"report_draft"}}
+REQUIRED["loganalyzer-bench-adversarial"] = REQUIRED["loganalyzer-bench"]
+REQUIRED["researcher-bench"] = {"analyze": {"claims"}}
+REQUIRED["researcher-bench-adversarial"] = REQUIRED["researcher-bench"]
+REQUIRED["coder-bench"] = {
+    # implement's step 1 mandates capturing the baseline before the first
+    # edit; without it a regression is indistinguishable from a pre-existing
+    # failure. Satisfiable even at TIER 1: the prompt requires writing
+    # "no baseline - nothing to run yet".
+    "implement": {"baseline"},
+    # A spike that records nothing wasted its detour: prototype's own prompt
+    # requires appending the verdict and what was ruled out.
+    "prototype": {"prototypes"},
+}
+REQUIRED["coder-bench-adversarial"] = REQUIRED["coder-bench"]
 
 
 def routing_targets(stage: dict) -> set[str]:
@@ -91,20 +218,28 @@ def routing_targets(stage: dict) -> set[str]:
     return {t for t in targets if t}
 
 
+def _toml_value(value) -> str:
+    """Render one value as inline TOML (bools, strings, numbers, lists,
+    nested tables - region specs carry seeds like { files = [...] })."""
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, str):
+        return json.dumps(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml_value(v) for v in value) + "]"
+    if isinstance(value, dict):
+        inner = ", ".join(f"{k} = {_toml_value(v)}" for k, v in value.items())
+        return f"{{ {inner} }}"
+    return str(value)
+
+
 def region_line(spec: dict, name: str, pct: int, required: bool = False) -> str:
     """The global declaration, re-budgeted (and re-required) for this stage."""
     spec = dict(spec)
     spec["budget"] = f"{pct}%"
     if required:
         spec["required"] = True
-    parts = []
-    for key, value in spec.items():
-        if isinstance(value, bool):
-            parts.append(f"{key} = {str(value).lower()}")
-        elif isinstance(value, str):
-            parts.append(f'{key} = "{value}"')
-        else:
-            parts.append(f"{key} = {value}")
+    parts = [f"{key} = {_toml_value(value)}" for key, value in spec.items()]
     return f"{name} = {{ {', '.join(parts)} }}"
 
 

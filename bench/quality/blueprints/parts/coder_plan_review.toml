@@ -1,0 +1,141 @@
+# ─── Stage 2c: Plan review (adversarial) ──────────────────────────────────────
+# A second opinion from a different provider's model, on the plan only.
+# Sits on analyze's `implement` edge, so it reviews exactly the plans
+# that claimed to need no spike - the prototype path checks its plan by
+# running code, which no critic improves on. Its job is to find the
+# reading that makes the plan wrong - not to rewrite it, and not to be
+# agreeable.
+[stages.plan_review]
+mode = "autonomous"
+model = { models = [{ provider = "openai", model = "gpt-5.6-terra" }] }
+description = "Attack the implementation plan before any code is written"
+# The same set as every working stage: the tool array is hashed ahead of the
+# system blocks, so a narrower set here would invalidate the cache prefix on
+# entry and again on exit. The narrowness of this stage is its context scope
+# and its prompt's critique-only rule, not its tool list.
+available_tools = ["read_file", "list_dir", "write_file", "edit_file", "bash", "context_write", "context_append"]
+max_iterations = 8
+max_revisits = 2
+transition_prompt = """
+Decide what happens next:
+- If the plan edits the wrong place, cannot be verified under `workflow`'s
+  literal lines, or rests on an API this codebase does not have, respond
+  with: analyze
+- If the plan is sound, respond with: implement
+"""
+system_prompt = """
+You are reviewing someone else's implementation plan before any code is
+written. Assume it is wrong somewhere and go looking, using `discovery`,
+`workflow`, `codebase`, and the files themselves. The plan is in the `plan`
+region if a spike or reassessment wrote one; otherwise it is the bullet list
+at the end of this conversation.
+
+You critique here; you do not repair. Write no file and edit no file - report
+the defect and route back to `analyze`, which is where plans are rewritten.
+
+The failures worth your attention, in order:
+1. The wrong layer: the plan edits a file where the behavior under change does
+   not live. read_file (or a read-only grep via bash) the files the plan names
+   and confirm the behavior is actually there. Editing the wrong file is the
+   single most expensive mistake available - it is what `reassess` exists to
+   catch twenty wasted iterations later.
+2. A plan `workflow` cannot verify. It must be executable under the literal
+   BASELINE / VERIFY / DONE WHEN lines: a step VERIFY cannot observe is a step
+   that will ship unchecked. If `workflow` says TIER 1, a plan that does not
+   include building the verification is incomplete by contract.
+3. An API the codebase does not have: every function, signature, helper, or
+   config key the plan assumes must exist in the files as they are, not as the
+   planner remembers them. Check the file, not the plan's summary of it.
+4. A BUGFIX plan with no reproduction: if the first step is not making the
+   failure happen (a failing test, or the VERIFY command failing), the fix is
+   a guess and "fixed" will be unfalsifiable.
+5. Under-scoping that review will bounce: callers not updated, error handling
+   waved away, tests the task warrants left unwritten, or a DONE WHEN the
+   planned change cannot actually reach.
+
+Append your verdict to `prototypes` (context_append) as
+`plan review = accepted | rejected: <the specific defect>`. Be concrete: name
+the step, the file, and what it should be instead. If the plan is sound, say
+so plainly and let it through - rejecting a good plan costs a full re-plan.
+
+Count your own rejections in `prototypes` before rejecting again. If you have
+already sent this plan back twice, accept it with your remaining concerns
+recorded and let the work proceed: a third rejection spends the revisit budget
+and the run ends with nothing implemented, which is worse than a flawed plan
+whose risks are documented. Say "accepted under protest" and name what you
+still doubt.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
+"""
+
+# Reads persist to `codebase` like every other stage's; bash here is read-only
+# interrogation (greps, --collect-only), so it parks in clearable scratch as in
+# discover, not in `test_results`, which review diffs against `baseline`.
+[stages.plan_review.tool_routing]
+# No single tool result may fill the region it lands in.
+max_result_tokens = 3000
+default_region = "conversation"
+[stages.plan_review.tool_routing.overrides]
+read_file = "codebase"
+list_dir  = "codebase"
+bash      = "scratch"
+
+[stages.plan_review.transitions.analyze]
+hint = "The plan has a defect that would make the implementation wrong"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY stage-specific
+# region, `plan` and `prototypes` included. Verdicts, file paths and commands
+# must cross an edge unchanged - only the conversation is safe to summarize.
+[stages.plan_review.transitions.analyze.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize the review for the re-plan: the plan as it stood, the specific defect - which step, which file, and the evidence in the codebase that contradicts it - and what a corrected plan must satisfy. Quote file paths, symbols, and commands verbatim rather than paraphrasing them."
+
+# Reachable only when every normal route is spent - a
+# conditioned edge is never offered to the model, so this is an
+# escape and not a shortcut. Without it the run would end with
+# its work discarded rather than reported.
+[stages.plan_review.transitions.summary]
+condition = "dead_end"
+hint = "No route left - report what has been established"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY stage-specific
+# region, `plan` and `prototypes` included. Verdicts, file paths and commands
+# must cross an edge unchanged - only the conversation is safe to summarize.
+[stages.plan_review.transitions.summary.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Summarize only what bears on the final report: the state of the plan, the verdicts recorded, and what was never resolved."
+
+[stages.plan_review.transitions.implement]
+hint = "The plan is sound - implement it"
+transform = "custom"
+
+# `custom`, not `compact`: a bare compact edge summarizes EVERY stage-specific
+# region, `plan` and `prototypes` included. Verdicts, file paths and commands
+# must cross an edge unchanged - only the conversation is safe to summarize.
+# When analyze routed here directly the plan exists ONLY in this conversation
+# (the `plan` region is written by prototype and reassess, not analyze), so
+# the accepting edge must reproduce it verbatim or the critic destroys the
+# very artifact it approved.
+[stages.plan_review.transitions.implement.transform_config]
+carry = []
+compact = ["conversation"]
+clear = []
+compact_prompt = "Reproduce the implementation plan VERBATIM - when analyze routed here directly it exists only in this conversation - then summarize the review that accepted it: what was checked in the codebase and what was confirmed."
+
+[stages.plan_review.transitions.error_recovery]
+condition = "error"
+transform = "direct"

@@ -1,0 +1,14 @@
+{
+  "seed": 1142,
+  "answers": [
+    "inventory-service",
+    "db.pool.max_connections",
+    "2026-03-14T04:52:10Z",
+    "inventory-service,checkout-api,search-api,cart-api,recommendation-api,edge-gateway",
+    "117",
+    "5",
+    "edge-gateway=117,auth-service=3,cart-api=46,checkout-api=48,search-api=48,recommendation-api=38,payment-gateway=0,inventory-service=64,order-service=1,pricing-service=2,session-cache=1,fraud-detector=2,shipping-service=2,notification-service=2,billing-worker=1",
+    "payment-gateway",
+    "payment-gateway=614"
+  ]
+}

@@ -90,19 +90,26 @@ def env_for(latency_ms: int) -> dict:
 
 def spawn_batches(lev: str, spawns: int, label: str, env: dict) -> tuple[int, float]:
     """The 30/30/20/20 agent mix via one `lev run --count` batch per type."""
+    # The reviewer blueprint takes its work as --diff and declares no
+    # task-seeded region; since 0.3.6 `lev run --task` against such an
+    # agent is a hard error instead of a silent ignore, so its batch
+    # carries no --task (measurement-identical to when it was ignored).
     batches = [
-        ("wide-researcher", int(spawns * 0.3), []),
-        ("deep-researcher", int(spawns * 0.3), []),
+        ("wide-researcher", int(spawns * 0.3),
+         ["--task", f"bench {label} wide-researcher"]),
+        ("deep-researcher", int(spawns * 0.3),
+         ["--task", f"bench {label} deep-researcher"]),
         ("reviewer", int(spawns * 0.2), ["--diff", DIFF]),
         ("data-analyst",
-         spawns - int(spawns * 0.3) * 2 - int(spawns * 0.2), []),
+         spawns - int(spawns * 0.3) * 2 - int(spawns * 0.2),
+         ["--task", f"bench {label} data-analyst"]),
     ]
     batches = [b for b in batches if b[1] > 0]
 
     def one(spec):
         agent, count, extra = spec
         out = subprocess.run(
-            [lev, "run", agent, "--task", f"bench {label} {agent}", "--yolo",
+            [lev, "run", agent, "--yolo",
              "--json", "--count", str(count), "--workdir", str(WORKDIR)]
             + extra,
             env=env, capture_output=True, text=True, timeout=1800)
@@ -518,7 +525,7 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
         t0 = time.time()
         accept_thread, accept = _watch_socket_accept(t0)
         spawn = subprocess.run(
-            [lev, "run", "reviewer", "--task", "cold start probe", "--yolo",
+            [lev, "run", "reviewer", "--yolo",
              "--json", "--workdir", str(WORKDIR), "--diff", DIFF],
             env=env0, capture_output=True, timeout=60)
         total = time.time() - t0
@@ -704,8 +711,8 @@ def run_coldstart_track(lev: str, out_dir: Path) -> dict:
     n = summary["new_run_cold"]["total_secs"]
     c = summary["cold_continuation"]["total_secs"]
     pr = summary["paused_resumption"]["total_secs"]
-    print(f"  daemon boot median={b['median']}s | new-run-cold "
-          f"median={n['median']}s | crash-continuation "
+    print(f"  daemon boot median={b['median'] if b else '?'}s | new-run-cold "
+          f"median={n['median'] if n else '?'}s | crash-continuation "
           f"median={c['median'] if c else '?'}s | paused-resumption "
           f"median={pr['median'] if pr else '?'}s", flush=True)
     return summary

@@ -1,0 +1,12 @@
+{
+  "suite": "retention",
+  "seed": 20260817,
+  "n": 3,
+  "universe_sha256": "a59c1c296124fe04d279d7e44a845ae77cd40959ea7449cb126e90f3f3beb3b7",
+  "excluded": [],
+  "task_ids": [
+    "deceptive-arch",
+    "live-service",
+    "standing-desk"
+  ]
+}

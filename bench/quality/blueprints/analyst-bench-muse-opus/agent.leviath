@@ -9,7 +9,7 @@
 
 [agent]
 name = "data-analyst"
-version = "0.5.0"
+version = "0.7.0"
 description = "Answers analytical questions about local data files - profiles the data, computes with scripts, and verifies each figure a second way before reporting it"
 entry_stage = "profile"
 
@@ -25,8 +25,8 @@ bash      = "ask"
 mode = "autonomous"
 model = { models = [{ provider = "openrouter", model = "meta/muse-spark-1.2" }] }
 description = "Inventory the data files, their formats, and their columns"
-available_tools = ["read_file", "list_dir", "bash", "context_write"]
-max_iterations = 10
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
+max_iterations = 15
 system_prompt = """
 Find out what data you actually have before computing anything.
 
@@ -44,6 +44,16 @@ Write `data_map` (context_write): one line per file as
 `<file> | <format> | <rows> | <columns and what they mean>`, followed by any
 domain rules the documentation states. If a field's meaning is ambiguous, say so
 in that line - an ambiguous field is where wrong answers come from.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.profile.tool_routing]
@@ -88,7 +98,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Decide exactly what to compute, and what would make it wrong"
-available_tools = ["read_file", "bash", "context_write"]
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
 max_iterations = 12
 max_revisits = 2
 system_prompt = """
@@ -132,6 +142,16 @@ confident number that answers a question nobody asked. Say in the plan which
 kind you are looking at, and if it is the second, say precisely which term is
 undefined and what the data would have to contain for the question to have an
 answer.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.plan.tool_routing]
@@ -145,6 +165,12 @@ bash      = "scratch"
 [stages.plan.transitions.compute]
 hint = "The plan is written - compute it"
 transform = "custom"
+# Belt and braces on top of `required` on the region itself. Measured on
+# ten runs of the composed agent, `plan` was still empty at the end of four
+# of them and the run proceeded anyway - a planning stage that skips writing
+# the plan takes the whole structure with it, because every later stage is
+# told to work from the plan rather than from the transcript.
+gate = { require_modifications = true, region = "plan", tools = ["context_write"], max_attempts = 2, message = "The plan region is still empty. Write it with context_write before moving on - the computing stage works from `plan`, not from this conversation, and the conversation is summarized on the way out." }
 
 # `custom`, not `compact`: a bare compact edge summarizes EVERY
 # stage-specific region, `results` included. Figures must cross
@@ -182,8 +208,8 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "openrouter", model = "meta/muse-spark-1.2" }] }
 description = "Execute the plan with scripts and record the figures"
-available_tools = ["read_file", "bash", "context_append"]
-max_iterations = 25
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
+max_iterations = 40
 max_revisits = 5
 transition_prompt = """
 Decide what happens next:
@@ -212,6 +238,16 @@ that answers, a pointer to nothing.
 Follow the plan's units and rounding. If the data contradicts the plan - a column
 is not what `data_map` said, a join explodes the row count - say so in `results`
 rather than quietly working around it.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.compute.tool_routing]
@@ -268,7 +304,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Recompute the answer a second way and reconcile"
-available_tools = ["read_file", "bash", "context_append"]
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
 max_iterations = 12
 max_revisits = 2
 transition_prompt = """
@@ -295,15 +331,27 @@ must hold (parts summing to the total).
 Sanity-check the result: is the magnitude plausible for this many rows, is the
 unit right, is the answer in the form the task demands?
 
-Then check that the answer is actually present. The stage that writes the final
-response reads `results` and nothing else - no files, no scripts. If `results`
-refers to a list, a table or a file rather than containing it, the answer is
-already lost; write the missing content into `results` yourself before you
-hand off.
+Then hand off the deliverable. Write `answer_draft` (context_write) containing
+the answer itself, complete, in the form `task` asks for - not a description of
+it, not its length, not a pointer to a file that holds it. Where the answer is
+long, write it out in full anyway. The stage that responds has no tools and
+cannot see the data, the scripts or your scratch space: whatever is not in
+`answer_draft` does not exist as far as the answer is concerned, and a model
+asked to produce an answer it cannot see will produce one anyway.
 
 Append the check and its outcome to `results`. If the two routes disagree,
 say which one you believe and why, and go back to compute rather than averaging
 them or picking the friendlier number.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.verify.tool_routing]
@@ -348,7 +396,7 @@ transform = "direct"
 mode = "autonomous"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Recover from a failed read or script execution"
-available_tools = ["read_file", "bash"]
+available_tools = ["read_file", "list_dir", "bash", "context_write", "context_append"]
 max_iterations = 10
 max_revisits = 1
 system_prompt = """
@@ -359,6 +407,16 @@ return to compute with an approach that avoids it.
 
 A tool that will not run is not a reason to stop: chunk the file, use a
 different library, or compute the same quantity another way.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 # Un-exhaustible escape (lint: dead-end-possible).
@@ -425,32 +483,72 @@ restating the question, no units it did not ask for. If it asked for an
 explanation, lead with the answer, then the figures from `results` that support
 it, then anything that stayed uncertain.
 
-Report only figures that are in `results`. If the analysis did not settle the
-question, say that rather than presenting a guess as a result.
+`answer_draft` holds the deliverable as the checking stage committed it. Emit
+that content - reformatted to the task's requested shape if it is not already,
+but not regenerated. You cannot see the data, the scripts, or the working: the
+deliverable is either in front of you or it is nowhere you can reach.
+
+So: never reconstruct, extend, or fill in content that is not in front of you.
+If `answer_draft` and `results` do not contain what the task asks for, say
+exactly that - name what is missing. A wrong answer that looks complete is
+worse than a short one that admits the gap, because nobody downstream can tell
+the first one is wrong.
+
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
 """
 
 [stages.answer.transitions]
 
 # ─── Context layout ───────────────────────────────────────────────────────────
 [context.regions]
-task         = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
+# Cache contract (verified against leviath 0.3.6): the provider-visible
+# prompt is [pinned regions in declaration order][stage_instructions]
+# [sliding][compacting][temporary/clearable], and the tool array is hashed
+# ahead of all of it. So every working stage advertises the SAME
+# available_tools, `stage_instructions` is declared so the per-stage prompt
+# stops landing inside `task` (the first pinned region - which rewrote
+# block 1 of the prefix on every transition), and pinned regions are
+# declared stable-first so a region that fills late invalidates only what
+# sits behind it.
+task         = { kind = "pinned", volatility = "stable", budget = "2%", min_tokens = 4000, required = true, seed = "task", required_message = "Say which data files to analyze and what to work out via --task." }
 # What the data is: written once in profile, read by every later stage.
-data_map     = { kind = "pinned", budget = "3%", required = true, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
+data_map     = { kind = "pinned", volatility = "grows", budget = "3%", required = true, summarizable = false, required_message = "Write `data_map` (context_write) before leaving: one line per file with its columns, types and the domain rules its documentation states. Later stages work from this, not from raw samples." }
 # The computation and its traps: the contract the compute stage executes.
-plan         = { kind = "pinned", budget = "3%", required = true, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
+plan         = { kind = "pinned", volatility = "grows", budget = "3%", required = true, summarizable = false, required_message = "Write `plan` (context_write) before computing: the exact quantity, the steps, the traps, the rule you will follow where the documentation leaves a choice, and how the result will be checked." }
 # Every figure established, with how it was computed.
-results      = { kind = "sliding_window", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10 }
+results      = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "8%", strategy = "bulk", overflow = 10, summarizable = false }
+# The deliverable itself, committed by the stage that checked it. Separate
+# from `results` because working notes and the answer are different things:
+# `results` accumulates figures and how they were derived, and a stage reading
+# it cannot tell which part IS the answer. Pinned, so no transform touches it;
+# required, so a checking stage that forgets to write it is re-run and told to.
+# The failure this exists to stop: an output stage with no tools, handed only
+# a description of a four-hundred-item answer, invents four hundred items.
+answer_draft = { kind = "pinned", volatility = "grows", budget = "10%", required = false, summarizable = false, required_message = "Write `answer_draft` (context_write): the deliverable itself, complete and in the form `task` asks for. Not a summary of it, not its length, not where it is stored - the content." }
 
 # Bulk and evictable: samples of the data pulled in for orientation.
-data_preview = { kind = "temporary", budget = "28%" }
+data_preview = { kind = "temporary", volatility = "grows", budget = "28%" }
 # Script code and output, compacted as the loop runs.
 scripts      = { kind = "compacting", budget = "22%", compact_at = "80%" }
-scripts_history = { kind = "compact_history", source_region = "scripts", budget = "3%" }
+scripts_history = { kind = "compact_history", volatility = "grows", source_region = "scripts", budget = "3%" }
 
-conversation = { kind = "sliding_window", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
+conversation = { kind = "sliding_window", volatility = "grows", max_items = 30, budget = "20%", strategy = "bulk", overflow = 10 }
 scratch      = { kind = "clearable", budget = "4%" }
 
 # Written by the runtime on an abnormal stage ending: a failed inference call's
 # error text, or a note that a stage hit its iteration cap. Pinned so it
 # survives the edge transform into the stage that acts on it.
-error_report = { kind = "pinned", budget = "2%" }
+error_report = { kind = "pinned", volatility = "grows", budget = "2%" }
+
+# The per-stage system prompt. Declared, the runtime keeps it at the END of
+# the pinned block run; undeclared, it is injected into the first pinned
+# region (`task`), which rewrites the head of the prompt every transition.
+stage_instructions = { kind = "pinned", volatility = "stable", budget = "3%", max_tokens = 4000 }

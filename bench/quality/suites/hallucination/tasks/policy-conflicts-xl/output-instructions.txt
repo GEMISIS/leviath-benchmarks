@@ -1,0 +1,5 @@
+Output exactly the thirteen report lines the task defines - twelve
+`conflict: <DOC-ID> <-> <DOC-ID> | <essence>` lines (using
+`conflict: none <-> none | not established` for any you could not
+ground) followed by one `reviewed: <N>` line - and nothing else: no
+preamble, no headings, no commentary after.

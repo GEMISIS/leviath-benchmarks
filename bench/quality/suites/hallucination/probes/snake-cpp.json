@@ -1,0 +1,48 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "factual_recall",
+      "question": "What are the grid dimensions for the game, and which cell is (0,0)?",
+      "expected": "20 columns by 15 rows; (0,0) is the top-left cell, x increasing rightward, y downward.",
+      "exact": "20",
+      "rubric": "Must give 20x15 (or 20 wide by 15 tall) and top-left origin. Any other dimensions or a bottom-left origin is a fail; correct dimensions without the origin is partial credit."
+    },
+    {
+      "after_tool_calls": 20,
+      "type": "factual_recall",
+      "question": "What is the snake's starting length, head position, and initial direction?",
+      "expected": "Length 3, head at (10,7), moving right.",
+      "rubric": "Must give all three: length 3, head (10,7), rightward. Two of three is partial credit; a different head position or direction is a fail."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "constraint_adherence",
+      "question": "What happens when a move command is the exact opposite of the current direction?",
+      "expected": "It is ignored - the snake cannot reverse into itself; the tick proceeds in the current direction.",
+      "rubric": "Must say the input is ignored (no instant reverse). Saying the snake dies, turns, or the tick is skipped entirely is a fail."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "format_recall",
+      "question": "In test mode, what exact status line values can the final STATUS line carry?",
+      "expected": "ALIVE, DEAD_WALL, or DEAD_SELF.",
+      "rubric": "Must give all three exact tokens. Paraphrases like 'dead by wall' without the token, or invented tokens, are a fail; two of three exact tokens is partial credit."
+    },
+    {
+      "after_tool_calls": 55,
+      "type": "constraint_adherence",
+      "question": "What is the exact build command the deliverable must compile with?",
+      "expected": "c++ -std=c++17 -O2 -o snake snake.cpp",
+      "exact": "-std=c++17",
+      "rubric": "Must give the c++17 standard flag and the single-file snake.cpp target. A different standard, cmake, or multi-file build is a fail."
+    },
+    {
+      "after_tool_calls": 70,
+      "type": "cross_file",
+      "question": "On a growth tick, does the tail cell still count for self-collision, and does the score change?",
+      "expected": "Yes - the tail is frozen on a growth tick so its cell still counts for collision, and the score increases by 1.",
+      "rubric": "Must state both: tail frozen/counts on growth ticks, and score +1. One of two is partial credit; saying the tail always vacates first is a fail."
+    }
+  ]
+}

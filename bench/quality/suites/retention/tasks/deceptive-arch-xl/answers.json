@@ -1,0 +1,425 @@
+{
+  "seed": 8117,
+  "capability": "per-tenant rate limiting",
+  "chains": [
+    {
+      "id": "throttle_gate",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "signature_mismatch",
+      "claimed": "Every incoming request is wrapped by ThrottleGate, which reserves per-route capacity through the TokenBucketBackend before the handler runs",
+      "actual": [
+        "atlas/api/middleware.py::install_middlewares",
+        "atlas/core/throttle.py::ThrottleGate.acquire",
+        "atlas/adapters/limiter_backend.py::TokenBucketBackend.reserve"
+      ],
+      "key": "token_bucket",
+      "flag": "enable_throttle_gate",
+      "fix_locus": "atlas/adapters/limiter_backend.py::reserve",
+      "fiction_locus": "atlas/core/throttle.py::acquire",
+      "wiring_locus": "atlas/core/throttle.py::__init__"
+    },
+    {
+      "id": "tenant_resolve",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "commented_out_ab",
+      "claimed": "Request context resolves the calling tenant through TenantDirectory, which reads tenant records from TenantStore so downstream policy decisions see plan and status",
+      "actual": [
+        "atlas/api/context.py::resolve_tenant",
+        "atlas/core/tenants.py::TenantDirectory.lookup",
+        "atlas/adapters/tenant_store.py::TenantStore.fetch"
+      ],
+      "key": "tenant_store",
+      "flag": "enable_tenant_directory",
+      "fix_locus": "atlas/api/context.py::resolve_tenant",
+      "fiction_locus": "atlas/core/tenants.py::lookup",
+      "wiring_locus": "atlas/core/tenants.py::__init__"
+    },
+    {
+      "id": "quota_meter",
+      "load_bearing": true,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Document submission is gated by QuotaService, which meters every accepted request into UsageStore keyed by tenant and day",
+      "actual": [
+        "atlas/api/documents.py::submit_document",
+        "atlas/core/quota.py::QuotaService.check_and_count",
+        "atlas/adapters/usage_store.py::UsageStore.add"
+      ],
+      "key": "usage_store",
+      "flag": "enable_quota_metering",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/quota.py::check_and_count",
+      "wiring_locus": "atlas/core/quota.py::__init__"
+    },
+    {
+      "id": "limits_policy",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "commented_out_bc",
+      "claimed": "Per-tenant limit policies are produced by LimitPolicy, which layers tenant overrides from ConfigSource over the shipped defaults",
+      "actual": [
+        "atlas/api/policies.py::effective_policy",
+        "atlas/core/limits.py::LimitPolicy.for_tenant",
+        "atlas/adapters/config_source.py::ConfigSource.read"
+      ],
+      "key": "config_source",
+      "flag": "enable_policy_loader",
+      "fix_locus": "atlas/core/limits.py::__init__",
+      "fiction_locus": "atlas/core/limits.py::for_tenant",
+      "wiring_locus": "atlas/core/limits.py::__init__"
+    },
+    {
+      "id": "billing_events",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "dead_branch",
+      "claimed": "Over-limit and usage events are recorded by BillingLedger and published through QueueBackend for invoicing",
+      "actual": [
+        "atlas/api/billing.py::post_usage_event",
+        "atlas/core/billing.py::BillingLedger.record",
+        "atlas/adapters/queue_backend.py::QueueBackend.enqueue"
+      ],
+      "key": "billing_queue",
+      "flag": "enable_billing_ledger",
+      "fix_locus": "atlas/core/billing.py::__init__",
+      "fiction_locus": "atlas/core/billing.py::record",
+      "wiring_locus": "atlas/core/billing.py::__init__"
+    },
+    {
+      "id": "usage_rollup",
+      "load_bearing": true,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "The nightly rollup job compacts per-request usage rows into daily aggregates via RollupService and RollupStore",
+      "actual": [
+        "atlas/jobs/rollup.py::run_usage_rollup",
+        "atlas/core/rollup_service.py::RollupService.aggregate_day",
+        "atlas/adapters/rollup_store.py::RollupStore.merge"
+      ],
+      "key": "rollup_store",
+      "flag": "enable_usage_rollup",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/rollup_service.py::aggregate_day",
+      "wiring_locus": "atlas/core/rollup_service.py::__init__"
+    },
+    {
+      "id": "cache_gate",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "dead_branch",
+      "claimed": "Read paths go through CacheGate, which serves hot documents from ShardedCache and falls through to storage on miss",
+      "actual": [
+        "atlas/api/reads.py::get_document",
+        "atlas/core/cachegate.py::CacheGate.get_or_load",
+        "atlas/adapters/cache_backend.py::ShardedCache.get"
+      ],
+      "key": "sharded_cache",
+      "flag": "enable_cache_gate",
+      "fix_locus": "atlas/core/cachegate.py::__init__",
+      "fiction_locus": "atlas/core/cachegate.py::get_or_load",
+      "wiring_locus": "atlas/core/cachegate.py::__init__"
+    },
+    {
+      "id": "admin_overrides",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "wrong_key",
+      "claimed": "Admin limit changes flow through OverrideManager, which validates and persists them back to ConfigSource so LimitPolicy picks them up",
+      "actual": [
+        "atlas/api/admin.py::update_tenant_limits",
+        "atlas/core/overrides.py::OverrideManager.apply",
+        "atlas/adapters/config_source.py::ConfigSource.write"
+      ],
+      "key": "override_writer",
+      "flag": "enable_override_manager",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/overrides.py::apply",
+      "wiring_locus": "atlas/core/overrides.py::__init__"
+    },
+    {
+      "id": "auth_session",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Authentication opens a session through SessionBroker, persisted in SessionStore with a sliding expiry",
+      "actual": [
+        "atlas/api/auth.py::authenticate",
+        "atlas/core/sessions.py::SessionBroker.open",
+        "atlas/adapters/session_store.py::SessionStore.put"
+      ],
+      "key": "session_store",
+      "flag": "enable_session_broker",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/sessions.py::open",
+      "wiring_locus": "atlas/core/sessions.py::__init__"
+    },
+    {
+      "id": "audit_log",
+      "load_bearing": false,
+      "deceptive": true,
+      "defect": "wrong_key",
+      "claimed": "Every mutating call is appended to AuditTrail and flushed to the append-only AuditSink",
+      "actual": [
+        "atlas/api/audit.py::audit_middleware",
+        "atlas/core/audit_trail.py::AuditTrail.append",
+        "atlas/adapters/audit_sink.py::AuditSink.write"
+      ],
+      "key": "audit_sink",
+      "flag": "enable_audit_trail",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/audit_trail.py::append",
+      "wiring_locus": "atlas/core/audit_trail.py::__init__"
+    },
+    {
+      "id": "export_bundle",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Tenant export jobs assemble bundles in Exporter and upload them to ObjectStore under a signed prefix",
+      "actual": [
+        "atlas/jobs/exports.py::run_export",
+        "atlas/core/exporter.py::Exporter.build_bundle",
+        "atlas/adapters/object_store.py::ObjectStore.upload"
+      ],
+      "key": "object_store",
+      "flag": "enable_exporter",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/exporter.py::build_bundle",
+      "wiring_locus": "atlas/core/exporter.py::__init__"
+    },
+    {
+      "id": "webhook_sign",
+      "load_bearing": false,
+      "deceptive": true,
+      "defect": "wrong_key",
+      "claimed": "Outbound webhooks are signed by WebhookSigner using the active key from KeyRing",
+      "actual": [
+        "atlas/api/webhooks.py::deliver_webhook",
+        "atlas/core/signing.py::WebhookSigner.sign",
+        "atlas/adapters/key_ring.py::KeyRing.current"
+      ],
+      "key": "key_ring",
+      "flag": "enable_webhook_signer",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/signing.py::sign",
+      "wiring_locus": "atlas/core/signing.py::__init__"
+    },
+    {
+      "id": "mail_notify",
+      "load_bearing": false,
+      "deceptive": true,
+      "defect": "not_registered",
+      "claimed": "Digest emails are composed by Notifier and handed to Mailer for delivery with per-tenant branding",
+      "actual": [
+        "atlas/jobs/digests.py::send_digests",
+        "atlas/core/notify.py::Notifier.send",
+        "atlas/adapters/mailer.py::Mailer.deliver"
+      ],
+      "key": "mailer",
+      "flag": "enable_notifier",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/notify.py::send",
+      "wiring_locus": "atlas/core/notify.py::__init__"
+    },
+    {
+      "id": "search_index",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Document changes are indexed by Indexer, which upserts denormalized rows into SearchBackend",
+      "actual": [
+        "atlas/api/search.py::reindex_document",
+        "atlas/core/indexer.py::Indexer.index",
+        "atlas/adapters/search_backend.py::SearchBackend.upsert"
+      ],
+      "key": "search_backend",
+      "flag": "enable_indexer",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/indexer.py::index",
+      "wiring_locus": "atlas/core/indexer.py::__init__"
+    },
+    {
+      "id": "retention_sweep",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "The retention sweep plans deletions with RetentionPlanner and executes them against ObjectStore",
+      "actual": [
+        "atlas/jobs/retention.py::run_retention_sweep",
+        "atlas/core/retention.py::RetentionPlanner.plan",
+        "atlas/adapters/object_store.py::ObjectStore.delete"
+      ],
+      "key": "retention_planner",
+      "flag": "enable_retention_planner",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/retention.py::plan",
+      "wiring_locus": "atlas/core/retention.py::__init__"
+    },
+    {
+      "id": "health_probe",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "The deep health endpoint fans out through HealthCheck to per-dependency probes in ProbeKit",
+      "actual": [
+        "atlas/api/health.py::deep_health",
+        "atlas/core/healthcheck.py::HealthCheck.run_all",
+        "atlas/adapters/probe_kit.py::ProbeKit.probe"
+      ],
+      "key": "probe_kit",
+      "flag": "enable_healthcheck",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/healthcheck.py::run_all",
+      "wiring_locus": "atlas/core/healthcheck.py::__init__"
+    },
+    {
+      "id": "burst_credit",
+      "load_bearing": true,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Short traffic bursts draw from BurstAccount, which debits prepaid burst credits in CreditStore before hard limits apply",
+      "actual": [
+        "atlas/api/burst.py::draw_burst",
+        "atlas/core/burst.py::BurstAccount.draw",
+        "atlas/adapters/credit_store.py::CreditStore.debit"
+      ],
+      "key": "credit_store",
+      "flag": "enable_burst_credit",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/burst.py::draw",
+      "wiring_locus": "atlas/core/burst.py::__init__"
+    },
+    {
+      "id": "rate_headers",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "not_registered",
+      "claimed": "Responses carry X-RateLimit headers rendered by RateView from live UsageStore snapshots",
+      "actual": [
+        "atlas/api/headers.py::attach_rate_headers",
+        "atlas/core/rate_view.py::RateView.snapshot",
+        "atlas/adapters/usage_store.py::UsageStore.snapshot"
+      ],
+      "key": "rate_view",
+      "flag": "enable_rate_headers",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/rate_view.py::snapshot",
+      "wiring_locus": "atlas/core/rate_view.py::__init__"
+    },
+    {
+      "id": "plan_catalog",
+      "load_bearing": true,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Tenant plan tiers resolve through PlanCatalog, which reads canonical plan rows from PlanStore",
+      "actual": [
+        "atlas/api/plans.py::get_plan",
+        "atlas/core/plans.py::PlanCatalog.resolve",
+        "atlas/adapters/plan_store.py::PlanStore.get_row"
+      ],
+      "key": "plan_store",
+      "flag": "enable_plan_catalog",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/plans.py::resolve",
+      "wiring_locus": "atlas/core/plans.py::__init__"
+    },
+    {
+      "id": "abuse_guard",
+      "load_bearing": true,
+      "deceptive": true,
+      "defect": "wrong_key",
+      "claimed": "Abusive traffic is scored by AbuseGuard, which persists strikes in StrikeStore feeding the limiter's penalty tier",
+      "actual": [
+        "atlas/api/abuse.py::flag_abuse",
+        "atlas/core/abuse.py::AbuseGuard.evaluate",
+        "atlas/adapters/strike_store.py::StrikeStore.add_strike"
+      ],
+      "key": "strike_store",
+      "flag": "enable_abuse_guard",
+      "fix_locus": "atlas/adapters/registry.py::register_defaults",
+      "fiction_locus": "atlas/core/abuse.py::evaluate",
+      "wiring_locus": "atlas/core/abuse.py::__init__"
+    },
+    {
+      "id": "doc_preview",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Document previews are built by PreviewBuilder and rasterized on the RenderFarm",
+      "actual": [
+        "atlas/api/previews.py::render_preview",
+        "atlas/core/previews.py::PreviewBuilder.build",
+        "atlas/adapters/render_farm.py::RenderFarm.submit"
+      ],
+      "key": "render_farm",
+      "flag": "enable_previews",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/previews.py::build",
+      "wiring_locus": "atlas/core/previews.py::__init__"
+    },
+    {
+      "id": "thumbnailer",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Thumbnail jobs run through ThumbService, which resizes via ImageKit with per-tenant presets",
+      "actual": [
+        "atlas/jobs/thumbnails.py::run_thumbnails",
+        "atlas/core/thumbs.py::ThumbService.make",
+        "atlas/adapters/image_kit.py::ImageKit.resize"
+      ],
+      "key": "image_kit",
+      "flag": "enable_thumbnails",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/thumbs.py::make",
+      "wiring_locus": "atlas/core/thumbs.py::__init__"
+    },
+    {
+      "id": "geo_router",
+      "load_bearing": false,
+      "deceptive": false,
+      "defect": null,
+      "claimed": "Requests are pinned to home regions by GeoRouter using RegionMap's tenant residency table",
+      "actual": [
+        "atlas/api/geo.py::route_request",
+        "atlas/core/geo.py::GeoRouter.pick_region",
+        "atlas/adapters/region_map.py::RegionMap.lookup"
+      ],
+      "key": "region_map",
+      "flag": "enable_geo_router",
+      "fix_locus": null,
+      "fiction_locus": "atlas/core/geo.py::pick_region",
+      "wiring_locus": "atlas/core/geo.py::__init__"
+    },
+    {
+      "id": "backup_verify",
+      "load_bearing": false,
+      "deceptive": true,
+      "defect": "signature_mismatch",
+      "claimed": "Nightly verification walks BackupVerifier over ObjectStore heads to prove restore points exist",
+      "actual": [
+        "atlas/jobs/backups.py::verify_backups",
+        "atlas/core/backups.py::BackupVerifier.verify",
+        "atlas/adapters/object_store.py::ObjectStore.head_object"
+      ],
+      "key": "backup_verifier",
+      "flag": "enable_backup_verifier",
+      "fix_locus": "atlas/adapters/object_store.py::head_object",
+      "fiction_locus": "atlas/core/backups.py::verify",
+      "wiring_locus": "atlas/core/backups.py::__init__"
+    }
+  ],
+  "load_bearing_deceptive": [
+    "throttle_gate",
+    "tenant_resolve",
+    "limits_policy",
+    "billing_events",
+    "cache_gate",
+    "admin_overrides",
+    "rate_headers",
+    "abuse_guard"
+  ],
+  "scale": 4
+}

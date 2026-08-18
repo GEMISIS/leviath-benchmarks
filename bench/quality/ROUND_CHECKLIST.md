@@ -13,7 +13,9 @@ methodology behind them is in [`../../METHODOLOGY.md`](../../METHODOLOGY.md).
    pricing, update `captured_utc`, and pin the OpenRouter route for any
    entry marked `pricing_varies_by_provider` so the pinned price is the
    billed price.
-3. **Agents.** Run `apply_bench_policy.py`, `make_flat.py`, and
+3. **Agents.** Run `apply_bench_policy.py`, `make_flat.py` (which also
+   regenerates the `-compacting` strong-baseline variants),
+   `make_adversarial.py`, `make_scoped.py`, `make_mix.py`, and
    `check_pairs.py`; bump `[agent] version` on anything that changed.
 4. **Subsets.** Draw each suite's subset with `core/subset.py` and
    commit it, with any exclusions declared and reasoned *before* the
@@ -22,9 +24,22 @@ methodology behind them is in [`../../METHODOLOGY.md`](../../METHODOLOGY.md).
    account - see the table below.
 6. **Capability.** Run one smoke cell per suite with `--unsafe-smoke`
    against the mock provider, and one cheap real cell per provider, to
-   prove keys, adapters, and containers work before spending.
-7. **Tag.** `git tag qbench-YYYY-MM-rN` on a clean tree. The runner
-   refuses to start otherwise.
+   prove keys, adapters, and containers work before spending. For a CRS
+   round the reader and grader models get capability cells too, and the
+   paid smoke must show a compaction actually firing in the
+   flat-compacting arm before that arm is frozen.
+7. **Footprint rounds.** Generated tasks regenerate byte-identical
+   (`generate.py --check`); explain-repo's `repo.json` commit is
+   re-pinned and exists locally; snake/explain verifiers pass their own
+   self-tests; runs go at **concurrency 1** (wall-clock is a headline
+   metric here). The `probes` block's grader model doubles as the
+   explain-repo coherence grader and stays frozen with the round.
+   (The full probe machinery is dormant until the successor
+   retention/window suite.)
+8. **Tag.** `git tag qbench-YYYY-MM-rN` on a clean tree. The runner
+   refuses to start otherwise. For a CRS round, the tag is also the
+   commitment to publish the round's result, whatever it shows -
+   exploration belongs to unfrozen smoke rounds, not to counted ones.
 
 ## Funding
 

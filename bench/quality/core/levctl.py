@@ -40,12 +40,14 @@ class QualityHome:
         """`[model_capabilities]` pinning each model's context window.
 
         Region budgets are percentages of the model's window, so the
-        window silently decides how large every region is. The runtime's
-        own table is incomplete - OpenRouter-fronted models resolve to a
-        conservative 128k while their providers report 1M - so a round
-        that does not pin the window measures region sizes it never
-        chose. Keys are the model id as the provider sees it, without
-        the leading provider segment.
+        window silently decides how large every region is. Since leviath
+        0.3.3 (#360) the runtime primes OpenRouter windows from the
+        provider's /models at daemon start, so this pin is no longer a
+        bug workaround - it is a freeze: the round runs under the window
+        it declared rather than whatever the live lookup returned (or
+        failed to return - the priming has a 10s timeout and often lacks
+        max_output_tokens). Keys are the model id as the provider sees
+        it, without the leading provider segment.
 
         Only models whose declared window differs from what the runtime
         resolves are overridden, and each entry carries all six fields:
@@ -122,9 +124,16 @@ class QualityHome:
 
     # -- daemon -------------------------------------------------------
     def start_daemon(self, extra_env: dict | None = None) -> None:
+        # The daemon's own output is diagnostic gold - a devnull here
+        # once cost the answer to whether persistence appends failed
+        # (leviath#455). One file per home, append mode, kept for the
+        # round's lifetime.
+        log_path = self.home / ".leviath" / "daemon.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        self._daemon_log = open(log_path, "ab")
         self._daemon = subprocess.Popen(
             [self.lev, "daemon"], env=self.env(extra_env),
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=self._daemon_log, stderr=subprocess.STDOUT,
             start_new_session=True)
         deadline = time.time() + _READY_TIMEOUT
         while time.time() < deadline:
@@ -160,9 +169,15 @@ class QualityHome:
     # -- runs ---------------------------------------------------------
     def launch(self, agent: str, task_text: str, workdir: Path,
                model: str | None = None, extra_args: list[str] | None = None,
-               extra_env: dict | None = None) -> str:
-        cmd = [self.lev, "run", agent, "--task", task_text, "--yolo",
+               extra_env: dict | None = None, yolo: bool = True) -> str:
+        # yolo=False keeps the ask_user_* tools in the advertised tool
+        # set (--yolo strips them before inference); the caller must
+        # then answer interactions itself or the run parks until the
+        # daemon's interaction timeout.
+        cmd = [self.lev, "run", agent, "--task", task_text,
                "--json", "--workdir", str(workdir)]
+        if yolo:
+            cmd.append("--yolo")
         if model:
             cmd += ["-m", model]
         cmd += extra_args or []
@@ -199,7 +214,8 @@ class QualityHome:
 
     def wait(self, run_id: str, timeout_secs: float,
              poll_secs: float = 1.0,
-             should_cancel=None) -> tuple[str, dict | None]:
+             should_cancel=None,
+             max_paused_secs: float = 7200.0) -> tuple[str, dict | None]:
         """Poll meta.json until terminal. Returns (status, meta).
 
         On timeout the run is cancelled and status "timeout" returned.
@@ -209,13 +225,32 @@ class QualityHome:
         blow through a whole round budget before the next between-run
         check. Either way the captured meta still carries the tokens
         spent.
+
+        A PAUSED run is waiting on the outside world - leviath pauses
+        on provider credit exhaustion, resumable after a top-up - and
+        spends nothing, so paused time does not count against the task
+        timeout. The harness retries `lev resume` once a minute (a
+        resume without credits just re-pauses on the next inference)
+        and gives up after ``max_paused_secs`` of accumulated pause.
         """
         deadline = time.time() + timeout_secs
         meta = None
+        paused_total = 0.0
+        resume_at = 0.0
         while time.time() < deadline:
             meta = self.meta(run_id)
             if meta and meta.get("status") in TERMINAL:
                 return meta["status"], meta
+            if meta and meta.get("status") == "paused":
+                paused_total += poll_secs
+                deadline += poll_secs
+                if paused_total > max_paused_secs:
+                    break  # falls through to cancel/timeout below
+                if time.time() >= resume_at:
+                    subprocess.run([self.lev, "resume", run_id],
+                                   env=self.env(), capture_output=True,
+                                   text=True)
+                    resume_at = time.time() + 60.0
             if meta and should_cancel is not None and should_cancel(meta):
                 subprocess.run([self.lev, "cancel", run_id],
                                env=self.env(), capture_output=True,

@@ -1,0 +1,7 @@
+Output exactly the eight report lines the task defines, in order: the
+four discrepancy counts, the three largest-impact transaction ids, the
+net ledger correction, and the enterprise-tier and
+enterprise-plus-tier payment fee rates. No headings, no labels, no
+commentary, nothing before or after the eight lines. Report only what
+you actually established from the records and the references
+available to you.

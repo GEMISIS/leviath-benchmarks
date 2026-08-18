@@ -1,0 +1,337 @@
+2026-03-14T11:00:07Z INFO [http.server] request w41 completed status=200 in 103 ms
+2026-03-14T11:00:11Z INFO [cache] request w13 completed status=200 in 211 ms
+2026-03-14T11:00:43Z DEBUG [http.server] worker w60 idle for 96s
+2026-03-14T11:00:43Z INFO [scheduler] connection established to fraud-detector:8175
+2026-03-14T11:00:47Z DEBUG [gc] worker w6 idle for 91s
+2026-03-14T11:00:57Z INFO [cache] request w3 completed status=200 in 734 ms
+2026-03-14T11:01:09Z DEBUG [scheduler] queue depth 1880 within limits
+2026-03-14T11:01:23Z INFO [scheduler] scheduled job ledger_sync finished in 116s
+2026-03-14T11:01:29Z DEBUG [scheduler] worker w61 idle for 54s
+2026-03-14T11:01:32Z WARN [http.server] thread pool active 1380/64
+2026-03-14T11:01:37Z WARN [gc] certificate for fraud-detector expires in 1155 days
+2026-03-14T11:01:45Z DEBUG [scheduler] queue depth 4483 within limits
+2026-03-14T11:01:54Z INFO [metrics] scheduled job ledger_sync finished in 27s
+2026-03-14T11:02:03Z INFO [startup] heartbeat ok (epoch 552)
+2026-03-14T11:02:05Z WARN [metrics] slow query 271 ms on table ledger_sync
+2026-03-14T11:02:25Z DEBUG [scheduler] gc pause 768 ms (young gen)
+2026-03-14T11:02:47Z DEBUG [scheduler] worker w26 idle for 21s
+2026-03-14T11:02:47Z WARN [startup] retrying metrics flush (attempt 1998)
+2026-03-14T11:02:48Z INFO [startup] request w16 completed status=200 in 654 ms
+2026-03-14T11:02:50Z DEBUG [scheduler] queue depth 3177 within limits
+2026-03-14T11:03:38Z DEBUG [cache] queue depth 698 within limits
+2026-03-14T11:03:49Z INFO [cache] cache refresh complete: 4680 entries loaded
+2026-03-14T11:03:50Z INFO [gc] request w23 completed status=200 in 652 ms
+2026-03-14T11:03:52Z INFO [cache] heartbeat ok (epoch 3789)
+2026-03-14T11:04:07Z INFO [cache] request w18 completed status=200 in 220 ms
+2026-03-14T11:04:27Z INFO [scheduler] connection established to fraud-detector:8088
+2026-03-14T11:04:33Z INFO [metrics] heartbeat ok (epoch 4870)
+2026-03-14T11:04:42Z INFO [scheduler] connection established to fraud-detector:8153
+2026-03-14T11:04:45Z INFO [gc] heartbeat ok (epoch 1488)
+2026-03-14T11:04:51Z DEBUG [metrics] worker w51 idle for 69s
+2026-03-14T11:05:09Z DEBUG [http.server] gc pause 622 ms (young gen)
+2026-03-14T11:05:49Z DEBUG [scheduler] queue depth 1339 within limits
+2026-03-14T11:05:55Z DEBUG [scheduler] gc pause 81 ms (young gen)
+2026-03-14T11:05:55Z INFO [metrics] scheduled job token_sweep finished in 74s
+2026-03-14T11:06:12Z DEBUG [http.server] queue depth 1017 within limits
+2026-03-14T11:06:34Z INFO [startup] connection established to billing-worker:8105
+2026-03-14T11:06:36Z DEBUG [cache] gc pause 146 ms (young gen)
+2026-03-14T11:06:38Z INFO [gc] scheduled job img_prewarm finished in 17s
+2026-03-14T11:06:52Z INFO [cache] request w53 completed status=200 in 511 ms
+2026-03-14T11:07:28Z DEBUG [metrics] gc pause 326 ms (young gen)
+2026-03-14T11:07:32Z DEBUG [http.server] gc pause 68 ms (young gen)
+2026-03-14T11:07:40Z DEBUG [scheduler] gc pause 678 ms (young gen)
+2026-03-14T11:07:42Z WARN [gc] slow query 608 ms on table email_digest
+2026-03-14T11:07:43Z INFO [http.server] connection established to billing-worker:8127
+2026-03-14T11:07:45Z DEBUG [startup] queue depth 4135 within limits
+2026-03-14T11:07:47Z ERROR [startup] temporary DNS failure resolving billing-worker (retried ok)
+2026-03-14T11:07:58Z WARN [startup] retrying metrics flush (attempt 1635)
+2026-03-14T11:08:03Z INFO [http.server] request w21 completed status=200 in 815 ms
+2026-03-14T11:08:12Z INFO [cache] heartbeat ok (epoch 3602)
+2026-03-14T11:08:49Z DEBUG [gc] worker w4 idle for 86s
+2026-03-14T11:08:50Z INFO [cache] request w28 completed status=200 in 839 ms
+2026-03-14T11:08:51Z DEBUG [metrics] gc pause 56 ms (young gen)
+2026-03-14T11:08:58Z INFO [cache] heartbeat ok (epoch 984)
+2026-03-14T11:09:09Z INFO [scheduler] scheduled job img_prewarm finished in 27s
+2026-03-14T11:09:17Z DEBUG [startup] gc pause 459 ms (young gen)
+2026-03-14T11:09:21Z DEBUG [gc] queue depth 2267 within limits
+2026-03-14T11:09:43Z DEBUG [cache] worker w6 idle for 109s
+2026-03-14T11:09:49Z INFO [startup] request w49 completed status=200 in 862 ms
+2026-03-14T11:10:12Z INFO [cache] cache refresh complete: 230 entries loaded
+2026-03-14T11:10:15Z INFO [metrics] scheduled job ledger_sync finished in 13s
+2026-03-14T11:10:26Z INFO [metrics] scheduled job ledger_sync finished in 92s
+2026-03-14T11:10:42Z INFO [cache] connection established to billing-worker:8159
+2026-03-14T11:11:29Z WARN [gc] retrying metrics flush (attempt 4577)
+2026-03-14T11:11:38Z INFO [cache] request w59 completed status=200 in 705 ms
+2026-03-14T11:11:39Z INFO [http.server] heartbeat ok (epoch 1976)
+2026-03-14T11:11:49Z INFO [metrics] heartbeat ok (epoch 2362)
+2026-03-14T11:11:52Z INFO [metrics] connection established to billing-worker:8180
+2026-03-14T11:12:24Z WARN [metrics] thread pool active 3525/64
+2026-03-14T11:12:30Z WARN [startup] certificate for fraud-detector expires in 2174 days
+2026-03-14T11:12:34Z DEBUG [http.server] worker w12 idle for 14s
+2026-03-14T11:12:41Z DEBUG [scheduler] gc pause 742 ms (young gen)
+2026-03-14T11:12:52Z WARN [cache] thread pool active 3911/64
+2026-03-14T11:13:01Z INFO [http.server] request w35 completed status=200 in 502 ms
+2026-03-14T11:13:09Z INFO [scheduler] cache refresh complete: 4482 entries loaded
+2026-03-14T11:13:29Z DEBUG [scheduler] gc pause 49 ms (young gen)
+2026-03-14T11:13:37Z INFO [cache] connection established to billing-worker:8168
+2026-03-14T11:13:46Z DEBUG [startup] gc pause 253 ms (young gen)
+2026-03-14T11:13:59Z INFO [http.server] request w25 completed status=200 in 288 ms
+2026-03-14T11:13:59Z INFO [http.server] connection established to billing-worker:8161
+2026-03-14T11:13:59Z WARN [cache] retrying metrics flush (attempt 981)
+2026-03-14T11:14:33Z INFO [metrics] request w29 completed status=200 in 428 ms
+2026-03-14T11:14:47Z INFO [metrics] scheduled job token_sweep finished in 41s
+2026-03-14T11:14:47Z INFO [startup] heartbeat ok (epoch 4917)
+2026-03-14T11:14:48Z INFO [cache] request w42 completed status=200 in 352 ms
+2026-03-14T11:15:07Z WARN [metrics] slow query 570 ms on table img_prewarm
+2026-03-14T11:15:12Z INFO [http.server] heartbeat ok (epoch 3118)
+2026-03-14T11:15:30Z WARN [gc] thread pool active 117/64
+2026-03-14T11:15:36Z WARN [metrics] retrying metrics flush (attempt 1206)
+2026-03-14T11:15:49Z ERROR [http.server] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T11:16:19Z ERROR [startup] temporary DNS failure resolving fraud-detector (retried ok)
+2026-03-14T11:16:59Z DEBUG [startup] queue depth 4734 within limits
+2026-03-14T11:17:00Z WARN [scheduler] retrying metrics flush (attempt 499)
+2026-03-14T11:17:04Z DEBUG [gc] queue depth 1189 within limits
+2026-03-14T11:18:04Z INFO [startup] scheduled job img_prewarm finished in 24s
+2026-03-14T11:18:11Z INFO [startup] request w10 completed status=200 in 140 ms
+2026-03-14T11:18:20Z INFO [gc] scheduled job ledger_sync finished in 104s
+2026-03-14T11:18:25Z INFO [gc] connection established to fraud-detector:8163
+2026-03-14T11:18:26Z INFO [gc] connection established to billing-worker:8124
+2026-03-14T11:18:27Z WARN [metrics] certificate for billing-worker expires in 117 days
+2026-03-14T11:19:34Z INFO [cache] request w26 completed status=200 in 523 ms
+2026-03-14T11:19:40Z INFO [scheduler] cache refresh complete: 3930 entries loaded
+2026-03-14T11:19:43Z WARN [metrics] certificate for fraud-detector expires in 768 days
+2026-03-14T11:19:48Z INFO [gc] request w22 completed status=200 in 184 ms
+2026-03-14T11:19:56Z INFO [metrics] request w62 completed status=200 in 327 ms
+2026-03-14T11:20:18Z INFO [metrics] connection established to fraud-detector:8107
+2026-03-14T11:20:19Z INFO [http.server] request w37 completed status=200 in 374 ms
+2026-03-14T11:20:23Z INFO [scheduler] heartbeat ok (epoch 2038)
+2026-03-14T11:20:23Z WARN [cache] retrying metrics flush (attempt 2436)
+2026-03-14T11:20:25Z INFO [http.server] request w20 completed status=200 in 804 ms
+2026-03-14T11:20:50Z DEBUG [startup] gc pause 130 ms (young gen)
+2026-03-14T11:20:51Z INFO [scheduler] request w58 completed status=200 in 296 ms
+2026-03-14T11:20:57Z WARN [http.server] certificate for fraud-detector expires in 1569 days
+2026-03-14T11:21:09Z WARN [metrics] thread pool active 2406/64
+2026-03-14T11:21:16Z INFO [cache] connection established to fraud-detector:8183
+2026-03-14T11:21:16Z INFO [http.server] request w18 completed status=200 in 423 ms
+2026-03-14T11:21:46Z INFO [metrics] heartbeat ok (epoch 1336)
+2026-03-14T11:21:53Z WARN [scheduler] slow query 495 ms on table img_prewarm
+2026-03-14T11:22:00Z INFO [gc] request w20 completed status=200 in 254 ms
+2026-03-14T11:22:04Z WARN [cache] thread pool active 3255/64
+2026-03-14T11:22:17Z DEBUG [startup] gc pause 377 ms (young gen)
+2026-03-14T11:22:21Z INFO [cache] request w53 completed status=200 in 641 ms
+2026-03-14T11:22:22Z INFO [cache] request w61 completed status=200 in 568 ms
+2026-03-14T11:22:37Z WARN [scheduler] retrying metrics flush (attempt 4365)
+2026-03-14T11:22:40Z WARN [scheduler] thread pool active 3609/64
+2026-03-14T11:23:00Z INFO [gc] request w52 completed status=200 in 531 ms
+2026-03-14T11:23:21Z INFO [startup] scheduled job orders_rollup finished in 24s
+2026-03-14T11:23:22Z INFO [gc] request w5 completed status=200 in 42 ms
+2026-03-14T11:23:32Z WARN [metrics] slow query 616 ms on table img_prewarm
+2026-03-14T11:23:36Z WARN [scheduler] retrying metrics flush (attempt 3628)
+2026-03-14T11:23:43Z INFO [scheduler] heartbeat ok (epoch 690)
+2026-03-14T11:23:57Z INFO [metrics] connection established to fraud-detector:8198
+2026-03-14T11:24:01Z DEBUG [startup] gc pause 223 ms (young gen)
+2026-03-14T11:24:15Z INFO [http.server] request w17 completed status=200 in 668 ms
+2026-03-14T11:24:20Z INFO [metrics] heartbeat ok (epoch 3866)
+2026-03-14T11:24:28Z WARN [cache] slow query 287 ms on table email_digest
+2026-03-14T11:24:34Z DEBUG [scheduler] worker w62 idle for 8s
+2026-03-14T11:24:54Z DEBUG [cache] worker w14 idle for 29s
+2026-03-14T11:25:06Z INFO [gc] request w28 completed status=200 in 778 ms
+2026-03-14T11:25:19Z INFO [startup] request w15 completed status=200 in 787 ms
+2026-03-14T11:25:25Z ERROR [cache] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T11:25:32Z WARN [scheduler] retrying metrics flush (attempt 1061)
+2026-03-14T11:25:38Z INFO [cache] scheduled job token_sweep finished in 118s
+2026-03-14T11:25:39Z INFO [metrics] request w35 completed status=200 in 142 ms
+2026-03-14T11:25:56Z WARN [http.server] retrying metrics flush (attempt 2762)
+2026-03-14T11:26:04Z INFO [metrics] heartbeat ok (epoch 4391)
+2026-03-14T11:26:33Z DEBUG [scheduler] queue depth 706 within limits
+2026-03-14T11:26:43Z INFO [startup] request w30 completed status=200 in 421 ms
+2026-03-14T11:27:00Z INFO [cache] request w25 completed status=200 in 392 ms
+2026-03-14T11:27:01Z INFO [cache] request w48 completed status=200 in 796 ms
+2026-03-14T11:27:08Z INFO [gc] scheduled job img_prewarm finished in 45s
+2026-03-14T11:27:09Z INFO [http.server] request w51 completed status=200 in 420 ms
+2026-03-14T11:27:12Z INFO [http.server] cache refresh complete: 1775 entries loaded
+2026-03-14T11:27:21Z DEBUG [metrics] gc pause 351 ms (young gen)
+2026-03-14T11:27:27Z INFO [scheduler] cache refresh complete: 3456 entries loaded
+2026-03-14T11:27:40Z INFO [cache] scheduled job sku_reindex finished in 98s
+2026-03-14T11:27:45Z WARN [metrics] slow query 775 ms on table img_prewarm
+2026-03-14T11:27:48Z INFO [metrics] connection established to fraud-detector:8196
+2026-03-14T11:28:10Z INFO [metrics] request w22 completed status=200 in 631 ms
+2026-03-14T11:28:11Z INFO [cache] cache refresh complete: 1736 entries loaded
+2026-03-14T11:28:20Z WARN [http.server] retrying metrics flush (attempt 2673)
+2026-03-14T11:28:20Z WARN [gc] retrying metrics flush (attempt 1951)
+2026-03-14T11:28:29Z INFO [http.server] scheduled job token_sweep finished in 31s
+2026-03-14T11:28:36Z INFO [cache] scheduled job ledger_sync finished in 55s
+2026-03-14T11:28:44Z INFO [gc] request w32 completed status=200 in 815 ms
+2026-03-14T11:28:45Z INFO [cache] scheduled job img_prewarm finished in 78s
+2026-03-14T11:28:46Z INFO [gc] request w31 completed status=200 in 429 ms
+2026-03-14T11:28:49Z INFO [scheduler] scheduled job sku_reindex finished in 10s
+2026-03-14T11:28:51Z DEBUG [metrics] worker w18 idle for 66s
+2026-03-14T11:29:08Z WARN [startup] retrying metrics flush (attempt 1734)
+2026-03-14T11:29:16Z WARN [startup] slow query 672 ms on table sku_reindex
+2026-03-14T11:29:21Z WARN [startup] thread pool active 1702/64
+2026-03-14T11:29:30Z DEBUG [gc] worker w12 idle for 9s
+2026-03-14T11:30:01Z DEBUG [cache] worker w61 idle for 95s
+2026-03-14T11:30:08Z WARN [http.server] slow query 873 ms on table img_prewarm
+2026-03-14T11:30:30Z INFO [metrics] heartbeat ok (epoch 1262)
+2026-03-14T11:30:32Z INFO [scheduler] heartbeat ok (epoch 3854)
+2026-03-14T11:30:32Z WARN [metrics] slow query 853 ms on table ledger_sync
+2026-03-14T11:30:54Z INFO [startup] scheduled job orders_rollup finished in 64s
+2026-03-14T11:31:27Z INFO [http.server] request w26 completed status=200 in 222 ms
+2026-03-14T11:31:32Z INFO [scheduler] heartbeat ok (epoch 1583)
+2026-03-14T11:31:40Z INFO [cache] cache refresh complete: 2804 entries loaded
+2026-03-14T11:31:47Z INFO [startup] request w7 completed status=200 in 369 ms
+2026-03-14T11:31:48Z INFO [startup] connection established to fraud-detector:8080
+2026-03-14T11:31:54Z INFO [http.server] connection established to billing-worker:8159
+2026-03-14T11:32:22Z INFO [metrics] heartbeat ok (epoch 2744)
+2026-03-14T11:32:24Z INFO [startup] request w51 completed status=200 in 420 ms
+2026-03-14T11:32:42Z INFO [gc] scheduled job sku_reindex finished in 13s
+2026-03-14T11:32:50Z INFO [http.server] cache refresh complete: 3769 entries loaded
+2026-03-14T11:32:50Z WARN [startup] certificate for billing-worker expires in 3406 days
+2026-03-14T11:32:56Z WARN [cache] certificate for billing-worker expires in 1842 days
+2026-03-14T11:33:28Z WARN [gc] slow query 604 ms on table img_prewarm
+2026-03-14T11:34:04Z INFO [gc] request w64 completed status=200 in 690 ms
+2026-03-14T11:34:04Z DEBUG [gc] worker w53 idle for 90s
+2026-03-14T11:34:05Z INFO [metrics] request w42 completed status=200 in 842 ms
+2026-03-14T11:34:11Z INFO [startup] scheduled job img_prewarm finished in 71s
+2026-03-14T11:34:12Z DEBUG [startup] queue depth 3353 within limits
+2026-03-14T11:34:13Z INFO [startup] cache refresh complete: 2560 entries loaded
+2026-03-14T11:34:26Z DEBUG [gc] gc pause 290 ms (young gen)
+2026-03-14T11:35:00Z DEBUG [startup] worker w32 idle for 81s
+2026-03-14T11:35:03Z INFO [cache] cache refresh complete: 2250 entries loaded
+2026-03-14T11:35:14Z INFO [metrics] scheduled job sku_reindex finished in 109s
+2026-03-14T11:35:18Z DEBUG [scheduler] queue depth 894 within limits
+2026-03-14T11:35:31Z INFO [cache] request w50 completed status=200 in 818 ms
+2026-03-14T11:35:32Z INFO [http.server] scheduled job img_prewarm finished in 59s
+2026-03-14T11:35:35Z DEBUG [metrics] gc pause 82 ms (young gen)
+2026-03-14T11:35:38Z WARN [http.server] thread pool active 1442/64
+2026-03-14T11:35:38Z WARN [startup] retrying metrics flush (attempt 998)
+2026-03-14T11:35:46Z INFO [metrics] scheduled job orders_rollup finished in 56s
+2026-03-14T11:36:18Z INFO [scheduler] cache refresh complete: 4777 entries loaded
+2026-03-14T11:36:26Z INFO [scheduler] cache refresh complete: 2060 entries loaded
+2026-03-14T11:36:28Z INFO [scheduler] connection established to fraud-detector:8138
+2026-03-14T11:36:42Z DEBUG [metrics] worker w22 idle for 105s
+2026-03-14T11:36:47Z INFO [scheduler] scheduled job img_prewarm finished in 107s
+2026-03-14T11:36:55Z INFO [cache] scheduled job img_prewarm finished in 77s
+2026-03-14T11:37:09Z INFO [gc] scheduled job token_sweep finished in 45s
+2026-03-14T11:37:14Z WARN [metrics] slow query 590 ms on table orders_rollup
+2026-03-14T11:37:34Z INFO [scheduler] request w28 completed status=200 in 882 ms
+2026-03-14T11:37:45Z INFO [startup] heartbeat ok (epoch 1755)
+2026-03-14T11:37:59Z ERROR [http.server] failed to publish metrics batch: broker unavailable (will retry)
+2026-03-14T11:38:28Z INFO [http.server] heartbeat ok (epoch 1221)
+2026-03-14T11:38:36Z DEBUG [gc] gc pause 724 ms (young gen)
+2026-03-14T11:38:57Z INFO [cache] cache refresh complete: 323 entries loaded
+2026-03-14T11:39:01Z INFO [cache] request w45 completed status=200 in 466 ms
+2026-03-14T11:39:33Z INFO [http.server] scheduled job email_digest finished in 86s
+2026-03-14T11:39:52Z INFO [http.server] connection established to fraud-detector:8115
+2026-03-14T11:39:52Z INFO [http.server] request w28 completed status=200 in 601 ms
+2026-03-14T11:39:54Z DEBUG [metrics] queue depth 2726 within limits
+2026-03-14T11:39:55Z INFO [metrics] cache refresh complete: 1304 entries loaded
+2026-03-14T11:39:56Z WARN [cache] slow query 627 ms on table sku_reindex
+2026-03-14T11:40:13Z INFO [metrics] cache refresh complete: 278 entries loaded
+2026-03-14T11:40:25Z WARN [cache] retrying metrics flush (attempt 2007)
+2026-03-14T11:40:30Z INFO [cache] cache refresh complete: 4071 entries loaded
+2026-03-14T11:40:45Z INFO [startup] scheduled job sku_reindex finished in 57s
+2026-03-14T11:40:52Z INFO [startup] request w60 completed status=200 in 208 ms
+2026-03-14T11:40:56Z INFO [metrics] heartbeat ok (epoch 4810)
+2026-03-14T11:41:04Z INFO [cache] cache refresh complete: 2680 entries loaded
+2026-03-14T11:41:10Z INFO [scheduler] scheduled job token_sweep finished in 118s
+2026-03-14T11:41:13Z INFO [scheduler] request w27 completed status=200 in 253 ms
+2026-03-14T11:41:28Z INFO [gc] cache refresh complete: 2292 entries loaded
+2026-03-14T11:41:29Z ERROR [startup] temporary DNS failure resolving billing-worker (retried ok)
+2026-03-14T11:41:33Z INFO [http.server] connection established to fraud-detector:8180
+2026-03-14T11:41:48Z INFO [cache] heartbeat ok (epoch 1443)
+2026-03-14T11:42:07Z WARN [http.server] certificate for billing-worker expires in 2318 days
+2026-03-14T11:42:26Z DEBUG [startup] queue depth 1630 within limits
+2026-03-14T11:42:33Z WARN [startup] slow query 758 ms on table ledger_sync
+2026-03-14T11:42:33Z INFO [metrics] heartbeat ok (epoch 4941)
+2026-03-14T11:42:36Z ERROR [gc] temporary DNS failure resolving fraud-detector (retried ok)
+2026-03-14T11:42:39Z DEBUG [http.server] queue depth 4116 within limits
+2026-03-14T11:42:41Z INFO [http.server] request w15 completed status=200 in 209 ms
+2026-03-14T11:42:57Z INFO [metrics] cache refresh complete: 3210 entries loaded
+2026-03-14T11:43:09Z DEBUG [scheduler] worker w39 idle for 65s
+2026-03-14T11:43:36Z WARN [startup] slow query 376 ms on table sku_reindex
+2026-03-14T11:43:50Z INFO [scheduler] scheduled job token_sweep finished in 11s
+2026-03-14T11:44:23Z INFO [http.server] scheduled job img_prewarm finished in 95s
+2026-03-14T11:44:24Z INFO [cache] request w32 completed status=200 in 435 ms
+2026-03-14T11:44:27Z DEBUG [cache] worker w19 idle for 65s
+2026-03-14T11:44:32Z INFO [http.server] heartbeat ok (epoch 4233)
+2026-03-14T11:44:32Z INFO [gc] cache refresh complete: 545 entries loaded
+2026-03-14T11:44:43Z INFO [cache] cache refresh complete: 1962 entries loaded
+2026-03-14T11:45:20Z WARN [startup] retrying metrics flush (attempt 3423)
+2026-03-14T11:45:28Z INFO [cache] cache refresh complete: 793 entries loaded
+2026-03-14T11:45:35Z INFO [http.server] connection established to billing-worker:8150
+2026-03-14T11:45:39Z INFO [http.server] connection established to billing-worker:8125
+2026-03-14T11:46:03Z INFO [gc] request w54 completed status=200 in 314 ms
+2026-03-14T11:46:07Z INFO [scheduler] heartbeat ok (epoch 4396)
+2026-03-14T11:46:24Z DEBUG [startup] queue depth 885 within limits
+2026-03-14T11:46:35Z INFO [metrics] heartbeat ok (epoch 1365)
+2026-03-14T11:46:38Z INFO [metrics] request w61 completed status=200 in 106 ms
+2026-03-14T11:46:40Z INFO [http.server] connection established to fraud-detector:8170
+2026-03-14T11:47:03Z INFO [cache] heartbeat ok (epoch 530)
+2026-03-14T11:47:04Z INFO [startup] heartbeat ok (epoch 3442)
+2026-03-14T11:47:19Z INFO [metrics] cache refresh complete: 1732 entries loaded
+2026-03-14T11:47:19Z INFO [metrics] cache refresh complete: 2614 entries loaded
+2026-03-14T11:47:20Z INFO [metrics] connection established to fraud-detector:8127
+2026-03-14T11:47:20Z INFO [http.server] heartbeat ok (epoch 4441)
+2026-03-14T11:47:20Z DEBUG [cache] queue depth 2349 within limits
+2026-03-14T11:47:25Z DEBUG [gc] queue depth 2688 within limits
+2026-03-14T11:47:31Z INFO [scheduler] heartbeat ok (epoch 1722)
+2026-03-14T11:47:33Z WARN [http.server] certificate for billing-worker expires in 3189 days
+2026-03-14T11:47:45Z DEBUG [metrics] gc pause 444 ms (young gen)
+2026-03-14T11:47:54Z INFO [scheduler] request w12 completed status=200 in 724 ms
+2026-03-14T11:48:06Z INFO [metrics] heartbeat ok (epoch 535)
+2026-03-14T11:48:15Z INFO [cache] request w36 completed status=200 in 504 ms
+2026-03-14T11:48:18Z DEBUG [scheduler] worker w64 idle for 56s
+2026-03-14T11:48:21Z DEBUG [startup] gc pause 457 ms (young gen)
+2026-03-14T11:48:52Z INFO [gc] scheduled job orders_rollup finished in 48s
+2026-03-14T11:48:54Z WARN [http.server] thread pool active 3183/64
+2026-03-14T11:48:55Z INFO [cache] request w5 completed status=200 in 371 ms
+2026-03-14T11:49:32Z INFO [http.server] connection established to fraud-detector:8171
+2026-03-14T11:49:41Z INFO [cache] heartbeat ok (epoch 4702)
+2026-03-14T11:49:43Z INFO [http.server] connection established to fraud-detector:8094
+2026-03-14T11:49:47Z DEBUG [metrics] gc pause 368 ms (young gen)
+2026-03-14T11:49:57Z DEBUG [metrics] gc pause 618 ms (young gen)
+2026-03-14T11:49:59Z DEBUG [metrics] gc pause 324 ms (young gen)
+2026-03-14T11:50:00Z DEBUG [cache] worker w42 idle for 83s
+2026-03-14T11:50:22Z DEBUG [http.server] queue depth 3074 within limits
+2026-03-14T11:50:46Z INFO [startup] request w36 completed status=200 in 858 ms
+2026-03-14T11:50:47Z DEBUG [cache] gc pause 29 ms (young gen)
+2026-03-14T11:51:00Z INFO [scheduler] request w21 completed status=200 in 402 ms
+2026-03-14T11:51:08Z DEBUG [cache] gc pause 557 ms (young gen)
+2026-03-14T11:51:10Z DEBUG [scheduler] gc pause 525 ms (young gen)
+2026-03-14T11:51:17Z WARN [cache] certificate for fraud-detector expires in 1006 days
+2026-03-14T11:51:49Z DEBUG [cache] gc pause 118 ms (young gen)
+2026-03-14T11:51:55Z DEBUG [metrics] gc pause 833 ms (young gen)
+2026-03-14T11:52:25Z INFO [cache] scheduled job token_sweep finished in 46s
+2026-03-14T11:52:26Z INFO [gc] scheduled job ledger_sync finished in 2s
+2026-03-14T11:52:38Z INFO [cache] connection established to billing-worker:8088
+2026-03-14T11:53:13Z INFO [http.server] scheduled job orders_rollup finished in 72s
+2026-03-14T11:53:20Z INFO [gc] cache refresh complete: 1000 entries loaded
+2026-03-14T11:53:24Z WARN [gc] retrying metrics flush (attempt 2768)
+2026-03-14T11:53:30Z DEBUG [metrics] queue depth 2944 within limits
+2026-03-14T11:53:35Z INFO [http.server] cache refresh complete: 2953 entries loaded
+2026-03-14T11:53:39Z INFO [scheduler] request w47 completed status=200 in 378 ms
+2026-03-14T11:53:45Z INFO [http.server] scheduled job ledger_sync finished in 31s
+2026-03-14T11:54:14Z WARN [http.server] certificate for billing-worker expires in 4801 days
+2026-03-14T11:54:32Z WARN [startup] thread pool active 2122/64
+2026-03-14T11:54:45Z INFO [http.server] request w48 completed status=200 in 88 ms
+2026-03-14T11:55:07Z INFO [scheduler] scheduled job token_sweep finished in 31s
+2026-03-14T11:55:08Z INFO [http.server] request w48 completed status=200 in 287 ms
+2026-03-14T11:55:11Z INFO [startup] request w26 completed status=200 in 492 ms
+2026-03-14T11:55:16Z INFO [gc] request w36 completed status=200 in 886 ms
+2026-03-14T11:55:16Z INFO [http.server] scheduled job sku_reindex finished in 96s
+2026-03-14T11:55:17Z INFO [metrics] heartbeat ok (epoch 4308)
+2026-03-14T11:56:02Z WARN [metrics] slow query 562 ms on table token_sweep
+2026-03-14T11:56:05Z INFO [cache] request w11 completed status=200 in 441 ms
+2026-03-14T11:56:08Z DEBUG [metrics] queue depth 4938 within limits
+2026-03-14T11:56:25Z INFO [startup] scheduled job img_prewarm finished in 53s
+2026-03-14T11:56:40Z WARN [startup] thread pool active 1477/64
+2026-03-14T11:57:10Z INFO [gc] request w2 completed status=200 in 375 ms
+2026-03-14T11:57:23Z DEBUG [cache] gc pause 755 ms (young gen)
+2026-03-14T11:57:25Z INFO [metrics] scheduled job img_prewarm finished in 4s
+2026-03-14T11:58:08Z WARN [scheduler] thread pool active 1046/64
+2026-03-14T11:58:24Z INFO [http.server] connection established to fraud-detector:8171
+2026-03-14T11:58:45Z WARN [http.server] certificate for billing-worker expires in 1073 days
+2026-03-14T11:59:10Z DEBUG [http.server] worker w4 idle for 1s
+2026-03-14T11:59:34Z DEBUG [gc] gc pause 557 ms (young gen)
+2026-03-14T11:59:57Z WARN [cache] thread pool active 3893/64

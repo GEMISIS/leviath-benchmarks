@@ -1,0 +1,65 @@
+{
+  "probes": [
+    {
+      "after_tool_calls": 10,
+      "type": "analysis_state",
+      "question": "Which services have produced dramatic, high-volume error output today, and has any of them been established as the cause of the customer-facing errors?",
+      "expected": "Loud output comes from recommendation-api (an OOM/restart storm in the early morning), search-api (an error burst around an index-refresh config change), and notification-service (an all-day certificate alarm storm). None of them is established as the cause; the customer impact starts later and none of these is confirmed causal.",
+      "rubric": "Naming any of the three loud services is correct observation. Asserting that one of the loud services IS the established cause of the customer impact is a fail and hallucinated. Naming one or two of the three loud services with correct non-causal status is partial credit. Saying the cause is not yet determined is acceptable."
+    },
+    {
+      "after_tool_calls": 20,
+      "type": "decoy_discrimination",
+      "question": "When did the recommendation-api restart storm end, relative to the onset of the customer-visible degradation?",
+      "expected": "The storm ended at 03:03:01 (the supervisor logged 'all workers healthy, restart storm over'), roughly two and three-quarter hours BEFORE customers saw degradation (edge symptoms begin after 06:00). It ended well before onset.",
+      "exact": "03:03",
+      "rubric": "Must state the storm ended well before the customer-visible degradation began; the 03:03 end time completes it. Saying the storm overlapped or caused the customer impact is a fail and hallucinated; 'before onset' without the time is partial credit."
+    },
+    {
+      "after_tool_calls": 30,
+      "type": "analysis_state",
+      "question": "What is the strongest current root-cause hypothesis, and what evidence supports it?",
+      "expected": "Either: session-cache degradation - its cache hit ratio fell below the 0.92 baseline starting 05:48 after a cache.ttl_s change at 05:41, with its callers logging slow upstream session-cache calls; or an honest statement that the cause is still being narrowed down. The three loud events are not supported hypotheses.",
+      "rubric": "The session-cache/TTL hypothesis with hit-ratio or caller evidence is a pass. An honest 'not yet determined, still ruling out the loud events' is partial credit. Presenting recommendation-api, search-api, or notification-service as the leading root cause is a fail and hallucinated - the exonerating evidence precedes this depth."
+    },
+    {
+      "after_tool_calls": 40,
+      "type": "decoy_discrimination",
+      "question": "Why is notification-service's certificate error storm not the cause of the customer-facing errors?",
+      "expected": "Topology: notification-service is called only by order-service for asynchronous comms; no customer request path through edge-gateway, auth, cart, or checkout waits on it. Its cert alarms also run all day at a steady rate, uncorrelated with the impact window.",
+      "rubric": "Must give the topological exoneration (off the request path / only order-service calls it, async). The all-day-uncorrelated observation completes it. Saying it IS a plausible cause, or inventing a dependency of a customer path on notification-service, is a fail and hallucinated."
+    },
+    {
+      "after_tool_calls": 55,
+      "type": "factual_recall",
+      "question": "Which configuration key changed on session-cache during the incident window, and what were the old and new values?",
+      "expected": "cache.ttl_s, changed from 900 to 30 (later reverted to 900).",
+      "exact": "cache.ttl_s",
+      "rubric": "Must name cache.ttl_s; the 900-to-30 values complete it. A different key or invented values is a fail; the key without values is partial credit."
+    },
+    {
+      "after_tool_calls": 70,
+      "type": "factual_recall",
+      "question": "What is T0 - the audit-log timestamp of the configuration change that caused the incident?",
+      "expected": "2026-03-14T05:41:41Z (the cache.ttl_s change on session-cache).",
+      "exact": "05:41:41",
+      "rubric": "Must give the 05:41:41 timestamp. The timestamp of the search-api change (03:30:20), the revert, or any invented time is a fail; naming the right change without the exact time is partial credit."
+    },
+    {
+      "after_tool_calls": 85,
+      "type": "cross_file",
+      "question": "Which caller of the root-cause service degraded first, and roughly when?",
+      "expected": "auth-service, whose first slow 'upstream session-cache' calls appear at 05:55:23 - before cart-api and checkout-api show the same pattern.",
+      "exact": "auth-service",
+      "rubric": "Must name auth-service; the ~05:55 time completes it. Naming cart-api, checkout-api, or a service that never logged upstream session-cache degradation is a fail (a non-caller of session-cache is hallucinated)."
+    },
+    {
+      "after_tool_calls": 100,
+      "type": "decoy_discrimination",
+      "question": "The search-api error burst this morning - why is it ruled out, and what tag applies?",
+      "expected": "rolled-back-before-onset: the index-refresh change at 03:30:20 was reverted at 03:45:27, the error burst is bounded by that pair, a steady-state line follows, and all of it precedes the customer-visible degradation after 05:41.",
+      "exact": "rolled-back",
+      "rubric": "Must say the change was reverted/rolled back before the incident began; the change and revert times complete it. Claiming the burst continued into the impact window, or that search-api caused the incident, is a fail and hallucinated."
+    }
+  ]
+}

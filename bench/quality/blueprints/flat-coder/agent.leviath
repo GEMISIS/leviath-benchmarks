@@ -12,10 +12,12 @@
 # structured agent, and its window is a percentage of the model's
 # context exactly like the structured regions - the baseline is
 # unstructured, not handicapped. check_pairs.py asserts that.
+# The window evicts oldest-first on overflow - the classic
+# truncating loop.
 
 [agent]
 name = "flat-coder"
-version = "0.2.0"
+version = "0.3.0"
 description = "Flat-context baseline for coder: identical tools and permissions, one loop, one conversation window"
 entry_stage = "work"
 
@@ -42,6 +44,16 @@ change and fix what breaks. Before finishing, review your changes as a
 whole - correctness, edge cases, consistency with the surrounding code -
 and make sure everything you changed actually runs.
 
+Evidence conduct, applying to everything you produce:
+- Cite the source of every factual claim (file and line, log entry,
+  or document section) so a reader can check it without you.
+- Keep a running record of key findings together with their sources as
+  you work, and reuse that record instead of trusting memory.
+- If the available material does not establish something you need, ask
+  for it when you have a way to ask; otherwise state the gap explicitly.
+  Never fill a gap with what similar systems usually do - an unsupported
+  guess presented as fact is worse than a missing value.
+
 Deliver the final answer to the task. Report only what you actually
 established.
 
@@ -61,6 +73,18 @@ provider = "anthropic"
 model = "claude-sonnet-5"
 
 [context.regions]
-task = { kind = "pinned", budget = "2%", required = true, seed = "task", required_message = "Describe the coding task via --task (or the API/ACP task field)." }
-conversation = { kind = "sliding_window", max_items = 400, budget = "91%", strategy = "bulk", overflow = 20 }
-error_report = { kind = "pinned", budget = "2%" }
+# min_tokens floors survive a small pinned window (the CRS window
+# sweep): a percentage budget that starves the task text kills the run
+# at spawn, which measures the harness rather than the arm.
+# Volatility declarations (runtime orders the prompt by them and
+# places cache markers accordingly, stable first): the flat arm gets
+# the same honest annotations as the structured bases - seeded-once
+# text is `stable`, append-only regions are `grows`. Undeclared
+# defaults to `rewritten` (sorted last, never cached ahead of churn).
+task = { kind = "pinned", budget = "2%", min_tokens = 4000, required = true, seed = "task", volatility = "stable", required_message = "Describe the coding task via --task (or the API/ACP task field)." }
+conversation = { kind = "sliding_window", max_items = 400, budget = "91%", strategy = "bulk", overflow = 20, volatility = "grows" }
+error_report = { kind = "pinned", budget = "2%", volatility = "grows" }
+# Declared so the per-stage prompt gets its own region instead of being
+# injected into `task` (the first pinned region), where it both churns
+# the cache prefix and competes with the task text for budget.
+stage_instructions = { kind = "pinned", budget = "3%", min_tokens = 2000, max_tokens = 4000, volatility = "stable" }

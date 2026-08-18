@@ -1,0 +1,12 @@
+{
+  "suite": "footprint",
+  "seed": 20260815,
+  "n": 3,
+  "universe_sha256": "d86b2e95eefd80504e2bce2f0bd4915d1562d4f062d816ce179b0c435ddd5ece",
+  "excluded": [],
+  "task_ids": [
+    "explain-repo",
+    "log-search",
+    "snake-cpp"
+  ]
+}

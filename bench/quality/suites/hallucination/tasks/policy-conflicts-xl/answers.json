@@ -1,0 +1,263 @@
+{
+  "seed": 7717,
+  "answers": [
+    "conflict: ACC-50 <-> HR-74 | quarterly entitlement certification versus anniversary-only access review",
+    "conflict: EXP-53 <-> FIN-21 | director signature threshold contradicts self-approval spending limit",
+    "conflict: HR-78 <-> EXP-44 | self-service itinerary booking versus mandatory corporate desk",
+    "conflict: INC-18 <-> OPS-73 | fifteen-minute recovery objective versus next-morning cold restore",
+    "conflict: OPS-60 <-> ACC-64 | pipeline-only deployment versus direct elevated write access",
+    "conflict: PRIV-14 <-> OPS-60 | EU residency guarantee versus overseas backup replication",
+    "conflict: PRIV-47 <-> HR-75 | anonymized aggregate analytics versus individual keystroke telemetry",
+    "conflict: RET-47 <-> VEN-75 | customer purge timeline contradicts supplier retention floor",
+    "conflict: RET-54 <-> INC-69 | one-year archive compaction versus three-year original evidence",
+    "conflict: SEC-12 <-> OPS-73 | quarterly credential rotation versus annual password refresh",
+    "conflict: SEC-8 <-> PRIV-68 | seven-year audit retention versus ninety-day log erasure",
+    "conflict: VEN-75 <-> FIN-29 | pre-contract security assessment versus immediate marketplace access",
+    "reviewed: 173"
+  ],
+  "conflicts": [
+    {
+      "key": "rto-vs-coldstore",
+      "essence": "fifteen-minute recovery objective versus next-morning cold restore",
+      "doc_a": "INC-18",
+      "section_a": 4,
+      "statement_a": "Mission-critical systems resume within a fifteen-minute recovery objective.",
+      "doc_b": "OPS-73",
+      "section_b": 3,
+      "statement_b": "Restoration from cold storage is scheduled for the next business morning."
+    },
+    {
+      "key": "selfbook-vs-desk",
+      "essence": "self-service itinerary booking versus mandatory corporate desk",
+      "doc_a": "HR-78",
+      "section_a": 4,
+      "statement_a": "Employees arrange their itineraries independently, using whichever provider suits them.",
+      "doc_b": "EXP-44",
+      "section_b": 6,
+      "statement_b": "All travel is booked exclusively via the corporate desk."
+    },
+    {
+      "key": "certify-vs-anniversary",
+      "essence": "quarterly entitlement certification versus anniversary-only access review",
+      "doc_a": "ACC-50",
+      "section_a": 3,
+      "statement_a": "Line managers certify their reports' entitlements at the close of each quarter.",
+      "doc_b": "HR-74",
+      "section_b": 5,
+      "statement_b": "Access privileges are examined only during the employee's anniversary evaluation."
+    },
+    {
+      "key": "rotation-vs-refresh",
+      "essence": "quarterly credential rotation versus annual password refresh",
+      "doc_a": "SEC-12",
+      "section_a": 2,
+      "statement_a": "Service credentials must be rotated every ninety days.",
+      "doc_b": "OPS-73",
+      "section_b": 4,
+      "statement_b": "The annual maintenance window is the sole occasion on which system passwords and API keys receive their scheduled refresh."
+    },
+    {
+      "key": "compact-vs-evidence",
+      "essence": "one-year archive compaction versus three-year original evidence",
+      "doc_a": "RET-54",
+      "section_a": 4,
+      "statement_a": "Message archives older than one year are compacted into summaries.",
+      "doc_b": "INC-69",
+      "section_b": 1,
+      "statement_b": "Investigations require untouched original communications going back three full calendar cycles."
+    },
+    {
+      "key": "pipeline-vs-push",
+      "essence": "pipeline-only deployment versus direct elevated write access",
+      "doc_a": "OPS-60",
+      "section_a": 4,
+      "statement_a": "Production changes deploy through the automated pipeline alone.",
+      "doc_b": "ACC-64",
+      "section_b": 1,
+      "statement_b": "Engineers holding elevated roles may write directly onto live infrastructure."
+    },
+    {
+      "key": "pentest-vs-instant",
+      "essence": "pre-contract security assessment versus immediate marketplace access",
+      "doc_a": "VEN-75",
+      "section_a": 5,
+      "statement_a": "New suppliers undergo a penetration assessment before contract execution.",
+      "doc_b": "FIN-29",
+      "section_b": 5,
+      "statement_b": "Third parties gain marketplace access immediately upon purchase-order issuance."
+    },
+    {
+      "key": "retention-vs-vendor",
+      "essence": "customer purge timeline contradicts supplier retention floor",
+      "doc_a": "RET-47",
+      "section_a": 1,
+      "statement_a": "Customer records are purged twenty-four months after account closure.",
+      "doc_b": "VEN-75",
+      "section_b": 5,
+      "statement_b": "Datasets shared with suppliers shall retain the complete client history for the entire duration of the supplier agreement, with a five-year floor."
+    },
+    {
+      "key": "audit-vs-minimize",
+      "essence": "seven-year audit retention versus ninety-day log erasure",
+      "doc_a": "SEC-8",
+      "section_a": 2,
+      "statement_a": "Audit trails persist for seven years in immutable storage.",
+      "doc_b": "PRIV-68",
+      "section_b": 5,
+      "statement_b": "Activity logs are erased after ninety days to honor minimization."
+    },
+    {
+      "key": "residency-vs-backup",
+      "essence": "EU residency guarantee versus overseas backup replication",
+      "doc_a": "PRIV-14",
+      "section_a": 4,
+      "statement_a": "Personal information belonging to EU residents never leaves union territory.",
+      "doc_b": "OPS-60",
+      "section_b": 4,
+      "statement_b": "Nightly backups replicate to the Oregon and Singapore regions."
+    },
+    {
+      "key": "aggregate-vs-keystroke",
+      "essence": "anonymized aggregate analytics versus individual keystroke telemetry",
+      "doc_a": "PRIV-47",
+      "section_a": 2,
+      "statement_a": "Workplace analytics collect nothing beyond aggregate, anonymized counts.",
+      "doc_b": "HR-75",
+      "section_b": 3,
+      "statement_b": "Individual keystroke telemetry feeds performance dossiers."
+    },
+    {
+      "key": "signature-vs-selfserve",
+      "essence": "director signature threshold contradicts self-approval spending limit",
+      "doc_a": "EXP-53",
+      "section_a": 5,
+      "statement_a": "Purchases above five hundred dollars require a director's signature.",
+      "doc_b": "FIN-21",
+      "section_b": 4,
+      "statement_b": "Spending under two thousand USD may proceed on the employee's own authority."
+    }
+  ],
+  "decoys": [
+    {
+      "key": "quarterly-scans",
+      "why": "same quarterly cadence stated twice",
+      "anchor": "quarterly",
+      "doc_a": "SEC-31",
+      "statement_a": "External vulnerability scans run quarterly against every internet-facing host.",
+      "doc_b": "OPS-70",
+      "statement_b": "The operations calendar reserves the first week of each fiscal quarter for the quarterly external scan."
+    },
+    {
+      "key": "erasure-clock",
+      "why": "same thirty-day deadline, policy and tracking view",
+      "anchor": "thirty",
+      "doc_a": "RET-25",
+      "statement_a": "Erasure requests complete within thirty days of receipt.",
+      "doc_b": "PRIV-34",
+      "statement_b": "The privacy office tracks every erasure ticket against the thirty-day completion clock."
+    },
+    {
+      "key": "mfa-everywhere",
+      "why": "same multi-factor requirement, rule and provisioning",
+      "anchor": "multi-factor",
+      "doc_a": "ACC-3",
+      "statement_a": "All administrative consoles require multi-factor authentication.",
+      "doc_b": "SEC-12",
+      "statement_b": "Multi-factor authentication is provisioned for administrative console access during onboarding."
+    },
+    {
+      "key": "reimburse-45",
+      "why": "same forty-five-day settlement window",
+      "anchor": "forty-five",
+      "doc_a": "EXP-38",
+      "statement_a": "Approved reimbursements are paid within forty-five days.",
+      "doc_b": "FIN-21",
+      "statement_b": "Finance settles approved reimbursement claims on a forty-five-day cycle."
+    },
+    {
+      "key": "sev1-page",
+      "why": "same fifteen-minute paging promise",
+      "anchor": "fifteen",
+      "doc_a": "INC-7",
+      "statement_a": "A severity-one incident pages the on-call engineer within fifteen minutes.",
+      "doc_b": "OPS-21",
+      "statement_b": "On-call rotations are staffed so severity-one pages are acknowledged inside fifteen minutes."
+    },
+    {
+      "key": "day-one-training",
+      "why": "same first-day training obligation",
+      "anchor": "first working day",
+      "doc_a": "HR-74",
+      "statement_a": "Security awareness training is completed on the first working day.",
+      "doc_b": "SEC-57",
+      "statement_b": "Onboarding schedules security awareness training for the first working day."
+    },
+    {
+      "key": "dpa-required",
+      "why": "same DPA prerequisite, rule and filing step",
+      "anchor": "data processing agreement",
+      "doc_a": "VEN-60",
+      "statement_a": "Every vendor relationship requires an executed data processing agreement.",
+      "doc_b": "PRIV-56",
+      "statement_b": "Procurement files the executed data processing agreement before any vendor account is enabled."
+    },
+    {
+      "key": "soc-24-7",
+      "why": "same round-the-clock monitoring, stated twice",
+      "anchor": "twenty-four seven",
+      "doc_a": "SEC-14",
+      "statement_a": "The security operations center monitors alerts twenty-four seven.",
+      "doc_b": "INC-57",
+      "statement_b": "Incident intake relies on the twenty-four seven monitoring rotation."
+    },
+    {
+      "key": "capex-template",
+      "why": "same template requirement, rule and review step",
+      "anchor": "capital expenditure template",
+      "doc_a": "OPS-65",
+      "statement_a": "Infrastructure purchases follow the capital expenditure template.",
+      "doc_b": "FIN-7",
+      "statement_b": "Finance reviews each capital expenditure template within one week of submission."
+    },
+    {
+      "key": "consent-form",
+      "why": "same consent form, signing and archiving view",
+      "anchor": "consent form",
+      "doc_a": "HR-50",
+      "statement_a": "New hires sign the monitoring consent form during onboarding.",
+      "doc_b": "PRIV-9",
+      "statement_b": "The privacy office archives every signed monitoring consent form."
+    },
+    {
+      "key": "least-privilege",
+      "why": "same least-privilege principle, roles and automation",
+      "anchor": "least privilege",
+      "doc_a": "ACC-58",
+      "statement_a": "Role definitions follow the least privilege principle.",
+      "doc_b": "OPS-21",
+      "statement_b": "Automation service accounts are scoped to least privilege before activation."
+    },
+    {
+      "key": "encrypted-at-rest",
+      "why": "same at-rest encryption, records and volumes view",
+      "anchor": "encrypted at rest",
+      "doc_a": "RET-1",
+      "statement_a": "Archived records remain encrypted at rest for their full retention term.",
+      "doc_b": "SEC-15",
+      "statement_b": "Storage volumes holding archives are encrypted at rest using managed keys."
+    }
+  ],
+  "prior_traps": {
+    "password_min_length": {
+      "corpus": "19",
+      "priors": [
+        "8",
+        "12",
+        "14"
+      ],
+      "doc": "SEC-14",
+      "section": 6
+    }
+  },
+  "n_docs": 173
+}

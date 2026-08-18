@@ -1,0 +1,114 @@
+{
+ "items": [
+  {
+   "id": "itm-5759",
+   "name": "butter block",
+   "cat": 2,
+   "stock": 332
+  },
+  {
+   "id": "itm-8488",
+   "name": "goat cheese",
+   "cat": 2,
+   "stock": 259
+  },
+  {
+   "id": "itm-3915",
+   "name": "paper towels",
+   "cat": 2,
+   "stock": 271
+  },
+  {
+   "id": "itm-9209",
+   "name": "arabica beans",
+   "cat": 2,
+   "stock": 287
+  },
+  {
+   "id": "itm-8897",
+   "name": "frozen peas",
+   "cat": 1,
+   "stock": 350
+  },
+  {
+   "id": "itm-2947",
+   "name": "rice 5kg",
+   "cat": 0,
+   "stock": 367
+  },
+  {
+   "id": "itm-5724",
+   "name": "gyoza tray",
+   "cat": 3,
+   "stock": 284
+  },
+  {
+   "id": "itm-8646",
+   "name": "olive oil",
+   "cat": 0,
+   "stock": 343
+  },
+  {
+   "id": "itm-4128",
+   "name": "rye loaf",
+   "cat": 3,
+   "stock": 258
+  },
+  {
+   "id": "itm-2937",
+   "name": "lentils",
+   "cat": 1,
+   "stock": 282
+  },
+  {
+   "id": "itm-2489",
+   "name": "kombucha",
+   "cat": 2,
+   "stock": 362
+  },
+  {
+   "id": "itm-9517",
+   "name": "orange juice",
+   "cat": 1,
+   "stock": 279
+  },
+  {
+   "id": "itm-1347",
+   "name": "vented crate liner",
+   "cat": -1,
+   "stock": 49,
+   "consumable": "crate-liner"
+  }
+ ],
+ "categories": [
+  "beverage",
+  "perishable",
+  "frozen",
+  "dry-goods",
+  "household"
+ ],
+ "fault": {
+  "cat": 2,
+  "rel": 12,
+  "thr": 13
+ },
+ "metrics": {
+  "retry_key": "restock_retries_total"
+ },
+ "mitigation": {
+  "key": "restock_backoff_strategy",
+  "value": "exponential"
+ },
+ "config": {
+  "restock_backoff_strategy": "fixed",
+  "order_qty_cap": 3,
+  "metrics_window_ticks": 20
+ },
+ "latency": {
+  "base": [
+   35,
+   70
+  ],
+  "degraded_multiplier": 8
+ }
+}

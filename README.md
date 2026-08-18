@@ -101,6 +101,13 @@ resumption** (run paused, daemon killed, restarted, `lev resume`).
 
 ## Quality track
 
+This repo publishes the harness, the tasks, and the runbooks — not
+result narratives. Run the rounds and draw your own conclusions: the
+runbooks under [`bench/quality/rounds/`](bench/quality/rounds/)
+reproduce each tier byte-for-byte against the leviath commit they
+name, and `render_quality.py` turns any results tree into the full
+chart set.
+
 The context arms, run on external suites and compared with exact
 statistics (see [`METHODOLOGY.md`](METHODOLOGY.md) for the full
 design):

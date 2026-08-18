@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import gzip
+import json
 import random
 import shutil
 import threading
@@ -32,6 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import cost as cost_mod
+from . import interact as interact_mod
 from . import record as record_mod
 
 __all__ = ["run_matrix"]
@@ -72,11 +74,28 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
     records = []
     lock = threading.Lock()
     concurrency = max(1, int(concurrency or 1))
+    # The circuit breaker leviath doesn't have yet (leviath#456): once
+    # one cell dies to provider credit exhaustion, every not-yet-
+    # launched cell records as "infra" instead of rediscovering the
+    # dead account - 31 cells burned before this existed.
+    credits_dead = threading.Event()
+
+    _CREDIT_SIGNS = ("out of credits", "credit balance is too low")
+
+    def _credit_death(meta: dict | None) -> bool:
+        return any(s in str((meta or {}).get("error") or "").lower()
+                   for s in _CREDIT_SIGNS)
 
     def run_cell(i: int, cell: tuple) -> None:
         nonlocal spent
         task, arm, rep = cell
-        blueprint, extra_cli = suite.agent_for(arm)
+        # A suite whose tasks map to different agent families (the CRS
+        # runs coder and non-coder tasks in one matrix) resolves the
+        # blueprint per task; every other suite keeps the arm-only form.
+        if hasattr(suite, "agent_for_task"):
+            blueprint, extra_cli = suite.agent_for_task(task, arm)
+        else:
+            blueprint, extra_cli = suite.agent_for(arm)
         # Per-task output spec (lev run --output-format/--output-
         # instructions) is applied to every arm identically, so the
         # answer-shape guidance rides the runtime's own mechanism
@@ -100,7 +119,20 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
             "rates_sha256": rates_sha,
             "concurrency": concurrency,
         }
+        if arm.get("window_tokens"):
+            base["window_tokens"] = arm["window_tokens"]
 
+        if credits_dead.is_set():
+            log(f"[{i}/{len(cells)}] {label}: SKIPPED - provider "
+                "credits exhausted earlier in this round")
+            with lock:
+                records.append(_finish(
+                    base, runs_dir, status="infra", started=_utcnow(),
+                    ended=_utcnow(), wall=0.0, meta=None, arm=arm,
+                    rates=rates,
+                    score={"passed": False,
+                           "detail": "provider credits exhausted"}))
+            return
         with lock:
             over_budget = budget_usd is not None and spent >= budget_usd
         if over_budget:
@@ -126,11 +158,25 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         status, meta, answer = "error", None, None
         stage_records: list[dict] = []
         archived: list[str] = []
+        # The ask tests: a task with an interaction spec runs without
+        # --yolo (so ask tools survive to inference) and the scripted
+        # user answers its questions; every other task keeps the
+        # standing unattended policy.
+        interaction = (suite.interaction_for(task)
+                       if hasattr(suite, "interaction_for") else None)
+        scripted = None
         try:
             prompt = suite.prepare(task, workdir)
             run_id = home.launch(blueprint, prompt, workdir,
                                  model=arm["model_id"],
-                                 extra_args=extra_cli)
+                                 extra_args=extra_cli,
+                                 yolo=interaction is None)
+            if interaction:
+                scripted = interact_mod.ScriptedUser(
+                    home.lev, home.env(), run_id,
+                    pack=interaction["pack"],
+                    max_answers=int(interaction.get("max_answers", 2)),
+                ).start()
             should_cancel = None
             if per_run_max_tokens:
                 # Model-agnostic mid-run ceiling on billed tokens; the
@@ -162,7 +208,40 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
         except Exception as exc:  # recorded, never skipped
             log(f"  run errored: {exc}")
             status = "error" if status not in ("timeout",) else status
+        finally:
+            if scripted is not None:
+                scripted.stop()
+                # Beside the record whatever happened: an errored ask
+                # run's questions are evidence, not debris.
+                try:
+                    scripted.write(_artifacts_dir(artifacts_root, base))
+                except OSError as exc:
+                    log(f"  interactions.json not written: {exc}")
+        if status == "error" and _credit_death(meta):
+            # Not the arm's failure: the account died (leviath#456).
+            status = "infra"
+            if not credits_dead.is_set():
+                log("  PROVIDER CREDITS EXHAUSTED - remaining cells "
+                    "will be skipped, not burned")
+                credits_dead.set()
         wall = round(time.time() - t0, 1)
+
+        mix_mapping = None
+        if arm["model_id"] is None:
+            blueprint_toml = (home.home / ".leviath" / "agents"
+                              / blueprint / "agent.leviath")
+            try:
+                mix_mapping = cost_mod.stagemix_mapping(blueprint_toml)
+            except Exception:
+                mix_mapping = None
+        if mix_mapping:
+            # Beside the journal, for the footprint fold: OpenAI's
+            # prompt_tokens INCLUDE cached tokens, so per-request input
+            # deltas need to know which stages ran on which provider.
+            run_art = _artifacts_dir(artifacts_root, base) / "run"
+            run_art.mkdir(parents=True, exist_ok=True)
+            (run_art / "stage_models.json").write_text(
+                json.dumps(mix_mapping, indent=1) + "\n")
 
         score = None
         if status in ("complete",):
@@ -175,15 +254,18 @@ def run_matrix(home, suite, tasks: list[dict], arms: list[dict],
                 score = {"passed": False, "detail": f"grade error: {exc}"}
         if score is None and status != "complete":
             score = {"passed": False, "detail": f"status {status}"}
-
-        mix_mapping = None
-        if arm["model_id"] is None:
-            blueprint_toml = (home.home / ".leviath" / "agents"
-                              / blueprint / "agent.leviath")
-            try:
-                mix_mapping = cost_mod.stagemix_mapping(blueprint_toml)
-            except Exception:
-                mix_mapping = None
+            # A failed run's token curve is data, not debris: the
+            # journal survives error/cap/timeout, so the footprint
+            # block lands on those records too (charts label the
+            # failure instead of omitting the run).
+            if hasattr(suite, "fold_footprint"):
+                try:
+                    fp = suite.fold_footprint(
+                        _artifacts_dir(artifacts_root, base))
+                    if fp:
+                        score["record_fields"] = {"request_footprint": fp}
+                except Exception as exc:
+                    log(f"  footprint fold errored: {exc}")
         rec = _finish(base, runs_dir, status=status, started=started,
                       ended=_utcnow(), wall=wall, meta=meta, arm=arm,
                       rates=rates, score=score,
@@ -227,6 +309,11 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
             mix_mapping: dict | None = None,
             archived: list[str] | None = None) -> dict:
     usage = _usage_of(meta)
+    # A suite may hand back record-level data blocks alongside its
+    # verdict (the CRS returns the validation summary this way); they
+    # land on the record top level, keeping the runner suite-agnostic.
+    record_fields = (score or {}).pop("record_fields", None) \
+        if isinstance(score, dict) else None
     model_id = arm["model_id"]
     priced = model_id is not None and cost_mod.is_pinned(rates, model_id)
     includes = (rates[model_id]["prompt_includes_cache_read"]
@@ -247,13 +334,16 @@ def _finish(base: dict, runs_dir: Path, status: str, started: str,
                      if priced else None),
         "score": score,
     })
+    if record_fields:
+        record.update(record_fields)
     if stage_records:
         # Every arm carries its stage ledger, not just the mixed one:
         # which stages a run actually entered is the first question any
         # post-mortem asks, and it cannot be recovered later.
         record["usage_by_stage"] = [
             {k: s.get(k) for k in ("name", "prompt_tokens",
-                                   "completion_tokens", "cached_tokens")}
+                                   "completion_tokens", "cached_tokens",
+                                   "cache_write_tokens")}
             for s in stage_records]
         record["stages_entered"] = [
             s["name"] for s in stage_records

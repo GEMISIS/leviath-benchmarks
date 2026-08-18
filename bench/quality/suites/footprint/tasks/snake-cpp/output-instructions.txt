@@ -1,0 +1,5 @@
+Reply with a short report: the exact build command for snake.cpp, how
+to run the interactive game and the headless test mode, what you
+implemented (grid, rules, determinism, both modes), and anything that
+is unfinished or deviates from the spec. A few sentences is enough; do
+not paste source code.

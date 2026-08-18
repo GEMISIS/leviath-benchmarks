@@ -66,6 +66,10 @@ def is_pinned(rates: dict, model_id: str) -> bool:
     entry = rates.get(model_id)
     if not entry:
         return False
+    if entry.get("local"):
+        # Local compute: zero is the true provider price, declared
+        # explicitly so it can never be confused with a placeholder.
+        return True
     return any(entry[k] > 0 for k in ("input_per_mtok", "output_per_mtok",
                                       "cache_read_per_mtok",
                                       "cache_write_per_mtok"))
