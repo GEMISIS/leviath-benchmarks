@@ -37,6 +37,13 @@ scripts; pulling the whole log into context buys nothing and costs a lot. Write 
 short format/structure summary to `findings` (context_write) so the analyze stage
 starts oriented. Raw sampled content lands in `logs`.
 
+Identify structure, then STOP: this stage's product is the map, not the
+investigation. Sweeping the corpus here is wasted twice over - your working
+context does not survive into analyze, so anything you learn beyond the
+format summary is thrown away, and the analyze stage must read the evidence
+itself regardless. The moment you can say what the files are, how they are
+organized, and where an analysis should start, transition.
+
 Evidence conduct, applying to everything you produce:
 - Cite the source of every factual claim (file and line, log entry,
   or document section) so a reader can check it without you.
@@ -119,9 +126,17 @@ Analyze the log data for:
 4. Correlations - errors that co-occur, time-based patterns
 5. Security signals - auth failures, unusual access, injection attempts
 
+The summary you inherit from ingest is orientation, not evidence: it tells
+you where to look, never what is true. Every finding must rest on file
+content YOU opened in this stage - a finding whose only support is the
+inherited summary is a rumor, and the verify stage will strike it.
+
 Quantify everything (timestamps, counts, rates). For each finding, append to
-`findings` (context_append): `<SEVERITY> | <finding> | <evidence: counts/timestamps>`
-with SEVERITY in {critical, warning, info}. Keep a running tally in `severity_index`
+`findings` (context_append):
+`<SEVERITY> | <finding> | <evidence: counts/timestamps> | <source: file:lines>`
+with SEVERITY in {critical, warning, info}. The source field is what makes
+the finding checkable in one read - a finding that does not name its file
+costs the verify stage a search and may be struck unread. Keep a running tally in `severity_index`
 (context_write), e.g. "critical: 2, warning: 5, info: 3". For precise
 parsing/filtering/aggregation, write small scripts via bash (awk/grep/sed or
 python on Unix, PowerShell or python on Windows) - never eyeball a count you
@@ -308,8 +323,13 @@ work nobody asked for: do not write one, and move to summary with the answer.
 
 Otherwise the task asked for a written report, so write one.
 
-Write a structured log analysis report from the `findings` region, structured
-by the `severity_index` tally. Include:
+If the task prescribes its own output format - a required line shape, an
+exact list, "reply with only X" - the draft IS that format, exactly as
+prescribed, and the template below does not apply. The verify stage checks
+whatever the draft holds; the summary stage delivers it literally.
+
+Otherwise, write a structured log analysis report from the `findings` region,
+structured by the `severity_index` tally. Include:
 - Executive summary (top findings in 3-5 bullets)
 - Log source overview (files, format, time range, volume)
 - Findings by severity (🔴 critical / 🟡 warning / 🔵 info)
