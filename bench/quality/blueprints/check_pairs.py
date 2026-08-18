@@ -33,8 +33,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from conduct import ASK_NOTE, CONDUCT  # noqa: E402
-from make_askable import (ASKABLE, SESSION, SESSION_NOTE,  # noqa: E402
-                          SESSION_REVISITS)
+from make_askable import (ASKABLE, SESSION, SESSION_ANSWER_HINT,  # noqa: E402
+                          SESSION_NOTE, SESSION_REVISITS)
 from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
 from make_readonly import (DROPPED_TOOLS, READONLY_FLATS,  # noqa: E402
                            READONLY_STRUCTURED)
@@ -56,6 +56,11 @@ def check_policy(name: str) -> list[str]:
     problems = []
     ask_stage = (ASKABLE.get(name.removesuffix("-askable"))
                  if name.endswith("-askable") else None)
+    if name.endswith("-session"):
+        # The session condition inherits the askable exemption: same
+        # tool, same stage; check_session() holds it to its askable
+        # source beyond the loop budget and note.
+        ask_stage = SESSION.get(f'{name.removesuffix("-session")}-askable')
     for sname, stage in doc.get("stages", {}).items():
         models = (stage.get("model") or {}).get("models") or []
         if len(models) != 1:
@@ -277,12 +282,21 @@ def check_session(askable_name: str, ask_stage: str) -> list[str]:
         problems.append(f"{session_name}/{ask_stage}: prompt is not "
                         "the askable prompt plus the session note")
 
+    want_hint = SESSION_ANSWER_HINT[1].split('"', 1)[1].rstrip('"')
+    got_hint = (stage.get("transitions", {}).get("answer", {})
+                .get("hint"))
+    if got_hint != want_hint:
+        problems.append(f"{session_name}/{ask_stage}: answer-edge hint "
+                        f"{got_hint!r} != {want_hint!r}")
+
     def masked(doc: dict) -> dict:
         doc = json_roundtrip(doc)
         for name, st in doc["stages"].items():
             if name in SESSION_REVISITS:
                 st.pop("max_revisits", None)
-        doc["stages"].get(ask_stage, {}).pop("system_prompt", None)
+        st = doc["stages"].get(ask_stage, {})
+        st.pop("system_prompt", None)
+        st.get("transitions", {}).get("answer", {}).pop("hint", None)
         return doc
 
     for name, want in SESSION_REVISITS.items():

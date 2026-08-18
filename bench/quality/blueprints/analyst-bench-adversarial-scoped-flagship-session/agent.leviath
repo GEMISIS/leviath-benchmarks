@@ -554,8 +554,15 @@ SESSION CONDUCT: the user may have a sequence of requests, and later ones
 can depend on your earlier answers. After verifying the current answer,
 append it to `answer_draft` (context_append) labeled by request number,
 then ask whether there is another request. For each new request, route
-back to compute. Go to answer only when the user says there is nothing
-more; the final deliverable is every answer in `answer_draft`, in order.
+back to compute.
+
+Only the user ends the session. However many requests have gone by, the
+session is over when the user says there is nothing more - never because
+it feels long, never because the requests seem complete, never on a
+guess. If the last user reply is anything other than an explicit
+"nothing more", ask again. The final deliverable is every answer in
+`answer_draft`, in order; a session abandoned early delivers wrong
+answers for every request that was never taken.
 """
 
 [stages.verify.tool_routing]
@@ -597,7 +604,7 @@ clear = ["scratch"]
 compact_prompt = "Summarize what has been computed so far: which figures are settled, which are disputed, and what the next calculation must establish."
 
 [stages.verify.transitions.answer]
-hint = "The figure holds up - answer"
+hint = "The user said there is nothing more - deliver every answer in answer_draft"
 transform = "custom"
 
 # `custom`, not `compact`: a bare compact edge summarizes EVERY
