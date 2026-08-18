@@ -71,10 +71,12 @@ can compute. Test each script before building on its output.""",
 count it from the file text you actually read and cite the file and time range
 it came from."""),
     # verify's re-computation option needs the shell; reads remain.
-    ("""re-open the cited source (read_file, or recompute with a bash
-one-liner) and confirm the value character for character.""",
-     """re-open the cited source (read_file) and confirm the value
-character for character."""),
+    ("""re-open the
+cited source (read_file, or recompute with a bash one-liner) and confirm the
+value character for character.""",
+     """re-open the
+cited source (read_file) and confirm the value character for
+character."""),
     ('description = "Analyzes log files - identifies anomalies, trends, '
      'and error patterns, fact-checks its own report against the sources '
      'before delivering, maintaining a severity-ranked findings index"',

@@ -266,22 +266,30 @@ accepts_messages = false
 system_prompt = """
 The report draft in `report_draft` is claimed, not established. Fact-check it:
 
-For EVERY factual line - each timestamp, count, rate, filename, field name,
-config key - re-open the cited source (read_file, or recompute with a bash
-one-liner) and confirm the value character for character. Do not trust the
-draft, the findings, or your memory of the logs: the whole point of this stage
-is that those can be wrong. Work through the draft top to bottom and keep a
-tally of checked/corrected/unverifiable as you go.
+Triage first: rank the draft's factual claims by how load-bearing they are -
+the values the deliverable is judged on before supporting color - and check in
+that order, because your iteration budget may not cover everything. For each
+claim - timestamp, count, rate, filename, field name, config key - re-open the
+cited source (read_file, or recompute with a bash one-liner) and confirm the
+value character for character. Do not trust the draft, the findings, or your
+memory of the logs: the whole point of this stage is that those can be wrong.
+Keep a tally of confirmed/corrected/unchecked as you go.
 
-- A value the source confirms stands.
-- A value the source contradicts is corrected in the draft to what the source
-  actually says, never to a compromise.
-- A value you cannot re-establish from any file is removed or marked
-  "not established" - an unverifiable claim does not ship as a fact.
+Three fates, and the difference between the last two is the whole job:
+- A value the source CONFIRMS stands.
+- A value the source CONTRADICTS is corrected in the draft to what the source
+  actually says, never to a compromise. A claim whose cited source, when
+  opened, contains no support for it is removed - that is a contradiction.
+- A claim you RAN OUT OF BUDGET to check is NOT removed. It keeps its
+  original citation and stands as the investigation delivered it, counted in
+  the unchecked tally. The investigation already did its work under the
+  evidence conduct; destroying its sourced findings because you lacked time
+  to re-derive them replaces a possible error with a certain one.
 
 When the pass is complete, rewrite `report_draft` (context_write) with the
-corrected draft. Precision beats speed: a wrong figure in a shipped report is
-the worst outcome this pipeline can produce.
+corrected draft, appending one line: `verify: N confirmed, N corrected,
+N unchecked`. Precision beats speed on what you do check; coverage honesty
+beats false completeness on what you do not.
 
 Evidence conduct, applying to everything you produce:
 - Cite the source of every factual claim (file and line, log entry,
