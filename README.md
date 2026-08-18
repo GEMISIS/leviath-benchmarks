@@ -101,12 +101,12 @@ resumption** (run paused, daemon killed, restarted, `lev resume`).
 
 ## Quality track
 
-The current full comparison — survival under window pressure,
-truthfulness, sessions, economics, and where flat wins — is
-[`bench/quality/FLAGSHIP-VS-FLAT.md`](bench/quality/FLAGSHIP-VS-FLAT.md);
-every table regenerates from `results/` by script, and the round
+This repo publishes the harness, the tasks, and the runbooks — not
+result narratives. Run the rounds and draw your own conclusions: the
 runbooks under [`bench/quality/rounds/`](bench/quality/rounds/)
-reproduce each tier byte-for-byte against the leviath commit they name.
+reproduce each tier byte-for-byte against the leviath commit they
+name, and `render_quality.py` turns any results tree into the full
+chart set.
 
 The context arms, run on external suites and compared with exact
 statistics (see [`METHODOLOGY.md`](METHODOLOGY.md) for the full
