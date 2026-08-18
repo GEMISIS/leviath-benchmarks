@@ -92,8 +92,13 @@ class Suite:
                 blueprint = f"{blueprint}-{arm['variant']}"
         # The session task needs the ask channel (the scripted user IS
         # the session); everything else runs the standard blueprints.
+        # Flat loops host a session in their askable form as-is; the
+        # staged pipeline needs the session variant, whose revisit
+        # budgets fit a dozen phases (the askable ask-test variant
+        # submits after the first phase or two - measured 0.17 vs 1.0).
         if self.interaction_for(task) is not None:
-            blueprint = f"{blueprint}-askable"
+            suffix = "-session" if arm["role"] == "structured" else "-askable"
+            blueprint = f"{blueprint}{suffix}"
         return blueprint, []
 
     def interaction_for(self, task: dict) -> dict | list | None:

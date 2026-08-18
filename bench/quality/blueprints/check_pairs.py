@@ -33,7 +33,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from conduct import ASK_NOTE, CONDUCT  # noqa: E402
-from make_askable import ASKABLE  # noqa: E402
+from make_askable import (ASKABLE, SESSION, SESSION_NOTE,  # noqa: E402
+                          SESSION_REVISITS)
 from make_flat import COMPACT_VARIANTS, PAIRS, _excluded_tool  # noqa: E402
 from make_readonly import (DROPPED_TOOLS, READONLY_FLATS,  # noqa: E402
                            READONLY_STRUCTURED)
@@ -255,6 +256,47 @@ def check_askable(source_name: str, stage_name: str) -> list[str]:
     return problems
 
 
+def check_session(askable_name: str, ask_stage: str) -> list[str]:
+    """The session variant is the askable variant plus the raised
+    revisit budgets and the session note - two insertions, nothing
+    else. A drifted session variant would make the session cells an
+    uncontrolled comparison."""
+    session_name = (askable_name.removesuffix("-askable") + "-session")
+    if not (HERE / session_name / "agent.leviath").is_file():
+        return [f"{session_name}: missing (regenerate with "
+                "make_askable.py)"]
+    a, se = load(askable_name), load(session_name)
+    problems = []
+    stage = se.get("stages", {}).get(ask_stage, {})
+    a_stage = a.get("stages", {}).get(ask_stage, {})
+    if SESSION_NOTE not in stage.get("system_prompt", ""):
+        problems.append(f"{session_name}/{ask_stage}: session note "
+                        "missing")
+    if not stage.get("system_prompt", "").startswith(
+            a_stage.get("system_prompt", "").rstrip()):
+        problems.append(f"{session_name}/{ask_stage}: prompt is not "
+                        "the askable prompt plus the session note")
+
+    def masked(doc: dict) -> dict:
+        doc = json_roundtrip(doc)
+        for name, st in doc["stages"].items():
+            if name in SESSION_REVISITS:
+                st.pop("max_revisits", None)
+        doc["stages"].get(ask_stage, {}).pop("system_prompt", None)
+        return doc
+
+    for name, want in SESSION_REVISITS.items():
+        got = se.get("stages", {}).get(name, {}).get("max_revisits")
+        if got != want:
+            problems.append(f"{session_name}/{name}: max_revisits "
+                            f"{got} != {want}")
+    if masked(a) != masked(se):
+        problems.append(f"{session_name}: differs from {askable_name} "
+                        "beyond revisits + session note (regenerate "
+                        "with make_askable.py)")
+    return problems
+
+
 def check_readonly() -> list[str]:
     """The read-only condition's invariants: no shell/writes anywhere,
     the script stage gone, and the flat/structured symmetry (tool
@@ -362,6 +404,15 @@ def main() -> int:
                 print(f"  FAIL {p}")
         else:
             print(f"{source_name} vs {source_name}-askable: OK (askable)")
+    for askable_name, ask_stage in SESSION.items():
+        problems = check_session(askable_name, ask_stage)
+        if problems:
+            failed = True
+            print(f"{askable_name} vs session:")
+            for p in problems:
+                print(f"  FAIL {p}")
+        else:
+            print(f"{askable_name} vs session: OK (session)")
     problems = check_readonly()
     if problems:
         failed = True
