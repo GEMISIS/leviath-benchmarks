@@ -115,8 +115,15 @@ design):
 | arm | what it is |
 |---|---|
 | `flat-pinned` | one working stage, one sliding conversation window, one pinned model - today's typical setup |
+| `flat-compacting` | identical, except the window summarizes on overflow instead of evicting - what production harnesses do |
+| `flat-*-hardened` | either flat arm plus wind-down and result-hygiene disciplines in the prompt - the strongest flat we know how to write |
 | `structured-pinned` | the frozen staged blueprint with context regions, the same pinned model |
 | `structured-mix-*` | the same blueprint with a per-stage model mix; the suffix names the mix (`econ`, `sonnet-opus`, `frontier-brain`, `muse-*`) |
+
+Task conditions generate further paired variants - read-only (no
+shell/writes, for the pressure tasks), askable (the deterministic
+scripted-user ask channel), and session (multi-request) - always to
+both sides of a pair, so no condition ever favors an arm.
 
 The first three are the ablation: one variable each, so a difference is
 attributable. `structured-mix-flagship` is the composed configuration -
@@ -127,20 +134,36 @@ never instead of them. `arms.json` is the full list; every mix's
 stage-to-model mapping is written out in `blueprints/mixes.json` rather
 than inferred, because a mix is a claim about which model does which job.
 
-Suites: terminal-bench 2.0 and frontier-bench (via their harness's
-agent interface, `suites/terminalbench/harbor_agent.py`), deep-swe v1.1
-(same adapter under its runner), DABstep's dev split, GAIA validation,
-and a purpose-built log-analysis suite generated deterministically from
-loghub 2k annotated datasets (half public, half held-out behind salted
-answer hashes revealed at publish time).
+The primary suites are purpose-built, seeded generators with held-out
+answer keys (regenerate with a fresh seed and the tasks are new):
+
+- **footprint** - the economics suite: three fixed tasks (build a C++
+  game, search logs, explain a repository at a pinned commit), exact
+  per-call token/cache/cost accounting from the run journal.
+- **hallucination** - integrity and survival under window pressure:
+  incident reports with seeded prior-traps and decoys, an
+  underivable-fact ask test, and policy-conflict corpora from ~180k to
+  ~1.57M tokens, run at pinned windows (32k-128k) and native.
+- **retention** - memory over depth: a deceptively-documented codebase
+  (with a journal-based coverage channel), a live seeded service
+  debugged over 100+ tool calls, and a 12-request session whose later
+  requests depend on the agent's own earlier answers.
+
+Additional external suites: terminal-bench 2.0 and frontier-bench (via
+their harness's agent interface, `suites/terminalbench/harbor_agent.py`),
+deep-swe v1.1 (same adapter under its runner), DABstep's dev split,
+GAIA validation, and a log-analysis suite generated deterministically
+from loghub 2k annotated datasets (half public, half held-out behind
+salted answer hashes revealed at publish time).
 
 The agents live in `bench/quality/blueprints/`: this repo's own
 benchmark agents (based on the bundled agents, evolved here under
 [`blueprints/AGENTS.md`](bench/quality/blueprints/AGENTS.md)) plus
-generated flat counterparts. Variants are generated, never hand-maintained: `make_flat.py`,
-`make_mix.py`, `make_scoped.py` and `make_adversarial.py` derive them
-from the base agents, so an improvement to a base reaches every variant
-that should have it. Two checks enforce the rules that make the numbers
+generated flat counterparts. Variants are generated, never
+hand-maintained: `make_flat.py`, `make_mix.py`, `make_scoped.py`,
+`make_adversarial.py`, `make_askable.py`, `make_readonly.py`, and
+`add_volatility.py` derive them from the four base agents, so an
+improvement to a base reaches every variant that should have it. Two checks enforce the rules that make the numbers
 mean something. `check_pairs.py`: one model per stage, nothing
 human-in-the-loop, no suite or dataset names in agent text, and each
 pair identical in tools, permissions, and total iteration budget so only
@@ -167,10 +190,10 @@ LEVMOCK_LATENCY_MS=150 python3 bench/quality/run_quality.py \
 
 # a counted run (see bench/quality/ROUND_CHECKLIST.md first; requires
 # a qbench-* freeze tag on a clean tree)
-python3 bench/quality/run_quality.py --suite dabstep \
-    --arms flat-pinned,structured-pinned,structured-stagemix \
-    --models "Claude Sonnet 5" --reps 3 --subset <subset file> \
-    --budget-usd 50
+python3 bench/quality/run_quality.py --suite hallucination \
+    --arms flat-pinned,flat-compacting,structured-mix-flagship \
+    --models "Claude Sonnet 5" --reps 5 --subset <subset file> \
+    --window-tokens 128000 --budget-usd 100
 ```
 
 Container coding suites run through the adapter instead of the runner
