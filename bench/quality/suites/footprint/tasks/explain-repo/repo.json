@@ -1,5 +1,6 @@
 {
-  "path": "/Users/gemisis/Documents/projects/ai/personal/leviath",
+  "url": "https://github.com/GEMISIS/leviath",
+  "cache_path": ".tasks/leviath",
   "commit": "1638e403efc2bb191593ed296b3b8cbb7ce06486",
   "name": "leviath"
 }

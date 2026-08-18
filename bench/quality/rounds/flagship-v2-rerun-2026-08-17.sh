@@ -8,9 +8,12 @@
 # stand; these runs replace the flagship column for loganalyzer tasks,
 # and the v1 flagship results are kept as the design-fix "before" arm.
 set -u
-WT=/Users/gemisis/Documents/projects/ai/personal/leviath-benchmarks/.claude/worktrees/benchmark-improvements
-SCRATCH=/private/tmp/claude-501/-Users-gemisis-Documents-projects-ai-personal-leviath-benchmarks/fb0825da-4d64-4e27-8389-bb3cb410600e/scratchpad
-LEV=$SCRATCH/lev-main-3f464a5d
+WT="$(cd "$(dirname "$0")/../../.." && pwd)"
+
+# This round ran on leviath main @3f464a5d; build
+# that commit (cargo build --release --bin lev) and point LEV
+# at the binary to reproduce byte-for-byte.
+LEV="${LEV:?set LEV to a lev binary (lev-main-3f464a5d)}"
 cd "$WT" || exit 1
 
 for WIN in 32000 64000 128000; do

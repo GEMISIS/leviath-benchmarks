@@ -9,9 +9,12 @@
 # Sequential tiers, each budget-capped; the credit breaker turns an
 # empty account into `infra` cells rather than garbage.
 set -u
-WT=/Users/gemisis/Documents/projects/ai/personal/leviath-benchmarks/.claude/worktrees/benchmark-improvements
-SCRATCH=/private/tmp/claude-501/-Users-gemisis-Documents-projects-ai-personal-leviath-benchmarks/fb0825da-4d64-4e27-8389-bb3cb410600e/scratchpad
-LEV=$SCRATCH/lev-main-3f464a5d
+WT="$(cd "$(dirname "$0")/../../.." && pwd)"
+
+# This round ran on leviath main @3f464a5d; build
+# that commit (cargo build --release --bin lev) and point LEV
+# at the binary to reproduce byte-for-byte.
+LEV="${LEV:?set LEV to a lev binary (lev-main-3f464a5d)}"
 cd "$WT" || exit 1
 
 FLATS=flat-pinned,flat-compacting,flat-pinned-hardened,flat-compacting-hardened

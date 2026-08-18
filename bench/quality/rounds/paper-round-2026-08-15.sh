@@ -3,8 +3,11 @@
 # fixes), all three tiers, 5 reps. The 0.3.10-stable 32k tier stays
 # archived as a cross-version comparison point.
 set -u
-WT=/Users/gemisis/Documents/projects/ai/personal/leviath-benchmarks/.claude/worktrees/benchmark-improvements
-LEV=/private/tmp/claude-501/-Users-gemisis-Documents-projects-ai-personal-leviath-benchmarks/fb0825da-4d64-4e27-8389-bb3cb410600e/scratchpad/lev-main-94b5a5e4
+WT="$(cd "$(dirname "$0")/../../.." && pwd)"
+# This round ran on leviath main @94b5a5e4; build that commit
+# (cargo build --release --bin lev) and point LEV at the binary to
+# reproduce byte-for-byte.
+LEV="${LEV:?set LEV to a lev binary (lev-main-94b5a5e4)}"
 cd "$WT" || exit 1
 
 for WIN in 64000 128000; do

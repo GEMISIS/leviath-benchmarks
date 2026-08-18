@@ -3,7 +3,7 @@
 # already ran). Same arms, same tasks (incl. reworked redacted-ledger,
 # whose 32k tier gets re-run first so every tier uses the same task).
 set -u
-WT=/Users/gemisis/Documents/projects/ai/personal/leviath-benchmarks/.claude/worktrees/benchmark-improvements
+WT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$WT" || exit 1
 
 run_tier() {
