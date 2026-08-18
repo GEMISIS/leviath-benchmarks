@@ -35,7 +35,7 @@ mode = "output"
 model = { models = [{ provider = "anthropic", model = "claude-opus-5" }] }
 description = "Do the whole task and answer, in one loop"
 available_tools = ["list_dir", "read_file"]
-max_iterations = 88
+max_iterations = 123
 system_prompt = """
 Analyze the log file(s) named in `task` and answer the question asked.
 

@@ -74,23 +74,28 @@ SCOPES["analyst-bench-adversarial"]["plan_review"] = {
 # CACHE RULE for every table here: each stage lists its regions in the same
 # relative order as the agent's global [context.regions] declaration, so the
 # pinned prefix stays byte-stable across stage transitions.
+# FLOOR RULE: `findings` is persistent and summarizable = false, so a
+# stage giving it less than the stage before silently deletes the oldest
+# entries with no way back. Its budget must never shrink along the main
+# path (ingest -> analyze -> [review] -> report -> verify -> summary).
 SCOPES["loganalyzer-bench"] = {
     "ingest": {"task": 4, "findings": 8, "logs": 55,
                "conversation": 24, "error_report": 3},
-    "analyze": {"task": 4, "severity_index": 2, "findings": 10,
-                "logs": 30, "scripts": 14, "scripts_history": 3,
-                "conversation": 22, "scratch": 5, "error_report": 3},
-    "script": {"task": 4, "findings": 6, "logs": 28, "scripts": 32,
-               "scripts_history": 3, "conversation": 18,
-               "error_report": 3},
+    "analyze": {"task": 4, "severity_index": 2, "findings": 14,
+                "logs": 34, "conversation": 22, "scratch": 12,
+                "error_report": 3},
     "report": {"task": 5, "severity_index": 3, "findings": 20,
-               "logs": 22, "scripts": 18, "scripts_history": 3,
+               "logs": 20, "report_draft": 20,
                "conversation": 20, "error_report": 3},
-    "error_recovery": {"task": 4, "findings": 8, "logs": 22,
-                       "scripts": 22, "conversation": 24, "scratch": 4,
-                       "error_report": 8},
-    "summary": {"task": 8, "severity_index": 5, "findings": 35,
-                "conversation": 40, "error_report": 3},
+    "verify": {"task": 4, "severity_index": 3, "findings": 20,
+               "logs": 25, "report_draft": 20,
+               "conversation": 18, "scratch": 4, "error_report": 3},
+    "error_recovery": {"task": 4, "findings": 20, "logs": 20,
+                       "report_draft": 12, "conversation": 24,
+                       "scratch": 4, "error_report": 8},
+    "summary": {"task": 8, "severity_index": 5, "findings": 25,
+                "report_draft": 20, "conversation": 35,
+                "error_report": 3},
 }
 
 # The critic is deliberately narrow: the findings, the index, and enough of
@@ -182,7 +187,10 @@ REQUIRED["analyst-bench-adversarial"] = REQUIRED["analyst-bench"]
 # analyze must leave with findings/claims written: they are the spine every
 # downstream deliverable is built from. report/summary regions themselves
 # cannot be asserted (a report is a file on disk).
-REQUIRED["loganalyzer-bench"] = {"analyze": {"findings"}}
+# verify cannot spawn without a draft to check: this is the gate that makes
+# the report stage's context_write mandatory in practice, not just in prose.
+REQUIRED["loganalyzer-bench"] = {"analyze": {"findings"},
+                                 "verify": {"report_draft"}}
 REQUIRED["loganalyzer-bench-adversarial"] = REQUIRED["loganalyzer-bench"]
 REQUIRED["researcher-bench"] = {"analyze": {"claims"}}
 REQUIRED["researcher-bench-adversarial"] = REQUIRED["researcher-bench"]

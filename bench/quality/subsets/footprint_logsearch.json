@@ -1,0 +1,10 @@
+{
+  "suite": "footprint",
+  "seed": 20260817,
+  "n": 1,
+  "universe_sha256": "manual-v2-rerun",
+  "excluded": [],
+  "task_ids": [
+    "log-search"
+  ]
+}

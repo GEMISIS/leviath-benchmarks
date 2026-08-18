@@ -62,57 +62,25 @@ selectively - newest and oldest rotations, and whatever the reference
 documents point at. Long results are truncated at a fixed size, so pull the
 essentials into your notes as you read instead of planning to re-read. Write a"""),
     ("""Keep a running tally in `severity_index`
-(context_write), e.g. "critical: 2, warning: 5, info: 3". Use the `script` stage
-when you need precise parsing/aggregation you can't eyeball.""",
+(context_write), e.g. "critical: 2, warning: 5, info: 3". For precise
+parsing/filtering/aggregation, write small scripts via bash (awk/grep/sed or
+python on Unix, PowerShell or python on Windows) - never eyeball a count you
+can compute. Test each script before building on its output.""",
      """Keep a running tally in `severity_index`
 (context_write), e.g. "critical: 2, warning: 5, info: 3". When a count matters,
 count it from the file text you actually read and cite the file and time range
 it came from."""),
-    # analyze's routing: the critic now gates the report, not the
-    # scripts - the adversarial mechanism must stay reachable.
-    ("""Decide what happens next:
-- If you need a script to parse/filter/aggregate the data more precisely, respond with: script
-- If the task asked a specific question and you can now answer it, respond with: summary
-- If the task asked for a written report or a broad review of these logs, respond with: report
-""",
-     """Decide what happens next:
-- If the task asked a specific question and you can now answer it, respond with: summary
-- If the analysis is finished but has not yet been reviewed, respond with: analysis_review
-- If the review has cleared your analysis and the task asked for a written report, respond with: report
-"""),
-    ('hint = "Need scripts - have the analysis attacked first"',
-     'hint = "Analysis done - have it attacked before reporting"'),
-    # The critic's approval edge: report instead of script, and its
-    # report edge stops being dead_end-only so approval can route there.
-    ("- If the analysis has a defect that would send the scripting "
-     "effort in the wrong direction, respond with: analyze\n"
-     "- If the analysis is sound, respond with: script",
-     "- If the analysis has a defect that would send the report in the "
-     "wrong direction, respond with: analyze\n"
-     "- If the analysis is sound, respond with: report"),
-    ("""[stages.analysis_review.transitions.report]
-condition = "dead_end"
-hint = "No route left - report what has been established\"""",
-     """[stages.analysis_review.transitions.report]
-hint = "The analysis is sound - report what has been established\""""),
-    ('description = "Attack the analysis before any scripts are written '
-     'against it"',
-     'description = "Attack the analysis before the report is written '
-     'from it"'),
-    ("""You are reviewing someone else's log analysis before scripts are written
-against it.""",
-     """You are reviewing someone else's log analysis before the report is written
-from it."""),
-    ("""Scripts built to quantify a symptom will measure
-   it very precisely and still answer the wrong question.""",
-     """A report built around a symptom will quantify
-   it very precisely and still answer the wrong question."""),
+    # verify's re-computation option needs the shell; reads remain.
+    ("""re-open the cited source (read_file, or recompute with a bash
+one-liner) and confirm the value character for character.""",
+     """re-open the cited source (read_file) and confirm the value
+character for character."""),
     ('description = "Analyzes log files - identifies anomalies, trends, '
-     'and error patterns via a scripted analyze⇄script loop, maintaining '
-     'a severity-ranked findings index"',
+     'and error patterns, fact-checks its own report against the sources '
+     'before delivering, maintaining a severity-ranked findings index"',
      'description = "Analyzes log files by reading them - identifies '
-     'anomalies, trends, and error patterns, maintaining a '
-     'severity-ranked findings index (read-only condition)"'),
+     'anomalies, trends, and error patterns, fact-checks its own report '
+     'against the sources before delivering (read-only condition)"'),
 ]
 
 SUBS_FLAT = [

@@ -52,10 +52,16 @@ AGENTS = {
     "loganalyzer-bench": {
         "critic": "analysis_review",
         "part": "analysis_review.toml",
-        "redirect": ("analyze", "script"),
-        "hint": ('hint = "Need a script to parse/filter/aggregate log data"',
-                 'hint = "Need scripts - have the analysis attacked first"'),
-        "prompt_patch": None,
+        "redirect": ("analyze", "report"),
+        "hint": ('hint = "The task asked for a written report or a broad review"',
+                 'hint = "The analysis is drafted - have it attacked before '
+                 'the report is written"'),
+        "prompt_patch": (
+            "- If the task asked for a written report or a broad review of "
+            "these logs, respond with: report",
+            "- If the task asked for a written report or a broad review of "
+            "these logs, respond with: analysis_review",
+        ),
         "anchor": "# ─── Stage 3",
     },
     "researcher-bench": {
