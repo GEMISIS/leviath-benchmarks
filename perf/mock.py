@@ -8,11 +8,15 @@ Usage:
 
 The decision is made from the request body, never from a turn counter: the
 daemon spends a turn during startup, so a counter-based script never reaches
-the agent. The tool call is returned until `messages` carries a `role: "tool"`
-entry, then the reply is plain text and the run completes.
+the agent. The tool call is returned until the request carries a tool result
+(a `role: "tool"` message, or a `function_call_output` item on the Responses
+route), then the reply is plain text and the run completes.
 
 Routes:
     GET  /v1/models          two models, "gpt-mock" and "claude-mock"
+    POST /v1/responses       the OpenAI Responses API, which the native
+                             `openai` provider speaks: SSE events ending in
+                             `response.completed`, or one JSON response
     POST /v1/chat/completions  JSON or SSE, depending on `stream`
     POST /v1/messages        the Anthropic shape of the same answer (JSON only;
                              point the harness at it with `stream_inference = false`)
@@ -202,6 +206,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"input_tokens": len(anthropic_text(req)) // 4})
         if self.path.startswith("/v1/messages"):
             return self._anthropic(req)
+        if self.path.startswith("/v1/responses"):
+            CALLS[0] += 1
+            return self._responses(req)
         CALLS[0] += 1
         if OVERSIZE_MIB:
             return self._oversize(bool(req.get("stream")))
@@ -264,6 +271,49 @@ class Handler(BaseHTTPRequestHandler):
             body, content_type = b'{"pad":"' + pad + b'"}', "application/json"
         self.send_response(200)
         self.send_header("content-type", content_type)
+        self.send_header("content-length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _responses(self, req):
+        """The Responses API: the tool call until a `function_call_output`
+        item comes back, then "done". Streamed as the typed events the
+        provider reads, ending in `response.completed`; the stream is only
+        finished once that event arrives."""
+        items = req.get("input")
+        seen_tool = isinstance(items, list) and any(
+            isinstance(item, dict) and item.get("type") == "function_call_output" for item in items)
+        want_tool = TOOL is not None and not seen_tool
+        output = []
+        if want_tool:
+            for i, call in enumerate(tool_calls(streaming=False)):
+                output.append({"type": "function_call", "id": f"fc_{i + 1}", "call_id": call["id"],
+                               "name": call["function"]["name"],
+                               "arguments": call["function"]["arguments"], "status": "completed"})
+        else:
+            output.append({"type": "message", "id": "msg_1", "role": "assistant", "status": "completed",
+                           "content": [{"type": "output_text", "text": "done", "annotations": []}]})
+        response = {"id": "resp_mock", "object": "response", "status": "completed", "model": "gpt-mock",
+                    "output": output,
+                    "usage": {"input_tokens": 12, "output_tokens": 3, "total_tokens": 15,
+                              "input_tokens_details": {"cached_tokens": 0}}}
+        if not req.get("stream"):
+            return self._json(response)
+        events = [{"type": "response.created", "response": {**response, "status": "in_progress", "output": []}}]
+        for i, item in enumerate(output):
+            opened = {**item, "arguments": ""} if item["type"] == "function_call" else {**item, "content": []}
+            events.append({"type": "response.output_item.added", "output_index": i, "item": opened})
+            if item["type"] == "function_call":
+                events.append({"type": "response.function_call_arguments.delta", "output_index": i,
+                               "item_id": item["id"], "delta": item["arguments"]})
+            else:
+                events.append({"type": "response.output_text.delta", "output_index": i, "content_index": 0,
+                               "item_id": item["id"], "delta": item["content"][0]["text"]})
+            events.append({"type": "response.output_item.done", "output_index": i, "item": item})
+        events.append({"type": "response.completed", "response": response})
+        body = "".join(f"event: {e['type']}\ndata: {json.dumps(e)}\n\n" for e in events).encode()
+        self.send_response(200)
+        self.send_header("content-type", "text/event-stream")
         self.send_header("content-length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
