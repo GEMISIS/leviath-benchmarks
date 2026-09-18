@@ -30,6 +30,10 @@ __pycache__/
 /jobs/
 /.harbor/
 
+# Monitor output and charts from the perf probes.
+/perf/*.csv
+/perf/*.png
+
 # Python tooling caches and local environments.
 .venv/
 venv/

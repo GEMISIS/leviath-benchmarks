@@ -15,7 +15,7 @@ timestamped PNG graph with three aligned panels:
    core count, since 10% of a 16-core machine is 1.6 cores of work.
 3. Memory - ``rss`` and ``live`` lines, plus ``pss`` where the OS provides it.
 
-Memory metrics, precisely (see also perf-tools/README.md):
+Memory metrics, precisely (see also perf/README.md):
 
 - ``rss_mb``: resident set size, what ``ps``/``top`` show. On BOTH macOS and
   Linux this includes pages the allocator has already given back lazily

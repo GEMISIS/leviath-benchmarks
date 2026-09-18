@@ -50,7 +50,7 @@ statistics, seeded subsets, and the rest - is
    on Windows) - never bare RSS. CPU is percent of the whole machine.
    Tokens and cost come from provider-reported usage fields including
    cache reads and writes, priced at rates pinned per round. Rationale:
-   the leviath repo's `perf-tools/README.md` and
+   [`perf/README.md`](perf/README.md) and
    [`METHODOLOGY.md`](METHODOLOGY.md).
 3. **Raw outputs only - and never committed by hand.** Runs write raw
    records (every run, including failures and cap-outs), monitor CSVs,
@@ -98,6 +98,17 @@ run cold** (`lev run` with no daemon running - the CLI auto-starts
 one), **cold continuation** (daemon SIGKILLed with runs in flight, then
 restarted; time until the reloaded run makes progress), and **paused
 resumption** (run paused, daemon killed, restarted, `lev resume`).
+
+## Probes for leviath changes
+
+[`perf/`](perf/) holds the smaller instruments a leviath pull request is
+measured with before and after: `lev dash` first-frame, key and scroll
+latency over a pty, `lev serve` per-route p50/p99, WebSocket leak checks,
+binary size, and a daemon driven through K runs against a mock provider.
+Each change's numbers are kept in `perf/baselines/`, one file per leviath
+commit. Everything runs against the `lev` you point `LV_BIN` at, inside the
+isolated environment `perf/harness.sh` sets up; see
+[`perf/README.md`](perf/README.md).
 
 ## Quality track
 
