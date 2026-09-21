@@ -7,6 +7,8 @@ Usage:
     mock.py PORT TOOL '[{"a":1},{"a":2}]'  # a JSON list asks for TOOL once per element, in one batch
 
     LV_MOCK_THEN='other:{"a":1}'          # a second turn, asking for another tool
+    LV_MOCK_FAIL_FIRST=2                  # refuse the first two completions, then answer
+    LV_MOCK_FAIL_FIRST=1:429              # refuse once with a rate limit
 
 The decision is made from the request body, never from a turn counter: the
 daemon spends a turn during startup, so a counter-based script never reaches
@@ -80,6 +82,14 @@ IMAGE = os.environ.get("LV_MOCK_IMAGE") == "1"
 # (401) any request without that header, the way a corporate proxy does, so a
 # probe can prove `[providers] <provider>_headers` reached the wire.
 REQUIRE_HEADER = os.environ.get("LV_MOCK_REQUIRE_HEADER", "").partition("=")
+# `LV_MOCK_FAIL_FIRST=N[:status]` refuses the first N completion requests with
+# an HTTP error (503 unless a status is given), then answers normally. What it
+# is for: a retry and a failover leave no trace in a reply, so the only way to
+# see them end to end is to make the provider refuse and watch what the run
+# records. 429 buys the capacity schedule, 503 the plain transient one.
+_fail = os.environ.get("LV_MOCK_FAIL_FIRST", "").partition(":")
+FAIL_FIRST = int(_fail[0]) if _fail[0] else 0
+FAIL_STATUS = int(_fail[2]) if _fail[2] else 503
 # `LV_MOCK_DUMP=path` appends one JSON line per completion request (path,
 # headers, body), so a probe can assert what was sent.
 DUMP = os.environ.get("LV_MOCK_DUMP")
@@ -133,6 +143,7 @@ def tool_calls(streaming, done=0):
         calls.append(call)
     return calls
 CALLS = [0]
+REFUSED = [0]
 COUNTS = [0]
 USAGE = {"prompt_tokens": 12, "completion_tokens": 3, "total_tokens": 15}
 
@@ -197,6 +208,15 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _refuses_to_answer(self):
+        """Whether this request is one of the first `FAIL_FIRST`; answers itself."""
+        if REFUSED[0] >= FAIL_FIRST:
+            return False
+        REFUSED[0] += 1
+        self._json({"error": {"message": "the mock was told to refuse this one",
+                              "type": "server_error"}}, FAIL_STATUS)
+        return True
+
     def _gateway_refuses(self):
         """Whether the required header is missing; answers the 401 itself."""
         name, _, value = REQUIRE_HEADER
@@ -230,15 +250,20 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/reset"):
             CALLS[0] = 0
             COUNTS[0] = 0
+            REFUSED[0] = 0
             return self._json({"ok": True})
         n = int(self.headers.get("content-length", "0"))
         req = json.loads(self.rfile.read(n) or b"{}")
         self._dump(req)
         if self._gateway_refuses():
             return
+        # Token counting is not a completion, so it is not what a refusal is
+        # about and is answered as usual.
         if self.path.startswith("/v1/messages/count_tokens"):
             COUNTS[0] += 1
             return self._json({"input_tokens": len(anthropic_text(req)) // 4})
+        if self._refuses_to_answer():
+            return
         if self.path.startswith("/v1/messages"):
             return self._anthropic(req)
         if self.path.startswith("/v1/responses"):
