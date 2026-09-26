@@ -96,6 +96,17 @@ DUMP = os.environ.get("LV_MOCK_DUMP")
 # `LV_MOCK_CUT_OFF=1` cuts the first Anthropic tool call off mid-argument;
 # `always` cuts every turn off.
 CUT_OFF = os.environ.get("LV_MOCK_CUT_OFF", "")
+# `LV_MOCK_STOP_REASON=reason` makes the Anthropic route's plain text answer
+# end with that `stop_reason` in place of `end_turn`: `refusal`, say, which
+# the daemon has no name for, so a probe can watch what it records.
+STOP_REASON = os.environ.get("LV_MOCK_STOP_REASON", "")
+# `LV_MOCK_NAMELESS_TOOL=1` leaves the `name` off every Anthropic `tool_use`
+# block, the shape of a reply that asks for a call to nothing.
+NAMELESS_TOOL = os.environ.get("LV_MOCK_NAMELESS_TOOL") == "1"
+# `LV_MOCK_EXTRA_BLOCK=type` puts a content block of that type ahead of the
+# Anthropic answer, one the daemon does not read, so a probe can watch it be
+# skipped and logged rather than lost.
+EXTRA_BLOCK = os.environ.get("LV_MOCK_EXTRA_BLOCK", "")
 IMAGE_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 
 
@@ -314,10 +325,16 @@ class Handler(BaseHTTPRequestHandler):
                  "input": json.loads(c["function"]["arguments"])}
                 for i, c in enumerate(tool_calls(streaming=False, done=done))
             ]
+            if NAMELESS_TOOL:
+                for block in content:
+                    del block["name"]
             stop = "tool_use"
         else:
             content = [{"type": "text", "text": "done"}]
-            stop = "end_turn"
+            stop = STOP_REASON or "end_turn"
+        if EXTRA_BLOCK:
+            content.insert(0, {"type": EXTRA_BLOCK, "id": "srvtoolu_1", "name": "web_search",
+                               "input": {"query": "anything"}})
         self._json({"id": "msg_1", "type": "message", "role": "assistant",
                     "model": req.get("model", "gpt-mock"), "content": content,
                     "stop_reason": stop,
