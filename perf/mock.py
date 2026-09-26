@@ -6,6 +6,10 @@ Usage:
     mock.py PORT TOOL '{"json":"args"}'  # first turn asks for TOOL, then "done"
     mock.py PORT TOOL '[{"a":1},{"a":2}]'  # a JSON list asks for TOOL once per element, in one batch
 
+    LV_MOCK_THEN='other:{"a":1}'          # a second turn, asking for another tool
+    LV_MOCK_FAIL_FIRST=2                  # refuse the first two completions, then answer
+    LV_MOCK_FAIL_FIRST=1:429              # refuse once with a rate limit
+
 The decision is made from the request body, never from a turn counter: the
 daemon spends a turn during startup, so a counter-based script never reaches
 the agent. The tool call is returned until the request carries a tool result
@@ -54,6 +58,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 PORT = int(sys.argv[1])
 TOOL = sys.argv[2] if len(sys.argv) > 2 else None
 ARGS = sys.argv[3] if len(sys.argv) > 3 else "{}"
+# `LV_MOCK_THEN=tool:{"json":"args"}` asks for a *second*, different tool on the
+# turn after the first one's result comes back. Without it one run can only ever
+# drive one tool, so a probe about a tool that appears between turns has no way
+# to both create it and call it.
+THEN = None
+if os.environ.get("LV_MOCK_THEN"):
+    _name, _, _args = os.environ["LV_MOCK_THEN"].partition(":")
+    THEN = (_name, _args or "{}")
 # `LV_MOCK_OVERSIZE_MIB=N` makes every completion answer with N MiB of a single
 # never-ending frame (one `data:` line with no terminator when streaming, one
 # JSON string otherwise), which is what a peer that never stops looks like to
@@ -70,12 +82,31 @@ IMAGE = os.environ.get("LV_MOCK_IMAGE") == "1"
 # (401) any request without that header, the way a corporate proxy does, so a
 # probe can prove `[providers] <provider>_headers` reached the wire.
 REQUIRE_HEADER = os.environ.get("LV_MOCK_REQUIRE_HEADER", "").partition("=")
+# `LV_MOCK_FAIL_FIRST=N[:status]` refuses the first N completion requests with
+# an HTTP error (503 unless a status is given), then answers normally. What it
+# is for: a retry and a failover leave no trace in a reply, so the only way to
+# see them end to end is to make the provider refuse and watch what the run
+# records. 429 buys the capacity schedule, 503 the plain transient one.
+_fail = os.environ.get("LV_MOCK_FAIL_FIRST", "").partition(":")
+FAIL_FIRST = int(_fail[0]) if _fail[0] else 0
+FAIL_STATUS = int(_fail[2]) if _fail[2] else 503
 # `LV_MOCK_DUMP=path` appends one JSON line per completion request (path,
 # headers, body), so a probe can assert what was sent.
 DUMP = os.environ.get("LV_MOCK_DUMP")
 # `LV_MOCK_CUT_OFF=1` cuts the first Anthropic tool call off mid-argument;
 # `always` cuts every turn off.
 CUT_OFF = os.environ.get("LV_MOCK_CUT_OFF", "")
+# `LV_MOCK_STOP_REASON=reason` makes the Anthropic route's plain text answer
+# end with that `stop_reason` in place of `end_turn`: `refusal`, say, which
+# the daemon has no name for, so a probe can watch what it records.
+STOP_REASON = os.environ.get("LV_MOCK_STOP_REASON", "")
+# `LV_MOCK_NAMELESS_TOOL=1` leaves the `name` off every Anthropic `tool_use`
+# block, the shape of a reply that asks for a call to nothing.
+NAMELESS_TOOL = os.environ.get("LV_MOCK_NAMELESS_TOOL") == "1"
+# `LV_MOCK_EXTRA_BLOCK=type` puts a content block of that type ahead of the
+# Anthropic answer, one the daemon does not read, so a probe can watch it be
+# skipped and logged rather than lost.
+EXTRA_BLOCK = os.environ.get("LV_MOCK_EXTRA_BLOCK", "")
 IMAGE_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 
 
@@ -87,23 +118,43 @@ def with_image(message):
 SPLIT_TEXT = "done 完成 🎉"
 
 
-def tool_calls(streaming):
-    """The tool calls the first turn asks for: one per element when ARGS is a
+def asked_for(done):
+    """The (tool, args) this turn asks for, given how many tool results the
+    request already carries, or `None` to answer with text.
+
+    `done == 0` is the first turn and asks for `TOOL`. `LV_MOCK_THEN=tool:json`
+    adds a second turn, which is the only way to drive two *different* tools -
+    a probe about a tool that appears between turns needs one call to create it
+    and a later one to use it, and a single tool cannot say both."""
+    if done == 0:
+        return (TOOL, ARGS) if TOOL is not None else None
+    if done == 1 and THEN is not None:
+        return THEN
+    return None
+
+
+def tool_calls(streaming, done=0):
+    """The tool calls this turn asks for: one per element when the args are a
     JSON list, so a probe can put several calls in one batch."""
+    stage = asked_for(done)
+    if stage is None:
+        return []
+    name, raw = stage
     try:
-        parsed = json.loads(ARGS)
+        parsed = json.loads(raw)
     except ValueError:
         parsed = None
-    args_list = parsed if isinstance(parsed, list) else [ARGS]
+    args_list = parsed if isinstance(parsed, list) else [raw]
     calls = []
     for i, args in enumerate(args_list):
         arguments = args if isinstance(args, str) else json.dumps(args)
-        call = {"id": f"call_{i + 1}", "type": "function", "function": {"name": TOOL, "arguments": arguments}}
+        call = {"id": f"call_{i + 1}", "type": "function", "function": {"name": name, "arguments": arguments}}
         if streaming:
             call = {"index": i, **call}
         calls.append(call)
     return calls
 CALLS = [0]
+REFUSED = [0]
 COUNTS = [0]
 USAGE = {"prompt_tokens": 12, "completion_tokens": 3, "total_tokens": 15}
 
@@ -138,16 +189,22 @@ def anthropic_bad_tool_input(req):
     return None
 
 
-def anthropic_seen_tool(req):
-    """Whether any message carries a `tool_result` block, the Anthropic way of
+def anthropic_results(req):
+    """How many messages carry a `tool_result` block, the Anthropic way of
     saying a tool has already answered."""
+    done = 0
     for m in req.get("messages", []):
         content = m.get("content", "")
         if isinstance(content, list) and any(
             isinstance(b, dict) and b.get("type") == "tool_result" for b in content
         ):
-            return True
-    return False
+            done += 1
+    return done
+
+
+def anthropic_seen_tool(req):
+    """Whether a tool has answered at all."""
+    return anthropic_results(req) > 0
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -161,6 +218,15 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("content-length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _refuses_to_answer(self):
+        """Whether this request is one of the first `FAIL_FIRST`; answers itself."""
+        if REFUSED[0] >= FAIL_FIRST:
+            return False
+        REFUSED[0] += 1
+        self._json({"error": {"message": "the mock was told to refuse this one",
+                              "type": "server_error"}}, FAIL_STATUS)
+        return True
 
     def _gateway_refuses(self):
         """Whether the required header is missing; answers the 401 itself."""
@@ -195,15 +261,20 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/reset"):
             CALLS[0] = 0
             COUNTS[0] = 0
+            REFUSED[0] = 0
             return self._json({"ok": True})
         n = int(self.headers.get("content-length", "0"))
         req = json.loads(self.rfile.read(n) or b"{}")
         self._dump(req)
         if self._gateway_refuses():
             return
+        # Token counting is not a completion, so it is not what a refusal is
+        # about and is answered as usual.
         if self.path.startswith("/v1/messages/count_tokens"):
             COUNTS[0] += 1
             return self._json({"input_tokens": len(anthropic_text(req)) // 4})
+        if self._refuses_to_answer():
+            return
         if self.path.startswith("/v1/messages"):
             return self._anthropic(req)
         if self.path.startswith("/v1/responses"):
@@ -212,15 +283,15 @@ class Handler(BaseHTTPRequestHandler):
         CALLS[0] += 1
         if OVERSIZE_MIB:
             return self._oversize(bool(req.get("stream")))
-        seen_tool = any(m.get("role") == "tool" for m in req.get("messages", []))
-        want_tool = TOOL is not None and not seen_tool
+        done = sum(1 for m in req.get("messages", []) if m.get("role") == "tool")
+        want_tool = asked_for(done) is not None
         if req.get("stream"):
-            return self._sse(want_tool)
+            return self._sse(want_tool, done)
         if want_tool:
             message = {
                 "role": "assistant",
                 "content": None,
-                "tool_calls": tool_calls(streaming=False),
+                "tool_calls": tool_calls(streaming=False, done=done),
             }
             finish = "tool_calls"
         else:
@@ -237,8 +308,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"type": "error", "error": {
                 "type": "invalid_request_error",
                 "message": f"{bad}: Input should be an object"}}, 400)
-        seen_tool = anthropic_seen_tool(req)
-        want_tool = TOOL is not None and not seen_tool
+        done = anthropic_results(req)
+        seen_tool = done > 0
+        want_tool = asked_for(done) is not None
         # Only a request that offers the tool can be answered with a call to
         # it, so a recovery stage without it gets a plain answer.
         cut_tool = TOOL or "write_file"
@@ -249,14 +321,20 @@ class Handler(BaseHTTPRequestHandler):
             stop = "max_tokens"
         elif want_tool:
             content = [
-                {"type": "tool_use", "id": f"toolu_{i + 1}", "name": TOOL,
+                {"type": "tool_use", "id": f"toolu_{i + 1}", "name": c["function"]["name"],
                  "input": json.loads(c["function"]["arguments"])}
-                for i, c in enumerate(tool_calls(streaming=False))
+                for i, c in enumerate(tool_calls(streaming=False, done=done))
             ]
+            if NAMELESS_TOOL:
+                for block in content:
+                    del block["name"]
             stop = "tool_use"
         else:
             content = [{"type": "text", "text": "done"}]
-            stop = "end_turn"
+            stop = STOP_REASON or "end_turn"
+        if EXTRA_BLOCK:
+            content.insert(0, {"type": EXTRA_BLOCK, "id": "srvtoolu_1", "name": "web_search",
+                               "input": {"query": "anything"}})
         self._json({"id": "msg_1", "type": "message", "role": "assistant",
                     "model": req.get("model", "gpt-mock"), "content": content,
                     "stop_reason": stop,
@@ -281,12 +359,13 @@ class Handler(BaseHTTPRequestHandler):
         provider reads, ending in `response.completed`; the stream is only
         finished once that event arrives."""
         items = req.get("input")
-        seen_tool = isinstance(items, list) and any(
-            isinstance(item, dict) and item.get("type") == "function_call_output" for item in items)
-        want_tool = TOOL is not None and not seen_tool
+        done = sum(
+            1 for item in (items if isinstance(items, list) else [])
+            if isinstance(item, dict) and item.get("type") == "function_call_output")
+        want_tool = asked_for(done) is not None
         output = []
         if want_tool:
-            for i, call in enumerate(tool_calls(streaming=False)):
+            for i, call in enumerate(tool_calls(streaming=False, done=done)):
                 output.append({"type": "function_call", "id": f"fc_{i + 1}", "call_id": call["id"],
                                "name": call["function"]["name"],
                                "arguments": call["function"]["arguments"], "status": "completed"})
@@ -318,9 +397,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _sse(self, want_tool):
+    def _sse(self, want_tool, done=0):
         if want_tool:
-            delta = {"role": "assistant", "tool_calls": tool_calls(streaming=True)}
+            delta = {"role": "assistant", "tool_calls": tool_calls(streaming=True, done=done)}
             finish = "tool_calls"
         else:
             delta = with_image({"role": "assistant", "content": SPLIT_TEXT if SPLIT_UTF8 else "done"})

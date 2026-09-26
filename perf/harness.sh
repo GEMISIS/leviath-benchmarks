@@ -14,6 +14,9 @@
 #                  reply with CJK and an emoji, flushed mid-character
 #   LV_MOCK_CUT_OFF  optional; forwarded to mock.py, which then cuts an
 #                  Anthropic tool call off mid-argument (1: once, always: every turn)
+#   LV_MOCK_FAIL_FIRST  optional; forwarded to mock.py, which then refuses the
+#                  first N completions (`N` or `N:status`) so a probe can watch
+#                  what a run records about a retry
 #
 # Nothing here reads the caller's environment: `env -i` first, then exactly
 # these names, so a probe cannot accidentally reach a real provider.
@@ -40,6 +43,7 @@ exec env -i \
   ${LV_MOCK_OVERSIZE_MIB:+LV_MOCK_OVERSIZE_MIB="$LV_MOCK_OVERSIZE_MIB"} \
   ${LV_MOCK_SPLIT_UTF8:+LV_MOCK_SPLIT_UTF8="$LV_MOCK_SPLIT_UTF8"} \
   ${LV_MOCK_CUT_OFF:+LV_MOCK_CUT_OFF="$LV_MOCK_CUT_OFF"} \
+  ${LV_MOCK_FAIL_FIRST:+LV_MOCK_FAIL_FIRST="$LV_MOCK_FAIL_FIRST"} \
   LV_MOCK_PORT="$LV_MOCK_PORT" \
   ${LV_SERVE_PORT:+LV_SERVE_PORT="$LV_SERVE_PORT"} \
   LV_BIN="$LV_BIN" \
